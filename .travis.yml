@@ -1,0 +1,34 @@
+language: java
+
+#dist: trusty
+
+sudo: false
+#sudo: required
+
+os:
+  - linux
+
+jdk:
+  - oraclejdk8
+
+#env:
+#  global:
+#    - JAVA_OPTS="-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+#    - MALLOC_ARENA_MAX=2
+
+branches:
+  only:
+    - master
+
+before_install:
+#  - sudo apt-get update -qq
+
+#before_script:
+#  - export MAVEN_SKIP_RC=true
+#  - export MAVEN_OPTS="-Xmx512m -XX:MaxPermSize=512m"
+#  - unset GEM_PATH GEM_HOME IRBRC JRUBY_OPTS
+#  - "export PATH=`pwd`/bin:$PATH"
+#  - echo $HOME
+
+script:
+- mvn clean package sonar:sonar -Dsonar.login=$SONAR_TOKEN
