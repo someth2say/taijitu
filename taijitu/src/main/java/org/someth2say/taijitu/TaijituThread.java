@@ -2,15 +2,16 @@ package org.someth2say.taijitu;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.ComparisonResult;
-import org.someth2say.taijitu.config.TaijituConfig;
+import org.someth2say.taijitu.config.TaijituConfigImpl;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * @author Jordi Sola
  */
-public class TaijituThread implements Runnable {
+public class TaijituThread implements Callable<ComparisonResult> {
 
     private static final Logger logger = Logger.getLogger(TaijituThread.class);
 
@@ -25,7 +26,7 @@ public class TaijituThread implements Runnable {
      *
      * @see java.lang.Runnable#run()
      */
-    public void run() {
+    public ComparisonResult call() {
         final ComparisonResult result = comparison.getResult();
         try {
 
@@ -50,13 +51,14 @@ public class TaijituThread implements Runnable {
             logger.error(e.getMessage(), e);
             result.setStatus(ComparisonResult.ComparisonResultStatus.ERROR);
         }
+        return result:
     }
 
     private void runComparisonStrategy() throws TaijituException {
         // Show comparison description
         logger.info("COMPARISON: " + comparison.getTestName() + "(strategy " + comparison.getStrategy().getName() + ")");
-        logger.debug("SETUP: " + TaijituConfig.getAllSetup(comparison.getTestName()).toString());
-        logger.debug("PARAMETERS: " + TaijituConfig.getAllParameters(comparison.getTestName()).toString());
+        logger.debug("SETUP: " + TaijituConfigImpl.getAllSetup(comparison.getTestName()).toString());
+        logger.debug("PARAMETERS: " + TaijituConfigImpl.getAllParameters(comparison.getTestName()).toString());
 
         comparison.getStrategy().runComparison(comparison);
     }
