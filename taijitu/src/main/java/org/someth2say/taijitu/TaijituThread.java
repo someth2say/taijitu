@@ -2,7 +2,7 @@ package org.someth2say.taijitu;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.ComparisonResult;
-import org.someth2say.taijitu.config.TaijituConfig;
+import org.someth2say.taijitu.config.TaijituConfigImpl;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 
 import java.util.List;
@@ -55,8 +55,8 @@ public class TaijituThread implements Runnable {
     private void runComparisonStrategy() throws TaijituException {
         // Show comparison description
         logger.info("COMPARISON: " + comparison.getTestName() + "(strategy " + comparison.getStrategy().getName() + ")");
-        logger.debug("SETUP: " + TaijituConfig.getAllSetup(comparison.getTestName()).toString());
-        logger.debug("PARAMETERS: " + TaijituConfig.getAllParameters(comparison.getTestName()).toString());
+        logger.debug("SETUP: " + TaijituConfigImpl.getAllSetup(comparison.getTestName()).toString());
+        logger.debug("PARAMETERS: " + TaijituConfigImpl.getAllParameters(comparison.getTestName()).toString());
 
         comparison.getStrategy().runComparison(comparison);
     }

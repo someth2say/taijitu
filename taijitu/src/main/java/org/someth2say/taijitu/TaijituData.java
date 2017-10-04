@@ -10,7 +10,7 @@ import org.someth2say.taijitu.commons.StringUtil;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.PrecissionThresholdComparator;
 import org.someth2say.taijitu.config.ConfigurationLabels;
-import org.someth2say.taijitu.config.TaijituConfig;
+import org.someth2say.taijitu.config.TaijituConfigImpl;
 import org.someth2say.taijitu.plugins.PluginRegistry;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.strategy.ComparisonStrategy;
@@ -42,16 +42,16 @@ public class TaijituData {
     public TaijituData(final String _testName, IConnectionFactory connectionFactory) throws TaijituException {
         this.testName = _testName;
 
-        final Integer fetchSize = TaijituConfig.getFetchSize(_testName);
-        final boolean queryOptimization = TaijituConfig.isQueryOptimization(_testName);
+        final Integer fetchSize = TaijituConfigImpl.getFetchSize(_testName);
+        final boolean queryOptimization = TaijituConfigImpl.isQueryOptimization(_testName);
 
         this.result = new ComparisonResult();
 
         try {
-            source = buildQuery(_testName, connectionFactory, TaijituConfig.getSourceQuery(_testName), TaijituConfig.getSourceQueryName(_testName), ConfigurationLabels.Comparison.SOURCE);
+            source = buildQuery(_testName, connectionFactory, TaijituConfigImpl.getSourceQuery(_testName), TaijituConfigImpl.getSourceQueryName(_testName), ConfigurationLabels.Comparison.SOURCE);
             source.setFetchSize(fetchSize);
             source.setQueryOptimization(queryOptimization);
-            target = buildQuery(_testName, connectionFactory, TaijituConfig.getTargetQuery(_testName), TaijituConfig.getTargetQueryName(_testName), ConfigurationLabels.Comparison.TARGET);
+            target = buildQuery(_testName, connectionFactory, TaijituConfigImpl.getTargetQuery(_testName), TaijituConfigImpl.getTargetQueryName(_testName), ConfigurationLabels.Comparison.TARGET);
             source.setFetchSize(fetchSize);
             target.setQueryOptimization(queryOptimization);
 
@@ -65,7 +65,7 @@ public class TaijituData {
     }
 
     private ComparisonStrategy buildStrategy(final String testName) throws TaijituException {
-        String strategyName = TaijituConfig.getStrategyName(testName);
+        String strategyName = TaijituConfigImpl.getStrategyName(testName);
         return ComparisonStrategyRegistry.getStrategy(strategyName);
     }
 
@@ -86,7 +86,7 @@ public class TaijituData {
         final List<Object> targetQueryParameterValues = prepareParameterValues(queryStr);
         String replacedQueryStr = replaceQueryParameterTags(queryStr);
 
-        final String dataBaseName = TaijituConfig.getDatabaseName(testName, discriminator);
+        final String dataBaseName = TaijituConfigImpl.getDatabaseName(testName, discriminator);
         return new Query(actualName, replacedQueryStr, connectionFactory, dataBaseName, getFields(), targetQueryParameterValues);
     }
 
@@ -119,10 +119,10 @@ public class TaijituData {
             final String parameterTag = parameterMatcher.group();
             final String parameterName = parameterTag.substring(1, parameterTag.length() - 1);
 
-            String parameterValue = TaijituConfig.getParameter(testName, parameterName);
+            String parameterValue = TaijituConfigImpl.getParameter(testName, parameterName);
 
             if (parameterTag.contains(ConfigurationLabels.DATE_PARAMETER_KEYWORD)) {
-                values.add(TaijituConfig.parseDate(parameterName, parameterValue));
+                values.add(TaijituConfigImpl.parseDate(parameterName, parameterValue));
             } else {
                 values.add(parameterValue);
             }
@@ -136,7 +136,7 @@ public class TaijituData {
      */
     private String getHeader() {
         if (header == null) {
-            header = TaijituConfig.getHeader(this.testName);
+            header = TaijituConfigImpl.getHeader(this.testName);
         }
         return header;
     }
@@ -163,7 +163,7 @@ public class TaijituData {
      */
     public String[] getKeyFields() {
         if (keyFields == null) {
-            String keyHeader = TaijituConfig.getKeyFields(testName);
+            String keyHeader = TaijituConfigImpl.getKeyFields(testName);
             if (keyHeader == null) {
                 logger.info("Key fields not provided for " + testName + ". Defaulting to all fields.");
                 keyFields = getFields();
@@ -198,14 +198,14 @@ public class TaijituData {
     }
 
     public List<TaijituPlugin> getPlugins() {
-        return PluginRegistry.getPlugins(TaijituConfig.getComparisonPlugins(getTestName()));
+        return PluginRegistry.getPlugins(TaijituConfigImpl.getComparisonPlugins(getTestName()));
     }
 
     /**
      * @return the compareHeader
      */
     private String getCompareHeader() {
-        return TaijituConfig.getCompareFields(testName);
+        return TaijituConfigImpl.getCompareFields(testName);
     }
 
     /**
@@ -235,7 +235,7 @@ public class TaijituData {
     public final double getPrecisionThreshold() {
         // lazy init
         if (precisionThreshold == null) {
-            precisionThreshold = TaijituConfig.getPrecisionThreshold(testName);
+            precisionThreshold = TaijituConfigImpl.getPrecisionThreshold(testName);
         }
         return precisionThreshold;
     }

@@ -10,7 +10,7 @@ import org.someth2say.taijitu.TaijituData;
 import org.someth2say.taijitu.commons.StringUtil;
 import org.someth2say.taijitu.compare.ComparableObjectArray;
 import org.someth2say.taijitu.compare.ComparisonResult;
-import org.someth2say.taijitu.config.TaijituConfig;
+import org.someth2say.taijitu.config.TaijituConfigImpl;
 import org.someth2say.taijitu.util.Pair;
 
 import java.io.File;
@@ -120,7 +120,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
     }
 
     private File createOutputFolder() throws TaijituException {
-        final File result = TaijituConfig.getOutputFolderFile();
+        final File result = TaijituConfigImpl.getOutputFolderFile();
         if (!result.exists()) {
             final boolean dirCreated = result.mkdirs();
             if (!dirCreated) {
