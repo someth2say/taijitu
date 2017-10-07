@@ -10,7 +10,7 @@ import org.someth2say.taijitu.strategy.StrategyUtils;
 import org.someth2say.taijitu.strategy.mapping.mapper.QueryMapper;
 import org.someth2say.taijitu.strategy.mapping.mapper.QueryMapperResult;
 import org.someth2say.taijitu.TaijituException;
-import org.someth2say.taijitu.TaijituData;
+import org.someth2say.taijitu.ComparisonRuntime;
 import org.someth2say.taijitu.compare.ComparableObjectArray;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.util.ImmutablePair;
@@ -29,7 +29,7 @@ public class ParallelComparingMappingStrategy extends AbstractMappingComparisonS
     public static final String NAME = "parallelComparing";
     private static final Logger logger = Logger.getLogger(ParallelComparingMappingStrategy.class);
 
-    public void runComparison(final TaijituData comparison) throws TaijituException {
+    public void runComparison(final ComparisonRuntime comparison) throws TaijituException {
 
         logger.info("Starting comparison for " + comparison.getTestName());
 
@@ -63,14 +63,14 @@ public class ParallelComparingMappingStrategy extends AbstractMappingComparisonS
 
         private final ExceptionHoldingCyclicBarrier descriptionBarrier;
         private final CyclicBarrier finalizationBarrier;
-        private final TaijituData comparison;
+        private final ComparisonRuntime comparison;
         protected int[] keyFieldsIdxs;
         protected Object[] keyBuffer;
         QueryMapperResult<Integer, ComparableObjectArray> mappingResults = new QueryMapperResult<>();
         private ParallelComparingQueryActions other;
         private int[] compareFieldsIdxs;
 
-        public ParallelComparingQueryActions(TaijituData comparison, ExceptionHoldingCyclicBarrier descriptionBarrier, CyclicBarrier finalizationBarrier) {
+        public ParallelComparingQueryActions(ComparisonRuntime comparison, ExceptionHoldingCyclicBarrier descriptionBarrier, CyclicBarrier finalizationBarrier) {
             this.comparison = comparison;
             this.descriptionBarrier = descriptionBarrier;
             this.finalizationBarrier = finalizationBarrier;
@@ -203,7 +203,7 @@ public class ParallelComparingMappingStrategy extends AbstractMappingComparisonS
 
     static class SourceParallelComparingQueryAction extends ParallelComparingQueryActions {
 
-        public SourceParallelComparingQueryAction(TaijituData comparison, ExceptionHoldingCyclicBarrier descriptionBarrier, CyclicBarrier finalizationBarrier) {
+        public SourceParallelComparingQueryAction(ComparisonRuntime comparison, ExceptionHoldingCyclicBarrier descriptionBarrier, CyclicBarrier finalizationBarrier) {
             super(comparison, descriptionBarrier, finalizationBarrier);
         }
 
@@ -228,7 +228,7 @@ public class ParallelComparingMappingStrategy extends AbstractMappingComparisonS
 
     static class TargetParallelComparingQueryAction extends ParallelComparingQueryActions {
 
-        public TargetParallelComparingQueryAction(TaijituData comparison, ExceptionHoldingCyclicBarrier descriptionBarrier, CyclicBarrier finalizationBarrier) {
+        public TargetParallelComparingQueryAction(ComparisonRuntime comparison, ExceptionHoldingCyclicBarrier descriptionBarrier, CyclicBarrier finalizationBarrier) {
             super(comparison, descriptionBarrier, finalizationBarrier);
         }
 

@@ -1,5 +1,6 @@
 package org.someth2say.taijitu.compare;
 
+import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.util.Pair;
 
 import java.util.Collection;
@@ -9,6 +10,13 @@ import java.util.Collection;
  */
 public class ComparisonResult {
 
+	private final ComparisonConfig comparisonConfig;
+	
+	public ComparisonResult(final ComparisonConfig comparisonConfig) {
+		this.comparisonConfig = comparisonConfig;
+	}
+
+	
     private Collection<Pair<ComparableObjectArray, ComparableObjectArray>> different;
 
     private Collection<ComparableObjectArray> sourceOnly;
@@ -34,9 +42,6 @@ public class ComparisonResult {
         this.targetOnly = targetOnly;
     }
 
-    /**
-     * @return the different pair of entries
-     */
     public Collection<Pair<ComparableObjectArray, ComparableObjectArray>> getDifferent() {
         return different;
     }
@@ -69,7 +74,11 @@ public class ComparisonResult {
         this.targetColumnDescriptions = targetColumnDescriptions;
     }
 
-    public enum ComparisonResultStatus {
+    public ComparisonConfig getComparisonConfig() {
+		return comparisonConfig;
+	}
+
+	public enum ComparisonResultStatus {
         PENDING(),
         RUNNING(),
         SUCCESS(),

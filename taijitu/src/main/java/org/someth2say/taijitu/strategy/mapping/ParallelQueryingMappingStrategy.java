@@ -11,7 +11,7 @@ import org.someth2say.taijitu.strategy.StrategyUtils;
 import org.someth2say.taijitu.strategy.mapping.mapper.QueryMapper;
 import org.someth2say.taijitu.strategy.mapping.mapper.QueryMapperResult;
 import org.someth2say.taijitu.TaijituException;
-import org.someth2say.taijitu.TaijituData;
+import org.someth2say.taijitu.ComparisonRuntime;
 import org.someth2say.taijitu.compare.ComparableObjectArray;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.QueryMapperResultComparator;
@@ -32,7 +32,7 @@ public class ParallelQueryingMappingStrategy extends AbstractMappingComparisonSt
     public static final String NAME = "parallelMapping";
     private static final Logger logger = Logger.getLogger(ParallelQueryingMappingStrategy.class);
 
-    public void runComparison(final TaijituData comparison) throws TaijituException {
+    public void runComparison(final ComparisonRuntime comparison) throws TaijituException {
 
         logger.info("Starting comparison for " + comparison.getTestName());
 
@@ -71,12 +71,12 @@ public class ParallelQueryingMappingStrategy extends AbstractMappingComparisonSt
     static abstract class MappingQueryActions<T extends ComparableObjectArray> implements QueryActions<T> {
 
         private final ExceptionHoldingCyclicBarrier barrier;
-        private final TaijituData comparison;
+        private final ComparisonRuntime comparison;
         private int[] keyFieldsIdxs;
         private Object[] keyValuesBuffer;
         private QueryMapperResult<Integer, T> mappingResults;
 
-        public MappingQueryActions(TaijituData comparison, ExceptionHoldingCyclicBarrier barrier) {
+        public MappingQueryActions(ComparisonRuntime comparison, ExceptionHoldingCyclicBarrier barrier) {
             this.comparison = comparison;
             this.barrier = barrier;
         }
@@ -136,7 +136,7 @@ public class ParallelQueryingMappingStrategy extends AbstractMappingComparisonSt
 
     static class SourceMappingQueryAction<T extends ComparableObjectArray> extends MappingQueryActions<T> {
 
-        public SourceMappingQueryAction(TaijituData comparison, ExceptionHoldingCyclicBarrier barrier) {
+        public SourceMappingQueryAction(ComparisonRuntime comparison, ExceptionHoldingCyclicBarrier barrier) {
             super(comparison, barrier);
         }
 
@@ -147,7 +147,7 @@ public class ParallelQueryingMappingStrategy extends AbstractMappingComparisonSt
     }
 
     static class TargetMappingQueryAction<T extends ComparableObjectArray> extends MappingQueryActions<T> {
-        public TargetMappingQueryAction(TaijituData comparison, ExceptionHoldingCyclicBarrier barrier) {
+        public TargetMappingQueryAction(ComparisonRuntime comparison, ExceptionHoldingCyclicBarrier barrier) {
             super(comparison, barrier);
         }
 

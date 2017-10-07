@@ -11,10 +11,10 @@ import static org.someth2say.taijitu.config.DefaultConfig.*;
 
 
 public class ComparisonConfigImpl implements ComparisonConfig {
-    private static final Logger     logger = Logger.getLogger(ComparisonConfigImpl.class);
+    private static final Logger logger = Logger.getLogger(ComparisonConfigImpl.class);
     private final TaijituConfigImpl taijituConfig;
-    private final HProperties       config;
-    private final String            name;
+    private final HProperties config;
+    private final String name;
 
     public ComparisonConfigImpl(TaijituConfigImpl taijituConfig, final String testName) {
         this.taijituConfig = taijituConfig;
@@ -22,29 +22,51 @@ public class ComparisonConfigImpl implements ComparisonConfig {
         this.config = taijituConfig.getProperties();
     }
 
+    public HProperties getConfig() {
+        return this.config;
+    }
+
+
+    public String getName() {
+        return name;
+    }
+
+
     /**** PARAMETERS *********************************************************************/
 
     public Properties getAllParameters() {
         final Properties result = new Properties();
         result.putAll(taijituConfig.getAllParameters());
-
-        //TODO: Hierarchical subProperties
-        result.putAll(config.getPropertiesByPrefix(Sections.COMPARISON, name, Comparison.PARAMETERS)); //comparison.N.parameters.XXX=YYY
-        result.putAll(config.getPropertiesByPrefix(Sections.COMPARISON, name, Sections.SETUP, Comparison.PARAMETERS)); //comparison.N.setup.parameters.XXX=YYY
-
+        result.putAll(config.getPropertiesByPrefix(Sections.COMPARISON, getName(), Comparison.PARAMETERS)); //comparison.comparisonName.parameters.XXX=YYY
         return result;
     }
 
-    public String getParameter(final String paramName, final String defaultValue) {
+    public String getParameter(String parameterName) {
+        String parameterKey = config.joinSections(Comparison.PARAMETERS, parameterName);
+        String parameterValue = config.getHierarchycalProperty(parameterKey, Sections.COMPARISON, getName(), Comparison.PARAMETERS);
+        return parameterValue != null ? parameterValue : taijituConfig.getParameter(parameterName);
+    }
+
+
+    /**
+     * PROPERTIES
+     *************************************************************************/
+
+    public String getProperty(final String paramName, final String defaultValue) {
         return getPropertyWithFailback(config.joinSections(Comparison.PARAMETERS, paramName), defaultValue);
     }
 
+
     public String getPropertyWithFailback(final String param, final String defaultValue) {
-        String result = config.getHierarchycalProperty(param, Sections.COMPARISON, name, Sections.SETUP);
+        String result = config.getHierarchycalProperty(param, Sections.COMPARISON, getName(), Sections.SETUP);
         if (result == null) {
-            result = taijituConfig.getParameter(param, defaultValue);
+            result = taijituConfig.getProperty(param, defaultValue);
         }
         return result;
+    }
+
+    public String[] getPropertiesRoot() {
+        return new String[]{Sections.COMPARISON, getName()};
     }
 
     /*** STRATEGY ***/
@@ -71,12 +93,15 @@ public class ComparisonConfigImpl implements ComparisonConfig {
         String[] pluginNames = getComparisonPluginNames();
         ComparisonPluginConfig[] result = new ComparisonPluginConfig[pluginNames.length];
         for (int pos = 0; pos < pluginNames.length; pos++) {
+            //TODO: May be cached
             result[pos] = new ComparisonPluginConfigImpl(this, pluginNames[pos]);
         }
         return result;
     }
 
-    /** DATABASE **/
+    /**
+     * DATABASE
+     **/
     public String getDatabaseName() {
         return getPropertyWithFailback(Comparison.DATABASE_REF, null);
     }
@@ -89,7 +114,9 @@ public class ComparisonConfigImpl implements ComparisonConfig {
         return null;
     }
 
-    /** PROPERTIES **/
+    /**
+     * PROPERTIES
+     **/
 
     public int getFetchSize() {
         try {
@@ -102,22 +129,21 @@ public class ComparisonConfigImpl implements ComparisonConfig {
 
     /**
      * Key fields are fields that define both entries are the same.
-     * Some strategies may not need this field (i.e. strategies that assume all 
+     * Some strategies may not need this field (i.e. strategies that assume all
      * entries are returned by both queries, and just need to check the contents)
-     * 
      */
     public String[] getKeyFields() {
-        String property = getPropertyWithFailback(Comparison.Fields.KEY, name);
+        String property = getPropertyWithFailback(Comparison.Fields.KEY, getName());
         return StringUtil.splitAndTrim(property);
     }
 
 
     public String[] getCompareFields() {
-        String property = getPropertyWithFailback(Comparison.FIELDS, name);
+        String property = getPropertyWithFailback(Comparison.FIELDS, getName());
         return StringUtil.splitAndTrim(property);
     }
 
-    /** 
+    /**
      * Precission threshold allow numeric columns to have slightly different values, but similar enough to be considered the same.
      * So, if precission threshold is defined, and difference between two numeric columns is lesser than the threshold, no difference will be acknowledged.
      */
@@ -133,7 +159,9 @@ public class ComparisonConfigImpl implements ComparisonConfig {
         return DEFAULT_PRECISION_THRESHOLD;
     }
 
-    /** QUERIES **/
+    /**
+     * QUERIES
+     **/
     public QueryConfig getSourceQueryConfig() {
         return new QueryConfigImpl(this, Comparison.SOURCE);
     }

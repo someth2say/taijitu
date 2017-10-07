@@ -1,7 +1,8 @@
 package org.someth2say.taijitu.strategy;
 
 import org.someth2say.taijitu.TaijituException;
-import org.someth2say.taijitu.TaijituData;
+import org.someth2say.taijitu.config.ComparisonConfig;
+import org.someth2say.taijitu.ComparisonRuntime;
 import org.someth2say.taijitu.util.Named;
 
 /**
@@ -9,5 +10,5 @@ import org.someth2say.taijitu.util.Named;
  */
 public interface ComparisonStrategy extends Named {
 
-    void runComparison(final TaijituData taijituData) throws TaijituException;
+    void runComparison(final ComparisonRuntime taijituData, final ComparisonConfig comparisonConfig) throws TaijituException;
 }

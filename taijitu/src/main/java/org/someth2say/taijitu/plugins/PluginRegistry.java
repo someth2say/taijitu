@@ -1,12 +1,15 @@
 package org.someth2say.taijitu.plugins;
 
 import org.apache.log4j.Logger;
+import org.someth2say.taijitu.config.ComparisonPluginConfig;
 import org.someth2say.taijitu.plugins.logging.TimeLoggingPlugin;
 import org.someth2say.taijitu.plugins.reporting.CSVWriterPlugin;
 import org.someth2say.taijitu.plugins.reporting.XLSWriterPlugin;
 import org.someth2say.taijitu.util.ClassScanUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -16,41 +19,51 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class PluginRegistry {
 
-    private static final Logger logger = Logger.getLogger(PluginRegistry.class);
-    private static Map<String, TaijituPlugin> instances;
+	private static final Logger logger = Logger.getLogger(PluginRegistry.class);
+	private static Map<String, TaijituPlugin> instances;
 
-    private PluginRegistry() {
-    }
+	private PluginRegistry() {
+	}
 
-    public static List<TaijituPlugin> getPlugins(String[] plugins) {
-        List<TaijituPlugin> result = new ArrayList<>(plugins.length);
-        for (String plugin : plugins) {
-            final TaijituPlugin pluginInstance = instances.get(plugin);
-            if (pluginInstance == null) {
-                logger.warn("Plugin " + plugin + " not available.");
-            } else {
-                result.add(pluginInstance);
-            }
-        }
-        return result;
-    }
+	public static Collection<TaijituPlugin> getAllPlugins() {
+		// Do we actually need plugins to be in some order?
+		return instances.values();
+	}
 
-    public static void scanClassPath() {
-        // This seems fast enough for a one-shot initialization
-        // If found slow, it can be changed to scan only sub-packages for taijitu
-        final Class<TaijituPlugin> implementedInterface = TaijituPlugin.class;
-        instances = ClassScanUtils.getInstancesForClassesImplementing(implementedInterface);
-        logger.info("Registered plugins: " + instances.keySet().toString());
-    }
+	public static Map<ComparisonPluginConfig, TaijituPlugin> getPlugins(
+			ComparisonPluginConfig[] comparisonPluginConfigs) {
+		Map<ComparisonPluginConfig, TaijituPlugin> result = new HashMap<>(comparisonPluginConfigs.length);
+		for (ComparisonPluginConfig pluginConfig : comparisonPluginConfigs) {
+			final TaijituPlugin pluginInstance = instances.get(pluginConfig.getName());
+			if (pluginInstance == null) {
+				logger.warn("Plugin reference" + pluginConfig.getName() + " not available.");
+			} else {
+				result.put(pluginConfig, pluginInstance);
+			}
+		}
+		return result;
+	}
 
-    public static void useDefaults() {
-        instances = new ConcurrentHashMap<>();
-        addPlugin(new XLSWriterPlugin());
-        addPlugin(new CSVWriterPlugin());
-        addPlugin(new TimeLoggingPlugin());
-    }
+	public static void scanClassPath() {
+		// This seems fast enough for a one-shot initialization
+		// If found slow, it can be changed to scan only sub-packages for taijitu
+		final Class<TaijituPlugin> implementedInterface = TaijituPlugin.class;
+		instances = ClassScanUtils.getInstancesForClassesImplementing(implementedInterface);
+		logger.info("Registered plugins: " + instances.keySet().toString());
+	}
 
-    private static TaijituPlugin addPlugin(TaijituPlugin xls) {
-        return instances.put(xls.getName(), xls);
-    }
+	public static void useDefaults() {
+		instances = new ConcurrentHashMap<>();
+		addPlugin(new XLSWriterPlugin());
+		addPlugin(new CSVWriterPlugin());
+		addPlugin(new TimeLoggingPlugin());
+	}
+
+	private static TaijituPlugin addPlugin(TaijituPlugin plugin) {
+		return instances.put(plugin.getName(), plugin);
+	}
+
+	public static TaijituPlugin getPlugin(String name) {
+		return instances.get(name);
+	}
 }

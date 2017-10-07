@@ -30,7 +30,7 @@ public final class TaijituConfigImpl implements TaijituConfig {
 
     private static final Logger logger = Logger.getLogger(TaijituConfigImpl.class);
 
-    private HProperties         config;
+    private HProperties config;
 
     private TaijituConfigImpl() {
     }
@@ -43,7 +43,6 @@ public final class TaijituConfigImpl implements TaijituConfig {
 
     /**** PARAMETERS *********************************************************************/
 
-    //TODO: Consider renaming. The name "parameter" have two different meanings here...
     public Properties getAllParameters() {
         final Properties result = new Properties();
         result.putAll(config.getPropertiesByPrefix(Sections.SETUP, Comparison.PARAMETERS)); // setup.parameters.XXX=YYY
@@ -51,11 +50,14 @@ public final class TaijituConfigImpl implements TaijituConfig {
         return result;
     }
 
-    /**
-     * TaijituConfig does not define any entry itself, but delegates all entries to "SETUP" section.
-     */
-    public String getParameter(final String paramName, final String defaulValue) {
-        return getSetup(paramName, defaulValue);
+    public String getParameter(String parameterName) {
+        final String parameterKey = config.joinSections(Comparison.PARAMETERS, parameterName);
+        String parameterValue = config.getHierarchycalProperty(parameterKey, Sections.COMPARISON, Comparison.PARAMETERS);
+        if (parameterValue == null) {
+            parameterValue = config.getHierarchycalProperty(parameterKey, Sections.SETUP, Comparison.PARAMETERS);
+        }
+        return parameterValue;
+
     }
 
 
@@ -70,8 +72,7 @@ public final class TaijituConfigImpl implements TaijituConfig {
         ComparisonConfig[] result = new ComparisonConfig[comparisonNames.size()];
         int pos = 0;
         for (Iterator<String> iterator = comparisonNames.iterator(); iterator.hasNext(); pos++) {
-            String comparisonName = (String)iterator.next();
-            result[pos] = new ComparisonConfigImpl(this, comparisonName);
+            result[pos] = new ComparisonConfigImpl(this, iterator.next());
         }
         return result;
 
@@ -83,7 +84,20 @@ public final class TaijituConfigImpl implements TaijituConfig {
         return new DatabaseConfigImpl(this, databaseName);
     }
 
-    public Set<String> getAllDatabaseNames() {
+
+    @Override
+    public DatabaseConfig[] getAllDatabaseConfigs() {
+        Set<String> allDatabaseNames = getAllDatabaseNames();
+        int pos = 0;
+        DatabaseConfig[] result = new DatabaseConfig[allDatabaseNames.size()];
+        for (Iterator<String> iterator = allDatabaseNames.iterator(); iterator.hasNext(); pos++) {
+            result[pos] = new DatabaseConfigImpl(this, iterator.next());
+        }
+        return result;
+    }
+
+
+    private Set<String> getAllDatabaseNames() {
         final HProperties databaseProperties = config.getPropertiesByPrefix(Sections.DATABASE);
         return databaseProperties.getPropertiesRoots();
     }
@@ -91,13 +105,20 @@ public final class TaijituConfigImpl implements TaijituConfig {
 
     /**** SETUP *********************************************************************/
 
+    /**
+     * TaijituConfig does not define any entry itself, but delegates all entries to "SETUP" section.
+     */
+    public String getProperty(final String paramName, final String defaultValue) {
+        return getSetup(paramName, defaultValue);
+    }
+
     private String getSetup(final String property, final String def) {
         final String value = config.getProperty(property, Sections.SETUP);
         return value == null ? def : value;
     }
 
     /**
-     * Number of threads Taijitu will raise for running comparisons. 
+     * Number of threads Taijitu will raise for running comparisons.
      * Note that each comparison strategy may require different number of threads.
      */
     public int getThreads() {
@@ -154,14 +175,13 @@ public final class TaijituConfigImpl implements TaijituConfig {
         return new File(getOutputFolder());
     }
 
-    public Date parseDate(String paramName, String paramValue) throws TaijituException {
+    public static Date parseDate(String dateStr) throws TaijituException {
         Date result = null;
-        if (paramValue != null) {
+        if (dateStr != null) {
             try {
-                final long millis = DATE_TIME_FORMATTER.parseMillis(paramValue);
-                result = new Date(millis);
+                result = new Date(DATE_TIME_FORMATTER.parseMillis(dateStr));
             } catch (final IllegalArgumentException e) {
-                throw new TaijituException("Unable to parse date " + paramName, e);
+                throw new TaijituException("Unable to parse date " + dateStr, e);
             }
         }
         return result;
@@ -172,10 +192,10 @@ public final class TaijituConfigImpl implements TaijituConfig {
      *
      * @param configFile ConfigurationLabels file to load
      */
-    private HProperties loadProperties(String configFile) throws TaijituException {
+    private void loadProperties(String configFile) throws TaijituException {
         try (final InputStream configStream = new FileInputStream(configFile)) {
             validateStream(configFile, configStream);
-            return HPropertiesHelper.load(configStream);
+            config = HPropertiesHelper.load(configStream);
         } catch (HPropertiesException | IOException e) {
             throw new TaijituException("Unable to load configuration from file: " + configFile, e);
         }
@@ -191,15 +211,13 @@ public final class TaijituConfigImpl implements TaijituConfig {
         return config;
     }
 
-    /*public void setProperties(HProperties properties) {
-        config = properties;
-    }*/
-
     public Boolean isUseScanClassPath() {
         return Boolean.valueOf(getSetup(Setup.SCAN_CLASSPATH, "false"));
     }
 
-    public HProperties getDatabaseProperties() {
-        return getProperties().getPropertiesByPrefix(Sections.DATABASE);
+    @Override
+    public ComparisonPluginConfig[] getAllPluginsConfig() {
+        return new ComparisonPluginConfig[0];
     }
+
 }

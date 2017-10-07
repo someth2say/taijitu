@@ -1,12 +1,54 @@
 package org.someth2say.taijitu.config;
 
-public class QueryConfigImpl implements QueryConfig {
-    
-    private final ComparisonConfig comparisonConfig;
-    private final String id;
+import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
 
-    public QueryConfigImpl(final ComparisonConfig comparisonConfig, final String id){
+import java.util.Arrays;
+
+public class QueryConfigImpl implements QueryConfig {
+
+    private final ComparisonConfigImpl comparisonConfig;
+    private final String name;
+
+    public QueryConfigImpl(final ComparisonConfigImpl comparisonConfig, final String name) {
         this.comparisonConfig = comparisonConfig;
-        this.id = id;
+        this.name = name;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getStatement() {
+        return getProperty(getName(), null);
+    }
+
+    public String getProperty(final String property, final String defaultValue) {
+        //TODO: Is this too verbose?
+        //comparison.comparisonName.query.queryname.property.XXX=YYY
+        final String[] configRoot = comparisonConfig.getPropertiesRoot();
+        String[] queryRoot = Arrays.copyOf(configRoot, configRoot.length + 3);
+        queryRoot[configRoot.length - 1] = Comparison.QUERY;
+        queryRoot[configRoot.length] = getName();
+        String hierarchycalProperty = comparisonConfig.getConfig().getHierarchycalProperty(property, null, queryRoot);
+        return hierarchycalProperty != null ? hierarchycalProperty : defaultValue;
+    }
+
+    @Override
+    public int getFetchSize() {
+        String property = getProperty(ConfigurationLabels.Setup.FETCH_SIZE, null);
+        try {
+            return Integer.parseInt(property);
+        } catch (NumberFormatException e) {
+            return DefaultConfig.DEFAULT_FETCHSIZE;
+        }
+    }
+
+    @Override
+    public String getParameter(String parameterName) {
+        String propertyName = comparisonConfig.getConfig().joinSections(Comparison.PARAMETERS, parameterName);
+        String propertyValue = getProperty(propertyName, null);
+        return propertyValue != null ? propertyValue : comparisonConfig.getParameter(parameterName);
     }
 }

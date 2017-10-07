@@ -56,8 +56,8 @@ public class HProperties implements Map<String, String>, Cloneable, Serializable
         return HPropertiesHelper.getPropertiesRoots(delegate, separator);
     }
 
-    public String getHierarchycalProperty(final String paramName, final String root, final String... sections) {
-        return HPropertiesHelper.getHierarchicalProperty(delegate, paramName, root, separator, sections);
+    public String getHierarchycalProperty(final String property, final String root, final String... sections) {
+        return HPropertiesHelper.getHierarchicalProperty(delegate, property, root, separator, sections);
     }
 
     public String getProperty(String property, String... sections) {

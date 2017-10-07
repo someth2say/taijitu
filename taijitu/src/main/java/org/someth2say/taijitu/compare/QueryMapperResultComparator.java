@@ -1,7 +1,7 @@
 package org.someth2say.taijitu.compare;
 
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.TaijituData;
+import org.someth2say.taijitu.ComparisonRuntime;
 import org.someth2say.taijitu.commons.StringUtil;
 import org.someth2say.taijitu.strategy.mapping.mapper.QueryMapperResult;
 import org.someth2say.taijitu.util.ImmutablePair;
@@ -34,7 +34,7 @@ public final class QueryMapperResultComparator {
      *
      * @param taijituData description for the comparison to be performed
      */
-    public static void compare(final TaijituData taijituData, final QueryMapperResult<Integer, ComparableObjectArray> sourceMapperResult, final QueryMapperResult<Integer, ComparableObjectArray> targetMapperResult) {
+    public static void compare(final ComparisonRuntime taijituData, final QueryMapperResult<Integer, ComparableObjectArray> sourceMapperResult, final QueryMapperResult<Integer, ComparableObjectArray> targetMapperResult) {
         final ComparisonResult comparisonResult = taijituData.getResult();
 
         final Map<Integer, ComparableObjectArray> sourceMapValues = sourceMapperResult.getMapValues();
