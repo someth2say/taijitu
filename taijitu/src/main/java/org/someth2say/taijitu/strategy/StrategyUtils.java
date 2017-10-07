@@ -6,7 +6,7 @@ import org.someth2say.taijitu.query.QueryUtilsException;
 import org.someth2say.taijitu.query.queryactions.QueryActions;
 import org.someth2say.taijitu.query.querywalker.QueryWalker;
 import org.someth2say.taijitu.TaijituException;
-import org.someth2say.taijitu.TaijituData;
+import org.someth2say.taijitu.ComparisonRuntime;
 import org.someth2say.taijitu.compare.ComparableObjectArray;
 import org.someth2say.taijitu.util.Pair;
 
@@ -26,7 +26,7 @@ public class StrategyUtils {
     private StrategyUtils() {
     }
 
-	public static void runParallelQueryActions(TaijituData comparison, Collection<Pair<Query, QueryActions<ComparableObjectArray>>> actions, ExceptionHoldingRunnable<? extends Exception>... otherRunnables) throws TaijituException {
+	public static void runParallelQueryActions(ComparisonRuntime comparison, Collection<Pair<Query, QueryActions<ComparableObjectArray>>> actions, ExceptionHoldingRunnable<? extends Exception>... otherRunnables) throws TaijituException {
         Collection<Collection<Exception>> allExceptions = new ArrayList<>(actions.size());
         
         final ExecutorService executor = Executors.newFixedThreadPool(actions.size() + otherRunnables.length);
@@ -75,7 +75,7 @@ public class StrategyUtils {
         }
     }
 
-    static ExceptionHoldingRunnable<TaijituException> getComparisonFieldsUpdatingRunnable(final TaijituData comparison) {
+    static ExceptionHoldingRunnable<TaijituException> getComparisonFieldsUpdatingRunnable(final ComparisonRuntime comparison) {
         return new ExceptionHoldingRunnable<TaijituException>() {
             private TaijituException exception;
 

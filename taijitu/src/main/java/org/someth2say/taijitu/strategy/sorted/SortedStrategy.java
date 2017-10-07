@@ -11,7 +11,7 @@ import org.someth2say.taijitu.strategy.ExceptionHoldingRunnable;
 import org.someth2say.taijitu.strategy.StrategyUtils;
 import org.someth2say.taijitu.strategy.mapping.ParallelComparingMappingStrategy;
 import org.someth2say.taijitu.TaijituException;
-import org.someth2say.taijitu.TaijituData;
+import org.someth2say.taijitu.ComparisonRuntime;
 import org.someth2say.taijitu.compare.ComparableObjectArray;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.util.ImmutablePair;
@@ -38,7 +38,7 @@ public class SortedStrategy implements ComparisonStrategy {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void runComparison(TaijituData comparison) throws TaijituException {
+	public void runComparison(ComparisonRuntime comparison) throws TaijituException {
 
 		logger.info("Starting comparison for " + comparison.getTestName());
 
@@ -60,7 +60,7 @@ public class SortedStrategy implements ComparisonStrategy {
 
 	private abstract class QueueingQueryActions implements QueryActions<ComparableObjectArray> {
 		private static final int DEFAULT_BUFFER_SIZE = 4;
-		protected final TaijituData comparison;
+		protected final ComparisonRuntime comparison;
 		private final ExceptionHoldingCyclicBarrier barrier;
 
 		BlockingQueue<Pair<Object[], ComparableObjectArray>> queue = new ArrayBlockingQueue<>(DEFAULT_BUFFER_SIZE);
@@ -71,7 +71,7 @@ public class SortedStrategy implements ComparisonStrategy {
 		private int[] keyFieldsIdxs;
 		private Object[] keyBuffer;
 
-		public QueueingQueryActions(TaijituData comparison, ExceptionHoldingCyclicBarrier barrier) {
+		public QueueingQueryActions(ComparisonRuntime comparison, ExceptionHoldingCyclicBarrier barrier) {
 			this.comparison = comparison;
 			this.barrier = barrier;
 		}
@@ -129,14 +129,14 @@ public class SortedStrategy implements ComparisonStrategy {
 			return getComparison().getResult();
 		}
 
-		private TaijituData getComparison() {
+		private ComparisonRuntime getComparison() {
 			return comparison;
 		}
 	}
 
 	private class SourceQueueingQueryActions extends QueueingQueryActions {
 
-		public SourceQueueingQueryActions(TaijituData comparison, ExceptionHoldingCyclicBarrier barrier) {
+		public SourceQueueingQueryActions(ComparisonRuntime comparison, ExceptionHoldingCyclicBarrier barrier) {
 			super(comparison, barrier);
 		}
 
@@ -149,7 +149,7 @@ public class SortedStrategy implements ComparisonStrategy {
 
 	private class TargetQueueingQueryActions extends QueueingQueryActions {
 
-		public TargetQueueingQueryActions(TaijituData comparison, ExceptionHoldingCyclicBarrier barrier) {
+		public TargetQueueingQueryActions(ComparisonRuntime comparison, ExceptionHoldingCyclicBarrier barrier) {
 			super(comparison, barrier);
 		}
 
@@ -160,12 +160,12 @@ public class SortedStrategy implements ComparisonStrategy {
 	}
 
 	private class SortedComparer implements ExceptionHoldingRunnable<InterruptedException> {
-		private final TaijituData comparison;
+		private final ComparisonRuntime comparison;
 		private final QueueingQueryActions source;
 		private final QueueingQueryActions target;
 		private InterruptedException exception;
 
-		public SortedComparer(TaijituData comparison, QueueingQueryActions source, QueueingQueryActions target) {
+		public SortedComparer(ComparisonRuntime comparison, QueueingQueryActions source, QueueingQueryActions target) {
 			this.comparison = comparison;
 			this.source = source;
 			this.target = target;
@@ -175,7 +175,7 @@ public class SortedStrategy implements ComparisonStrategy {
 			return getComparison().getResult();
 		}
 
-		private TaijituData getComparison() {
+		private ComparisonRuntime getComparison() {
 			return comparison;
 		}
 

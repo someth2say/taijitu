@@ -1,7 +1,7 @@
 package org.someth2say.taijitu.strategy;
 
 import org.someth2say.taijitu.TaijituException;
-import org.someth2say.taijitu.TaijituData;
+import org.someth2say.taijitu.ComparisonRuntime;
 
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
@@ -15,7 +15,7 @@ public class ExceptionHoldingCyclicBarrier {
     private final ExceptionHoldingRunnable<TaijituException> runnable;
     private final CyclicBarrier cyclicBarrier;
 
-    public ExceptionHoldingCyclicBarrier(int parties, TaijituData comparison) {
+    public ExceptionHoldingCyclicBarrier(int parties, ComparisonRuntime comparison) {
         runnable = StrategyUtils.getComparisonFieldsUpdatingRunnable(comparison);
         cyclicBarrier = new CyclicBarrier(parties, runnable);
     }

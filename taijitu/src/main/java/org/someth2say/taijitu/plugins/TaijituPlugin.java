@@ -1,7 +1,8 @@
 package org.someth2say.taijitu.plugins;
 
+import org.someth2say.taijitu.ComparisonRuntime;
 import org.someth2say.taijitu.TaijituException;
-import org.someth2say.taijitu.TaijituData;
+import org.someth2say.taijitu.config.ComparisonPluginConfig;
 import org.someth2say.taijitu.util.Named;
 
 /**
@@ -9,11 +10,11 @@ import org.someth2say.taijitu.util.Named;
  */
 public interface TaijituPlugin extends Named {
 
-    void preComparison(TaijituData taijituData) throws TaijituException;
+    void preComparison(final ComparisonRuntime taijituData, final ComparisonPluginConfig comparisonConfig) throws TaijituException;
 
-    void postComparison(TaijituData taijituData) throws TaijituException;
+    void postComparison(final ComparisonRuntime taijituData, final ComparisonPluginConfig comparisonConfig) throws TaijituException;
 
-    void start() throws TaijituException;
+    void start(final ComparisonPluginConfig config) throws TaijituException;
 
-    void end() throws TaijituException;
+    void end(final ComparisonPluginConfig config) throws TaijituException;
 }

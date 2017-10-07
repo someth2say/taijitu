@@ -9,6 +9,7 @@ import org.someth2say.taijitu.query.columnDescription.ColumnDescriptionUtils;
 import org.someth2say.taijitu.commons.StringUtil;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.PrecissionThresholdComparator;
+import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.config.TaijituConfigImpl;
 import org.someth2say.taijitu.plugins.PluginRegistry;
@@ -25,39 +26,29 @@ import java.util.regex.Pattern;
  * @author Jordi Sola
  *         This class keep all values defined for a single comparison, as per in configuration file.
  */
-public class TaijituData {
-    private static final Logger logger = Logger.getLogger(TaijituData.class);
+public class ComparisonRuntime {
+    private static final Logger logger = Logger.getLogger(ComparisonRuntime.class);
     private final Query source;
     private final Query target;
     private final String testName;
     private final Map<Class<?>, Comparator<Object>> comparators;
     private final ComparisonStrategy strategy;
-    private final ComparisonResult result;
+    //private final ComparisonResult result;
     private String header;
     private String[] fields;
     private String[] keyFields;
     private String[] compareFields;
     private Double precisionThreshold;
+    //private final ComparisonConfig comparisonConfig;
 
-    public TaijituData(final String _testName, IConnectionFactory connectionFactory) throws TaijituException {
-        this.testName = _testName;
-
-        final Integer fetchSize = TaijituConfigImpl.getFetchSize(_testName);
+    //TODO: Rename to "ComparisonData"
+    public ComparisonRuntime(final ComparisonConfig comparisonConfig) throws TaijituException {
+        this.comparisonConfig = comparisonConfig;
+        source = new Query(comparisonConfig.getSourceQueryConfig());
+        target = new Query(comparisonConfig.getTargetQueryConfig());
         final boolean queryOptimization = TaijituConfigImpl.isQueryOptimization(_testName);
 
-        this.result = new ComparisonResult();
-
-        try {
-            source = buildQuery(_testName, connectionFactory, TaijituConfigImpl.getSourceQuery(_testName), TaijituConfigImpl.getSourceQueryName(_testName), ConfigurationLabels.Comparison.SOURCE);
-            source.setFetchSize(fetchSize);
-            source.setQueryOptimization(queryOptimization);
-            target = buildQuery(_testName, connectionFactory, TaijituConfigImpl.getTargetQuery(_testName), TaijituConfigImpl.getTargetQueryName(_testName), ConfigurationLabels.Comparison.TARGET);
-            source.setFetchSize(fetchSize);
-            target.setQueryOptimization(queryOptimization);
-
-        } catch (QueryUtilsException e) {
-            throw new TaijituException("Unable to create comparison: " + e.getMessage(), e);
-        }
+        //this.result = new ComparisonResult(comparisonConfig);
 
         this.comparators = buildComparators();
 
@@ -119,7 +110,7 @@ public class TaijituData {
             final String parameterTag = parameterMatcher.group();
             final String parameterName = parameterTag.substring(1, parameterTag.length() - 1);
 
-            String parameterValue = TaijituConfigImpl.getParameter(testName, parameterName);
+            String parameterValue = TaijituConfigImpl.getProperty(testName, parameterName);
 
             if (parameterTag.contains(ConfigurationLabels.DATE_PARAMETER_KEYWORD)) {
                 values.add(TaijituConfigImpl.parseDate(parameterName, parameterValue));
@@ -195,10 +186,6 @@ public class TaijituData {
             }
         }
         return compareFields != null ? compareFields : null;
-    }
-
-    public List<TaijituPlugin> getPlugins() {
-        return PluginRegistry.getPlugins(TaijituConfigImpl.getComparisonPlugins(getTestName()));
     }
 
     /**

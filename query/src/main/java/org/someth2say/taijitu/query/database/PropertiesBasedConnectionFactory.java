@@ -24,6 +24,6 @@ public class PropertiesBasedConnectionFactory implements IConnectionFactory {
 
     @Override
     public void closeAll() throws QueryUtilsException {
-        ConnectionManager.closeConnections();
+        ConnectionManager.closeAllConnections();
     }
 }

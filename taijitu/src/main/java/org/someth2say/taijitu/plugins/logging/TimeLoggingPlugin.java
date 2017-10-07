@@ -7,7 +7,7 @@ import org.joda.time.format.ISOPeriodFormat;
 import org.joda.time.format.PeriodFormatter;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
-import org.someth2say.taijitu.TaijituData;
+import org.someth2say.taijitu.ComparisonRuntime;
 
 /**
  * Created by Jordi Sola on 24/02/2017.
@@ -27,12 +27,12 @@ public class TimeLoggingPlugin implements TaijituPlugin {
     }
 
     @Override
-    public void preComparison(TaijituData taijituData) throws TaijituException {
+    public void preComparison(ComparisonRuntime taijituData) throws TaijituException {
         comparisonStart = System.currentTimeMillis();
     }
 
     @Override
-    public void postComparison(TaijituData taijituData) throws TaijituException {
+    public void postComparison(ComparisonRuntime taijituData) throws TaijituException {
         comparisonEnd = System.currentTimeMillis();
         logComparisonTimes(taijituData);
         comparisonCount++;
@@ -50,7 +50,7 @@ public class TimeLoggingPlugin implements TaijituPlugin {
         logTotalTimes();
     }
 
-    private void logComparisonTimes(TaijituData taijituData) {
+    private void logComparisonTimes(ComparisonRuntime taijituData) {
         final PeriodFormatter formatter = ISOPeriodFormat.standard();
         final Period periodTotal = new Duration(comparisonStart, comparisonEnd).toPeriod();
         logger.info("DONE comparison " + taijituData.getTestName() + ":" + formatter.print(periodTotal));

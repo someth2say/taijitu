@@ -6,10 +6,11 @@ import org.someth2say.taijitu.fileutil.FileCommand;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.query.columnDescription.ColumnDescriptionUtils;
 import org.someth2say.taijitu.TaijituException;
-import org.someth2say.taijitu.TaijituData;
+import org.someth2say.taijitu.ComparisonRuntime;
 import org.someth2say.taijitu.commons.StringUtil;
 import org.someth2say.taijitu.compare.ComparableObjectArray;
 import org.someth2say.taijitu.compare.ComparisonResult;
+import org.someth2say.taijitu.config.ComparisonPluginConfig;
 import org.someth2say.taijitu.config.TaijituConfigImpl;
 import org.someth2say.taijitu.util.Pair;
 
@@ -25,7 +26,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
     private static final Logger logger = Logger.getLogger(AbstractWriterPlugin.class);
     private File outputFolder;
 
-    private String[][] printDifferent(final ComparisonResult comparisonResult, final TaijituData taijituData) {
+    private String[][] printDifferent(final ComparisonResult comparisonResult, final ComparisonRuntime taijituData) {
         final Collection<Pair<ComparableObjectArray, ComparableObjectArray>> different = comparisonResult.getDifferent();
         final String[][] result = new String[different.size() * 2 + 1][];
 
@@ -86,7 +87,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
         }
     }
 
-    private String[][] printMissing(final TaijituData comparison, Collection<ComparableObjectArray> missings) {
+    private String[][] printMissing(final ComparisonRuntime comparison, Collection<ComparableObjectArray> missings) {
         final String[][] result = new String[missings.size() + 1][];
         if (!missings.isEmpty()) {
             int idx = 0;
@@ -130,7 +131,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
         return result;
     }
 
-    private void writeResults(final ComparisonResult result, final TaijituData comparison, final String targetOnlyFile, final String sourceOnlyFile, final String diffsFile, final String testName, final File outputFolder) throws TaijituException, CommandException {
+    private void writeResults(final ComparisonResult result, final ComparisonRuntime comparison, final String targetOnlyFile, final String sourceOnlyFile, final String diffsFile, final String testName, final File outputFolder) throws TaijituException, CommandException {
         if (!result.getTargetOnly().isEmpty()) {
             logger.debug("Writing entries only in target for " + testName);
             final String[][] reportableStrings = printMissing(comparison, result.getTargetOnly());
@@ -152,12 +153,12 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
     protected abstract FileCommand getFileCommand(String fileNameSource, String sheetName, File outputFolder) throws CommandException;
 
     @Override
-    public void preComparison(TaijituData taijituData) throws TaijituException {
+    public void preComparison(ComparisonRuntime taijituData) throws TaijituException {
         outputFolder = createOutputFolder();
     }
 
     @Override
-    public void postComparison(TaijituData taijituData) throws TaijituException {
+    public void postComparison(ComparisonRuntime taijituData) throws TaijituException {
         final ComparisonResult result = taijituData.getResult();
         final String testName = taijituData.getTestName();
 
@@ -177,12 +178,12 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
     }
 
     @Override
-    public void start() throws TaijituException {
+    public void start(final ComparisonPluginConfig config) throws TaijituException {
         // Do nothing
     }
 
     @Override
-    public void end() throws TaijituException {
+    public void end(final ComparisonPluginConfig config) throws TaijituException {
         // Do nothing
     }
 

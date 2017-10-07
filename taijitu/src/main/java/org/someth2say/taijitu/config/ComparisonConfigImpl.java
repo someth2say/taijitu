@@ -22,6 +22,16 @@ public class ComparisonConfigImpl implements ComparisonConfig {
         this.config = taijituConfig.getProperties();
     }
 
+    public HProperties getConfig() {
+        return this.config;
+    }
+
+
+	public String getName() {
+		return name;
+	}
+
+    
     /**** PARAMETERS *********************************************************************/
 
     public Properties getAllParameters() {
@@ -29,18 +39,21 @@ public class ComparisonConfigImpl implements ComparisonConfig {
         result.putAll(taijituConfig.getAllParameters());
 
         //TODO: Hierarchical subProperties
-        result.putAll(config.getPropertiesByPrefix(Sections.COMPARISON, name, Comparison.PARAMETERS)); //comparison.N.parameters.XXX=YYY
-        result.putAll(config.getPropertiesByPrefix(Sections.COMPARISON, name, Sections.SETUP, Comparison.PARAMETERS)); //comparison.N.setup.parameters.XXX=YYY
+        result.putAll(config.getPropertiesByPrefix(Sections.COMPARISON, getName(), Comparison.PARAMETERS)); //comparison.N.parameters.XXX=YYY
+        result.putAll(config.getPropertiesByPrefix(Sections.COMPARISON, getName(), Sections.SETUP, Comparison.PARAMETERS)); //comparison.N.setup.parameters.XXX=YYY
 
         return result;
     }
 
-    public String getParameter(final String paramName, final String defaultValue) {
+    /** PROPERTIES *************************************************************************/
+    
+    public String getProperty(final String paramName, final String defaultValue) {
         return getPropertyWithFailback(config.joinSections(Comparison.PARAMETERS, paramName), defaultValue);
     }
 
+
     public String getPropertyWithFailback(final String param, final String defaultValue) {
-        String result = config.getHierarchycalProperty(param, Sections.COMPARISON, name, Sections.SETUP);
+        String result = config.getHierarchycalProperty(param, Sections.COMPARISON, getName(), Sections.SETUP);
         if (result == null) {
             result = taijituConfig.getParameter(param, defaultValue);
         }
@@ -71,6 +84,7 @@ public class ComparisonConfigImpl implements ComparisonConfig {
         String[] pluginNames = getComparisonPluginNames();
         ComparisonPluginConfig[] result = new ComparisonPluginConfig[pluginNames.length];
         for (int pos = 0; pos < pluginNames.length; pos++) {
+        	//TODO: May be cached
             result[pos] = new ComparisonPluginConfigImpl(this, pluginNames[pos]);
         }
         return result;
@@ -107,13 +121,13 @@ public class ComparisonConfigImpl implements ComparisonConfig {
      * 
      */
     public String[] getKeyFields() {
-        String property = getPropertyWithFailback(Comparison.Fields.KEY, name);
+        String property = getPropertyWithFailback(Comparison.Fields.KEY, getName());
         return StringUtil.splitAndTrim(property);
     }
 
 
     public String[] getCompareFields() {
-        String property = getPropertyWithFailback(Comparison.FIELDS, name);
+        String property = getPropertyWithFailback(Comparison.FIELDS, getName());
         return StringUtil.splitAndTrim(property);
     }
 

@@ -54,7 +54,7 @@ public final class TaijituConfigImpl implements TaijituConfig {
     /**
      * TaijituConfig does not define any entry itself, but delegates all entries to "SETUP" section.
      */
-    public String getParameter(final String paramName, final String defaulValue) {
+    public String getProperty(final String paramName, final String defaulValue) {
         return getSetup(paramName, defaulValue);
     }
 

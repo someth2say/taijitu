@@ -6,7 +6,7 @@ import org.someth2say.taijitu.query.columnDescription.ColumnDescriptionUtils;
 import org.someth2say.taijitu.query.querywalker.MemStoreResults;
 import org.someth2say.taijitu.strategy.mapping.mapper.QueryMapperResult;
 import org.someth2say.taijitu.TaijituException;
-import org.someth2say.taijitu.TaijituData;
+import org.someth2say.taijitu.ComparisonRuntime;
 import org.someth2say.taijitu.compare.ComparableObjectArray;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.QueryMapperResultComparator;
@@ -24,7 +24,7 @@ public class InteractiveMappingStrategy extends AbstractMappingComparisonStrateg
     private static Logger logger = Logger.getLogger(InteractiveMappingStrategy.class);
 
     @Override
-    public void runComparison(final TaijituData taijituData) throws TaijituException {
+    public void runComparison(final ComparisonRuntime taijituData) throws TaijituException {
 
         logger.debug("Starting queries for " + taijituData.getTestName());
         final ComparisonResult result = taijituData.getResult();
