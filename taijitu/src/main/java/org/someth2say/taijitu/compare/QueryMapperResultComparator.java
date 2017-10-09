@@ -34,11 +34,11 @@ public final class QueryMapperResultComparator {
      *
      * @param taijituData description for the comparison to be performed
      */
-    public static void compare(final ComparisonRuntime taijituData, final QueryMapperResult<Integer, ComparableObjectArray> sourceMapperResult, final QueryMapperResult<Integer, ComparableObjectArray> targetMapperResult) {
+    public static void compare(final ComparisonRuntime taijituData, final QueryMapperResult<Integer, ComparableTuple> sourceMapperResult, final QueryMapperResult<Integer, ComparableTuple> targetMapperResult) {
         final ComparisonResult comparisonResult = taijituData.getResult();
 
-        final Map<Integer, ComparableObjectArray> sourceMapValues = sourceMapperResult.getMapValues();
-        final Map<Integer, ComparableObjectArray> targetMapValues = targetMapperResult.getMapValues();
+        final Map<Integer, ComparableTuple> sourceMapValues = sourceMapperResult.getMapValues();
+        final Map<Integer, ComparableTuple> targetMapValues = targetMapperResult.getMapValues();
 
         final String[] fields = taijituData.getFields();
         final String[] compareFields = taijituData.getCompareFields();
@@ -47,7 +47,7 @@ public final class QueryMapperResultComparator {
         compareIntoResult(comparisonResult, sourceMapValues, targetMapValues, fields, compareFields, comparators);
     }
 
-    public static void compareIntoResult(ComparisonResult comparisonResult, Map<Integer, ComparableObjectArray> sourceMapValues, Map<Integer, ComparableObjectArray> targetMapValues, String[] fields, String[] compareFields, Map<Class<?>, Comparator<Object>> comparators) {
+    public static void compareIntoResult(ComparisonResult comparisonResult, Map<Integer, ComparableTuple> sourceMapValues, Map<Integer, ComparableTuple> targetMapValues, String[] fields, String[] compareFields, Map<Class<?>, Comparator<Object>> comparators) {
         // Look for entries on one map that are missing on other map.
         // Modifies both sourceData and targetData: removes 'missing' elements in order to improve differences finding.
         findMissing(comparisonResult, sourceMapValues, targetMapValues);
@@ -56,18 +56,18 @@ public final class QueryMapperResultComparator {
         findDifferent(comparisonResult, sourceMapValues, targetMapValues, comparators, fields, compareFields);
     }
 
-    private static void findDifferent(final ComparisonResult comparisonResult, final Map<Integer, ComparableObjectArray> sourceData,
-                                      final Map<Integer, ComparableObjectArray> targetData, Map<Class<?>, Comparator<Object>> comparators, String[] fields, String[] compareFields) {
+    private static void findDifferent(final ComparisonResult comparisonResult, final Map<Integer, ComparableTuple> sourceData,
+                                      final Map<Integer, ComparableTuple> targetData, Map<Class<?>, Comparator<Object>> comparators, String[] fields, String[] compareFields) {
         int[] compareFieldsIdxs = StringUtil.findIndexes(fields, compareFields);
 
-        final List<Pair<ComparableObjectArray, ComparableObjectArray>> differences = new ArrayList<>();
+        final List<Pair<ComparableTuple, ComparableTuple>> differences = new ArrayList<>();
         // Look for match elements, and then compare each field.
-        for (final Entry<Integer, ComparableObjectArray> sourceEntry : sourceData.entrySet()) {
+        for (final Entry<Integer, ComparableTuple> sourceEntry : sourceData.entrySet()) {
             final Integer sourceEntryKey = sourceEntry.getKey();
             if (targetData.containsKey(sourceEntryKey)) {
                 // we have a match, but values the same?
-                final ComparableObjectArray sourceValues = sourceData.get(sourceEntryKey);
-                final ComparableObjectArray targetValues = targetData.get(sourceEntryKey);
+                final ComparableTuple sourceValues = sourceData.get(sourceEntryKey);
+                final ComparableTuple targetValues = targetData.get(sourceEntryKey);
 
                 addIfDifferent(sourceValues, targetValues, comparators, compareFieldsIdxs, differences);
             }
@@ -77,31 +77,31 @@ public final class QueryMapperResultComparator {
         logger.info("Entries on both tables but with different content: " + String.format("%,d", comparisonResult.getDifferent().size()));
     }
 
-    private static boolean addIfDifferent(final ComparableObjectArray sourceObj, final ComparableObjectArray targetObj, Map<Class<?>, Comparator<Object>> comparators, int[] sourceCompareFieldsIdxs, List<Pair<ComparableObjectArray, ComparableObjectArray>> differences) {
-        if (!sourceObj.equalsCompareFields(targetObj, comparators, sourceCompareFieldsIdxs)) {
+    private static boolean addIfDifferent(final ComparableTuple sourceObj, final ComparableTuple targetObj, Map<Class<?>, Comparator<Object>> comparators, int[] sourceCompareFieldsIdxs, List<Pair<ComparableTuple, ComparableTuple>> differences) {
+        if (!sourceObj.equalsFields(targetObj, comparators, sourceCompareFieldsIdxs)) {
             differences.add(new ImmutablePair<>(sourceObj, targetObj));
             return true;
         }
         return false;
     }
 
-    private static void findMissing(final ComparisonResult comparisonResult, final Map<Integer, ComparableObjectArray> sourceData,
-                                    final Map<Integer, ComparableObjectArray> targetData) {
+    private static void findMissing(final ComparisonResult comparisonResult, final Map<Integer, ComparableTuple> sourceData,
+                                    final Map<Integer, ComparableTuple> targetData) {
 
-        final List<ComparableObjectArray> sourceOnly = findMissing(sourceData, targetData);
+        final List<ComparableTuple> sourceOnly = findMissing(sourceData, targetData);
         comparisonResult.setSourceOnly(sourceOnly);
         logger.info("Entries on source only (missing in target): " + String.format("%,d", sourceOnly.size()));
 
-        final List<ComparableObjectArray> targetOnly = findMissing(targetData, sourceData);
+        final List<ComparableTuple> targetOnly = findMissing(targetData, sourceData);
         comparisonResult.setTargetOnly(targetOnly);
         logger.info("Entries on target only (missing in source): " + String.format("%,d", targetOnly.size()));
     }
 
-    private static List<ComparableObjectArray> findMissing(final Map<Integer, ComparableObjectArray> objectsMap, final Map<Integer, ComparableObjectArray> otherMap) {
-        final List<ComparableObjectArray> missing = new ArrayList<>();
+    private static List<ComparableTuple> findMissing(final Map<Integer, ComparableTuple> objectsMap, final Map<Integer, ComparableTuple> otherMap) {
+        final List<ComparableTuple> missing = new ArrayList<>();
         // Looks for missing keys on second map
         final List<Integer> keysToBeRemoved = new ArrayList<>();
-        for (final Entry<Integer, ComparableObjectArray> entry : objectsMap.entrySet()) {
+        for (final Entry<Integer, ComparableTuple> entry : objectsMap.entrySet()) {
             final Integer key = entry.getKey();
             if (!otherMap.containsKey(key)) {
                 missing.add(objectsMap.get(key));

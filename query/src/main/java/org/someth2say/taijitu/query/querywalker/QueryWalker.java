@@ -6,8 +6,8 @@ import org.someth2say.taijitu.query.Query;
 import org.someth2say.taijitu.query.QueryUtilsException;
 import org.someth2say.taijitu.query.discarter.Discarter;
 import org.someth2say.taijitu.query.discarter.TimeBasedLog4jDiscarter;
-import org.someth2say.taijitu.query.objects.ObjectArray;
-import org.someth2say.taijitu.query.objects.IObjectsFactory;
+import org.someth2say.taijitu.query.tuple.Tuple;
+import org.someth2say.taijitu.query.tuple.ITupleFactory;
 import org.someth2say.taijitu.query.queryactions.MemStoreQueryActions;
 import org.someth2say.taijitu.query.queryactions.QueryActions;
 import org.someth2say.taijitu.query.queryactions.QueryActionsException;
@@ -24,23 +24,23 @@ public final class QueryWalker {
 	private QueryWalker() {
 	}
 
-	public static <T extends ObjectArray> MemStoreResults<T> getMemStoreValues(Query query,
-			IObjectsFactory<T> factory) throws QueryUtilsException {
+	public static <T extends Tuple> MemStoreResults<T> getMemStoreValues(Query query,
+																		 ITupleFactory<T> factory) throws QueryUtilsException {
 		MemStoreQueryActions<T> queryWalker = new MemStoreQueryActions<>();
 		walkValues(query, factory, queryWalker);
 		return new MemStoreResults<>(queryWalker.getColumnDescriptions(), queryWalker.getValues());
 	}
 
-	public static <T extends ObjectArray> void getMemStoreValuesInto(Query query, IObjectsFactory<T> factory,
-			MemStoreResults<T> result) throws QueryUtilsException {
+	public static <T extends Tuple> void getMemStoreValuesInto(Query query, ITupleFactory<T> factory,
+															   MemStoreResults<T> result) throws QueryUtilsException {
 		MemStoreQueryActions<T> queryWalker = new MemStoreQueryActions<>(result);
 		walkValues(query, factory, queryWalker);
 		result.setDescriptions(queryWalker.getColumnDescriptions());
 		result.setValues(queryWalker.getValues());
 	}
 
-	public static <T extends ObjectArray> void walkValues(Query query, IObjectsFactory<T> factory,
-			QueryActions<T> queryActions) throws QueryUtilsException {
+	public static <T extends Tuple> void walkValues(Query query, ITupleFactory<T> factory,
+													QueryActions<T> queryActions) throws QueryUtilsException {
 		// Assuming connection is already open! So we should not close it
 		final Connection connection = query.getConnection();
 		if (connection == null) {
@@ -58,8 +58,8 @@ public final class QueryWalker {
 		}
 	}
 
-	private static <T extends ObjectArray> void walkValuesWithoutParameters(Query query, IObjectsFactory<T> factory,
-			QueryActions<T> queryActions, Connection connection, String queryStr, int fetchSize)
+	private static <T extends Tuple> void walkValuesWithoutParameters(Query query, ITupleFactory<T> factory,
+																	  QueryActions<T> queryActions, Connection connection, String queryStr, int fetchSize)
 			throws QueryUtilsException {
 		try (final Statement statement = getStatement(connection, fetchSize);
 				final ResultSet resultSet = getResultSet(queryStr, statement)) {
@@ -69,8 +69,8 @@ public final class QueryWalker {
 		}
 	}
 
-	private static <T extends ObjectArray> void walkValuesWithParameters(Query query, IObjectsFactory<T> factory,
-			QueryActions<T> queryActions, Connection connection, String queryStr, int fetchSize)
+	private static <T extends Tuple> void walkValuesWithParameters(Query query, ITupleFactory<T> factory,
+																   QueryActions<T> queryActions, Connection connection, String queryStr, int fetchSize)
 			throws QueryUtilsException {
 		try (final PreparedStatement preparedStatement = getPreparedStatement(query, connection, queryStr, fetchSize);
 				final ResultSet resultSet = getResultSet(preparedStatement)) {
@@ -132,8 +132,8 @@ public final class QueryWalker {
 		return preparedStatement;
 	}
 
-	private static <T extends ObjectArray> void walkResultSet(Query query, IObjectsFactory<T> factory,
-			QueryActions<T> queryActions, ResultSet rs) throws QueryUtilsException {
+	private static <T extends Tuple> void walkResultSet(Query query, ITupleFactory<T> factory,
+														QueryActions<T> queryActions, ResultSet rs) throws QueryUtilsException {
 		Discarter discarter = TimeBasedLog4jDiscarter.newInstance(1000, logger, Level.INFO);
 		try {
 			int recordCount = 0;

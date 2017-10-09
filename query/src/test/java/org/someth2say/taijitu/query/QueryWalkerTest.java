@@ -7,9 +7,9 @@ import org.someth2say.taijitu.query.database.ConnectionManager;
 import org.someth2say.taijitu.query.database.IConnectionFactory;
 import org.someth2say.taijitu.query.database.PropertiesBasedConnectionFactory;
 import org.someth2say.taijitu.query.database.PropertyBasedConnectionDataFactory;
+import org.someth2say.taijitu.query.tuple.DefaultTuple;
 import org.someth2say.taijitu.query.properties.HProperties;
-import org.someth2say.taijitu.query.objects.DefaultObjectArray;
-import org.someth2say.taijitu.query.objects.IObjectsFactory;
+import org.someth2say.taijitu.query.tuple.ITupleFactory;
 import org.someth2say.taijitu.query.queryactions.OutputStreamQueryActions;
 import org.someth2say.taijitu.query.querywalker.QueryWalker;
 
@@ -52,7 +52,7 @@ public class QueryWalkerTest {
         List<Object> paramValues = Collections.emptyList();
         Query query = new Query(name, str, null, "", null, paramValues);
 
-        IObjectsFactory<DefaultObjectArray> factory = new DefaultObjectArray.Factory();
+        ITupleFactory<DefaultTuple> factory = new DefaultTuple.Factory();
         QueryWalker.getMemStoreValues(query, factory);
         fail("Exception should be thrown!");
     }
@@ -73,9 +73,9 @@ public class QueryWalkerTest {
 
             Query query = new Query(testName, str, connectionFactory, DB_NAME, new String[]{"KEY", "VALUE"}, Collections.emptyList());
 
-            IObjectsFactory<DefaultObjectArray> factory = new DefaultObjectArray.Factory();
+            ITupleFactory<DefaultTuple> factory = new DefaultTuple.Factory();
             try (PipedInputStream inputStream = new PipedInputStream(); OutputStream os = new PipedOutputStream(inputStream)) {
-                OutputStreamQueryActions<DefaultObjectArray> walker = new OutputStreamQueryActions<>(os);
+                OutputStreamQueryActions<DefaultTuple> walker = new OutputStreamQueryActions<>(os);
                 QueryWalker.walkValues(query, factory, walker);
                 String output = dumpInputStreamToString(inputStream);
                 assertTrue("Output should contain table columns", output.contains("1,UNO"));

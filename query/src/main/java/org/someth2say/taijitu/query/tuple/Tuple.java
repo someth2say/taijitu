@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.query.objects;
+package org.someth2say.taijitu.query.tuple;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -7,10 +7,10 @@ import java.util.Iterator;
  *
  */
 //TODO: Please, do not re-invent array...
-public abstract class ObjectArray {
+public abstract class Tuple {
     private final Object[] columns;
 
-    public ObjectArray(Object[] columns) {
+    public Tuple(Object[] columns) {
         this.columns = columns;
     }
 
@@ -26,7 +26,7 @@ public abstract class ObjectArray {
         } else if (obj == null || this.getClass() != obj.getClass()) {
             return false;
         } else {
-            ObjectArray other = (ObjectArray) obj;
+            Tuple other = (Tuple) obj;
             return Arrays.equals(this.columns, other.columns);
         }
     }

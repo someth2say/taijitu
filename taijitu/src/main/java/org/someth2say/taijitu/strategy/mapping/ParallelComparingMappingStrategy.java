@@ -1,6 +1,7 @@
 package org.someth2say.taijitu.strategy.mapping;
 
 import org.apache.log4j.Logger;
+import org.someth2say.taijitu.compare.ComparableTuple;
 import org.someth2say.taijitu.query.Query;
 import org.someth2say.taijitu.query.columnDescription.ColumnDescriptionUtils;
 import org.someth2say.taijitu.query.queryactions.QueryActions;
@@ -11,7 +12,6 @@ import org.someth2say.taijitu.strategy.mapping.mapper.QueryMapper;
 import org.someth2say.taijitu.strategy.mapping.mapper.QueryMapperResult;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.ComparisonRuntime;
-import org.someth2say.taijitu.compare.ComparableObjectArray;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.util.ImmutablePair;
 import org.someth2say.taijitu.util.Pair;
@@ -41,7 +41,7 @@ public class ParallelComparingMappingStrategy extends AbstractMappingComparisonS
         sourceQueryAction.setOther(targetQueryAction);
         targetQueryAction.setOther(sourceQueryAction);
 
-        Collection<Pair<Query, QueryActions<ComparableObjectArray>>> pairs = new ArrayList<>();
+        Collection<Pair<Query, QueryActions<ComparableTuple>>> pairs = new ArrayList<>();
         pairs.add(new ImmutablePair<>(comparison.getSource(), sourceQueryAction));
         pairs.add(new ImmutablePair<>(comparison.getTarget(), targetQueryAction));
         StrategyUtils.runParallelQueryActions(comparison, pairs);
@@ -59,14 +59,14 @@ public class ParallelComparingMappingStrategy extends AbstractMappingComparisonS
     /**
      * @author Jordi Sola
      */
-    static abstract class ParallelComparingQueryActions implements QueryActions<ComparableObjectArray> {
+    static abstract class ParallelComparingQueryActions implements QueryActions<ComparableTuple> {
 
         private final ExceptionHoldingCyclicBarrier descriptionBarrier;
         private final CyclicBarrier finalizationBarrier;
         private final ComparisonRuntime comparison;
         protected int[] keyFieldsIdxs;
         protected Object[] keyBuffer;
-        QueryMapperResult<Integer, ComparableObjectArray> mappingResults = new QueryMapperResult<>();
+        QueryMapperResult<Integer, ComparableTuple> mappingResults = new QueryMapperResult<>();
         private ParallelComparingQueryActions other;
         private int[] compareFieldsIdxs;
 
@@ -114,7 +114,7 @@ public class ParallelComparingMappingStrategy extends AbstractMappingComparisonS
 
 
         @Override
-        public void step(ComparableObjectArray currentRecord) throws QueryActionsException {
+        public void step(ComparableTuple currentRecord) throws QueryActionsException {
             synchronized (comparison) {
                 if (isInOther(currentRecord)) {
                     if (!currentRecordsAreEquals(currentRecord)) {
@@ -130,27 +130,27 @@ public class ParallelComparingMappingStrategy extends AbstractMappingComparisonS
             }
         }
 
-        protected abstract void addRecordToDiffs(ComparableObjectArray record);
+        protected abstract void addRecordToDiffs(ComparableTuple record);
 
-        private ComparableObjectArray removeFormOther(ComparableObjectArray currentRecordKey) {
+        private ComparableTuple removeFormOther(ComparableTuple currentRecordKey) {
             return other.removeRecord(currentRecordKey);
         }
 
-        private boolean isInOther(ComparableObjectArray record) {
+        private boolean isInOther(ComparableTuple record) {
             return other.contains(record);
         }
 
-        protected ComparableObjectArray removeRecord(ComparableObjectArray record) {
+        protected ComparableTuple removeRecord(ComparableTuple record) {
             return mappingResults.getMapValues().remove(buildKey(record));
         }
 
-        protected boolean contains(ComparableObjectArray record) {
+        protected boolean contains(ComparableTuple record) {
             return mappingResults.getMapValues().containsKey(buildKey(record));
         }
 
-        private boolean currentRecordsAreEquals(ComparableObjectArray currentRecord) {
-            final ComparableObjectArray otherRecord = other.getRecord(currentRecord);
-            return currentRecord.equalsCompareFields(otherRecord, comparison.getComparators(), this.compareFieldsIdxs);
+        private boolean currentRecordsAreEquals(ComparableTuple currentRecord) {
+            final ComparableTuple otherRecord = other.getRecord(currentRecord);
+            return currentRecord.equalsFields(otherRecord, comparison.getComparators(), this.compareFieldsIdxs);
         }
 
 
@@ -182,17 +182,17 @@ public class ParallelComparingMappingStrategy extends AbstractMappingComparisonS
             this.other = other;
         }
 
-        protected ComparableObjectArray getRecord(ComparableObjectArray record) {
+        protected ComparableTuple getRecord(ComparableTuple record) {
             return mappingResults.getMapValues().get(buildKey(record));
         }
 
 
-        protected void addRecord(ComparableObjectArray record) {
+        protected void addRecord(ComparableTuple record) {
             QueryMapper.mapRow(keyFieldsIdxs, mappingResults, keyBuffer, record);
         }
 
 
-        private int buildKey(ComparableObjectArray record) {
+        private int buildKey(ComparableTuple record) {
             return QueryMapper.buildIntKey(record, keyFieldsIdxs, keyBuffer);
         }
 
@@ -213,9 +213,9 @@ public class ParallelComparingMappingStrategy extends AbstractMappingComparisonS
         }
 
         @Override
-        protected void addRecordToDiffs(ComparableObjectArray record) {
-            ComparableObjectArray sourceObjects = record;
-            ComparableObjectArray targetObjects = getOther().getRecord(record);
+        protected void addRecordToDiffs(ComparableTuple record) {
+            ComparableTuple sourceObjects = record;
+            ComparableTuple targetObjects = getOther().getRecord(record);
             getResult().getDifferent().add(new ImmutablePair<>(sourceObjects, targetObjects));
         }
 
@@ -243,9 +243,9 @@ public class ParallelComparingMappingStrategy extends AbstractMappingComparisonS
         }
 
         @Override
-        protected void addRecordToDiffs(ComparableObjectArray record) {
-            ComparableObjectArray sourceObjects = getOther().getRecord(record);
-            ComparableObjectArray targetObjects = record;
+        protected void addRecordToDiffs(ComparableTuple record) {
+            ComparableTuple sourceObjects = getOther().getRecord(record);
+            ComparableTuple targetObjects = record;
             getResult().getDifferent().add(new ImmutablePair<>(sourceObjects, targetObjects));
         }
     }

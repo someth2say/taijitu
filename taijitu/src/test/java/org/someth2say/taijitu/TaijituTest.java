@@ -150,7 +150,7 @@ public class TaijituTest {
 
 
     /**
-     * Test for databases with equalsCompareFields content.
+     * Test for databases with equalsFields content.
      */
     @Test
     public void equalsTest() throws TaijituException, QueryUtilsException, SQLException {

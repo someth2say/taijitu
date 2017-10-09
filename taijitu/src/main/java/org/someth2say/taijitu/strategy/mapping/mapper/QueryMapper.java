@@ -2,7 +2,7 @@ package org.someth2say.taijitu.strategy.mapping.mapper;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.query.columnDescription.ColumnDescriptionUtils;
-import org.someth2say.taijitu.query.objects.ObjectArray;
+import org.someth2say.taijitu.query.tuple.Tuple;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,13 +16,13 @@ public final class QueryMapper {
     private QueryMapper() {
     }
 
-    public static <T extends ObjectArray> QueryMapperResult<Integer, T> mapValues(int[] keyColumnIdxs, Collection<T> values) {
+    public static <T extends Tuple> QueryMapperResult<Integer, T> mapValues(int[] keyColumnIdxs, Collection<T> values) {
         QueryMapperResult<Integer, T> result = new QueryMapperResult<>();
         mapValuesInto(keyColumnIdxs, values, result);
         return result;
     }
 
-    public static <T extends ObjectArray> void mapValuesInto(int[] keyColumnIdxs, Collection<T> values, QueryMapperResult<Integer, T> result) {
+    public static <T extends Tuple> void mapValuesInto(int[] keyColumnIdxs, Collection<T> values, QueryMapperResult<Integer, T> result) {
         result.setMapValues(new HashMap<>());
         Object[] keyValuesBuffer = new Object[keyColumnIdxs.length];
         for (T row : values) {
@@ -34,7 +34,7 @@ public final class QueryMapper {
         }
     }
 
-    public static <K, T extends ObjectArray> void mapRow(int[] keyColumnIdxs, final QueryMapperResult<Integer, T> result, Object[] keyValuesBuffer, T row) {
+    public static <K, T extends Tuple> void mapRow(int[] keyColumnIdxs, final QueryMapperResult<Integer, T> result, Object[] keyValuesBuffer, T row) {
         int key = buildIntKey(row, keyColumnIdxs, keyValuesBuffer);
         if (result.getMapValues().containsKey(key)) {
             result.getDuplicatedKeyValues().put(key, row);
@@ -42,7 +42,7 @@ public final class QueryMapper {
         result.getMapValues().put(key, row);
     }
 
-    public static <T extends ObjectArray> int buildIntKey(T row, int[] keyColumnIdxs, Object[] keyValuesBuffer) {
+    public static <T extends Tuple> int buildIntKey(T row, int[] keyColumnIdxs, Object[] keyValuesBuffer) {
         ColumnDescriptionUtils.buildKey(row, keyColumnIdxs, keyValuesBuffer);
         return java.util.Objects.hash(keyValuesBuffer);
     }

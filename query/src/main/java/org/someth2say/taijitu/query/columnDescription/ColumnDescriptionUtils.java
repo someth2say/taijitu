@@ -2,7 +2,7 @@ package org.someth2say.taijitu.query.columnDescription;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.query.QueryUtilsException;
-import org.someth2say.taijitu.query.objects.ObjectArray;
+import org.someth2say.taijitu.query.tuple.Tuple;
 import org.someth2say.taijitu.commons.StringUtil;
 
 import java.util.Arrays;
@@ -70,7 +70,7 @@ public class ColumnDescriptionUtils {
         return result;
     }
 
-    public static <T extends ObjectArray> void buildKey(T row, int[] keyColumnIdxs, Object[] keyValuesBuffer) {
+    public static <T extends Tuple> void buildKey(T row, int[] keyColumnIdxs, Object[] keyValuesBuffer) {
         int keyIdx = 0;
         for (int keyColumnIdx : keyColumnIdxs) {
             keyValuesBuffer[keyIdx++] = row.getValue(keyColumnIdx);

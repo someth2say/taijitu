@@ -1,13 +1,13 @@
 package org.someth2say.taijitu.strategy.mapping;
 
 import org.apache.log4j.Logger;
+import org.someth2say.taijitu.compare.ComparableTuple;
 import org.someth2say.taijitu.query.Query;
 import org.someth2say.taijitu.query.columnDescription.ColumnDescriptionUtils;
 import org.someth2say.taijitu.query.querywalker.MemStoreResults;
 import org.someth2say.taijitu.strategy.mapping.mapper.QueryMapperResult;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.ComparisonRuntime;
-import org.someth2say.taijitu.compare.ComparableObjectArray;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.QueryMapperResultComparator;
 
@@ -32,12 +32,12 @@ public class InteractiveMappingStrategy extends AbstractMappingComparisonStrateg
         final Query sourceQuery = taijituData.getSource();
         final String sourceName = sourceQuery.getQueryName();
         waitForKeyPress(sourceName, "listing");
-        MemStoreResults<ComparableObjectArray> sourceQLR = listValues(sourceQuery);
+        MemStoreResults<ComparableTuple> sourceQLR = listValues(sourceQuery);
 
         final Query targetQuery = taijituData.getTarget();
         final String targetName = targetQuery.getQueryName();
         waitForKeyPress(targetName, "listing");
-        MemStoreResults<ComparableObjectArray> targetQLR = listValues(targetQuery);
+        MemStoreResults<ComparableTuple> targetQLR = listValues(targetQuery);
 
         //3.- Update fields with column descriptions
         // Comparison Fields may have been set after getting values!
@@ -56,11 +56,11 @@ public class InteractiveMappingStrategy extends AbstractMappingComparisonStrateg
         final int[] targetKeyFieldsPositions = ColumnDescriptionUtils.getFieldPositions(keyFields, targetDescriptions);
 
         waitForKeyPress(sourceName, "mapping");
-        final QueryMapperResult<Integer, ComparableObjectArray> sourceMapperResult = mapQueryResults(sourceKeyFieldsPositions, sourceName, sourceQLR.getValues());
+        final QueryMapperResult<Integer, ComparableTuple> sourceMapperResult = mapQueryResults(sourceKeyFieldsPositions, sourceName, sourceQLR.getValues());
         //result.setSourceMap(sourceMapperResult);
 
         waitForKeyPress(targetName, "mapping");
-        final QueryMapperResult<Integer, ComparableObjectArray> targetMapperResult = mapQueryResults(targetKeyFieldsPositions, targetName, targetQLR.getValues());
+        final QueryMapperResult<Integer, ComparableTuple> targetMapperResult = mapQueryResults(targetKeyFieldsPositions, targetName, targetQLR.getValues());
         //result.setTargetMap(targetMapperResult);
 
         //5.- Compare maps

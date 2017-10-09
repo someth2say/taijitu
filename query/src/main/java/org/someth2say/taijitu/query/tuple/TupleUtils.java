@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.query.objects;
+package org.someth2say.taijitu.query.tuple;
 
 import org.someth2say.taijitu.query.QueryUtilsException;
 
@@ -8,8 +8,8 @@ import java.sql.SQLException;
 /**
  * Created by Jordi Sola on 17/02/2017.
  */
-public class ObjectsUtils {
-    private ObjectsUtils() {
+public class TupleUtils {
+    private TupleUtils() {
     }
 
     public static Object[] extractObjectsFromRs(String[] descriptions, ResultSet rs) throws QueryUtilsException {

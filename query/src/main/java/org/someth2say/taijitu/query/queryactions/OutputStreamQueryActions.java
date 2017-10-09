@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.query.queryactions;
 
-import org.someth2say.taijitu.query.objects.ObjectArray;
+import org.someth2say.taijitu.query.tuple.Tuple;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -8,7 +8,7 @@ import java.io.OutputStream;
 /**
  * @author Jordi Sola
  */
-public class OutputStreamQueryActions<T extends ObjectArray> implements QueryActions<T> {
+public class OutputStreamQueryActions<T extends Tuple> implements QueryActions<T> {
     private final OutputStream outputStream;
     private final String recordSeparator;
     private boolean firstStep = true;
@@ -26,7 +26,7 @@ public class OutputStreamQueryActions<T extends ObjectArray> implements QueryAct
     }
 
     @Override
-    public void step(ObjectArray currentRecord) throws QueryActionsException {
+    public void step(Tuple currentRecord) throws QueryActionsException {
         try {
             if (this.firstStep) {
                 this.firstStep = false;

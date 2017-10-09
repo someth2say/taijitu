@@ -17,36 +17,36 @@ public class ComparisonResult {
 	}
 
 	
-    private Collection<Pair<ComparableObjectArray, ComparableObjectArray>> different;
+    private Collection<Pair<ComparableTuple, ComparableTuple>> different;
 
-    private Collection<ComparableObjectArray> sourceOnly;
-    private Collection<ComparableObjectArray> targetOnly;
+    private Collection<ComparableTuple> sourceOnly;
+    private Collection<ComparableTuple> targetOnly;
     private ComparisonResultStatus status = ComparisonResultStatus.PENDING;
 
     private String[] sourceColumnDescriptions;
     private String[] targetColumnDescriptions;
 
-    public Collection<ComparableObjectArray> getSourceOnly() {
+    public Collection<ComparableTuple> getSourceOnly() {
         return sourceOnly;
     }
 
-    public void setSourceOnly(Collection<ComparableObjectArray> sourceOnly) {
+    public void setSourceOnly(Collection<ComparableTuple> sourceOnly) {
         this.sourceOnly = sourceOnly;
     }
 
-    public Collection<ComparableObjectArray> getTargetOnly() {
+    public Collection<ComparableTuple> getTargetOnly() {
         return targetOnly;
     }
 
-    public void setTargetOnly(Collection<ComparableObjectArray> targetOnly) {
+    public void setTargetOnly(Collection<ComparableTuple> targetOnly) {
         this.targetOnly = targetOnly;
     }
 
-    public Collection<Pair<ComparableObjectArray, ComparableObjectArray>> getDifferent() {
+    public Collection<Pair<ComparableTuple, ComparableTuple>> getDifferent() {
         return different;
     }
 
-    public void setDifferent(Collection<Pair<ComparableObjectArray, ComparableObjectArray>> different) {
+    public void setDifferent(Collection<Pair<ComparableTuple, ComparableTuple>> different) {
         this.different = different;
     }
 

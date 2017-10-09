@@ -39,7 +39,7 @@ public final class Taijitu {
 	private static final Logger logger = Logger.getLogger(Taijitu.class);
 
 	/*
-	 * Avoids creation of new objects Static methods should be used
+	 * Avoids creation of new tuple Static methods should be used
 	 */
 	private Taijitu() {
 	}

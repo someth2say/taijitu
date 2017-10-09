@@ -1,13 +1,13 @@
 package org.someth2say.taijitu.strategy;
 
 import org.apache.log4j.Logger;
+import org.someth2say.taijitu.compare.ComparableTuple;
 import org.someth2say.taijitu.query.Query;
 import org.someth2say.taijitu.query.QueryUtilsException;
 import org.someth2say.taijitu.query.queryactions.QueryActions;
 import org.someth2say.taijitu.query.querywalker.QueryWalker;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.ComparisonRuntime;
-import org.someth2say.taijitu.compare.ComparableObjectArray;
 import org.someth2say.taijitu.util.Pair;
 
 import java.util.ArrayList;
@@ -26,12 +26,12 @@ public class StrategyUtils {
     private StrategyUtils() {
     }
 
-	public static void runParallelQueryActions(ComparisonRuntime comparison, Collection<Pair<Query, QueryActions<ComparableObjectArray>>> actions, ExceptionHoldingRunnable<? extends Exception>... otherRunnables) throws TaijituException {
+	public static void runParallelQueryActions(ComparisonRuntime comparison, Collection<Pair<Query, QueryActions<ComparableTuple>>> actions, ExceptionHoldingRunnable<? extends Exception>... otherRunnables) throws TaijituException {
         Collection<Collection<Exception>> allExceptions = new ArrayList<>(actions.size());
         
         final ExecutorService executor = Executors.newFixedThreadPool(actions.size() + otherRunnables.length);
         
-        for (Pair<Query, QueryActions<ComparableObjectArray>> pair : actions) {
+        for (Pair<Query, QueryActions<ComparableTuple>> pair : actions) {
             final Collection<Exception> pairExceptions = StrategyUtils.executeQueryActions(pair.getKey(), executor, pair.getValue());
             allExceptions.add(pairExceptions);
         }
@@ -97,14 +97,14 @@ public class StrategyUtils {
         };
     }
 
-    static <T extends QueryActions<ComparableObjectArray>> Collection<Exception> executeQueryActions(final Query query, final ExecutorService executor, final T queryActions) {
+    static <T extends QueryActions<ComparableTuple>> Collection<Exception> executeQueryActions(final Query query, final ExecutorService executor, final T queryActions) {
         final Collection<Exception> exceptions = new ArrayList<>();
         executor.execute(new Runnable() {
             @Override
             public void run() {
                 try {
                     logger.debug("Start processing query " + query.getQueryName());
-                    QueryWalker.walkValues(query, ComparableObjectArray.Factory.INSTANCE, queryActions);
+                    QueryWalker.walkValues(query, ComparableTuple.Factory.INSTANCE, queryActions);
                     logger.info("Completed processing query " + query.getQueryName());
                 } catch (QueryUtilsException e) {
                     exceptions.add(e);

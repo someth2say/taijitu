@@ -1,11 +1,12 @@
 package org.someth2say.taijitu;
 
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.config.*;
+import org.someth2say.taijitu.config.ComparisonConfig;
+import org.someth2say.taijitu.config.ConfigurationLabels;
+import org.someth2say.taijitu.config.QueryConfig;
+import org.someth2say.taijitu.config.TaijituConfigImpl;
 import org.someth2say.taijitu.query.Query;
 import org.someth2say.taijitu.query.QueryUtilsException;
-import org.someth2say.taijitu.strategy.ComparisonStrategy;
-import org.someth2say.taijitu.strategy.ComparisonStrategyRegistry;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -13,7 +14,7 @@ import java.util.regex.Pattern;
 
 /**
  * @author Jordi Sola
- *         This class keep all values defined for a single comparison, as per in configuration file.
+ * This class keep all values defined for a single comparison, as per in configuration file.
  */
 //TODO: This class will die, as runtime data should be kept by the comparison runner (thread)
 public class ComparisonRuntime {
@@ -97,6 +98,134 @@ public class ComparisonRuntime {
 //            res.put(BigDecimal.class, new PrecissionThresholdComparator(threshold));
 //        }
         return res;
+    }
+
+    public void registerColumns(final String[] sourceColumns, final String[] targetColumns, final ComparisonConfig comparisonConfig) {
+
+
+    }
+
+    // Can't be final, 'cause it is mutable >:(
+    private List<String> canonicalColumns = null;
+    private List<String> canonicalKeys = null;
+
+    // TODO: What about the keys? What if a key field does not survive?
+    public void registerColumns(final String[] columns, final QueryConfig queryConfig, final ComparisonRuntime comparisonRuntime) throws QueryUtilsException {
+        // Should use columnMatchingStrategy to find what fields do actually survive!
+        ColumnMatchingStrategy columnMatchingStrategy = comparisonRuntime.getColumnMatchingStrategy();
+
+        if (canonicalColumns == null) {
+            // Runtime columns
+            canonicalColumns = Arrays.asList(columns);
+            //Runtime key
+            canonicalKeys = Arrays.asList(queryConfig.getKeyFields());
+
+            validateKeyColumns(queryConfig, columnMatchingStrategy);
+
+        } else {
+            List<String> configKeys = Arrays.asList(queryConfig.getKeyFields());
+            List<String> columnsList = Arrays.asList(columns);
+            for (String column : columns) {
+
+                // KEYS
+                //1.- Key should be provided by query
+                //2.- Key should have a canonical match
+
+                // NON-KEYS
+                //1.- If column is not key, and have no canonical match, it is just ignored (i.e. query provides more information than needed)
+                //2.- If a canonical non-key column is not provided, it is removed from the list of canonical columns (i.e. query does not provide some information).
+
+                if (configKeys.contains(column)) {
+                    //KEY
+                    if (!columnsList.contains(column)) {
+                        throw new QueryUtilsException("Key " + column" in query " + queryConfig.getName() + " is not provided by query results.");
+                    }
+                    String cannonicalKey = columnMatchingStrategy.getMatchingColumn(column);
+                    if (!canonicalKeys.contains(cannonicalKey)) {
+                        throw new QueryUtilsException("Key " + column" in query " + queryConfig.getName() + " do not have a canonical match (using matching strategy " + columnMatchingStrategy.getName() + ")");
+                    }
+                } else {
+                    // NON-KEY
+                    String canonicalColumn = columnMatchingStrategy.getMatchingColumn(column);
+                    if (!canonicalColumns.contains(canonicalColumn)) {
+                        logger.warn("Column " + column + " in query " + queryConfig.getName() + " do not have a canonical match (using matching strategy " + columnMatchingStrategy.getName() + ")");
+                        canonicalColumns.remove(canonicalColumn);
+                    }
+                }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            }
+
+
+            List<String> matchingColumns = new ArrayList<>(canonicalColumns.size());
+
+            for (int runtimeColumnPos = 0; runtimeColumnPos < canonicalColumns.size(); runtimeColumnPos++) {
+                if (columnMatchingStrategy.isColumnMatching(canonicalColumns, runtimeColumnPos, columns)) {
+                    //Column actually have a match, so it survives.
+                    matchingColumns.add(canonicalColumns.get(runtimeColumnPos));
+                } else {
+                    logger.info("Column '" + canonicalColumns.get(runtimeColumnPos) + "' does not have matching column, so will not be considered for comparison.");
+                }
+            }
+            canonicalColumns = matchingColumns;
+            validateKeyColumns(queryConfig, columnMatchingStrategy);
+        }
+    }
+
+    private void validateKeyColumns(QueryConfig queryConfig, ColumnMatchingStrategy columnMatchingStrategy) throws QueryUtilsException {
+        String[] queryConfigKeys = queryConfig.getKeyFields();
+        for (String configKey : queryConfigKeys) {
+            String canonicalKey = columnMatchingStrategy.getMatchingColumn(configKey);
+            //1.- Configured key column should be provided by the query
+            if (!canonicalColumns.contains(canonicalKey)) {
+                throw new QueryUtilsException("Column " + configKey + "defined by " + queryConfig.getName() + " have no matching canonical column!");
+            }
+
+            //2.- Configured key column should have a match with canonical keys.
+            if (!canonicalKeys.contains(canonicalKey)) {
+                throw new QueryUtilsException("Column " + configKey + "defined by " + queryConfig.getName() + " have no matching canonical key!");
+            }
+        }
+    }
+
+    public List<String> getCanonicalColumns() {
+        return canonicalColumns;
+    }
+
+    public List<String> getCanonicalKeys() {
+        return canonicalKeys;
+    }
+
+    /**
+     * Retrieve the indexes for the key columns on source query
+     *
+     * @param sourceQueryConfig
+     * @param columns
+     * @return
+     */
+    public int[] getSourceKeyFieldsIdxs(QueryConfig sourceQueryConfig) {
+        List<String> keyFields = getCanonicalKeys();
+        int[] result = new int[keyFields.size()];
+        for (int keyFieldIdx = 0; keyFieldIdx < keyFields.size(); keyFieldIdx++) {
+            // Source query does not need field matching, so we can directly look for the name in the column list.
+
+
+        }
+        return result;
     }
 
 //

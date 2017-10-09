@@ -2,12 +2,13 @@ package org.someth2say.taijitu.config;
 
 public interface QueryConfig {
     
-    public String getName();
+    String getName();
     
-    public String getStatement();
+    String getStatement();
     
-    public int getFetchSize();
+    int getFetchSize();
     
-    public String getParameter(final String parameterName);
+    String getParameter(final String parameterName);
 
+    String[] getKeyFields();
 }

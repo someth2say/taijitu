@@ -163,10 +163,12 @@ public class ComparisonConfigImpl implements ComparisonConfig {
      * QUERIES
      **/
     public QueryConfig getSourceQueryConfig() {
+        //TODO: Memoize
         return new QueryConfigImpl(this, Comparison.SOURCE);
     }
 
     public QueryConfig getTargetQueryConfig() {
+        //TODO: Memoize
         return new QueryConfigImpl(this, Comparison.TARGET);
     }
 

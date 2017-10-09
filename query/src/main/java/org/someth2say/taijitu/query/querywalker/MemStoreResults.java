@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.query.querywalker;
 
-import org.someth2say.taijitu.query.objects.ObjectArray;
+import org.someth2say.taijitu.query.tuple.Tuple;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,7 +8,7 @@ import java.util.Collection;
 /**
  * Created by Jordi Sola on 20/02/2017.
  */
-public class MemStoreResults<T extends ObjectArray> {
+public class MemStoreResults<T extends Tuple> {
     private String[] descriptions;
     private Collection<T> values;
 

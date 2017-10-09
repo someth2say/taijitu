@@ -2,6 +2,7 @@ package org.someth2say.taijitu.strategy.mapping;
 
 
 import org.apache.log4j.Logger;
+import org.someth2say.taijitu.compare.ComparableTuple;
 import org.someth2say.taijitu.query.Query;
 import org.someth2say.taijitu.query.columnDescription.ColumnDescriptionUtils;
 import org.someth2say.taijitu.query.queryactions.QueryActions;
@@ -12,7 +13,6 @@ import org.someth2say.taijitu.strategy.mapping.mapper.QueryMapper;
 import org.someth2say.taijitu.strategy.mapping.mapper.QueryMapperResult;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.ComparisonRuntime;
-import org.someth2say.taijitu.compare.ComparableObjectArray;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.QueryMapperResultComparator;
 import org.someth2say.taijitu.util.ImmutablePair;
@@ -37,10 +37,10 @@ public class ParallelQueryingMappingStrategy extends AbstractMappingComparisonSt
         logger.info("Starting comparison for " + comparison.getTestName());
 
         final ExceptionHoldingCyclicBarrier barrier = new ExceptionHoldingCyclicBarrier(2, comparison);
-        final SourceMappingQueryAction<ComparableObjectArray> sourceActions = new SourceMappingQueryAction<>(comparison, barrier);
-        final TargetMappingQueryAction<ComparableObjectArray> targetActions = new TargetMappingQueryAction<>(comparison, barrier);
+        final SourceMappingQueryAction<ComparableTuple> sourceActions = new SourceMappingQueryAction<>(comparison, barrier);
+        final TargetMappingQueryAction<ComparableTuple> targetActions = new TargetMappingQueryAction<>(comparison, barrier);
 
-        Collection<Pair<Query, QueryActions<ComparableObjectArray>>> pairs = new ArrayList<>();
+        Collection<Pair<Query, QueryActions<ComparableTuple>>> pairs = new ArrayList<>();
         pairs.add(new ImmutablePair<>(comparison.getSource(), sourceActions));
         pairs.add(new ImmutablePair<>(comparison.getTarget(), targetActions));
         StrategyUtils.runParallelQueryActions(comparison, pairs);
@@ -51,8 +51,8 @@ public class ParallelQueryingMappingStrategy extends AbstractMappingComparisonSt
         String[] compareFields = comparison.getCompareFields();
         Map<Class<?>, Comparator<Object>> comparators = comparison.getComparators();
         ComparisonResult result = comparison.getResult();
-        Map<Integer, ComparableObjectArray> sourceMap = sourceActions.getMappingResults().getMapValues();
-        Map<Integer, ComparableObjectArray> targetMap = targetActions.getMappingResults().getMapValues();
+        Map<Integer, ComparableTuple> sourceMap = sourceActions.getMappingResults().getMapValues();
+        Map<Integer, ComparableTuple> targetMap = targetActions.getMappingResults().getMapValues();
         QueryMapperResultComparator.compareIntoResult(result, sourceMap, targetMap, fields, compareFields, comparators);
 
         logger.info("Comparison complete for " + comparison.getTestName());
@@ -68,7 +68,7 @@ public class ParallelQueryingMappingStrategy extends AbstractMappingComparisonSt
     /**
      * @author Jordi Sola
      */
-    static abstract class MappingQueryActions<T extends ComparableObjectArray> implements QueryActions<T> {
+    static abstract class MappingQueryActions<T extends ComparableTuple> implements QueryActions<T> {
 
         private final ExceptionHoldingCyclicBarrier barrier;
         private final ComparisonRuntime comparison;
@@ -134,7 +134,7 @@ public class ParallelQueryingMappingStrategy extends AbstractMappingComparisonSt
         }
     }
 
-    static class SourceMappingQueryAction<T extends ComparableObjectArray> extends MappingQueryActions<T> {
+    static class SourceMappingQueryAction<T extends ComparableTuple> extends MappingQueryActions<T> {
 
         public SourceMappingQueryAction(ComparisonRuntime comparison, ExceptionHoldingCyclicBarrier barrier) {
             super(comparison, barrier);
@@ -146,7 +146,7 @@ public class ParallelQueryingMappingStrategy extends AbstractMappingComparisonSt
         }
     }
 
-    static class TargetMappingQueryAction<T extends ComparableObjectArray> extends MappingQueryActions<T> {
+    static class TargetMappingQueryAction<T extends ComparableTuple> extends MappingQueryActions<T> {
         public TargetMappingQueryAction(ComparisonRuntime comparison, ExceptionHoldingCyclicBarrier barrier) {
             super(comparison, barrier);
         }

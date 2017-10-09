@@ -1,5 +1,6 @@
 package org.someth2say.taijitu.config;
 
+import org.someth2say.taijitu.commons.StringUtil;
 import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
 
 import java.util.Arrays;
@@ -46,9 +47,17 @@ public class QueryConfigImpl implements QueryConfig {
     }
 
     @Override
+    // TODO: Parameters should be resolved at HProperties level (string replacement), not at config level.
     public String getParameter(String parameterName) {
         String propertyName = comparisonConfig.getConfig().joinSections(Comparison.PARAMETERS, parameterName);
         String propertyValue = getProperty(propertyName, null);
         return propertyValue != null ? propertyValue : comparisonConfig.getParameter(parameterName);
+    }
+
+    @Override
+    public String[] getKeyFields() {
+        String property = getProperty(Comparison.Fields.KEY, null);
+        //TODO: Memoize
+        return StringUtil.splitAndTrim(property);
     }
 }

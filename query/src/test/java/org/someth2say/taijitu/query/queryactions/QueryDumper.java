@@ -3,11 +3,11 @@ package org.someth2say.taijitu.query.queryactions;
 import org.apache.log4j.Logger;
 import org.someth2say.TestUtils;
 import org.someth2say.taijitu.query.database.PropertiesBasedConnectionFactory;
+import org.someth2say.taijitu.query.tuple.DefaultTuple;
 import org.someth2say.taijitu.query.properties.HProperties;
 import org.someth2say.taijitu.query.Query;
 import org.someth2say.taijitu.query.QueryUtilsException;
-import org.someth2say.taijitu.query.objects.DefaultObjectArray;
-import org.someth2say.taijitu.query.objects.IObjectsFactory;
+import org.someth2say.taijitu.query.tuple.ITupleFactory;
 import org.someth2say.taijitu.query.querywalker.QueryWalker;
 import org.someth2say.taijitu.commons.FileUtil;
 
@@ -70,9 +70,9 @@ public final class QueryDumper {
 				TestUtils.PROPERTIES_ROOT);
 		String sql = properties.getProperty("querydumper.sql");
 		log.debug("Query: " + sql);
-		QueryActions<DefaultObjectArray> queryActions = new CVSStreamQueryActions(os);
+		QueryActions<DefaultTuple> queryActions = new CVSStreamQueryActions(os);
 		log.debug("Starting dump.");
-		final IObjectsFactory<DefaultObjectArray> factory = DefaultObjectArray.Factory.INSTANCE;
+		final ITupleFactory<DefaultTuple> factory = DefaultTuple.Factory.INSTANCE;
 		final String queryName = "querydumper";
 		Query query = new Query(queryName, sql, connectionFactory, connectionName, null, new ArrayList<>());
 		query.setFetchSize(DEFAULT_FECH_SIZE);
@@ -84,7 +84,7 @@ public final class QueryDumper {
 
 	}
 
-	private static class CVSStreamQueryActions implements QueryActions<DefaultObjectArray> {
+	private static class CVSStreamQueryActions implements QueryActions<DefaultTuple> {
 		private final OutputStream os;
 		boolean initialized;
 		private String[] columnDescriptions;
@@ -101,7 +101,7 @@ public final class QueryDumper {
 		}
 
 		@Override
-		public void step(DefaultObjectArray currentRecord) throws QueryActionsException {
+		public void step(DefaultTuple currentRecord) throws QueryActionsException {
 			try {
 				if (!this.initialized) {
 					writeColumnsHeader();
@@ -113,7 +113,7 @@ public final class QueryDumper {
 			}
 		}
 
-		private void writeColumnsValues(DefaultObjectArray currentRecord) throws IOException {
+		private void writeColumnsValues(DefaultTuple currentRecord) throws IOException {
 			int pos = 0;
 			while (pos < currentRecord.size()) {
 				Object value = currentRecord.getValue(pos++);

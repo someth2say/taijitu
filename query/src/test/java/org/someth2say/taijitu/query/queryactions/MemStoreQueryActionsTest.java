@@ -1,8 +1,8 @@
 package org.someth2say.taijitu.query.queryactions;
 
 import org.junit.Test;
-import org.someth2say.taijitu.query.objects.ObjectArray;
-import org.someth2say.taijitu.query.objects.DefaultObjectArray;
+import org.someth2say.taijitu.query.tuple.Tuple;
+import org.someth2say.taijitu.query.tuple.DefaultTuple;
 
 import static org.junit.Assert.assertTrue;
 
@@ -12,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 public class MemStoreQueryActionsTest {
     @Test
     public void start() throws Exception {
-        MemStoreQueryActions<ObjectArray> msqa = new MemStoreQueryActions<>();
+        MemStoreQueryActions<Tuple> msqa = new MemStoreQueryActions<>();
         String[] cd = new String[]{};
         msqa.start(cd);
         assertTrue("Column descriptions should be retained", cd == msqa.getColumnDescriptions());
@@ -20,10 +20,10 @@ public class MemStoreQueryActionsTest {
 
     @Test
     public void step() throws Exception {
-        MemStoreQueryActions<ObjectArray> msqa = new MemStoreQueryActions<>();
-        ObjectArray obj = DefaultObjectArray.Factory.INSTANCE.getInstance(new Object[]{});
+        MemStoreQueryActions<Tuple> msqa = new MemStoreQueryActions<>();
+        Tuple obj = DefaultTuple.Factory.INSTANCE.getInstance(new Object[]{});
         msqa.step(obj);
-        assertTrue("Stepped objects should be retained", msqa.getValues().contains(obj));
+        assertTrue("Stepped tuple should be retained", msqa.getValues().contains(obj));
     }
 
     @Test

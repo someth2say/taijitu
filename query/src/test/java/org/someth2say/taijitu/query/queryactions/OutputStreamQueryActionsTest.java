@@ -1,8 +1,8 @@
 package org.someth2say.taijitu.query.queryactions;
 
 import org.junit.Test;
-import org.someth2say.taijitu.query.objects.DefaultObjectArray;
-import org.someth2say.taijitu.query.objects.ObjectArray;
+import org.someth2say.taijitu.query.tuple.DefaultTuple;
+import org.someth2say.taijitu.query.tuple.Tuple;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -17,7 +17,7 @@ public class OutputStreamQueryActionsTest {
     @Test
     public void start() throws Exception {
         OutputStream os = new ByteArrayOutputStream();
-        OutputStreamQueryActions<ObjectArray> msqa = new OutputStreamQueryActions<>(os);
+        OutputStreamQueryActions<Tuple> msqa = new OutputStreamQueryActions<>(os);
         String[] cd = new String[]{};
         msqa.start(cd);
         assertTrue("Column descriptions should be retained", cd == msqa.getColumnDescriptions());
@@ -26,15 +26,15 @@ public class OutputStreamQueryActionsTest {
     @Test
     public void step() throws Exception {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
-        OutputStreamQueryActions<ObjectArray> msqa = new OutputStreamQueryActions<>(os);
+        OutputStreamQueryActions<Tuple> msqa = new OutputStreamQueryActions<>(os);
 
         String[] cd = new String[]{"ColumnName"};
         msqa.start(cd);
 
-        ObjectArray obj = DefaultObjectArray.Factory.INSTANCE.getInstance(new Object[]{});
+        Tuple obj = DefaultTuple.Factory.INSTANCE.getInstance(new Object[]{});
         msqa.step(obj);
         final String string = os.toString();
-        assertTrue("Stepped objects should be retained", !string.isEmpty());
+        assertTrue("Stepped tuple should be retained", !string.isEmpty());
         assertTrue("Headers should be dumped", string.contains("ColumnName"));
     }
 

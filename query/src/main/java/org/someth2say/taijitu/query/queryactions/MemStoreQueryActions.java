@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.query.queryactions;
 
-import org.someth2say.taijitu.query.objects.ObjectArray;
+import org.someth2say.taijitu.query.tuple.Tuple;
 import org.someth2say.taijitu.query.querywalker.MemStoreResults;
 
 import java.util.Collection;
@@ -8,7 +8,7 @@ import java.util.Collection;
 /**
  * @author Jordi Sola
  */
-public class MemStoreQueryActions<T extends ObjectArray> implements QueryActions<T> {
+public class MemStoreQueryActions<T extends Tuple> implements QueryActions<T> {
     private final MemStoreResults<T> memStore;
 
     public MemStoreQueryActions() {
