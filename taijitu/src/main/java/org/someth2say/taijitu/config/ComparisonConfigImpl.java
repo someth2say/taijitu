@@ -93,7 +93,7 @@ public class ComparisonConfigImpl implements ComparisonConfig {
         String[] pluginNames = getComparisonPluginNames();
         ComparisonPluginConfig[] result = new ComparisonPluginConfig[pluginNames.length];
         for (int pos = 0; pos < pluginNames.length; pos++) {
-            //TODO: May be cached
+        	//TODO: May be cached
             result[pos] = new ComparisonPluginConfigImpl(this, pluginNames[pos]);
         }
         return result;
