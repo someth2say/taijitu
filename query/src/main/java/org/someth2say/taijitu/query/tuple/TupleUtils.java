@@ -12,15 +12,16 @@ public class TupleUtils {
     private TupleUtils() {
     }
 
-    public static Object[] extractObjectsFromRs(String[] descriptions, ResultSet rs) throws QueryUtilsException {
-        Object[] columnValues = new Object[descriptions.length];
-        for (int columnIdx = 0, descriptionsLength = descriptions.length; columnIdx < descriptionsLength; columnIdx++) {
+    public static Object[] extractObjectsFromRs(String[] columns, ResultSet rs) throws QueryUtilsException {
+        Object[] columnValues = new Object[columns.length];
+        for (int columnIdx = 0, descriptionsLength = columns.length; columnIdx < descriptionsLength; columnIdx++) {
             try {
                 columnValues[columnIdx] = rs.getObject(columnIdx + 1);
             } catch (SQLException e) {
-                throw new QueryUtilsException("Can\'t retrieve column value for " + descriptions[columnIdx], e);
+                throw new QueryUtilsException("Can\'t retrieve column value for " + columns[columnIdx], e);
             }
         }
         return columnValues;
     }
+
 }

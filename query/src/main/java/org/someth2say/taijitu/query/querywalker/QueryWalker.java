@@ -58,6 +58,7 @@ public final class QueryWalker {
 		}
 	}
 
+	@Deprecated
 	private static <T extends Tuple> void walkValuesWithoutParameters(Query query, ITupleFactory<T> factory,
 																	  QueryActions<T> queryActions, Connection connection, String queryStr, int fetchSize)
 			throws QueryUtilsException {
@@ -90,6 +91,17 @@ public final class QueryWalker {
 		return resultSet;
 	}
 
+	private static ResultSet getResultSet(PreparedStatement preparedStatement) throws QueryUtilsException {
+		ResultSet resultSet;
+		try {
+			resultSet = preparedStatement.executeQuery();
+		} catch (SQLException e) {
+			throw new QueryUtilsException("Can\'t execute query.", e);
+		}
+		return resultSet;
+	}
+
+	@Deprecated
 	private static Statement getStatement(Connection connection, int fetchSize) throws QueryUtilsException {
 		Statement statement;
 		try {
@@ -99,16 +111,6 @@ public final class QueryWalker {
 			throw new QueryUtilsException("Can\'t prepare statement.", var2);
 		}
 		return statement;
-	}
-
-	private static ResultSet getResultSet(PreparedStatement preparedStatement) throws QueryUtilsException {
-		ResultSet resultSet;
-		try {
-			resultSet = preparedStatement.executeQuery();
-		} catch (SQLException e) {
-			throw new QueryUtilsException("Can\'t execute query.", e);
-		}
-		return resultSet;
 	}
 
 	private static PreparedStatement getPreparedStatement(Query query, Connection connection, String queryStr,

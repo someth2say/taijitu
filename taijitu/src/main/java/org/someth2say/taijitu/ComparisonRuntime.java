@@ -2,15 +2,13 @@ package org.someth2say.taijitu;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.config.ComparisonConfig;
-import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.config.QueryConfig;
-import org.someth2say.taijitu.config.TaijituConfigImpl;
+import org.someth2say.taijitu.matcher.ColumnMatcher;
 import org.someth2say.taijitu.query.Query;
 import org.someth2say.taijitu.query.QueryUtilsException;
+import org.someth2say.taijitu.registry.MatcherRegistry;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author Jordi Sola
@@ -18,76 +16,34 @@ import java.util.regex.Pattern;
  */
 //TODO: This class will die, as runtime data should be kept by the comparison runner (thread)
 public class ComparisonRuntime {
-    final String queryParamRegexp = "\\{(.*?)}";
-
     private static final Logger logger = Logger.getLogger(ComparisonRuntime.class);
+
     private final Query source;
     private final Query target;
 
     private final Map<Class<?>, Comparator<Object>> comparators;
     private final ComparisonConfig comparisonConfig;
 
-    public ComparisonRuntime(final ComparisonConfig comparisonConfig) throws TaijituException, QueryUtilsException {
+    //TODO: This hurts! should be final...
+    private List<String> canonicalColumns;
+    private List<String> canonicalKeys;
+    private final ColumnMatcher columnMatcher;
+
+    public ComparisonRuntime(final ComparisonConfig comparisonConfig) throws TaijituException {
         this.comparisonConfig = comparisonConfig;
         source = buildQuery(comparisonConfig.getSourceQueryConfig());
         target = buildQuery(comparisonConfig.getTargetQueryConfig());
 
         this.comparators = buildComparators();
 
-    }
-
-
-    private Query buildQuery(final QueryConfig queryConfig) throws TaijituException, QueryUtilsException {
-
-        String queryStr = queryConfig.getStatement();
-        final List<Object> queryParameterValues = prepareParameterValues(queryConfig);
-        final String replacedQueryStr = replaceQueryParameterTags(queryStr);
-
-        return new Query(replacedQueryStr, queryParameterValues, queryConfig.getFetchSize());
+        this.columnMatcher = buildColumnMatcher(comparisonConfig);
 
     }
 
-
-    /**
-     * Replace parameters by '?' in order to be assigned in JDBC queries
-     *
-     * @param query String for the query
-     * @return Same query string, but with all parameter tags replaces by ?
-     */
-    private String replaceQueryParameterTags(final String query) {
-
-        final Pattern parameterPattern = Pattern.compile(queryParamRegexp);
-        final Matcher parameterMatcher = parameterPattern.matcher(query);
-        return parameterMatcher.replaceAll("?");
+    private ColumnMatcher buildColumnMatcher(ComparisonConfig comparisonConfig) throws TaijituException {
+        return MatcherRegistry.getMatcher(comparisonConfig.getColumnMatcher());
     }
 
-    /**
-     * Generate the list of parameter values, in the same order as they appear on the query.
-     * Parameter values are take from configuration properties.
-     *
-     * @param queryConfig The query string
-     * @return The list of values to be used for query parameters
-     */
-    private List<Object> prepareParameterValues(final QueryConfig queryConfig) throws TaijituException {
-        final List<Object> values = new ArrayList<>();
-        // 1) Store parameters in query order
-        final Pattern parameterPattern = Pattern.compile(queryParamRegexp);
-        final Matcher parameterMatcher = parameterPattern.matcher(queryConfig.getStatement());
-        while (parameterMatcher.find()) {
-            final String parameterTag = parameterMatcher.group();
-            final String parameterName = parameterTag.substring(1, parameterTag.length() - 1);
-
-            String parameterValue = queryConfig.getParameter(parameterName);
-
-            if (parameterTag.contains(ConfigurationLabels.DATE_PARAMETER_KEYWORD)) {
-                values.add(TaijituConfigImpl.parseDate(parameterValue));
-            } else {
-                values.add(parameterValue);
-            }
-        }
-
-        return values;
-    }
 
 
     //TODO: Move to ComparatorRegistry and ComparatorConfig
@@ -100,106 +56,64 @@ public class ComparisonRuntime {
         return res;
     }
 
-    public void registerColumns(final String[] sourceColumns, final String[] targetColumns, final ComparisonConfig comparisonConfig) {
 
-
+    private Map<String, String[]> providedColumnsMap = new HashMap<>();
+    public List<String> getProvidedColumns(String name) {
+        return Arrays.asList(providedColumnsMap.get(name));
     }
 
-    // Can't be final, 'cause it is mutable >:(
-    private List<String> canonicalColumns = null;
-    private List<String> canonicalKeys = null;
 
-    // TODO: What about the keys? What if a key field does not survive?
-    public void registerColumns(final String[] columns, final QueryConfig queryConfig, final ComparisonRuntime comparisonRuntime) throws QueryUtilsException {
-        // Should use columnMatchingStrategy to find what fields do actually survive!
-        ColumnMatchingStrategy columnMatchingStrategy = comparisonRuntime.getColumnMatchingStrategy();
+    public void registerColumns(final String[] providedColumns, final QueryConfig queryConfig) throws QueryUtilsException {
+        providedColumnsMap.put(queryConfig.getName(), providedColumns);
+
+        String[] providedKeys = queryConfig.getKeyFields();
+        List<String> providedKeysList = Arrays.asList(providedKeys);
+        List<String> providedColumnsList = Arrays.asList(providedColumns);
 
         if (canonicalColumns == null) {
-            // Runtime columns
-            canonicalColumns = Arrays.asList(columns);
-            //Runtime key
-            canonicalKeys = Arrays.asList(queryConfig.getKeyFields());
-
-            validateKeyColumns(queryConfig, columnMatchingStrategy);
-
+            validateKeyColumnsAreProvided(queryConfig, providedKeysList, providedColumnsList);
+            canonicalColumns = Arrays.asList(providedColumns);
+            canonicalKeys = providedKeysList;
         } else {
-            List<String> configKeys = Arrays.asList(queryConfig.getKeyFields());
-            List<String> columnsList = Arrays.asList(columns);
-            for (String column : columns) {
-
-                // KEYS
-                //1.- Key should be provided by query
-                //2.- Key should have a canonical match
-
-                // NON-KEYS
-                //1.- If column is not key, and have no canonical match, it is just ignored (i.e. query provides more information than needed)
-                //2.- If a canonical non-key column is not provided, it is removed from the list of canonical columns (i.e. query does not provide some information).
-
-                if (configKeys.contains(column)) {
-                    //KEY
-                    if (!columnsList.contains(column)) {
-                        throw new QueryUtilsException("Key " + column" in query " + queryConfig.getName() + " is not provided by query results.");
-                    }
-                    String cannonicalKey = columnMatchingStrategy.getMatchingColumn(column);
-                    if (!canonicalKeys.contains(cannonicalKey)) {
-                        throw new QueryUtilsException("Key " + column" in query " + queryConfig.getName() + " do not have a canonical match (using matching strategy " + columnMatchingStrategy.getName() + ")");
-                    }
-                } else {
-                    // NON-KEY
-                    String canonicalColumn = columnMatchingStrategy.getMatchingColumn(column);
-                    if (!canonicalColumns.contains(canonicalColumn)) {
-                        logger.warn("Column " + column + " in query " + queryConfig.getName() + " do not have a canonical match (using matching strategy " + columnMatchingStrategy.getName() + ")");
-                        canonicalColumns.remove(canonicalColumn);
-                    }
-                }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            }
-
-
-            List<String> matchingColumns = new ArrayList<>(canonicalColumns.size());
-
-            for (int runtimeColumnPos = 0; runtimeColumnPos < canonicalColumns.size(); runtimeColumnPos++) {
-                if (columnMatchingStrategy.isColumnMatching(canonicalColumns, runtimeColumnPos, columns)) {
-                    //Column actually have a match, so it survives.
-                    matchingColumns.add(canonicalColumns.get(runtimeColumnPos));
-                } else {
-                    logger.info("Column '" + canonicalColumns.get(runtimeColumnPos) + "' does not have matching column, so will not be considered for comparison.");
-                }
-            }
-            canonicalColumns = matchingColumns;
-            validateKeyColumns(queryConfig, columnMatchingStrategy);
+            validateKeyColumnsAreProvided(queryConfig, providedKeysList, providedColumnsList);
+            validateCanonicalKeysAreProvided(queryConfig, columnMatcher, providedKeysList, providedColumnsList);
+            shrinkCanonicalColumnsToProvided(columnMatcher, providedColumnsList);
         }
     }
 
-    private void validateKeyColumns(QueryConfig queryConfig, ColumnMatchingStrategy columnMatchingStrategy) throws QueryUtilsException {
-        String[] queryConfigKeys = queryConfig.getKeyFields();
-        for (String configKey : queryConfigKeys) {
-            String canonicalKey = columnMatchingStrategy.getMatchingColumn(configKey);
-            //1.- Configured key column should be provided by the query
-            if (!canonicalColumns.contains(canonicalKey)) {
-                throw new QueryUtilsException("Column " + configKey + "defined by " + queryConfig.getName() + " have no matching canonical column!");
-            }
-
-            //2.- Configured key column should have a match with canonical keys.
-            if (!canonicalKeys.contains(canonicalKey)) {
-                throw new QueryUtilsException("Column " + configKey + "defined by " + queryConfig.getName() + " have no matching canonical key!");
+    private void validateCanonicalKeysAreProvided(final QueryConfig queryConfig, final ColumnMatcher columnMatcher, final List<String> providedKeysList, final List<String> providedColumnsList) throws QueryUtilsException {
+        // .- Both provided and canonical keys should be exactly the same
+        ArrayList<String> canonicalProvidedKeyList = new ArrayList<>(providedKeysList.size());
+        for (String providedKey : providedKeysList) {
+            String canonicalProvidedKey = columnMatcher.getMatchingColumn(providedKey, canonicalColumns, providedColumnsList);
+            if (canonicalProvidedKey == null) {
+                throw new QueryUtilsException("Key column " + providedKey + " in query " + queryConfig.getName() + " do not have a canonical match (using matching strategy " + columnMatcher.getName() + ")");
+            } else {
+                canonicalProvidedKeyList.add(canonicalProvidedKey);
             }
         }
+        if (!canonicalKeys.equals(canonicalProvidedKeyList)) {
+            throw new QueryUtilsException("Keys in query " + queryConfig.getName() + " must match (same amount, same order) canonical keys. " + canonicalProvidedKeyList.toString() + " vs " + canonicalKeys.toString());
+        }
+    }
+
+    private void validateKeyColumnsAreProvided(QueryConfig queryConfig, List<String> providedKeysList, List<String> providedColumnsList) throws QueryUtilsException {
+        // .- Provided keys should be a subset for provide columns.
+        for (String providedKey : providedKeysList) {
+            if (!providedColumnsList.contains(providedKey)) {
+                throw new QueryUtilsException("Key " + providedKey + " in query " + queryConfig.getName() + " is not provided by query results.");
+            }
+        }
+    }
+
+    private void shrinkCanonicalColumnsToProvided(ColumnMatcher columnMatcher, List<String> providedColumnsList) {
+        // .- Canonical columns not provided are removed from comparison
+        List<String> canonicalProvidedColumnsList = new ArrayList<>(providedColumnsList.size());
+        for (String providedColum : providedColumnsList) {
+            String canonicalProvidedColumn = columnMatcher.getMatchingColumn(providedColum, canonicalColumns, providedColumnsList);
+            canonicalProvidedColumnsList.add(canonicalProvidedColumn);
+        }
+        canonicalColumns.retainAll(canonicalProvidedColumnsList);
     }
 
     public List<String> getCanonicalColumns() {
@@ -214,7 +128,6 @@ public class ComparisonRuntime {
      * Retrieve the indexes for the key columns on source query
      *
      * @param sourceQueryConfig
-     * @param columns
      * @return
      */
     public int[] getSourceKeyFieldsIdxs(QueryConfig sourceQueryConfig) {
@@ -227,6 +140,7 @@ public class ComparisonRuntime {
         }
         return result;
     }
+
 
 //
 //    /**

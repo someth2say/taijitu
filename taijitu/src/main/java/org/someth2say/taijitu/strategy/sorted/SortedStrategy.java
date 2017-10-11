@@ -65,22 +65,8 @@ public class SortedStrategy implements ComparisonStrategy {
     @Override
     public <T extends ComparableTuple> ComparisonResult runComparison(ResultSetIterator<T> source, ResultSetIterator<T> target, ComparisonRuntime comparisonRuntime, ComparisonConfig comparisonConfig) {
 
-        //******* THIS IS PRE-COMPARISON JOB!!! ************************//
-
-        String[] sourceColumns = source.getColumns();
-        String[] targetColumns = target.getColumns();
-
-        //TODO: Validate condition on columns: column amount, type, etc...
-
-        //TODO: Update comparisonRuntime in order to obtain the column common set, and validate. Remember using columnMatchingStrategy
-        comparisonRuntime.registerColumns(sourceColumns, comparisonConfig);
-        comparisonRuntime.registerColumns(targetColumns, comparisonConfig);
-
         int[] sourceKeyFieldsIdxs = comparisonRuntime.getSourceKeyFieldsIdxs(comparisonConfig.getSourceQueryConfig(), comparisonRuntime.getCanonicalColumns());
         int[] targetKeyFieldsIdxs = comparisonRuntime.getTargetKeyFieldsIdxs(comparisonConfig.getTargetQueryConfig(), comparisonRuntime.getCanonicalColumns());
-
-        //*******************************//
-
 
         logger.debug("Start sorted stratey comparison for " + comparisonConfig.getName());
         ComparisonResult result = new ComparisonResult(comparisonConfig);

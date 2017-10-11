@@ -3,26 +3,27 @@ package org.someth2say.taijitu.config;
 import java.util.Properties;
 
 public interface ComparisonConfig {
-	public String getName();
+	String getName();
 
-	public StrategyConfig getStrategyConfig();
+	StrategyConfig getStrategyConfig();
 
-	public ComparisonPluginConfig[] getComparisonPluginConfigs();
+	ComparisonPluginConfig[] getComparisonPluginConfigs();
 
-	public DatabaseConfig getDatabaseConfig();
+	DatabaseConfig getDatabaseConfig();
 
-	public int getFetchSize();
+	int getFetchSize();
 
-	public String[] getKeyFields();
+	String[] getKeyFields();
 
-	public String[] getCompareFields();
+	String[] getCompareFields();
 
-	public double getPrecisionThreshold();
+	double getPrecisionThreshold();
 
-	public QueryConfig getSourceQueryConfig();
+	QueryConfig getSourceQueryConfig();
 
-	public QueryConfig getTargetQueryConfig();
+	QueryConfig getTargetQueryConfig();
 
-	public Properties getAllParameters();
+	Properties getAllParameters();
 
+    String getColumnMatcher();
 }

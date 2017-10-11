@@ -1,8 +1,9 @@
-package org.someth2say.taijitu.strategy;
+package org.someth2say.taijitu.registry;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.config.StrategyConfig;
+import org.someth2say.taijitu.strategy.ComparisonStrategy;
 import org.someth2say.taijitu.strategy.mapping.ParallelComparingMappingStrategy;
 import org.someth2say.taijitu.strategy.mapping.ParallelQueryingMappingStrategy;
 import org.someth2say.taijitu.strategy.sorted.SortedStrategy;
@@ -21,7 +22,8 @@ public class ComparisonStrategyRegistry {
     private ComparisonStrategyRegistry() {
     }
 
-    public static ComparisonStrategy getStrategy(StrategyConfig strategyName) throws TaijituException {
+    public static ComparisonStrategy getStrategy(StrategyConfig strategyConfig) throws TaijituException {
+        String strategyName = strategyConfig.getName();
         if (instances.containsKey(strategyName)) {
             return instances.get(strategyName);
         }

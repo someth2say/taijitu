@@ -25,11 +25,12 @@ import org.someth2say.taijitu.config.ComparisonPluginConfig;
 import org.someth2say.taijitu.config.DatabaseConfig;
 import org.someth2say.taijitu.config.TaijituConfig;
 import org.someth2say.taijitu.config.TaijituConfigImpl;
-import org.someth2say.taijitu.plugins.PluginRegistry;
+import org.someth2say.taijitu.registry.MatcherRegistry;
+import org.someth2say.taijitu.registry.PluginRegistry;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.query.QueryUtilsException;
 import org.someth2say.taijitu.query.database.ConnectionManager;
-import org.someth2say.taijitu.strategy.ComparisonStrategyRegistry;
+import org.someth2say.taijitu.registry.ComparisonStrategyRegistry;
 
 /**
  * @author Jordi Sola
@@ -56,14 +57,16 @@ public final class Taijitu {
 		setupRegistries(config);
 	}
 
+	//TODO: This registry stuff may be moved to a IC context (Weld?)
 	private void setupRegistries(final TaijituConfig config) {
 		if (config.isUseScanClassPath()) {
 			PluginRegistry.scanClassPath();
 			ComparisonStrategyRegistry.scanClassPath();
-
+			MatcherRegistry.scanClassPath();
 		} else {
 			PluginRegistry.useDefaults();
 			ComparisonStrategyRegistry.useDefaults();
+			MatcherRegistry.useDefaults();
 		}
 	}
 

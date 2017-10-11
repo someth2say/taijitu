@@ -47,7 +47,6 @@ public class ComparisonConfigImpl implements ComparisonConfig {
         return parameterValue != null ? parameterValue : taijituConfig.getParameter(parameterName);
     }
 
-
     /**
      * PROPERTIES
      *************************************************************************/
@@ -93,7 +92,7 @@ public class ComparisonConfigImpl implements ComparisonConfig {
         String[] pluginNames = getComparisonPluginNames();
         ComparisonPluginConfig[] result = new ComparisonPluginConfig[pluginNames.length];
         for (int pos = 0; pos < pluginNames.length; pos++) {
-        	//TODO: May be cached
+            //TODO: May be cached
             result[pos] = new ComparisonPluginConfigImpl(this, pluginNames[pos]);
         }
         return result;
@@ -133,14 +132,14 @@ public class ComparisonConfigImpl implements ComparisonConfig {
      * entries are returned by both queries, and just need to check the contents)
      */
     public String[] getKeyFields() {
-        String property = getPropertyWithFailback(Comparison.Fields.KEY, getName());
-        return StringUtil.splitAndTrim(property);
+        String property = getPropertyWithFailback(Comparison.Fields.KEY, null);
+        return property != null ? StringUtil.splitAndTrim(property) : null;
     }
 
 
     public String[] getCompareFields() {
-        String property = getPropertyWithFailback(Comparison.FIELDS, getName());
-        return StringUtil.splitAndTrim(property);
+        String property = getPropertyWithFailback(Comparison.FIELDS, null);
+        return property != null ? StringUtil.splitAndTrim(property) : null;
     }
 
     /**
@@ -157,6 +156,11 @@ public class ComparisonConfigImpl implements ComparisonConfig {
             }
         }
         return DEFAULT_PRECISION_THRESHOLD;
+    }
+
+    @Override
+    public Object getColumnMatcher() {
+        return getPropertyWithFailback(Setup.COLUMN_MATCHING_STRATEGY, DEFAULT_MATCHING_STRATEGY);
     }
 
     /**

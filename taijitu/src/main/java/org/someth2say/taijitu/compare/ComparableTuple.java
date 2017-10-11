@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public class ComparableTuple extends Tuple {
 
-	private ComparableTuple(Object[] values) {
+	public ComparableTuple(Object[] values) {
 		super(values);
 	}
 
