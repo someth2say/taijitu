@@ -7,6 +7,7 @@ import java.sql.Connection;
 /**
  * Created by Jordi Sola on 23/02/2017.
  */
+@Deprecated
 public interface IConnectionFactory {
     Connection getConnection(final String name) throws QueryUtilsException;
 

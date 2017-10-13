@@ -11,4 +11,8 @@ public interface QueryConfig {
     String getParameter(final String parameterName);
 
     String[] getKeyFields();
+
+    String getDatabase();
+
+    Object[] getQueryParameters();
 }

@@ -8,6 +8,7 @@ import static org.someth2say.taijitu.query.properties.PropertiesLabels.*;
 /**
  * Created by Jordi Sola on 10/02/2017.
  */
+@Deprecated
 public class PropertyBasedConnectionDataFactory implements ConnectionDataFactory {
 
     private final HProperties properties;

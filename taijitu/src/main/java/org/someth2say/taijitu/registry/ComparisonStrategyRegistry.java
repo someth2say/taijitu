@@ -22,12 +22,9 @@ public class ComparisonStrategyRegistry {
     private ComparisonStrategyRegistry() {
     }
 
-    public static ComparisonStrategy getStrategy(StrategyConfig strategyConfig) throws TaijituException {
-        String strategyName = strategyConfig.getName();
-        if (instances.containsKey(strategyName)) {
-            return instances.get(strategyName);
-        }
-        throw new TaijituException("Comparison strategy not found: " + strategyName);
+    public static ComparisonStrategy getStrategy(final String strategyName) {
+        return instances.get(strategyName);
+
     }
 
     public static void scanClassPath() {

@@ -3,6 +3,7 @@ package org.someth2say.taijitu.query.queryactions;
 /**
  * @author Jordi Sola
  */
+@Deprecated
 public class QueryActionsException extends Exception {
    private static final long serialVersionUID = -9213505102639696521L;
 

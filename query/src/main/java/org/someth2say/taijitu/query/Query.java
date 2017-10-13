@@ -1,17 +1,15 @@
 package org.someth2say.taijitu.query;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author Jordi Sola
  */
+@Deprecated
 public class Query {
     private final String queryString;
-    private final List<Object> parameterValues;
+    private final Object[] parameterValues;
     private final int fetchSize;
 
-    public Query(final String queryStr, final List<Object> values, final int fetchSize) throws QueryUtilsException {
+    public Query(final String queryStr, final Object[] values, final int fetchSize) throws QueryUtilsException {
         if (queryStr == null) {
             throw new QueryUtilsException("Query string can not be null");
         }
@@ -25,7 +23,7 @@ public class Query {
         return this.queryString;
     }
 
-    public List<Object> getParameterValues() {
+    public Object[] getParameterValues() {
         return this.parameterValues;
     }
 

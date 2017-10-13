@@ -10,6 +10,7 @@ import java.util.HashMap;
 /**
  * @author Jordi Sola
  */
+@Deprecated
 public final class QueryMapper {
     private static final Logger logger = Logger.getLogger(QueryMapper.class);
 

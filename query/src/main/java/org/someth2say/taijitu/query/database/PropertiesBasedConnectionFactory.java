@@ -8,6 +8,7 @@ import java.sql.Connection;
 /**
  * Created by Jordi Sola on 23/02/2017.
  */
+@Deprecated
 public class PropertiesBasedConnectionFactory implements IConnectionFactory {
     final HProperties properties;
     private String propertiesRoot;
@@ -24,6 +25,6 @@ public class PropertiesBasedConnectionFactory implements IConnectionFactory {
 
     @Override
     public void closeAll() throws QueryUtilsException {
-        ConnectionManager.closeAllConnections();
+        ConnectionManager.closeAllDataSources();
     }
 }

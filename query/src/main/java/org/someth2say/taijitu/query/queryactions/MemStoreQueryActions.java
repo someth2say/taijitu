@@ -8,6 +8,7 @@ import java.util.Collection;
 /**
  * @author Jordi Sola
  */
+@Deprecated
 public class MemStoreQueryActions<T extends Tuple> implements QueryActions<T> {
     private final MemStoreResults<T> memStore;
 

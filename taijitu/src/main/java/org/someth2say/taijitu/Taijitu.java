@@ -191,7 +191,7 @@ public final class Taijitu {
 
 	private void closeDataSources() {
 		try {
-			ConnectionManager.closeAllConnections();
+			ConnectionManager.closeAllDataSources();
 		} catch (QueryUtilsException e) {
 			logger.error("Error while closing connections (will continue)" + e.getMessage(), e);
 		}

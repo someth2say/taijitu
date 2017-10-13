@@ -18,6 +18,7 @@ import java.util.Arrays;
 /**
  * @author Jordi Sola
  */
+@Deprecated
 public final class QueryWalker {
 	private static final Logger logger = Logger.getLogger(QueryWalker.class);
 

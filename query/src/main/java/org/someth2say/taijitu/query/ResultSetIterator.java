@@ -1,11 +1,19 @@
 package org.someth2say.taijitu.query;
 
-import java.sql.*;
+import org.apache.log4j.Logger;
+
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.List;
 import java.util.function.Function;
 
 public class ResultSetIterator<T> implements Iterator<T> {
+    private static final Logger logger = Logger.getLogger(ResultSetIterator.class);
+
     //TODO: Considering adding an the last exception raised, so we can check the status.
     private ResultSet resultSet;
     private PreparedStatement preparedStatement;
@@ -13,9 +21,9 @@ public class ResultSetIterator<T> implements Iterator<T> {
     private String sql;
     private Function<ResultSet, T> builder;
     private int fetchSize;
-    private List<Object> parameters;
+    private Object[] parameters;
 
-    public ResultSetIterator(Connection connection, String sql, Function<ResultSet, T> builder, final int fetchSize, final List<Object> parameters) {
+    public ResultSetIterator(Connection connection, String sql, Function<ResultSet, T> builder, final int fetchSize, final Object[] parameters) {
         this.fetchSize = fetchSize;
         this.parameters = parameters;
         assert connection != null;
@@ -25,11 +33,10 @@ public class ResultSetIterator<T> implements Iterator<T> {
         this.sql = sql;
     }
 
-    public void init() {
+    private void init() {
         try {
             preparedStatement = getPreparedStatement();
             resultSet = preparedStatement.executeQuery();
-
         } catch (SQLException e) {
             close();
         }
@@ -39,8 +46,8 @@ public class ResultSetIterator<T> implements Iterator<T> {
         PreparedStatement preparedStatement;
         preparedStatement = connection.prepareStatement(sql);
         preparedStatement.setFetchSize(fetchSize);
-        for (int paramIdx = 0; paramIdx < parameters.size(); paramIdx++) {
-            Object object = parameters.get(paramIdx);
+        for (int paramIdx = 0; paramIdx < parameters.length; paramIdx++) {
+            Object object = parameters[paramIdx];
             if (object instanceof java.util.Date) {
                 preparedStatement.setDate(paramIdx + 1, new Date(((java.util.Date) object).getTime()));
             } else {
@@ -99,22 +106,26 @@ public class ResultSetIterator<T> implements Iterator<T> {
      * @throws SQLException
      */
     // TODO: Maybe some day will be worth returning more information (i.e. column type).
-    public String[] getColumns() throws SQLException {
+    public String[] getColumns() {
         if (preparedStatement == null) {
             init();
         }
 
-        ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-
-        int rsColumnCount = resultSetMetaData.getColumnCount();
-        String[] result = new String[rsColumnCount];
-        for (int columnIdx = 1; columnIdx <= rsColumnCount; ++columnIdx) {
-            String columnName = resultSetMetaData.getColumnName(columnIdx);
-            if (columnName != null && !"".equals(columnName)) {
-                result[columnIdx - 1] = columnName;
+        try {
+            ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+            int rsColumnCount = resultSetMetaData.getColumnCount();
+            String[] result = new String[rsColumnCount];
+            for (int columnIdx = 1; columnIdx <= rsColumnCount; ++columnIdx) {
+                String columnName = resultSetMetaData.getColumnName(columnIdx);
+                if (columnName != null && !"".equals(columnName)) {
+                    result[columnIdx - 1] = columnName;
+                }
             }
+            return result;
+        } catch (SQLException e) {
+            logger.error("Unable to extract columns from ResultSet metadata.", e);
+            return null;
         }
-        return result;
     }
 
 

@@ -56,7 +56,7 @@ public class ComparisonConfigImpl implements ComparisonConfig {
     }
 
 
-    public String getPropertyWithFailback(final String param, final String defaultValue) {
+    private String getPropertyWithFailback(final String param, final String defaultValue) {
         String result = config.getHierarchycalProperty(param, Sections.COMPARISON, getName(), Sections.SETUP);
         if (result == null) {
             result = taijituConfig.getProperty(param, defaultValue);
@@ -64,7 +64,7 @@ public class ComparisonConfigImpl implements ComparisonConfig {
         return result;
     }
 
-    public String[] getPropertiesRoot() {
+    private String[] getPropertiesRoot() {
         return new String[]{Sections.COMPARISON, getName()};
     }
 
@@ -101,12 +101,12 @@ public class ComparisonConfigImpl implements ComparisonConfig {
     /**
      * DATABASE
      **/
-    public String getDatabaseName() {
+    public String getDatabase() {
         return getPropertyWithFailback(Comparison.DATABASE_REF, null);
     }
 
     public DatabaseConfig getDatabaseConfig() {
-        String databaseName = getDatabaseName();
+        String databaseName = getDatabase();
         if (databaseName != null) {
             return new DatabaseConfigImpl(taijituConfig, databaseName);
         }

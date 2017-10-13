@@ -175,16 +175,14 @@ public final class TaijituConfigImpl implements TaijituConfig {
         return new File(getOutputFolder());
     }
 
-    public static Date parseDate(String dateStr) throws TaijituException {
-        Date result = null;
+    public static Date parseDate(String dateStr) {
         if (dateStr != null) {
             try {
-                result = new Date(DATE_TIME_FORMATTER.parseMillis(dateStr));
+                return  new Date(DATE_TIME_FORMATTER.parseMillis(dateStr));
             } catch (final IllegalArgumentException e) {
-                throw new TaijituException("Unable to parse date " + dateStr, e);
+                return null;
             }
         }
-        return result;
     }
 
     /**

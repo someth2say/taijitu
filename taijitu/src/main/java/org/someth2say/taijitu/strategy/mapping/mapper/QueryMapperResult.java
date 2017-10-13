@@ -10,6 +10,7 @@ import java.util.Map;
 /**
  * @author Jordi Sola
  */
+@Deprecated
 public class QueryMapperResult<KEY, VALUE extends Tuple> {
     final private MultiValuedMap<KEY, VALUE> duplicatedKeyValues = new ArrayListValuedHashMap<>();
 

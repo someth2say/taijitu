@@ -8,6 +8,7 @@ import java.util.Collection;
 /**
  * Created by Jordi Sola on 20/02/2017.
  */
+@Deprecated
 public class MemStoreResults<T extends Tuple> {
     private String[] descriptions;
     private Collection<T> values;

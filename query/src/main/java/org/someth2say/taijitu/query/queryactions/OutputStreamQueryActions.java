@@ -8,6 +8,7 @@ import java.io.OutputStream;
 /**
  * @author Jordi Sola
  */
+@Deprecated
 public class OutputStreamQueryActions<T extends Tuple> implements QueryActions<T> {
     private final OutputStream outputStream;
     private final String recordSeparator;

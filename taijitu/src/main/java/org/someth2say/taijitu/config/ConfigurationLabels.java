@@ -27,6 +27,7 @@ public final class ConfigurationLabels {
         public static final String SOURCE = "source";
         public static final String TARGET = "target";
         public static final String STRATEGY = "strategy";
+        public static final String QUERY_PARAMETERS = "queryParameters";
 
         private Comparison() {
         }

@@ -9,6 +9,7 @@ import java.sql.Connection;
 /**
  * @author Jordi Sola
  */
+@Deprecated
 public final class DatabaseHelper {
     private static DatabaseHelper instance;
 

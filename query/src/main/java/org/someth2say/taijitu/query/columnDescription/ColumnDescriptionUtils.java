@@ -70,10 +70,4 @@ public class ColumnDescriptionUtils {
         return result;
     }
 
-    public static <T extends Tuple> void buildKey(T row, int[] keyColumnIdxs, Object[] keyValuesBuffer) {
-        int keyIdx = 0;
-        for (int keyColumnIdx : keyColumnIdxs) {
-            keyValuesBuffer[keyIdx++] = row.getValue(keyColumnIdx);
-        }
-    }
 }

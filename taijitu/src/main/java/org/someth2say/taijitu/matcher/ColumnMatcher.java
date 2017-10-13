@@ -5,7 +5,8 @@ import org.someth2say.taijitu.util.Named;
 import java.util.List;
 
 public interface ColumnMatcher extends Named {
-    String getMatchingColumn(final String column, final List<String> matching, final List<String> columns);
 
-    String getReverseMatchingColumn(String canonicalColumn, final List<String> matching, final List<String> columns);
+    String getCanonicalFromColumn(final String column, final List<String> canonicalColumns, final List<String> columns);
+
+    String getColumnFromCanonical(final String canonicalColumn, final List<String> canonicalColumns, final List<String> columns);
 }
