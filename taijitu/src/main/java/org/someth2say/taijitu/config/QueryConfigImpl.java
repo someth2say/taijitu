@@ -23,7 +23,7 @@ public class QueryConfigImpl implements QueryConfig {
 
     @Override
     public String getStatement() {
-        return getProperty(getName(), null);
+        return getProperty(Comparison.QUERY, null);
     }
 
     private String getProperty(final String property, final String defaultValue) {
