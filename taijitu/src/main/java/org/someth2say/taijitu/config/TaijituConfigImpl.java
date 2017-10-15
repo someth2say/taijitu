@@ -1,12 +1,6 @@
 package org.someth2say.taijitu.config;
 
-import static org.someth2say.taijitu.config.DefaultConfig.DATE_TIME_FORMATTER;
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_CONSOLE_LOG_LEVEL;
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_FETCHSIZE;
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_FILE_LOG_LEVEL;
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_OUTPUT_FOLDER;
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_PRECISION_THRESHOLD;
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_THREADS;
+import static org.someth2say.taijitu.config.DefaultConfig.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,6 +13,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.TaijituException;
+import org.someth2say.taijitu.commons.StringUtil;
 import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
 import org.someth2say.taijitu.config.ConfigurationLabels.Sections;
 import org.someth2say.taijitu.config.ConfigurationLabels.Setup;
@@ -169,6 +164,21 @@ public final class TaijituConfigImpl implements TaijituConfig {
         return DEFAULT_FETCHSIZE;
     }
 
+    public Boolean isUseScanClassPath() {
+        return Boolean.valueOf(getSetup(Setup.SCAN_CLASSPATH, "false"));
+    }
+
+    @Override
+    public ComparisonPluginConfig[] getAllPluginsConfig() {
+        return new ComparisonPluginConfig[0];
+    }
+
+	public Object[] getQueryParameters() {
+        String params = getSetup(Comparison.QUERY_PARAMETERS, null);
+        return (params!=null?StringUtil.splitAndTrim(params):DEFAULT_QUERY_PARAMETERS);
+	}
+	
+
     /**** UTILITIES *********************************************************************/
 
     public File getOutputFolderFile() {
@@ -178,11 +188,12 @@ public final class TaijituConfigImpl implements TaijituConfig {
     public static Date parseDate(String dateStr) {
         if (dateStr != null) {
             try {
-                return  new Date(DATE_TIME_FORMATTER.parseMillis(dateStr));
+                return new Date(DATE_TIME_FORMATTER.parseMillis(dateStr));
             } catch (final IllegalArgumentException e) {
-                return null;
+            	return null;
             }
         }
+        return null;
     }
 
     /**
@@ -209,13 +220,5 @@ public final class TaijituConfigImpl implements TaijituConfig {
         return config;
     }
 
-    public Boolean isUseScanClassPath() {
-        return Boolean.valueOf(getSetup(Setup.SCAN_CLASSPATH, "false"));
-    }
-
-    @Override
-    public ComparisonPluginConfig[] getAllPluginsConfig() {
-        return new ComparisonPluginConfig[0];
-    }
 
 }

@@ -22,6 +22,8 @@ public interface TaijituConfig {
 	public Boolean isUseScanClassPath();
 
 	public ComparisonPluginConfig[] getAllPluginsConfig();
+	
+	Object[] getQueryParameters();
 
 
 }

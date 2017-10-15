@@ -17,6 +17,7 @@ public class DefaultConfig {
     public static final String DEFAULT_STRATEGY_NAME = ParallelQueryingMappingStrategy.NAME;
     public static final String DEFAULT_MATCHING_STRATEGY = NamingColumnMatcher.NAME;
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("yyyyMMdd");
+    public static final Object[] DEFAULT_QUERY_PARAMETERS = new Object[0];
     
     public static final String DEFAULT_LOG_FILE = "taijitu.logger";
     public static final String DEFAULT_CONFIG_FILE = "taijitu.properties";

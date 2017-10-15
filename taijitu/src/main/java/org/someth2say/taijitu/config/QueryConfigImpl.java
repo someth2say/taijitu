@@ -23,7 +23,7 @@ public class QueryConfigImpl implements QueryConfig {
 
     @Override
     public String getStatement() {
-        return getProperty(getName(), null);
+        return getProperty(Comparison.QUERY, null);
     }
 
     private String getProperty(final String property, final String defaultValue) {
@@ -55,13 +55,12 @@ public class QueryConfigImpl implements QueryConfig {
         }
     }
 
-    @Override
-    // TODO: Parameters should be resolved at HProperties level (string replacement), not at config level.
-    public String getParameter(String parameterName) {
-        String propertyName = comparisonConfig.getConfig().joinSections(Comparison.PARAMETERS, parameterName);
-        String propertyValue = getProperty(propertyName, null);
-        return propertyValue != null ? propertyValue : comparisonConfig.getParameter(parameterName);
-    }
+//    @Override
+//    public String getParameter(String parameterName) {
+//        String propertyName = comparisonConfig.getConfig().joinSections(Comparison.PARAMETERS, parameterName);
+//        String propertyValue = getProperty(propertyName, null);
+//        return propertyValue != null ? propertyValue : comparisonConfig.getParameter(parameterName);
+//    }
 
     @Override
     public String[] getKeyFields() {
@@ -78,8 +77,7 @@ public class QueryConfigImpl implements QueryConfig {
 
     @Override
     public Object[] getQueryParameters() {
-        String property = getProperty(Comparison.QUERY_PARAMETERS, "");
-        //TODO: Failback to comparisonConfig
-        return StringUtil.splitAndTrim(property);
+        String property = getProperty(Comparison.QUERY_PARAMETERS, null);
+        return property != null ?StringUtil.splitAndTrim(property):comparisonConfig.getQueryParameters();
     }
 }

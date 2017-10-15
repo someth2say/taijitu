@@ -8,7 +8,7 @@ public interface QueryConfig {
     
     int getFetchSize();
     
-    String getParameter(final String parameterName);
+//    String getParameter(final String parameterName);
 
     String[] getKeyFields();
 
