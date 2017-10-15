@@ -25,7 +25,7 @@ public interface ComparisonConfig {
 
 	Properties getAllParameters();
 
-    String getColumnMatcher();
+	String getColumnMatcher();
 
 	String getStatement();
 	
