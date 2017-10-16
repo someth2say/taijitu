@@ -36,6 +36,17 @@ public final class TaijituConfigImpl implements TaijituConfig {
         return result;
     }
 
+    public static TaijituConfig fromProperties(Properties properties) throws TaijituException {
+        TaijituConfigImpl result = new TaijituConfigImpl();
+        try {
+            result.config = HPropertiesHelper.fromProperties(properties);
+        } catch (IOException | HPropertiesException e) {
+            throw new TaijituException("Unable to create HProperties", e);
+        }
+        return result;
+    }
+
+
     /**** PARAMETERS *********************************************************************/
 
     public Properties getAllParameters() {
@@ -173,11 +184,11 @@ public final class TaijituConfigImpl implements TaijituConfig {
         return new ComparisonPluginConfig[0];
     }
 
-	public Object[] getQueryParameters() {
+    public Object[] getQueryParameters() {
         String params = getSetup(Comparison.QUERY_PARAMETERS, null);
-        return (params!=null?StringUtil.splitAndTrim(params):DEFAULT_QUERY_PARAMETERS);
-	}
-	
+        return (params != null ? StringUtil.splitAndTrim(params) : DEFAULT_QUERY_PARAMETERS);
+    }
+
 
     /**** UTILITIES *********************************************************************/
 
@@ -190,7 +201,7 @@ public final class TaijituConfigImpl implements TaijituConfig {
             try {
                 return new Date(DATE_TIME_FORMATTER.parseMillis(dateStr));
             } catch (final IllegalArgumentException e) {
-            	return null;
+                return null;
             }
         }
         return null;

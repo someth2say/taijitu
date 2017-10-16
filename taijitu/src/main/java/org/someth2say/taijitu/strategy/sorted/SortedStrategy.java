@@ -1,35 +1,26 @@
 package org.someth2say.taijitu.strategy.sorted;
 
 import org.apache.log4j.Logger;
+import org.someth2say.taijitu.ComparisonRuntime;
 import org.someth2say.taijitu.compare.ComparableTuple;
+import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.QueryConfig;
 import org.someth2say.taijitu.query.ResultSetIterator;
-import org.someth2say.taijitu.query.columnDescription.ColumnDescriptionUtils;
 import org.someth2say.taijitu.query.tuple.Tuple;
-import org.someth2say.taijitu.query.queryactions.QueryActions;
-import org.someth2say.taijitu.query.queryactions.QueryActionsException;
 import org.someth2say.taijitu.strategy.ComparisonStrategy;
-import org.someth2say.taijitu.strategy.ExceptionHoldingCyclicBarrier;
-import org.someth2say.taijitu.strategy.ExceptionHoldingRunnable;
-import org.someth2say.taijitu.strategy.mapping.ParallelComparingMappingStrategy;
-import org.someth2say.taijitu.ComparisonRuntime;
-import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.util.ImmutablePair;
-import org.someth2say.taijitu.util.Pair;
 
-import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.TimeUnit;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Jordi Sola on 02/03/2017.
  */
 public class SortedStrategy implements ComparisonStrategy {
     public static final String NAME = "sorted";
-    private static final Logger logger = Logger.getLogger(ParallelComparingMappingStrategy.class);
+    private static final Logger logger = Logger.getLogger(SortedStrategy.class);
 
     //TODO: This is common to all comparison strategies, so should be moved to an abstract superclass
     private Map<String, Object[]> keyBuffers = new HashMap<>(2);

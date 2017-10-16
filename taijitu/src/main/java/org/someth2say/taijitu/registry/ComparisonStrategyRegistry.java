@@ -1,11 +1,7 @@
 package org.someth2say.taijitu.registry;
 
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.TaijituException;
-import org.someth2say.taijitu.config.StrategyConfig;
 import org.someth2say.taijitu.strategy.ComparisonStrategy;
-import org.someth2say.taijitu.strategy.mapping.ParallelComparingMappingStrategy;
-import org.someth2say.taijitu.strategy.mapping.ParallelQueryingMappingStrategy;
 import org.someth2say.taijitu.strategy.sorted.SortedStrategy;
 import org.someth2say.taijitu.util.ClassScanUtils;
 
@@ -38,8 +34,8 @@ public class ComparisonStrategyRegistry {
 
     public static void useDefaults() {
         instances = new ConcurrentHashMap<>();
-        addStrategy(new ParallelQueryingMappingStrategy());
-        addStrategy(new ParallelComparingMappingStrategy());
+//        addStrategy(new ParallelQueryingMappingStrategy());
+//        addStrategy(new ParallelComparingMappingStrategy());
         addStrategy(new SortedStrategy());
     }
 

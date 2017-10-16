@@ -55,13 +55,6 @@ public class QueryConfigImpl implements QueryConfig {
         }
     }
 
-//    @Override
-//    public String getParameter(String parameterName) {
-//        String propertyName = comparisonConfig.getConfig().joinSections(Comparison.PARAMETERS, parameterName);
-//        String propertyValue = getProperty(propertyName, null);
-//        return propertyValue != null ? propertyValue : comparisonConfig.getParameter(parameterName);
-//    }
-
     @Override
     public String[] getKeyFields() {
         String property = getProperty(Comparison.Fields.KEY, null);

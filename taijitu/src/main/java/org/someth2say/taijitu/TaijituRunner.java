@@ -172,21 +172,21 @@ public class TaijituRunner implements Callable<ComparisonResult> {
     //False: This have sense, in the context parameters are 'mapped' to JDBC parameters.
     // So we have 2 kind of 'parameters': The ones to be replaced directly in HProperties, and the ones to be passed to JDBC
     //Idea: Have a new query property (multivalued) with JDBC query parameters (that can be also HProperties parameters)
-    private static final String queryParamRegexp = "\\{(.*?)}";
+//    private static final String queryParamRegexp = "\\{(.*?)}";
 
-    private static Query buildQuery(final QueryConfig queryConfig) {
-
-        String queryStr = queryConfig.getStatement();
-        //final List<Object> queryParameterValues = prepareParameterValues(queryConfig);
-        final Object[] queryParameterValues = queryConfig.getQueryParameters();
-        // final String replacedQueryStr = replaceQueryParameterTags(queryStr);
-        try {
-            return new Query(queryStr, queryParameterValues, queryConfig.getFetchSize());
-        } catch (QueryUtilsException e) {
-            logger.error("Unable to build query " + queryConfig.getName(), e);
-            return null;
-        }
-    }
+//    private static Query buildQuery(final QueryConfig queryConfig) {
+//
+//        String queryStr = queryConfig.getStatement();
+//        //final List<Object> queryParameterValues = prepareParameterValues(queryConfig);
+//        final Object[] queryParameterValues = queryConfig.getQueryParameters();
+//        // final String replacedQueryStr = replaceQueryParameterTags(queryStr);
+//        try {
+//            return new Query(queryStr, queryParameterValues, queryConfig.getFetchSize());
+//        } catch (QueryUtilsException e) {
+//            logger.error("Unable to build query " + queryConfig.getName(), e);
+//            return null;
+//        }
+//    }
 
 //    /**
 //     * Replace parameters by '?' in order to be assigned in JDBC queries

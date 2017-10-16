@@ -4,6 +4,7 @@ import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import io.github.lukehutch.fastclasspathscanner.scanner.ScanResult;
 import org.apache.log4j.Logger;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
@@ -28,10 +29,10 @@ public class ClassScanUtils {
             try {
                 if (!Modifier.isAbstract(clazz.getModifiers())) {
                     @SuppressWarnings("unchecked")
-                    T plugin = (T) clazz.newInstance();
+                    T plugin = (T) clazz.getDeclaredConstructor().newInstance();
                     result.put(plugin.getName(), plugin);
                 }
-            } catch (InstantiationException | IllegalAccessException e) {
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                 logger.error("Unable to instantiate plugin class " + clazz.getName(), e);
             }
         }

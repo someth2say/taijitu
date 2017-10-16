@@ -1,20 +1,15 @@
 package org.someth2say.taijitu.query.database;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import javax.sql.DataSource;
-
 import com.zaxxer.hikari.HikariDataSource;
-import org.someth2say.taijitu.commons.database.ConnectionDataFactory;
 import org.someth2say.taijitu.query.QueryUtilsException;
 //import org.apache.log4j.Logger;
-import org.someth2say.taijitu.query.properties.HProperties;
 
 import com.zaxxer.hikari.HikariConfig;
 

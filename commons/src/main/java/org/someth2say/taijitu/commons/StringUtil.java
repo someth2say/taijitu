@@ -53,11 +53,11 @@ public final class StringUtil {
         return result;
     }
 
-    public static boolean[] getBitMap(String[] base, String[] find) {
-        final List<String> findList = Arrays.asList(find);
-        boolean[] result = new boolean[base.length];
-        for (int idx = 0; idx < base.length; idx++) {
-            result[idx] = findList.contains(base[idx]);
+    @Deprecated
+    public static boolean[] getBitMap(List<String> base, List<String> find) {
+        boolean[] result = new boolean[base.size()];
+        for (int idx = 0; idx < base.size(); idx++) {
+            result[idx] = find.contains(base.get(idx));
         }
         return result;
     }
