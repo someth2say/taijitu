@@ -1,13 +1,13 @@
 package org.someth2say.taijitu;
 
 import org.junit.After;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.someth2say.TestUtils;
-import org.someth2say.taijitu.query.database.ConnectionManager;
+import org.someth2say.taijitu.database.ConnectionManager;
+import org.someth2say.taijitu.database.QueryUtilsException;
 import org.someth2say.taijitu.query.properties.HProperties;
-import org.someth2say.taijitu.query.QueryUtilsException;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.strategy.sorted.SortedStrategy;
 
@@ -47,7 +47,7 @@ public class TaijituTest {
     }
 
 //    @BeforeClass
-//    public static void initializetaijitu() throws taijituException {
+//    public static void initializetaijitu() throws TaijituException {
 //        HProperties initProperties = new HProperties();
 //        initProperties.put(initProperties.joinSections(Sections.SETUP, Setup.CONSOLE_LOG), "DEBUG");
 //        taijitu.initialise(initProperties);
@@ -106,7 +106,7 @@ public class TaijituTest {
         // Comparisons
         testProperties.putAll(makeComparisonProps("test1", null, null, "KEY", "select * from test", "select * from test", "test"));
         testProperties.putAll(makeComparisonProps("test2", null, null, "KEY", "select * from test", "select * from test2", "test"));
-
+        testProperties.put(testProperties.joinSections(Sections.SETUP, Setup.CONSOLE_LOG), "DEBUG");
         // Disable plugins, 'cause we need to write nothing.
         commonPropertiesSetup(testProperties);
         final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());

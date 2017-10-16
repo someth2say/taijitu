@@ -13,14 +13,12 @@ import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.ComparableTuple;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.config.*;
+import org.someth2say.taijitu.database.ResultSetIterator;
 import org.someth2say.taijitu.matcher.ColumnMatcher;
-import org.someth2say.taijitu.query.Query;
-import org.someth2say.taijitu.query.ResultSetIterator;
-import org.someth2say.taijitu.query.database.ConnectionManager;
+import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.registry.MatcherRegistry;
 import org.someth2say.taijitu.registry.PluginRegistry;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
-import org.someth2say.taijitu.query.QueryUtilsException;
 import org.someth2say.taijitu.strategy.ComparisonStrategy;
 import org.someth2say.taijitu.registry.ComparisonStrategyRegistry;
 

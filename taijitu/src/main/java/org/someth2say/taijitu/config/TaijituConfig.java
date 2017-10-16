@@ -1,27 +1,27 @@
 package org.someth2say.taijitu.config;
 
 public interface TaijituConfig {
-	public ComparisonConfig[] getComparisons();
+	ComparisonConfig[] getComparisons();
 
-	public DatabaseConfig[] getAllDatabaseConfigs();
+	DatabaseConfig[] getAllDatabaseConfigs();
 
-	public DatabaseConfig getDatabaseConfig(final String databaseName);
+	DatabaseConfig getDatabaseConfig(final String databaseName);
 
-	public int getThreads();
+	int getThreads();
 
-	public int getFetchSize();
+	int getFetchSize();
 
-	public String getConsoleLog();
+	String getConsoleLog();
 
-	public String getFileLog();
+	String getFileLog();
 
-	public String getOutputFolder();
+	String getOutputFolder();
 
-	public double getPrecisionThreshold();
+	double getPrecisionThreshold();
 
-	public Boolean isUseScanClassPath();
+	Boolean isUseScanClassPath();
 
-	public ComparisonPluginConfig[] getAllPluginsConfig();
+	ComparisonPluginConfig[] getAllPluginsConfig();
 	
 	Object[] getQueryParameters();
 

@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.query.discarter;
+package org.someth2say.taijitu.discarter;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

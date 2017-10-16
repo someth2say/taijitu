@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.query.tuple;
+package org.someth2say.taijitu.tuple;
 
 import java.util.Arrays;
 import java.util.Iterator;

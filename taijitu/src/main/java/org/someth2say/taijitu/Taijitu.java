@@ -2,13 +2,13 @@ package org.someth2say.taijitu;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.commons.FileUtil;
-import org.someth2say.taijitu.commons.LogUtils;
+import org.someth2say.taijitu.util.FileUtil;
+import org.someth2say.taijitu.util.LogUtils;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.config.*;
+import org.someth2say.taijitu.database.QueryUtilsException;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
-import org.someth2say.taijitu.query.QueryUtilsException;
-import org.someth2say.taijitu.query.database.ConnectionManager;
+import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.registry.ComparisonStrategyRegistry;
 import org.someth2say.taijitu.registry.MatcherRegistry;
 import org.someth2say.taijitu.registry.PluginRegistry;

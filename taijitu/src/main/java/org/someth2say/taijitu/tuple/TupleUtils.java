@@ -1,6 +1,6 @@
-package org.someth2say.taijitu.query.tuple;
+package org.someth2say.taijitu.tuple;
 
-import org.someth2say.taijitu.query.QueryUtilsException;
+import org.someth2say.taijitu.database.QueryUtilsException;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

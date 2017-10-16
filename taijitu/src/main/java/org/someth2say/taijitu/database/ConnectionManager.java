@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.query.database;
+package org.someth2say.taijitu.database;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 
 import com.zaxxer.hikari.HikariDataSource;
-import org.someth2say.taijitu.query.QueryUtilsException;
 //import org.apache.log4j.Logger;
 
 import com.zaxxer.hikari.HikariConfig;

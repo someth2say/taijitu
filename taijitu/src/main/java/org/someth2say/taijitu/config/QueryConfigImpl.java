@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.config;
 
-import org.someth2say.taijitu.commons.StringUtil;
+import org.someth2say.taijitu.util.StringUtil;
 import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
 import org.someth2say.taijitu.query.properties.HProperties;
 

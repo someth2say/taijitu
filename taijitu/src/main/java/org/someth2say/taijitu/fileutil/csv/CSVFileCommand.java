@@ -6,8 +6,8 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.fileutil.CommandException;
 import org.someth2say.taijitu.fileutil.FileCommand;
-import org.someth2say.taijitu.query.discarter.Discarter;
-import org.someth2say.taijitu.query.discarter.TimeBasedLog4jDiscarter;
+import org.someth2say.taijitu.discarter.Discarter;
+import org.someth2say.taijitu.discarter.TimeBasedLog4jDiscarter;
 
 import java.io.*;
 

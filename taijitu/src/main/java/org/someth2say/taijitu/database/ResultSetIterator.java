@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.query;
+package org.someth2say.taijitu.database;
 
 import org.apache.log4j.Logger;
 

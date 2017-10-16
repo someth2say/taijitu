@@ -3,7 +3,7 @@ package org.someth2say.taijitu.config;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.commons.StringUtil;
+import org.someth2say.taijitu.util.StringUtil;
 import org.someth2say.taijitu.config.ConfigurationLabels.*;
 import org.someth2say.taijitu.query.properties.HProperties;
 

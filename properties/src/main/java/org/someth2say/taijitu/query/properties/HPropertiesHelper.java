@@ -1,7 +1,6 @@
 package org.someth2say.taijitu.query.properties;
 
 import org.apache.commons.lang.StringUtils;
-import org.someth2say.taijitu.commons.StringUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -162,11 +161,11 @@ public final class HPropertiesHelper {
     }
 
     public static String joinSections(String separator, String... sections) {
-        return StringUtil.join(sections, separator);
+        return StringUtils.join(sections, separator);
     }
 
     public static String joinSections(int start, int end, String separator, String... sections) {
-        return StringUtil.join(sections, separator, start, end);
+        return StringUtils.join(sections, separator, start, end);
     }
 
     public static String getProperty(Properties config, String property, String separator, String... sections) {
