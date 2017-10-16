@@ -1,12 +1,17 @@
 package org.someth2say.taijitu.config;
 
+//TODO Currently there is no strategy config, but it will be in a near future.
 public class StrategyConfigImpl implements StrategyConfig {
-    
-    private ComparisonConfig comparisonConfig;
 
-    public StrategyConfigImpl(ComparisonConfigImpl comparisonConfig) {
+    private final String name;
 
-        this.comparisonConfig = comparisonConfig;
-        
+    public StrategyConfigImpl(final String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+
     }
 }

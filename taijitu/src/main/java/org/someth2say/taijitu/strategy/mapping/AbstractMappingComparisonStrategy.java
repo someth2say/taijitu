@@ -4,8 +4,6 @@ import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.ComparableTuple;
 import org.someth2say.taijitu.query.Query;
 import org.someth2say.taijitu.query.QueryUtilsException;
-import org.someth2say.taijitu.query.querywalker.MemStoreResults;
-import org.someth2say.taijitu.query.querywalker.QueryWalker;
 import org.someth2say.taijitu.strategy.ComparisonStrategy;
 import org.someth2say.taijitu.strategy.mapping.mapper.QueryMapper;
 import org.someth2say.taijitu.strategy.mapping.mapper.QueryMapperResult;

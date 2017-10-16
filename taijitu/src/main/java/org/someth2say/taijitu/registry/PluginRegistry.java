@@ -4,8 +4,6 @@ import org.apache.log4j.Logger;
 import org.someth2say.taijitu.config.ComparisonPluginConfig;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.plugins.logging.TimeLoggingPlugin;
-import org.someth2say.taijitu.plugins.reporting.CSVWriterPlugin;
-import org.someth2say.taijitu.plugins.reporting.XLSWriterPlugin;
 import org.someth2say.taijitu.util.ClassScanUtils;
 
 import java.util.Collection;
@@ -52,8 +50,8 @@ public class PluginRegistry {
 
 	public static void useDefaults() {
 		instances = new ConcurrentHashMap<>();
-		addPlugin(new XLSWriterPlugin());
-		addPlugin(new CSVWriterPlugin());
+//		addPlugin(new XLSWriterPlugin());
+//		addPlugin(new CSVWriterPlugin());
 		addPlugin(new TimeLoggingPlugin());
 	}
 

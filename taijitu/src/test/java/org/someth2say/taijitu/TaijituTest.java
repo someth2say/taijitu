@@ -6,12 +6,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.someth2say.TestUtils;
 import org.someth2say.taijitu.query.database.ConnectionManager;
-import org.someth2say.taijitu.query.database.PropertyBasedConnectionDataFactory;
 import org.someth2say.taijitu.query.properties.HProperties;
 import org.someth2say.taijitu.query.QueryUtilsException;
 import org.someth2say.taijitu.compare.ComparisonResult;
-import org.someth2say.taijitu.strategy.mapping.ParallelComparingMappingStrategy;
-import org.someth2say.taijitu.strategy.mapping.ParallelQueryingMappingStrategy;
 import org.someth2say.taijitu.strategy.sorted.SortedStrategy;
 
 import java.io.File;
@@ -44,10 +41,10 @@ public class TaijituTest {
     @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection strategies() {
         return Arrays.asList(
-                new String[]{SortedStrategy.NAME},
-                new String[]{ParallelComparingMappingStrategy.NAME},
-                new String[]{ParallelQueryingMappingStrategy.NAME}
-        );
+                // ,
+//                new String[]{ParallelComparingMappingStrategy.NAME},
+//                new String[]{ParallelQueryingMappingStrategy.NAME}
+                SortedStrategy.NAME);
     }
 
 //    @BeforeClass
@@ -57,8 +54,9 @@ public class TaijituTest {
 //        taijitu.initialise(initProperties);
 //    }
 
-    private static Connection getConnection(String dbName, HProperties databaseProps) throws QueryUtilsException {
-        return ConnectionManager.getConnection(new PropertyBasedConnectionDataFactory(databaseProps, dbName, Sections.DATABASE, dbName));
+    private static Connection getConnection(String dbName, HProperties databaseProps) throws SQLException {
+        ConnectionManager.buildDataSource(dbName, databaseProps.getDelegate());
+        return ConnectionManager.getConnection(dbName);
     }
 
     @After
@@ -112,12 +110,11 @@ public class TaijituTest {
 
         // Disable plugins, 'cause we need to write nothing.
         commonPropertiesSetup(testProperties);
-        final Collection<ComparisonResult> comparisonResults = Taijitu.compare(testProperties);
-        assertEquals(2, comparisonResults.size());
-        final Iterator<ComparisonResult> iterator = comparisonResults.iterator();
-        final ComparisonResult firstResult = iterator.next();
+        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+        assertEquals(2, comparisonResults.length);
+        final ComparisonResult firstResult = comparisonResults[0];
         assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, firstResult.getStatus());
-        final ComparisonResult secondResult = iterator.next();
+        final ComparisonResult secondResult = comparisonResults[1];
         assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, secondResult.getStatus());
     }
 
@@ -144,8 +141,8 @@ public class TaijituTest {
         testProperties.putAll(makeComparisonProps("test", "KEY, VALUE", "KEY, VALUE", "KEY,VALUE", "select * from test", "select * from test2", "test"));
 
         testProperties.put("setup.strategy", "missing");
-        final Collection<ComparisonResult> comparisonResults = Taijitu.compare(testProperties);
-        assertEquals(0, comparisonResults.size());
+        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+        assertEquals(0, comparisonResults.length);
     }
 
 
@@ -177,9 +174,9 @@ public class TaijituTest {
 
         // Disable plugins, 'cause we need to write nothing.
         commonPropertiesSetup(testProperties);
-        final Collection<ComparisonResult> comparisonResults = Taijitu.compare(testProperties);
-        assertEquals(1, comparisonResults.size());
-        final ComparisonResult comparisonResult = comparisonResults.iterator().next();
+        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+        assertEquals(1, comparisonResults.length);
+        final ComparisonResult comparisonResult = comparisonResults[0];
         assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
 
         assertEquals(0, comparisonResult.getDifferent().size());
@@ -225,10 +222,10 @@ public class TaijituTest {
         // Disable plugins, 'cause we need to write nothing.
         commonPropertiesSetup(testProperties);
 
-        final Collection<ComparisonResult> comparisonResults = Taijitu.compare(testProperties);
-        assertEquals(1, comparisonResults.size());
+        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+        assertEquals(1, comparisonResults.length);
 
-        final ComparisonResult comparisonResult = comparisonResults.iterator().next();
+        final ComparisonResult comparisonResult = comparisonResults[0];
         assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
 
         assertEquals(0, comparisonResult.getDifferent().size());
@@ -268,10 +265,10 @@ public class TaijituTest {
         // Disable plugins, 'cause we need to write nothing.
         commonPropertiesSetup(testProperties);
 
-        final Collection<ComparisonResult> comparisonResults = Taijitu.compare(testProperties);
-        assertEquals(1, comparisonResults.size());
+        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+        assertEquals(1, comparisonResults.length);
 
-        final ComparisonResult comparisonResult = comparisonResults.iterator().next();
+        final ComparisonResult comparisonResult = comparisonResults[0];
         assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
 
         assertEquals(0, comparisonResult.getDifferent().size());
@@ -311,10 +308,10 @@ public class TaijituTest {
         // Disable plugins, 'cause we need to write nothing.
         commonPropertiesSetup(testProperties);
 
-        final Collection<ComparisonResult> comparisonResults = Taijitu.compare(testProperties);
-        assertEquals(1, comparisonResults.size());
+        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+        assertEquals(1, comparisonResults.length);
 
-        final ComparisonResult comparisonResult = comparisonResults.iterator().next();
+        final ComparisonResult comparisonResult = comparisonResults[0];
         assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
 
         assertEquals(1, comparisonResult.getDifferent().size());
@@ -354,10 +351,10 @@ public class TaijituTest {
         // Disable plugins, 'cause we need to write nothing.
         commonPropertiesSetup(testProperties);
 
-        final Collection<ComparisonResult> comparisonResults = Taijitu.compare(testProperties);
-        assertEquals(1, comparisonResults.size());
+        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+        assertEquals(1, comparisonResults.length);
 
-        final ComparisonResult comparisonResult = comparisonResults.iterator().next();
+        final ComparisonResult comparisonResult = comparisonResults[0];
         assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
 
         assertEquals(0, comparisonResult.getTargetOnly().size());
@@ -396,9 +393,9 @@ public class TaijituTest {
         testProperties.put("comparison.test.target.query", "select * from target");
         testProperties.put("comparison.test.database", "test");
 
-        final Collection<ComparisonResult> comparisonResults = Taijitu.compare(testProperties);
-        assertEquals(1, comparisonResults.size());
-        assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResults.iterator().next().getStatus());
+        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+        assertEquals(1, comparisonResults.length);
+        assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResults[0].getStatus());
 
     }
 
@@ -433,9 +430,9 @@ public class TaijituTest {
         testProperties.put("comparison.test.target.query", "select * from target");
         testProperties.put("comparison.test.database", "test");
 
-        final Collection<ComparisonResult> comparisonResults = Taijitu.compare(testProperties);
-        assertEquals(1, comparisonResults.size());
-        final ComparisonResult comparisonResult = comparisonResults.iterator().next();
+        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+        assertEquals(1, comparisonResults.length);
+        final ComparisonResult comparisonResult = comparisonResults[0];
         assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
     }
 
@@ -476,10 +473,9 @@ public class TaijituTest {
         // Disable plugins, 'cause we need to write nothing.
         testProperties.put(databaseProps.joinSections(Sections.SETUP, Setup.PLUGINS), "");
 
-        final Collection<ComparisonResult> comparisonResults = Taijitu.compare(testProperties);
-        assertEquals(1, comparisonResults.size());
-        final Iterator<ComparisonResult> iterator = comparisonResults.iterator();
-        final ComparisonResult comparisonResult = iterator.next();
+        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+        assertEquals(1, comparisonResults.length);
+        final ComparisonResult comparisonResult = comparisonResults[0];
         assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
         assertEquals(1, comparisonResult.getDifferent().size());
         assertTrue(comparisonResult.getTargetOnly().isEmpty());
@@ -531,12 +527,11 @@ public class TaijituTest {
         testProperties.put("setup.scanClasspath", "true");
         testProperties.put("setup.plugins", "csv,xls,timeLog");
 
-        final Collection<ComparisonResult> comparisonResults = Taijitu.compare(testProperties);
-        assertEquals(2, comparisonResults.size());
-        final Iterator<ComparisonResult> iterator = comparisonResults.iterator();
-        final ComparisonResult firstResult = iterator.next();
+        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+        assertEquals(2, comparisonResults.length);
+        final ComparisonResult firstResult = comparisonResults[0];
         assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, firstResult.getStatus());
-        final ComparisonResult secondResult = iterator.next();
+        final ComparisonResult secondResult = comparisonResults[1];
         assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, secondResult.getStatus());
 
         assertTrue("Output csv file exists and can be deleted", (new File("test2.difference.csv")).delete());

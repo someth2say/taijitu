@@ -2,10 +2,10 @@ package org.someth2say.taijitu.query.columnDescription;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.query.QueryUtilsException;
-import org.someth2say.taijitu.query.tuple.Tuple;
 import org.someth2say.taijitu.commons.StringUtil;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by Jordi Sola on 20/02/2017.
@@ -16,11 +16,12 @@ public class ColumnDescriptionUtils {
     private ColumnDescriptionUtils() {
     }
 
-    public static int[] getFieldPositions(String[] fields, String[] columnNames) {
-        int[] result = new int[fields.length];
+    @Deprecated
+    public static int[] getFieldPositions(List<String> fields, String[] columnNames) {
+        int[] result = new int[fields.size()];
 
-        for (int fieldIdx = 0, fieldsLength = fields.length; fieldIdx < fieldsLength; fieldIdx++) {
-            String field = fields[fieldIdx];
+        for (int fieldIdx = 0, fieldsLength = fields.size(); fieldIdx < fieldsLength; fieldIdx++) {
+            String field = fields.get(fieldIdx);
             for (int descriptionIdx = 0, descriptionsLength = columnNames.length; descriptionIdx < descriptionsLength; descriptionIdx++) {
                 String description = columnNames[descriptionIdx];
                 if (description.equals(field)) {

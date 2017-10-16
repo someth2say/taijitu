@@ -25,44 +25,44 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
     private static final String TARGET_LABEL = "TARGET";
     private static final Logger logger = Logger.getLogger(AbstractWriterPlugin.class);
     private File outputFolder;
+    private WritterPluginConfig config;
 
-    private String[][] printDifferent(final ComparisonResult comparisonResult, final ComparisonRuntime taijituData) {
+    private String[][] printDifferent(final ComparisonResult comparisonResult, final ComparisonRuntime taijituData, final WritterPluginConfig config) {
+        this.config = config;
         final Collection<Pair<ComparableTuple, ComparableTuple>> different = comparisonResult.getDifferent();
         final String[][] result = new String[different.size() * 2 + 1][];
 
-        final String[] fields = taijituData.getFields();
-        final String[] keyFields = taijituData.getKeyFields();
+        final List<String> fields = taijituData.getCanonicalColumns();
+        final List<String> keyFields = taijituData.getCanonicalKeys();
 
         int rowIdx = 0;
         if (!different.isEmpty()) {
-            final int fieldCount = fields.length;
+            final int fieldCount = fields.size();
             // Headers
             rowIdx = createRow(result, fieldCount, rowIdx, null);
             System.arraycopy(fields, 0, result[0], 1, fieldCount);
             highLightKeyFields(result[rowIdx], keyFields);
 
             boolean[] keyFieldsMap = StringUtil.getBitMap(fields, keyFields);
-            boolean[] compareFieldsMap = StringUtil.getBitMap(fields, taijituData.getCompareFields());
-            int[] sourceFieldToColumnsMap = ColumnDescriptionUtils.getFieldPositions(fields, taijituData.getResult().getSourceColumnDescriptions());
-            int[] targetFieldToColumnsMap = ColumnDescriptionUtils.getFieldPositions(fields, taijituData.getResult().getTargetColumnDescriptions());
-            Map<Class<?>, Comparator<Object>> comparators = taijituData.getComparators();
+            boolean[] compareFieldsMap = StringUtil.getBitMap(fields, taijituData.getCanonicalColumns());
+            int[] sourceFieldToColumnsMap = ColumnDescriptionUtils.getFieldPositions(fields, comparisonResult.getSourceColumnDescriptions());
+            int[] targetFieldToColumnsMap = ColumnDescriptionUtils.getFieldPositions(fields, comparisonResult.getTargetColumnDescriptions());
             // Contents
             for (Pair<ComparableTuple, ComparableTuple> difference : different) {
 
                 final int sourceRowIdx = createRow(result, fieldCount, ++rowIdx, SOURCE_LABEL);
                 final int targetRowIdx = createRow(result, fieldCount, ++rowIdx, TARGET_LABEL);
 
-                copyDifferencesAndKeys(difference, result[sourceRowIdx], result[targetRowIdx], sourceFieldToColumnsMap, targetFieldToColumnsMap, keyFieldsMap, compareFieldsMap, comparators);
+                copyDifferencesAndKeys(difference, result[sourceRowIdx], result[targetRowIdx], sourceFieldToColumnsMap, targetFieldToColumnsMap, keyFieldsMap, compareFieldsMap);
             }
         }
         return result;
     }
 
-    private void highLightKeyFields(String[] header, String[] keyFields) {
-        final List<String> keyFieldsList = Arrays.asList(keyFields);
-        for (int columnIdx = 0; columnIdx < header.length; columnIdx++) {
-            if (keyFieldsList.contains(header[columnIdx])) {
-                header[columnIdx] = header[columnIdx] + "*";
+    private void highLightKeyFields(List<String> header, List<String> keyFields) {
+        for (int columnIdx = 0; columnIdx < header.size(); columnIdx++) {
+            if (keyFields.contains(header.get(columnIdx))) {
+                header.set(columnIdx, header.get(columnIdx) + "*");
             }
         }
     }
@@ -73,12 +73,12 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
         return rowIdx;
     }
 
-    private void copyDifferencesAndKeys(Pair<ComparableTuple, ComparableTuple> difference, String[] sourceRow, String[] targetRow, int[] sourceFieldToColumnsMap, int[] targetFieldToColumnsMap, boolean[] keyFieldsMap, boolean[] compareFieldsMap, Map<Class<?>, Comparator<Object>> comparators) {
+    private void copyDifferencesAndKeys(Pair<ComparableTuple, ComparableTuple> difference, String[] sourceRow, String[] targetRow, int[] sourceFieldToColumnsMap, int[] targetFieldToColumnsMap, boolean[] keyFieldsMap, boolean[] compareFieldsMap) {
         final ComparableTuple sourceObjs = difference.getLeft();
         final ComparableTuple targetObjs = difference.getRight();
 
         for (int fieldIdx = 0; fieldIdx < sourceObjs.size(); fieldIdx++) {
-            if (isKeyField(keyFieldsMap, fieldIdx) || (isCompareColumn(compareFieldsMap, fieldIdx) && isDifferent(sourceObjs, targetObjs, fieldIdx, sourceFieldToColumnsMap, comparators))) {
+            if (isKeyField(keyFieldsMap, fieldIdx) || (isCompareColumn(compareFieldsMap, fieldIdx) && isDifferent(sourceObjs, targetObjs, fieldIdx, sourceFieldToColumnsMap))) {
                 final Object sourceValue = sourceObjs.getValue(sourceFieldToColumnsMap[fieldIdx]);
                 final Object targetValue = targetObjs.getValue(targetFieldToColumnsMap[fieldIdx]);
                 sourceRow[fieldIdx + 1] = sourceValue.toString();
@@ -87,18 +87,18 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
         }
     }
 
-    private String[][] printMissing(final ComparisonRuntime comparison, Collection<ComparableTuple> missings) {
-        final String[][] result = new String[missings.size() + 1][];
+    private List<String>[] printMissing(final ComparisonRuntime comparison, Collection<ComparableTuple> missings) {
+        final List<String>[] result = new List[missings.size() + 1];
         if (!missings.isEmpty()) {
             int idx = 0;
             // Headers
-            result[idx] = comparison.getFields().clone();
-            final String[] keyFields = comparison.getKeyFields();
+            result[idx] = comparison.getCanonicalColumns();
+            final List<String> keyFields = comparison.getCanonicalKeys();
             highLightKeyFields(result[0], keyFields);
 
             // Contents
             for (ComparableTuple missing : missings) {
-                result[++idx] = missing.toStringArray();
+                result[++idx] = missing.toStringList();
             }
         }
         return result;
@@ -108,8 +108,10 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
         return compareFieldsMap[fieldIdx];
     }
 
-    private boolean isDifferent(ComparableTuple sourceRow, ComparableTuple targetRow, int fieldIdx, int[] fieldToColumnsMap, Map<Class<?>, Comparator<Object>> comparators) {
-        return !sourceRow.isColumnEquals(targetRow, fieldToColumnsMap[fieldIdx], comparators);
+    private boolean isDifferent(ComparableTuple sourceRow, ComparableTuple targetRow, int fieldIdx, int[] fieldToColumnsMap) {
+        //TODO: Fix dependency to comparators.
+        return true;
+        //return !sourceRow.isColumnEquals(targetRow, fieldToColumnsMap[fieldIdx], comparators);
     }
 
     private boolean isKeyField(boolean[] keyFieldsMap, int fieldIdx) {
@@ -121,7 +123,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
     }
 
     private File createOutputFolder() throws TaijituException {
-        final File result = TaijituConfigImpl.getOutputFolderFile();
+        final File result = config.getOutputFolderFile();
         if (!result.exists()) {
             final boolean dirCreated = result.mkdirs();
             if (!dirCreated) {

@@ -126,9 +126,19 @@ public final class HPropertiesHelper {
     public static HProperties load(InputStream fos, String includeKeyword) throws IOException, HPropertiesException {
         Properties result = new Properties();
         result.load(fos);
+        return fromProperties(includeKeyword, result);
+    }
+
+    public static HProperties fromProperties(String includeKeyword, Properties result) throws HPropertiesException, IOException {
         resolveIncludes(result, new HashSet<>(), includeKeyword);
         return new HProperties(result);
     }
+
+    public static HProperties fromProperties(final Properties result) throws HPropertiesException, IOException {
+        resolveIncludes(result, new HashSet<>(), INCLUDE_KEYWORD);
+        return new HProperties(result);
+    }
+
 
     private static void resolveIncludes(Properties properties, Set<File> alreadyLoaded, String includeKeyword) throws HPropertiesException, IOException {
         final Properties includeProperties = getPropertiesByPrefix(properties, includeKeyword, false);

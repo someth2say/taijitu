@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.ComparableTuple;
 import org.someth2say.taijitu.query.Query;
 import org.someth2say.taijitu.query.columnDescription.ColumnDescriptionUtils;
-import org.someth2say.taijitu.query.querywalker.MemStoreResults;
 import org.someth2say.taijitu.strategy.mapping.mapper.QueryMapperResult;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.ComparisonRuntime;

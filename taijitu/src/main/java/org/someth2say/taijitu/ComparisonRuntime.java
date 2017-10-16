@@ -27,7 +27,6 @@ public class ComparisonRuntime {
         this.comparisonConfig = comparisonConfig;
 
         this.comparators = buildComparators();
-
     }
 
     //TODO: Move to ComparatorRegistry and ComparatorConfig
@@ -147,5 +146,9 @@ public class ComparisonRuntime {
     public Comparator<Object> getComparatorForColumn(Class<?> aClass, ComparisonConfig comparisonConfig) {
         //TODO: Work out comparison!!!!
         return defaultComparator;
+    }
+
+    public ComparisonConfig getComparisonConfig() {
+        return comparisonConfig;
     }
 }

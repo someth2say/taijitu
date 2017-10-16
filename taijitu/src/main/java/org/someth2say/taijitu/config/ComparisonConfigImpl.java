@@ -64,7 +64,7 @@ public class ComparisonConfigImpl implements ComparisonConfig {
         return result;
     }
 
-    private String[] getPropertiesRoot() {
+    protected String[] getPropertiesRoot() {
         return new String[]{Sections.COMPARISON, getName()};
     }
 
@@ -75,7 +75,7 @@ public class ComparisonConfigImpl implements ComparisonConfig {
     }
 
     public StrategyConfig getStrategyConfig() {
-        return new StrategyConfigImpl(this);
+        return new StrategyConfigImpl(getStrategyName());
     }
 
     /*** PLUGINS ***/
@@ -159,8 +159,19 @@ public class ComparisonConfigImpl implements ComparisonConfig {
     }
 
     @Override
-    public Object getColumnMatcher() {
+    public String getColumnMatcher() {
         return getPropertyWithFailback(Setup.COLUMN_MATCHING_STRATEGY, DEFAULT_MATCHING_STRATEGY);
+    }
+
+    @Override
+    public String getStatement() {
+        return getPropertyWithFailback(Comparison.QUERY, null);
+    }
+
+    @Override
+    public Object[] getQueryParameters() {
+        final String queryParameters = getPropertyWithFailback(Comparison.QUERY_PARAMETERS, null);
+        return queryParameters != null ? StringUtil.splitAndTrim(queryParameters) : null;
     }
 
     /**
