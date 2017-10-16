@@ -13,7 +13,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.TaijituException;
-import org.someth2say.taijitu.commons.StringUtil;
+import org.someth2say.taijitu.util.StringUtil;
 import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
 import org.someth2say.taijitu.config.ConfigurationLabels.Sections;
 import org.someth2say.taijitu.config.ConfigurationLabels.Setup;

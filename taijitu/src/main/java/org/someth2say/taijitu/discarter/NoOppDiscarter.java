@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.query.discarter;
+package org.someth2say.taijitu.discarter;
 
 /**
  * Created by Jordi Sola on 16/02/2017.

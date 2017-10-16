@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.commons;
+package org.someth2say.taijitu.util;
 
 import org.apache.commons.lang.StringUtils;
 

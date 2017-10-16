@@ -6,8 +6,8 @@ import org.someth2say.taijitu.compare.ComparableTuple;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.QueryConfig;
-import org.someth2say.taijitu.query.ResultSetIterator;
-import org.someth2say.taijitu.query.tuple.Tuple;
+import org.someth2say.taijitu.database.ResultSetIterator;
+import org.someth2say.taijitu.tuple.Tuple;
 import org.someth2say.taijitu.strategy.ComparisonStrategy;
 import org.someth2say.taijitu.util.ImmutablePair;
 

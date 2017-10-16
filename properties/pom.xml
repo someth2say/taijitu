@@ -13,8 +13,8 @@
     <artifactId>properties</artifactId>
     <dependencies>
         <dependency>
-            <groupId>org.someth2say.taijitu</groupId>
-            <artifactId>commons</artifactId>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

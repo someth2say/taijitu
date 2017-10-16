@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.query.discarter;
+package org.someth2say.taijitu.discarter;
 
 /**
  * @author Jordi Sola

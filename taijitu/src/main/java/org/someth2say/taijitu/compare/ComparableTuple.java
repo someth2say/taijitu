@@ -1,9 +1,9 @@
 package org.someth2say.taijitu.compare;
 
-import org.someth2say.taijitu.query.QueryUtilsException;
-import org.someth2say.taijitu.query.tuple.Tuple;
-import org.someth2say.taijitu.query.tuple.ITupleFactory;
-import org.someth2say.taijitu.query.tuple.TupleUtils;
+import org.someth2say.taijitu.database.QueryUtilsException;
+import org.someth2say.taijitu.tuple.Tuple;
+import org.someth2say.taijitu.tuple.ITupleFactory;
+import org.someth2say.taijitu.tuple.TupleUtils;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.query.discarter;
+package org.someth2say.taijitu.discarter;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
