@@ -1,6 +1,9 @@
-package org.someth2say.taijitu.config;
+package org.someth2say.taijitu.config.old;
 
-//TODO Currently there is no strategy config, but it will be in a near future.
+import org.someth2say.taijitu.config.StrategyConfig;
+
+//TODO Currently there is no strategy configuration, but it will be in a near future.
+@Deprecated
 public class StrategyConfigImpl implements StrategyConfig {
 
     private final String name;

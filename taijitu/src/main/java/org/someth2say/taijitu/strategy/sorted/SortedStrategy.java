@@ -6,6 +6,7 @@ import org.someth2say.taijitu.compare.ComparableTuple;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.QueryConfig;
+import org.someth2say.taijitu.config.StrategyConfig;
 import org.someth2say.taijitu.database.ResultSetIterator;
 import org.someth2say.taijitu.tuple.Tuple;
 import org.someth2say.taijitu.strategy.ComparisonStrategy;
@@ -118,8 +119,9 @@ public class SortedStrategy implements ComparisonStrategy {
             keyValuesBuffer[keyIdx++] = row.getValue(keyColumnIdx);
         }
     }
+
     private Object[] getKeyBuffer(QueryConfig queryConfig) {
-       return keyBuffers.computeIfAbsent(queryConfig.getName(), s -> new Object[queryConfig.getKeyFields().length]);
+        return keyBuffers.computeIfAbsent(queryConfig.getName(), s -> new Object[queryConfig.getKeyFields().length]);
     }
 
 
@@ -133,4 +135,7 @@ public class SortedStrategy implements ComparisonStrategy {
         return 0;
     }
 
+    public static StrategyConfig defaultConfig() {
+        return () -> SortedStrategy.NAME;
+    }
 }

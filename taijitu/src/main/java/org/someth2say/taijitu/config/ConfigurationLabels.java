@@ -14,6 +14,7 @@ public final class ConfigurationLabels {
         public static final String SETUP = "setup";
         public static final String COMPARISON = "comparison";
         public static final String DATABASE = "database";
+        public static final String PLUGINS = "plugin";
 
         private Sections() {
         }
@@ -22,6 +23,7 @@ public final class ConfigurationLabels {
     public static final class Comparison {
         public static final String FIELDS = "fields";
         public static final String QUERY = "query";
+        public static final String STATEMENT= "sql";
         public static final String DATABASE_REF = "database";
         public static final String PARAMETERS = "parameters";
         public static final String SOURCE = "source";

@@ -1,11 +1,15 @@
-package org.someth2say.taijitu.config;
+package org.someth2say.taijitu.config.old;
 
+import org.someth2say.taijitu.config.ConfigurationLabels;
+import org.someth2say.taijitu.config.DefaultConfig;
+import org.someth2say.taijitu.config.QueryConfig;
 import org.someth2say.taijitu.util.StringUtil;
 import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
 import org.someth2say.taijitu.query.properties.HProperties;
 
 import java.util.Arrays;
 
+@Deprecated
 public class QueryConfigImpl implements QueryConfig {
 
     private final ComparisonConfigImpl comparisonConfig;
@@ -38,10 +42,10 @@ public class QueryConfigImpl implements QueryConfig {
 
     private String[] getQueryPropertiesRoot() {
         final String[] configRoot = comparisonConfig.getPropertiesRoot();
-        String[] queryRoot = Arrays.copyOf(configRoot, configRoot.length + 3);
-        queryRoot[configRoot.length - 1] = Comparison.QUERY;
-        queryRoot[configRoot.length] = getName();
-        return queryRoot;
+        String[] result = Arrays.copyOf(configRoot, configRoot.length + 2);
+        result[result.length - 2] = Comparison.QUERY;
+        result[result.length - 1] = getName();
+        return result;
     }
 
     @Override
@@ -63,7 +67,7 @@ public class QueryConfigImpl implements QueryConfig {
     }
 
     @Override
-    public String getDatabase() {
+    public String getDatabaseRef() {
         String property = getProperty(Comparison.DATABASE_REF, null);
         return property != null ? property : comparisonConfig.getDatabase();
     }
@@ -71,6 +75,6 @@ public class QueryConfigImpl implements QueryConfig {
     @Override
     public Object[] getQueryParameters() {
         String property = getProperty(Comparison.QUERY_PARAMETERS, null);
-        return property != null ?StringUtil.splitAndTrim(property):comparisonConfig.getQueryParameters();
+        return property != null ? StringUtil.splitAndTrim(property) : comparisonConfig.getQueryParameters();
     }
 }

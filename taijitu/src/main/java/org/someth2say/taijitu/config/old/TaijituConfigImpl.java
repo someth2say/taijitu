@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.config;
+package org.someth2say.taijitu.config.old;
 
 import static org.someth2say.taijitu.config.DefaultConfig.*;
 
@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.TaijituException;
+import org.someth2say.taijitu.config.*;
 import org.someth2say.taijitu.util.StringUtil;
 import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
 import org.someth2say.taijitu.config.ConfigurationLabels.Sections;
@@ -21,6 +22,7 @@ import org.someth2say.taijitu.query.properties.HProperties;
 import org.someth2say.taijitu.query.properties.HPropertiesException;
 import org.someth2say.taijitu.query.properties.HPropertiesHelper;
 
+@Deprecated
 public final class TaijituConfigImpl implements TaijituConfig {
 
     private static final Logger logger = Logger.getLogger(TaijituConfigImpl.class);
@@ -34,6 +36,11 @@ public final class TaijituConfigImpl implements TaijituConfig {
         TaijituConfigImpl result = new TaijituConfigImpl();
         result.loadProperties(file);
         return result;
+    }
+
+
+    public HProperties getConfig() {
+        return config;
     }
 
     public static TaijituConfig fromProperties(Properties properties) throws TaijituException {
@@ -69,7 +76,7 @@ public final class TaijituConfigImpl implements TaijituConfig {
 
     /**** COMPARISONS *********************************************************************/
     public Set<String> getComparisonNames() {
-        final HProperties comparisons = config.getPropertiesByPrefix(Sections.COMPARISON);
+        final HProperties comparisons = config.getSubPropertiesByPrefix(Sections.COMPARISON);
         return comparisons.getPropertiesRoots();
     }
 
@@ -104,7 +111,7 @@ public final class TaijituConfigImpl implements TaijituConfig {
 
 
     private Set<String> getAllDatabaseNames() {
-        final HProperties databaseProperties = config.getPropertiesByPrefix(Sections.DATABASE);
+        final HProperties databaseProperties = config.getSubPropertiesByPrefix(Sections.DATABASE);
         return databaseProperties.getPropertiesRoots();
     }
 
@@ -180,13 +187,43 @@ public final class TaijituConfigImpl implements TaijituConfig {
     }
 
     @Override
-    public ComparisonPluginConfig[] getAllPluginsConfig() {
+    public ComparisonPluginConfig[] getComparisonPluginConfigs() {
         return new ComparisonPluginConfig[0];
     }
 
     public Object[] getQueryParameters() {
         String params = getSetup(Comparison.QUERY_PARAMETERS, null);
         return (params != null ? StringUtil.splitAndTrim(params) : DEFAULT_QUERY_PARAMETERS);
+    }
+
+    @Override
+    public StrategyConfig getStrategyConfig() {
+        return null;
+    }
+
+    @Override
+    public String getDatabaseRef() {
+        return null;
+    }
+
+    @Override
+    public String[] getKeyFields() {
+        return new String[0];
+    }
+
+    @Override
+    public String getColumnMatchingStrategyName() {
+        return null;
+    }
+
+    @Override
+    public String getStatement() {
+        return null;
+    }
+
+    @Override
+    public QueryConfig getSourceQueryConfig() {
+        return null;
     }
 
 

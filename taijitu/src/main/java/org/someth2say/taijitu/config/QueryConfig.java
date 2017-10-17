@@ -1,6 +1,8 @@
 package org.someth2say.taijitu.config;
 
-public interface QueryConfig {
+import org.someth2say.taijitu.util.Named;
+
+public interface QueryConfig extends Named{
     
     String getName();
     
@@ -12,7 +14,7 @@ public interface QueryConfig {
 
     String[] getKeyFields();
 
-    String getDatabase();
+    String getDatabaseRef();
 
     Object[] getQueryParameters();
 }

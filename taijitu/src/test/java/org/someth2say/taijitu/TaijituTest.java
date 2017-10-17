@@ -54,7 +54,7 @@ public class TaijituTest {
 //    }
 
     private static Connection getConnection(String dbName, HProperties databaseProps) throws SQLException {
-        ConnectionManager.buildDataSource(dbName, databaseProps.getDelegate());
+        ConnectionManager.buildDataSource(dbName, databaseProps.getSubPropertiesByPrefix("database." + dbName).getDelegate());
         return ConnectionManager.getConnection(dbName);
     }
 

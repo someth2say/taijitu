@@ -1,21 +1,22 @@
-package org.someth2say.taijitu.config;
+package org.someth2say.taijitu.config.old;
 
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+import org.someth2say.taijitu.config.*;
 import org.someth2say.taijitu.util.StringUtil;
 import org.someth2say.taijitu.config.ConfigurationLabels.*;
 import org.someth2say.taijitu.query.properties.HProperties;
 
 import static org.someth2say.taijitu.config.DefaultConfig.*;
 
-
+@Deprecated
 public class ComparisonConfigImpl implements ComparisonConfig {
     private static final Logger logger = Logger.getLogger(ComparisonConfigImpl.class);
     private final TaijituConfigImpl taijituConfig;
     private final HProperties config;
     private final String name;
-
+    //TODO: Sanity checks
     public ComparisonConfigImpl(TaijituConfigImpl taijituConfig, final String testName) {
         this.taijituConfig = taijituConfig;
         this.name = testName;
@@ -159,8 +160,8 @@ public class ComparisonConfigImpl implements ComparisonConfig {
     }
 
     @Override
-    public String getColumnMatcher() {
-        return getPropertyWithFailback(Setup.COLUMN_MATCHING_STRATEGY, DEFAULT_MATCHING_STRATEGY);
+    public String getColumnMatchingStrategyName() {
+        return getPropertyWithFailback(Setup.COLUMN_MATCHING_STRATEGY, DEFAULT_COLUMN_MATCHING_STRATEGY_NAME);
     }
 
     @Override
@@ -172,6 +173,11 @@ public class ComparisonConfigImpl implements ComparisonConfig {
     public Object[] getQueryParameters() {
         final String queryParameters = getPropertyWithFailback(Comparison.QUERY_PARAMETERS, null);
         return queryParameters != null ? StringUtil.splitAndTrim(queryParameters) : null;
+    }
+
+    @Override
+    public String getDatabaseRef() {
+        return null;
     }
 
     /**

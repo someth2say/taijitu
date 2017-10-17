@@ -1,17 +1,22 @@
 package org.someth2say.taijitu;
 
+import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.util.FileUtil;
-import org.someth2say.taijitu.util.LogUtils;
 import org.someth2say.taijitu.compare.ComparisonResult;
-import org.someth2say.taijitu.config.*;
+import org.someth2say.taijitu.config.ComparisonConfig;
+import org.someth2say.taijitu.config.ComparisonPluginConfig;
+import org.someth2say.taijitu.config.DatabaseConfig;
+import org.someth2say.taijitu.config.TaijituConfig;
+import org.someth2say.taijitu.config.impl.TaijituConfigImpl2;
+import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.database.QueryUtilsException;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
-import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.registry.ComparisonStrategyRegistry;
 import org.someth2say.taijitu.registry.MatcherRegistry;
 import org.someth2say.taijitu.registry.PluginRegistry;
+import org.someth2say.taijitu.util.FileUtil;
+import org.someth2say.taijitu.util.LogUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -33,15 +38,15 @@ public final class Taijitu {
     }
 
 
-    private TaijituConfig initialise(final Properties properties) throws TaijituException {
-        TaijituConfig config = TaijituConfigImpl.fromProperties(properties);
+    private TaijituConfig initialise(final ImmutableHierarchicalConfiguration properties) throws TaijituException {
+        TaijituConfig config = TaijituConfigImpl2.fromProperties(properties);
         performSetup(config);
         return config;
     }
 
 
     private TaijituConfig initialise(final String configProperties) throws TaijituException {
-        TaijituConfig config = TaijituConfigImpl.fromFile(configProperties);
+        TaijituConfig config = TaijituConfigImpl2.fromFile(configProperties);
         performSetup(config);
         return config;
     }
@@ -88,7 +93,7 @@ public final class Taijitu {
     }
 
 
-    public ComparisonResult[] compare(final Properties properties) throws TaijituException {
+    public ComparisonResult[] compare(final ImmutableHierarchicalConfiguration properties) throws TaijituException {
         TaijituConfig config = initialise(properties);
         return performComparisons(config);
     }
@@ -145,7 +150,7 @@ public final class Taijitu {
     }
 
     private void endPlugins(TaijituConfig config) throws TaijituException {
-        ComparisonPluginConfig[] allPluginsConfig = config.getAllPluginsConfig();
+        ComparisonPluginConfig[] allPluginsConfig = config.getComparisonPluginConfigs();
         for (int pluginIdx = 0, pluginsSize = allPluginsConfig.length; pluginIdx < pluginsSize; pluginIdx++) {
             ComparisonPluginConfig pluginConfig = allPluginsConfig[pluginIdx];
             TaijituPlugin plugin = PluginRegistry.getPlugin(pluginConfig.getName());
@@ -154,7 +159,7 @@ public final class Taijitu {
     }
 
     private void startPlugins(TaijituConfig config) throws TaijituException {
-        ComparisonPluginConfig[] allPluginsConfig = config.getAllPluginsConfig();
+        ComparisonPluginConfig[] allPluginsConfig = config.getComparisonPluginConfigs();
         for (int pluginIdx = 0, pluginsSize = allPluginsConfig.length; pluginIdx < pluginsSize; pluginIdx++) {
             ComparisonPluginConfig pluginConfig = allPluginsConfig[pluginIdx];
             TaijituPlugin plugin = PluginRegistry.getPlugin(pluginConfig.getName());

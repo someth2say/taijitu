@@ -1,33 +1,25 @@
 package org.someth2say.taijitu.config;
 
-import java.util.Properties;
+import org.someth2say.taijitu.util.Named;
 
-public interface ComparisonConfig {
-	String getName();
+public interface ComparisonConfig extends Named, QueryConfig {
+    StrategyConfig getStrategyConfig();
 
-	StrategyConfig getStrategyConfig();
+    ComparisonPluginConfig[] getComparisonPluginConfigs();
 
-	ComparisonPluginConfig[] getComparisonPluginConfigs();
+    int getFetchSize();
 
-	DatabaseConfig getDatabaseConfig();
+    String[] getKeyFields();
 
-	int getFetchSize();
+    QueryConfig getSourceQueryConfig();
 
-	String[] getKeyFields();
+    QueryConfig getTargetQueryConfig();
 
-	String[] getCompareFields();
+    String getColumnMatchingStrategyName();
 
-	double getPrecisionThreshold();
+    String getStatement();
 
-	QueryConfig getSourceQueryConfig();
+    Object[] getQueryParameters();
 
-	QueryConfig getTargetQueryConfig();
-
-	Properties getAllParameters();
-
-	String getColumnMatcher();
-
-	String getStatement();
-	
-	Object[] getQueryParameters();
+    String getDatabaseRef();
 }
