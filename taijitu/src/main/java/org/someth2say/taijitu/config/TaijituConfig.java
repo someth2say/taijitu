@@ -5,8 +5,6 @@ public interface TaijituConfig {
 
 	DatabaseConfig[] getAllDatabaseConfigs();
 
-	DatabaseConfig getDatabaseConfig(final String databaseName);
-
 	int getThreads();
 
 	int getFetchSize();
@@ -17,13 +15,21 @@ public interface TaijituConfig {
 
 	String getOutputFolder();
 
-	double getPrecisionThreshold();
-
 	Boolean isUseScanClassPath();
 
-	ComparisonPluginConfig[] getAllPluginsConfig();
+	ComparisonPluginConfig[] getComparisonPluginConfigs();
 	
 	Object[] getQueryParameters();
 
+	StrategyConfig getStrategyConfig();
 
+    String getDatabaseRef();
+
+	String[] getKeyFields();
+
+	String getColumnMatchingStrategyName();
+
+	String getStatement();
+
+	QueryConfig getSourceQueryConfig();
 }

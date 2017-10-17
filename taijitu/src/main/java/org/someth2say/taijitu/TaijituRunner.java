@@ -82,7 +82,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
     private void runComparison(ComparisonRuntime comparison) {
         // Show comparison description
         logger.info("COMPARISON: " + config.getName() + "(strategy " + config.getStrategyConfig().getName() + ")");
-        logger.debug("PARAMETERS: " + config.getAllParameters());
+        //logger.debug("PARAMETERS: " + config.getAllParameters());
         final ComparisonStrategy strategy = ComparisonStrategyRegistry.getStrategy(config.getStrategyConfig().getName());
         if (strategy != null) {
             runComparisonStrategy(comparison, strategy);
@@ -94,9 +94,9 @@ public class TaijituRunner implements Callable<ComparisonResult> {
     private void runComparisonStrategy(ComparisonRuntime comparison, ComparisonStrategy strategy) {
         ResultSetIterator<ComparableTuple> sourceIterator = getAndRegisterResultSetIterator(comparison, MatcherRegistry.getIdentityMatcher(), config.getSourceQueryConfig());
         if (sourceIterator != null) {
-            final ColumnMatcher matcher = MatcherRegistry.getMatcher(config.getColumnMatcher());
+            final ColumnMatcher matcher = MatcherRegistry.getMatcher(config.getColumnMatchingStrategyName());
             if (matcher == null) {
-                logger.error("Unable to find column matching strategy '" + config.getColumnMatcher() + "'");
+                logger.error("Unable to find column matching strategy '" + config.getColumnMatchingStrategyName() + "'");
             } else {
                 ResultSetIterator<ComparableTuple> targetIterator = getAndRegisterResultSetIterator(comparison, matcher, config.getTargetQueryConfig());
                 if (targetIterator != null) {
@@ -121,9 +121,9 @@ public class TaijituRunner implements Callable<ComparisonResult> {
                                                                 final ComparisonRuntime comparison, final ColumnMatcher matcher) {
         Connection connection;
         try {
-            connection = ConnectionManager.getConnection(queryConfig.getDatabase());
+            connection = ConnectionManager.getConnection(queryConfig.getDatabaseRef());
         } catch (SQLException e) {
-            logger.error("Unable to connect to " + queryConfig.getDatabase(), e);
+            logger.error("Unable to connect to " + queryConfig.getDatabaseRef(), e);
             return null;
         }
 
@@ -138,11 +138,6 @@ public class TaijituRunner implements Callable<ComparisonResult> {
     /**
      * It is VERY important that we extract the elements from the RS in the SAME order than the one defined by the canonical columns!
      * As we are just returning an Object[], the column information on each value is lost. Keeping the order is the only way to match.
-     * @param matcher
-     * @param rs
-     * @param queryConfig
-     * @param comparison
-     * @return
      */
     private static Object[] extractObjectsFromRs(ColumnMatcher matcher, ResultSet rs, QueryConfig queryConfig,
                                                  final ComparisonRuntime comparison) {
@@ -165,70 +160,4 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         return columnValues;
     }
 
-
-    //TODO: Nonsense here :'( Move parameter replacement to HProperties.
-    //False: This have sense, in the context parameters are 'mapped' to JDBC parameters.
-    // So we have 2 kind of 'parameters': The ones to be replaced directly in HProperties, and the ones to be passed to JDBC
-    //Idea: Have a new query property (multivalued) with JDBC query parameters (that can be also HProperties parameters)
-//    private static final String queryParamRegexp = "\\{(.*?)}";
-
-//    private static Query buildQuery(final QueryConfig queryConfig) {
-//
-//        String queryStr = queryConfig.getStatement();
-//        //final List<Object> queryParameterValues = prepareParameterValues(queryConfig);
-//        final Object[] queryParameterValues = queryConfig.getQueryParameters();
-//        // final String replacedQueryStr = replaceQueryParameterTags(queryStr);
-//        try {
-//            return new Query(queryStr, queryParameterValues, queryConfig.getFetchSize());
-//        } catch (QueryUtilsException e) {
-//            logger.error("Unable to build query " + queryConfig.getName(), e);
-//            return null;
-//        }
-//    }
-
-//    /**
-//     * Replace parameters by '?' in order to be assigned in JDBC queries
-//     *
-//     * @param query String for the query
-//     * @return Same query string, but with all parameter tags replaces by ?
-//     */
-//    private static String replaceQueryParameterTags(final String query) {
-//
-//        final Pattern parameterPattern = Pattern.compile(queryParamRegexp);
-//        final Matcher parameterMatcher = parameterPattern.matcher(query);
-//        return parameterMatcher.replaceAll("?");
-//    }
-//
-//    /**
-//     * Generate the list of parameter values, in the same order as they appear on the query.
-//     * Parameter values are take from configuration properties.
-//     *
-//     * @param queryConfig The query string
-//     * @return The list of values to be used for query parameters
-//     */
-//    private static List<Object> prepareParameterValues(final QueryConfig queryConfig) {
-//        final List<Object> values = new ArrayList<>();
-//        // 1) Store parameters in query order
-//        final Pattern parameterPattern = Pattern.compile(queryParamRegexp);
-//        final Matcher parameterMatcher = parameterPattern.matcher(queryConfig.getStatement());
-//        while (parameterMatcher.find()) {
-//            final String parameterTag = parameterMatcher.group();
-//            final String parameterName = parameterTag.substring(1, parameterTag.length() - 1);
-//
-//            String parameterValue = queryConfig.getParameter(parameterName);
-//
-//            if (parameterTag.contains(ConfigurationLabels.DATE_PARAMETER_KEYWORD)) {
-//                Date date = TaijituConfigImpl.parseDate(parameterValue);
-//                if (date == null) {
-//                    logger.error("Unable to parse date parameter '" + parameterName + "' for query '" + queryConfig.getName());
-//                    return null;
-//                }
-//                values.add(date);
-//            } else {
-//                values.add(parameterValue);
-//            }
-//        }
-//
-//        return values;
-//    }
 }

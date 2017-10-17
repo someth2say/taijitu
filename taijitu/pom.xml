@@ -92,7 +92,12 @@
 		    <groupId>org.apache.commons</groupId>
 		    <artifactId>commons-configuration2</artifactId>
 		    <version>2.2</version>
-		</dependency>        
+		</dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.9.3</version>
+        </dependency>
         <dependency>
             <groupId>org.someth2say.taijitu</groupId>
             <artifactId>query</artifactId>

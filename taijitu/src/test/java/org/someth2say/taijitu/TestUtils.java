@@ -6,6 +6,7 @@ import org.someth2say.taijitu.util.StringUtil;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -19,22 +20,19 @@ public class TestUtils {
     private TestUtils() {
     }
 
-    public static HProperties makeH2DatabaseProps(String dbName, String dbUser, String dbPwd) {
-        HProperties result = new HProperties();
+    public static Properties makeH2DatabaseProps(String dbName, String dbUser, String dbPwd) {
+        Properties result = new Properties();
         //result.putInSections("jdbc:h2:mem:" + dbName + ";DB_CLOSE_DELAY=-1", PROPERTIES_ROOT, dbName, "connectionString");
         //result.putInSections("org.h2.Driver", PROPERTIES_ROOT, dbName, "driver");
         //result.putInSections(dbPwd, PROPERTIES_ROOT, dbName, "password");
         //result.putInSections(dbUser, PROPERTIES_ROOT, dbName, "username");
 
-        result.put("database."+dbName+".jdbcUrl","jdbc:h2:mem:" + dbName + ";DB_CLOSE_DELAY=-1");
-        result.put("database."+dbName+".dataSource.user","username");
-        result.put("database."+dbName+".dataSource.password","password");
+        result.setProperty("jdbcUrl", "jdbc:h2:mem:" + dbName + ";DB_CLOSE_DELAY=-1");
+        result.setProperty("dataSource.user", dbUser);
+        result.setProperty("dataSource.password", dbPwd);
         //result.put("dataSource.cachePrepStmts","true");
         //result.put("dataSource.prepStmtCacheSize","250");
         //result.put("dataSource.prepStmtCacheSqlLimit","2048");
-
-
-
 
         return result;
     }
