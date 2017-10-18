@@ -22,7 +22,9 @@ public class DatabaseConfigImpl2 extends NamedConfig implements DatabaseConfig {
         // Why Configuration is not iterable?!
         final Iterator<String> keys = configuration.getKeys();
         while (keys.hasNext()){
-            result.putAll(configuration.getProperties(keys.next()));
+            final String key = keys.next();
+            final Object property = configuration.getProperty(key);
+            result.setProperty(key, property.toString());
         }
         return result;
     }

@@ -1,88 +1,39 @@
 package org.someth2say.taijitu.compare;
 
 import org.someth2say.taijitu.config.ComparisonConfig;
+import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.util.Pair;
 
 import java.util.Collection;
 
-/**
- * @author Jordi Sola
- */
-public class ComparisonResult {
+public abstract class ComparisonResult {
+    protected final ComparisonConfig comparisonConfig;
 
-	private final ComparisonConfig comparisonConfig;
-	
-	public ComparisonResult(final ComparisonConfig comparisonConfig) {
-		this.comparisonConfig = comparisonConfig;
-	}
+    final private Collection<Pair<ComparableTuple, ComparableTuple>> different;
+    final private Collection<ComparableTuple> sourceOnly;
+    final private Collection<ComparableTuple> targetOnly;
 
-	
-    private Collection<Pair<ComparableTuple, ComparableTuple>> different;
+    ComparisonResult(final ComparisonConfig comparisonConfig, final Collection<Pair<ComparableTuple, ComparableTuple>> different, final Collection<ComparableTuple> sourceOnly, final Collection<ComparableTuple> targetOnly) {
+        this.comparisonConfig = comparisonConfig;
+        this.different = different;
+        this.sourceOnly = sourceOnly;
+        this.targetOnly = targetOnly;
+    }
 
-    private Collection<ComparableTuple> sourceOnly;
-    private Collection<ComparableTuple> targetOnly;
-    private ComparisonResultStatus status = ComparisonResultStatus.PENDING;
-
-    private String[] sourceColumnDescriptions;
-    private String[] targetColumnDescriptions;
+    public ComparisonConfig getComparisonConfig() {
+        return comparisonConfig;
+    }
 
     public Collection<ComparableTuple> getSourceOnly() {
         return sourceOnly;
-    }
-
-    public void setSourceOnly(Collection<ComparableTuple> sourceOnly) {
-        this.sourceOnly = sourceOnly;
     }
 
     public Collection<ComparableTuple> getTargetOnly() {
         return targetOnly;
     }
 
-    public void setTargetOnly(Collection<ComparableTuple> targetOnly) {
-        this.targetOnly = targetOnly;
-    }
-
     public Collection<Pair<ComparableTuple, ComparableTuple>> getDifferent() {
         return different;
-    }
-
-    public void setDifferent(Collection<Pair<ComparableTuple, ComparableTuple>> different) {
-        this.different = different;
-    }
-
-    public ComparisonResultStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(ComparisonResultStatus _status) {
-        this.status = _status;
-    }
-
-    public String[] getSourceColumnDescriptions() {
-        return sourceColumnDescriptions;
-    }
-
-    public void setSourceColumnDescriptions(String[] sourceColumnDescriptions) {
-        this.sourceColumnDescriptions = sourceColumnDescriptions;
-    }
-
-    public String[] getTargetColumnDescriptions() {
-        return targetColumnDescriptions;
-    }
-
-    public void setTargetColumnDescriptions(String[] targetColumnDescriptions) {
-        this.targetColumnDescriptions = targetColumnDescriptions;
-    }
-
-    public ComparisonConfig getComparisonConfig() {
-		return comparisonConfig;
-	}
-
-	public enum ComparisonResultStatus {
-        PENDING(),
-        RUNNING(),
-        SUCCESS(),
-        ERROR()
     }
 
 

@@ -3,7 +3,7 @@ package org.someth2say.taijitu;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.compare.ComparisonResult;
+import org.someth2say.taijitu.compare.SimpleComparisonResult;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.ComparisonPluginConfig;
 import org.someth2say.taijitu.config.DatabaseConfig;
@@ -83,23 +83,23 @@ public final class Taijitu {
         }
     }
 
-    public ComparisonResult[] compare() throws TaijituException {
+    public SimpleComparisonResult[] compare() throws TaijituException {
         return compare(DEFAULT_CONFIG_FILE);
     }
 
-    public ComparisonResult[] compare(final String configProperties) throws TaijituException {
+    public SimpleComparisonResult[] compare(final String configProperties) throws TaijituException {
         TaijituConfig config = initialise(configProperties);
         return performComparisons(config);
     }
 
 
-    public ComparisonResult[] compare(final ImmutableHierarchicalConfiguration properties) throws TaijituException {
+    public SimpleComparisonResult[] compare(final ImmutableHierarchicalConfiguration properties) throws TaijituException {
         TaijituConfig config = initialise(properties);
         return performComparisons(config);
     }
 
 
-    private ComparisonResult[] performComparisons(final TaijituConfig config) throws TaijituException {
+    private SimpleComparisonResult[] performComparisons(final TaijituConfig config) throws TaijituException {
         logger.info("Start comparisons.");
 
         ComparisonConfig[] comparisonConfigs = config.getComparisons();
@@ -108,10 +108,10 @@ public final class Taijitu {
 
         startPlugins(config);
 
-        final CompletionService<ComparisonResult> completionService = runComparisons(config);
+        final CompletionService<SimpleComparisonResult> completionService = runComparisons(config);
 
         // Collect results
-        final ComparisonResult[] result = getComparisonResults(completionService, comparisonConfigs);
+        final SimpleComparisonResult[] result = getComparisonResults(completionService, comparisonConfigs);
 
         endPlugins(config);
 
@@ -122,37 +122,22 @@ public final class Taijitu {
 
     }
 
-    private CompletionService<ComparisonResult> runComparisons(final TaijituConfig config) throws TaijituException {
+    private CompletionService<SimpleComparisonResult> runComparisons(final TaijituConfig config) throws TaijituException {
         final ExecutorService executorService = Executors.newFixedThreadPool(config.getThreads());
-        CompletionService<ComparisonResult> completionService = new ExecutorCompletionService<ComparisonResult>(
-                executorService);
+        CompletionService<SimpleComparisonResult> completionService = new ExecutorCompletionService<>(executorService);
 
-        final Collection<Future<ComparisonResult>> futures = runComparisonThreads(completionService, config);
+        final Collection<Future<SimpleComparisonResult>> futures = runComparisonThreads(completionService, config);
 
         // Shutdown: no more tasks allowed.
         executorService.shutdown();
 
-        // waitForFinalization(executorService);
-
         return completionService;
     }
 
-    @Deprecated
-    private void waitForFinalization(final ExecutorService executorService) throws TaijituException {
-        // Wait for finalisation
-        try {
-            while (!executorService.awaitTermination(10, TimeUnit.SECONDS)) {
-                logger.debug("Awaiting for thread pool finalization.");
-            }
-        } catch (final InterruptedException t) {
-            throw new TaijituException("Comparison terminated unexpectedly: " + t.getMessage(), t);
-        }
-    }
 
     private void endPlugins(TaijituConfig config) throws TaijituException {
         ComparisonPluginConfig[] allPluginsConfig = config.getComparisonPluginConfigs();
-        for (int pluginIdx = 0, pluginsSize = allPluginsConfig.length; pluginIdx < pluginsSize; pluginIdx++) {
-            ComparisonPluginConfig pluginConfig = allPluginsConfig[pluginIdx];
+        for (ComparisonPluginConfig pluginConfig : allPluginsConfig) {
             TaijituPlugin plugin = PluginRegistry.getPlugin(pluginConfig.getName());
             plugin.end(pluginConfig);
         }
@@ -160,18 +145,17 @@ public final class Taijitu {
 
     private void startPlugins(TaijituConfig config) throws TaijituException {
         ComparisonPluginConfig[] allPluginsConfig = config.getComparisonPluginConfigs();
-        for (int pluginIdx = 0, pluginsSize = allPluginsConfig.length; pluginIdx < pluginsSize; pluginIdx++) {
-            ComparisonPluginConfig pluginConfig = allPluginsConfig[pluginIdx];
+        for (ComparisonPluginConfig pluginConfig : allPluginsConfig) {
             TaijituPlugin plugin = PluginRegistry.getPlugin(pluginConfig.getName());
             plugin.start(pluginConfig);
         }
     }
 
-    private ComparisonResult[] getComparisonResults(CompletionService<ComparisonResult> completionService,
-                                                    ComparisonConfig[] comparisonConfigs) {
-        final ComparisonResult[] result = new ComparisonResult[comparisonConfigs.length];
+    private SimpleComparisonResult[] getComparisonResults(CompletionService<SimpleComparisonResult> completionService,
+                                                          ComparisonConfig[] comparisonConfigs) {
+        final SimpleComparisonResult[] result = new SimpleComparisonResult[comparisonConfigs.length];
         for (int i = 0; i < comparisonConfigs.length; i++) {
-            Future<ComparisonResult> future;
+            Future<SimpleComparisonResult> future;
             try {
                 future = completionService.take();
                 try {
@@ -204,24 +188,23 @@ public final class Taijitu {
         }
     }
 
-    private Collection<Future<ComparisonResult>> runComparisonThreads(
-            final CompletionService<ComparisonResult> completionService, final TaijituConfig config) {
+    private Collection<Future<SimpleComparisonResult>> runComparisonThreads(
+            final CompletionService<SimpleComparisonResult> completionService, final TaijituConfig config) {
 
         final ComparisonConfig[] comparisonConfigs = config.getComparisons();
-        final Collection<Future<ComparisonResult>> result = new ArrayList<>(comparisonConfigs.length);
+        final Collection<Future<SimpleComparisonResult>> result = new ArrayList<>(comparisonConfigs.length);
 
         for (ComparisonConfig comparisonConfig : comparisonConfigs) {
 
             try {
                 final TaijituRunner taijituRunner = new TaijituRunner(comparisonConfig);
 
-                Future<ComparisonResult> future = completionService.submit(taijituRunner);
+                Future<SimpleComparisonResult> future = completionService.submit(taijituRunner);
 
                 result.add(future);
 
             } catch (final TaijituException e) {
-                logger.error("Error while creating comparison: " + comparisonConfig + "\n Please review properties.",
-                        e);
+                logger.error("Error while creating comparison: " + comparisonConfig + "\n Please review config.", e);
             }
         }
 

@@ -10,8 +10,9 @@ import java.util.concurrent.Callable;
 import java.util.function.Function;
 
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.compare.ComparableTuple;
 import org.someth2say.taijitu.compare.ComparisonResult;
+import org.someth2say.taijitu.compare.SimpleComparisonResult;
+import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.config.*;
 import org.someth2say.taijitu.database.ResultSetIterator;
 import org.someth2say.taijitu.matcher.ColumnMatcher;
@@ -41,25 +42,25 @@ public class TaijituRunner implements Callable<ComparisonResult> {
      * @see java.lang.Runnable#run()
      */
     public ComparisonResult call() {
-        ComparisonResult result = new ComparisonResult(config);
+        ComparisonResult result = new SimpleComparisonResult(config);
         ComparisonRuntime comparison = new ComparisonRuntime(config);
         Map<ComparisonPluginConfig, TaijituPlugin> plugins = PluginRegistry.getPlugins(config.getComparisonPluginConfigs());
 
         try {
 
-            result.setStatus(ComparisonResult.ComparisonResultStatus.RUNNING);
+            //result.setStatus(SimpleComparisonResult.ComparisonResultStatus.RUNNING);
 
             runPluginsPreComparison(comparison, plugins);
 
-            runComparison(comparison);
+            result = runComparison(comparison);
 
             runPluginsPostComparison(comparison, plugins);
 
-            result.setStatus(ComparisonResult.ComparisonResultStatus.SUCCESS);
+            //result.setStatus(SimpleComparisonResult.ComparisonResultStatus.SUCCESS);
 
         } catch (final TaijituException e) {
             logger.error(e.getMessage(), e);
-            result.setStatus(ComparisonResult.ComparisonResultStatus.ERROR);
+            //result.setStatus(SimpleComparisonResult.ComparisonResultStatus.ERROR);
         }
 
         return result;
@@ -79,19 +80,20 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         }
     }
 
-    private void runComparison(ComparisonRuntime comparison) {
+    private ComparisonResult runComparison(ComparisonRuntime comparison) {
         // Show comparison description
         logger.info("COMPARISON: " + config.getName() + "(strategy " + config.getStrategyConfig().getName() + ")");
         //logger.debug("PARAMETERS: " + config.getAllParameters());
         final ComparisonStrategy strategy = ComparisonStrategyRegistry.getStrategy(config.getStrategyConfig().getName());
         if (strategy != null) {
-            runComparisonStrategy(comparison, strategy);
+            return runComparisonStrategy(comparison, strategy);
         } else {
             logger.error("Unable to get comparison strategy " + config.getStrategyConfig().getName());
         }
+        return null;
     }
 
-    private void runComparisonStrategy(ComparisonRuntime comparison, ComparisonStrategy strategy) {
+    private ComparisonResult runComparisonStrategy(ComparisonRuntime comparison, ComparisonStrategy strategy) {
         ResultSetIterator<ComparableTuple> sourceIterator = getAndRegisterResultSetIterator(comparison, MatcherRegistry.getIdentityMatcher(), config.getSourceQueryConfig());
         if (sourceIterator != null) {
             final ColumnMatcher matcher = MatcherRegistry.getMatcher(config.getColumnMatchingStrategyName());
@@ -100,10 +102,11 @@ public class TaijituRunner implements Callable<ComparisonResult> {
             } else {
                 ResultSetIterator<ComparableTuple> targetIterator = getAndRegisterResultSetIterator(comparison, matcher, config.getTargetQueryConfig());
                 if (targetIterator != null) {
-                    strategy.runComparison(sourceIterator, targetIterator, comparison, config);
+                    return strategy.runComparison(sourceIterator, targetIterator, comparison, config);
                 }
             }
         }
+        return null;
     }
 
     private ResultSetIterator<ComparableTuple> getAndRegisterResultSetIterator(ComparisonRuntime comparison, ColumnMatcher columnMatcher, QueryConfig sourceQueryConfig) {
@@ -129,7 +132,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
 
         Function<ResultSet, ComparableTuple> tupleBuilder = (ResultSet rs) -> {
             Object[] values = extractObjectsFromRs(matcher, rs, queryConfig, comparison);
-            return new ComparableTuple(values);
+            return new ComparableTuple(values, comparison);
         };
 
         return new ResultSetIterator<>(connection, queryConfig.getStatement(), tupleBuilder, queryConfig.getFetchSize(), queryConfig.getQueryParameters());

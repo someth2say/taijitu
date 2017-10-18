@@ -2,8 +2,8 @@ package org.someth2say.taijitu.strategy.mapping;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonRuntime;
-import org.someth2say.taijitu.compare.ComparableTuple;
 import org.someth2say.taijitu.compare.ComparisonResult;
+import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.database.ResultSetIterator;
 
@@ -18,7 +18,7 @@ public class InteractiveMappingStrategy extends AbstractMappingComparisonStrateg
 //    public void runComparison(final ComparisonRuntime taijituData) throws TaijituException {
 //
 //        logger.debug("Starting queries for " + taijituData.getTestName());
-//        final ComparisonResult result = taijituData.getResult();
+//        final SimpleComparisonResult result = taijituData.getResult();
 //
 //        final Query sourceQuery = taijituData.getSource();
 //        final String sourceName = sourceQuery.getQueryName();

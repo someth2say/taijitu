@@ -1,8 +1,8 @@
 package org.someth2say.taijitu.strategy;
 
 import org.someth2say.taijitu.ComparisonRuntime;
-import org.someth2say.taijitu.compare.ComparableTuple;
 import org.someth2say.taijitu.compare.ComparisonResult;
+import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.database.ResultSetIterator;
 import org.someth2say.taijitu.util.Named;
