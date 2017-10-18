@@ -27,9 +27,9 @@ public class TestUtils {
         //result.putInSections(dbPwd, PROPERTIES_ROOT, dbName, "password");
         //result.putInSections(dbUser, PROPERTIES_ROOT, dbName, "username");
 
-        result.setProperty("jdbcUrl", "jdbc:h2:mem:" + dbName + ";DB_CLOSE_DELAY=-1");
         result.setProperty("dataSource.user", dbUser);
         result.setProperty("dataSource.password", dbPwd);
+        result.setProperty("jdbcUrl", "jdbc:h2:mem:" + dbName + ";DB_CLOSE_DELAY=-1");
         //result.put("dataSource.cachePrepStmts","true");
         //result.put("dataSource.prepStmtCacheSize","250");
         //result.put("dataSource.prepStmtCacheSqlLimit","2048");

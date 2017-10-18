@@ -8,6 +8,7 @@ import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.builder.fluent.PropertiesBuilderParameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.configuration2.ex.ConfigurationRuntimeException;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.config.*;
@@ -180,7 +181,7 @@ public final class TaijituConfigImpl2 implements TaijituConfig, ComparisonConfig
             try {
                 ImmutableHierarchicalConfiguration strategyConfiguration = configuration.immutableConfigurationAt(Comparison.STRATEGY);
                 strategyConfig = new StrategyConfigImpl2(strategyConfiguration);
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException | ConfigurationRuntimeException e) {
                 //No Strategy defined (or many)
                 return DEFAULT_STRATEGY_CONFIG;
             }

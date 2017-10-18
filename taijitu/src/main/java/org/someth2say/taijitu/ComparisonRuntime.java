@@ -1,6 +1,8 @@
 package org.someth2say.taijitu;
 
 import org.apache.log4j.Logger;
+import org.someth2say.taijitu.compare.EqualityStrategy;
+import org.someth2say.taijitu.compare.ToStringEqualityStrategy;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.QueryConfig;
 import org.someth2say.taijitu.matcher.ColumnMatcher;
@@ -136,16 +138,9 @@ public class ComparisonRuntime {
         return result;
     }
 
-    Comparator<Object> defaultComparator = (thiz, that) -> {
-        if (thiz == null && that == null) return 0;
-        if (thiz == null) return -1;
-        if (that == null) return 1;
-        return thiz.toString().compareTo(that.toString());
-    };
-
-    public Comparator<Object> getComparatorForColumn(Class<?> aClass, ComparisonConfig comparisonConfig) {
+    public <T> EqualityStrategy<Object> getEqualityStrategy(Class<T> aClass) {
         //TODO: Work out comparison!!!!
-        return defaultComparator;
+        return new ToStringEqualityStrategy<>();
     }
 
     public ComparisonConfig getComparisonConfig() {

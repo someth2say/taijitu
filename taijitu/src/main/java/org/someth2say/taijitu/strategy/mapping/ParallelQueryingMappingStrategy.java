@@ -3,8 +3,8 @@ package org.someth2say.taijitu.strategy.mapping;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonRuntime;
-import org.someth2say.taijitu.compare.ComparableTuple;
 import org.someth2say.taijitu.compare.ComparisonResult;
+import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.database.ResultSetIterator;
 
@@ -34,7 +34,7 @@ public class ParallelQueryingMappingStrategy extends AbstractMappingComparisonSt
 //        String[] fields = comparison.getFields();
 //        String[] compareFields = comparison.getCompareFields();
 //        Map<Class<?>, Comparator<Object>> comparators = comparison.getComparators();
-//        ComparisonResult result = comparison.getResult();
+//        SimpleComparisonResult result = comparison.getResult();
 //        Map<Integer, ComparableTuple> sourceMap = sourceActions.getMappingResults().getMapValues();
 //        Map<Integer, ComparableTuple> targetMap = targetActions.getMappingResults().getMapValues();
 //        QueryMapperResultComparator.compareIntoResult(result, sourceMap, targetMap, fields, compareFields, comparators);
@@ -118,7 +118,7 @@ public class ParallelQueryingMappingStrategy extends AbstractMappingComparisonSt
 //            return mappingResults;
 //        }
 //
-//        protected ComparisonResult getResult() {
+//        protected SimpleComparisonResult getResult() {
 //            return comparison.getResult();
 //        }
 //    }

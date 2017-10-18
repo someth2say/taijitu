@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.someth2say.taijitu.compare.ComparisonResult;
+import org.someth2say.taijitu.compare.SimpleComparisonResult;
 import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.database.QueryUtilsException;
@@ -21,6 +22,9 @@ import java.util.Collection;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
+import static org.someth2say.taijitu.config.ConfigurationLabels.Comparison.*;
+import static org.someth2say.taijitu.config.ConfigurationLabels.Comparison.Fields.KEY;
+import static org.someth2say.taijitu.config.ConfigurationLabels.Sections.COMPARISON;
 
 
 /**
@@ -85,32 +89,36 @@ public class TaijituTest {
                 "timest TIMESTAMP"// 	Stores year, month, day, hour, minute, and second values
         };
 
-        String tableName = "test";
-        String[][] commonValues = {{"1", "'A'", "'STRING'", "true", "10000", "1000000000", "1000000000000000000", "23.456", "89.102", "34.56", "78.9012345", "67.8901234567890123", "45.6789012345678901", "CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP"},
-                {"2", "'B'", "'STRING'", "true", "10000", "1000000000", "1000000000000000000", "23.456", "89.102", "34.56", "78.9012345", "67.8901234567890123", "45.6789012345678901", "CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP"}};
-        TestUtils.createTable(conn, tableName, commonSchema, commonValues);
-
-        String tableName2 = "test2";
-        TestUtils.createTable(conn, tableName2, commonSchema, commonValues);
+        String[][] commonValues = {
+                {"1", "'A'", "'STRING'", "true", "10000", "1000000000", "1000000000000000000", "23.456", "89.102", "34.56", "78.9012345", "67.8901234567890123", "45.6789012345678901", "CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP"},
+                {"2", "'B'", "'STRING'", "true", "10000", "1000000000", "1000000000000000000", "23.456", "89.102", "34.56", "78.9012345", "67.8901234567890123", "45.6789012345678901", "CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP"}
+        };
+        TestUtils.createTable(conn, "test", commonSchema, commonValues);
+        TestUtils.createTable(conn, "test2", commonSchema, commonValues);
 
         conn.close();
 
 
         //Databases
-        putAll(config, databaseProps,"database."+DB_NAME+".");
+        putAll(config, databaseProps, DATABASE_REF + "." + DB_NAME + ".");
         // Comparisons
-        putAll(config, makeComparisonProps("test1", null, null, "KEY", "select * from test", "select * from test", "test"),"");
-        putAll(config, makeComparisonProps("test2", null, null, "KEY", "select * from test", "select * from test2", "test"),"");
+        putAll(config, makeComparisonProps("test1", "KEY", "select * from test", "select * from test", "test"), "");
+        putAll(config, makeComparisonProps("test2", "KEY", "select * from test", "select * from test2", "test"), "");
 
         // Disable plugins, 'cause we need to write nothing.
         commonPropertiesSetup(config);
 
         final ComparisonResult[] comparisonResults = new Taijitu().compare(ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(config)));
+
         assertEquals(2, comparisonResults.length);
         final ComparisonResult firstResult = comparisonResults[0];
-        assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, firstResult.getStatus());
+        assertEquals(0, firstResult.getSourceOnly().size());
+        assertEquals(0, firstResult.getTargetOnly().size());
+        assertEquals(0, firstResult.getDifferent().size());
         final ComparisonResult secondResult = comparisonResults[1];
-        assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, secondResult.getStatus());
+        assertEquals(0, secondResult.getSourceOnly().size());
+        assertEquals(0, secondResult.getTargetOnly().size());
+        assertEquals(2, secondResult.getDifferent().size());
     }
 
     private void putAll(final PropertiesConfiguration configuration, final Properties props, final String keyPrefix) {
@@ -147,7 +155,7 @@ public class TaijituTest {
 //        testProperties.putAll(makeComparisonProps("test", "KEY, VALUE", "KEY, VALUE", "KEY,VALUE", "select * from test", "select * from test2", "test"));
 //
 //        testProperties.put("setup.strategy", "missing");
-//        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
 //        assertEquals(0, comparisonResults.length);
 //    }
 //
@@ -180,10 +188,10 @@ public class TaijituTest {
 //
 //        // Disable plugins, 'cause we need to write nothing.
 //        commonPropertiesSetup(testProperties);
-//        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
 //        assertEquals(1, comparisonResults.length);
-//        final ComparisonResult comparisonResult = comparisonResults[0];
-//        assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
+//        final SimpleComparisonResult comparisonResult = comparisonResults[0];
+//        assertEquals(SimpleComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
 //
 //        assertEquals(0, comparisonResult.getDifferent().size());
 //        assertEquals(0, comparisonResult.getTargetOnly().size());
@@ -224,11 +232,11 @@ public class TaijituTest {
 //        // Disable plugins, 'cause we need to write nothing.
 //        commonPropertiesSetup(testProperties);
 //
-//        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
 //        assertEquals(1, comparisonResults.length);
 //
-//        final ComparisonResult comparisonResult = comparisonResults[0];
-//        assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
+//        final SimpleComparisonResult comparisonResult = comparisonResults[0];
+//        assertEquals(SimpleComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
 //
 //        assertEquals(0, comparisonResult.getDifferent().size());
 //        assertEquals(1, comparisonResult.getTargetOnly().size());
@@ -267,11 +275,11 @@ public class TaijituTest {
 //        // Disable plugins, 'cause we need to write nothing.
 //        commonPropertiesSetup(testProperties);
 //
-//        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
 //        assertEquals(1, comparisonResults.length);
 //
-//        final ComparisonResult comparisonResult = comparisonResults[0];
-//        assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
+//        final SimpleComparisonResult comparisonResult = comparisonResults[0];
+//        assertEquals(SimpleComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
 //
 //        assertEquals(0, comparisonResult.getDifferent().size());
 //        assertEquals(0, comparisonResult.getTargetOnly().size());
@@ -310,11 +318,11 @@ public class TaijituTest {
 //        // Disable plugins, 'cause we need to write nothing.
 //        commonPropertiesSetup(testProperties);
 //
-//        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
 //        assertEquals(1, comparisonResults.length);
 //
-//        final ComparisonResult comparisonResult = comparisonResults[0];
-//        assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
+//        final SimpleComparisonResult comparisonResult = comparisonResults[0];
+//        assertEquals(SimpleComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
 //
 //        assertEquals(1, comparisonResult.getDifferent().size());
 //        assertEquals(0, comparisonResult.getTargetOnly().size());
@@ -353,11 +361,11 @@ public class TaijituTest {
 //        // Disable plugins, 'cause we need to write nothing.
 //        commonPropertiesSetup(testProperties);
 //
-//        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
 //        assertEquals(1, comparisonResults.length);
 //
-//        final ComparisonResult comparisonResult = comparisonResults[0];
-//        assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
+//        final SimpleComparisonResult comparisonResult = comparisonResults[0];
+//        assertEquals(SimpleComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
 //
 //        assertEquals(0, comparisonResult.getTargetOnly().size());
 //        assertTrue("Should be at least 1 record present only in source.", comparisonResult.getSourceOnly().size() < 2);
@@ -395,9 +403,9 @@ public class TaijituTest {
 //        testProperties.put("comparison.test.target.query", "select * from target");
 //        testProperties.put("comparison.test.database", "test");
 //
-//        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
 //        assertEquals(1, comparisonResults.length);
-//        assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResults[0].getStatus());
+//        assertEquals(SimpleComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResults[0].getStatus());
 //
 //    }
 //
@@ -432,10 +440,10 @@ public class TaijituTest {
 //        testProperties.put("comparison.test.target.query", "select * from target");
 //        testProperties.put("comparison.test.database", "test");
 //
-//        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
 //        assertEquals(1, comparisonResults.length);
-//        final ComparisonResult comparisonResult = comparisonResults[0];
-//        assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
+//        final SimpleComparisonResult comparisonResult = comparisonResults[0];
+//        assertEquals(SimpleComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
 //    }
 //
 //    @Test
@@ -475,10 +483,10 @@ public class TaijituTest {
 //        // Disable plugins, 'cause we need to write nothing.
 //        testProperties.put(databaseProps.joinSections(Sections.SETUP, Setup.PLUGINS), "");
 //
-//        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
 //        assertEquals(1, comparisonResults.length);
-//        final ComparisonResult comparisonResult = comparisonResults[0];
-//        assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
+//        final SimpleComparisonResult comparisonResult = comparisonResults[0];
+//        assertEquals(SimpleComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
 //        assertEquals(1, comparisonResult.getDifferent().size());
 //        assertTrue(comparisonResult.getTargetOnly().isEmpty());
 //        assertTrue(comparisonResult.getSourceOnly().isEmpty());
@@ -529,12 +537,12 @@ public class TaijituTest {
 //        testProperties.put("setup.scanClasspath", "true");
 //        testProperties.put("setup.plugins", "csv,xls,timeLog");
 //
-//        final ComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
 //        assertEquals(2, comparisonResults.length);
-//        final ComparisonResult firstResult = comparisonResults[0];
-//        assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, firstResult.getStatus());
-//        final ComparisonResult secondResult = comparisonResults[1];
-//        assertEquals(ComparisonResult.ComparisonResultStatus.SUCCESS, secondResult.getStatus());
+//        final SimpleComparisonResult firstResult = comparisonResults[0];
+//        assertEquals(SimpleComparisonResult.ComparisonResultStatus.SUCCESS, firstResult.getStatus());
+//        final SimpleComparisonResult secondResult = comparisonResults[1];
+//        assertEquals(SimpleComparisonResult.ComparisonResultStatus.SUCCESS, secondResult.getStatus());
 //
 //        assertTrue("Output csv file exists and can be deleted", (new File("test2.difference.csv")).delete());
 //        assertTrue("Output xls file exists and can be deleted", (new File("test2.difference.xls")).delete());
@@ -542,14 +550,15 @@ public class TaijituTest {
 //    }
 
 
-    private Properties makeComparisonProps(String name, String fields, String compare, String key, String sourceQuery, String targetQuery, String database) {
+    private Properties makeComparisonProps(String name, String key, String sourceQuery, String targetQuery, String database) {
         Properties result = new Properties();
-        if (fields != null) result.setProperty("comparison." + name + ".fields", fields);
-        if (compare != null) result.setProperty("comparison." + name + ".fields.compareWithProperties", compare);
-        if (key != null) result.setProperty("comparison." + name + ".fields.key", key);
-        if (sourceQuery != null) result.setProperty("comparison." + name + ".source.query", sourceQuery);
-        if (targetQuery != null) result.setProperty("comparison." + name + ".target.query", targetQuery);
-        if (database != null) result.setProperty("comparison." + name + ".database", database);
+        if (key != null)
+            result.setProperty(COMPARISON + "." + name + "." + KEY, key);
+        if (sourceQuery != null)
+            result.setProperty(COMPARISON + "." + name + "." + SOURCE + "." + STATEMENT, sourceQuery);
+        if (targetQuery != null)
+            result.setProperty(COMPARISON + "." + name + "." + TARGET + "." + STATEMENT, targetQuery);
+        if (database != null) result.setProperty(COMPARISON + "." + name + "." + DATABASE_REF, database);
         return result;
     }
 

@@ -4,6 +4,7 @@ import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.ComparisonResult;
+import org.someth2say.taijitu.compare.SimpleComparisonResult;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.ComparisonPluginConfig;
 import org.someth2say.taijitu.config.DatabaseConfig;
@@ -124,35 +125,21 @@ public final class Taijitu {
 
     private CompletionService<ComparisonResult> runComparisons(final TaijituConfig config) throws TaijituException {
         final ExecutorService executorService = Executors.newFixedThreadPool(config.getThreads());
-        CompletionService<ComparisonResult> completionService = new ExecutorCompletionService<ComparisonResult>(
-                executorService);
+        CompletionService<ComparisonResult> completionService = new ExecutorCompletionService<>(executorService);
 
-        final Collection<Future<ComparisonResult>> futures = runComparisonThreads(completionService, config);
+        //final Collection<Future<ComparisonResult>> futures =
+        runComparisonThreads(completionService, config);
 
         // Shutdown: no more tasks allowed.
         executorService.shutdown();
 
-        // waitForFinalization(executorService);
-
         return completionService;
     }
 
-    @Deprecated
-    private void waitForFinalization(final ExecutorService executorService) throws TaijituException {
-        // Wait for finalisation
-        try {
-            while (!executorService.awaitTermination(10, TimeUnit.SECONDS)) {
-                logger.debug("Awaiting for thread pool finalization.");
-            }
-        } catch (final InterruptedException t) {
-            throw new TaijituException("Comparison terminated unexpectedly: " + t.getMessage(), t);
-        }
-    }
 
     private void endPlugins(TaijituConfig config) throws TaijituException {
         ComparisonPluginConfig[] allPluginsConfig = config.getComparisonPluginConfigs();
-        for (int pluginIdx = 0, pluginsSize = allPluginsConfig.length; pluginIdx < pluginsSize; pluginIdx++) {
-            ComparisonPluginConfig pluginConfig = allPluginsConfig[pluginIdx];
+        for (ComparisonPluginConfig pluginConfig : allPluginsConfig) {
             TaijituPlugin plugin = PluginRegistry.getPlugin(pluginConfig.getName());
             plugin.end(pluginConfig);
         }
@@ -160,8 +147,7 @@ public final class Taijitu {
 
     private void startPlugins(TaijituConfig config) throws TaijituException {
         ComparisonPluginConfig[] allPluginsConfig = config.getComparisonPluginConfigs();
-        for (int pluginIdx = 0, pluginsSize = allPluginsConfig.length; pluginIdx < pluginsSize; pluginIdx++) {
-            ComparisonPluginConfig pluginConfig = allPluginsConfig[pluginIdx];
+        for (ComparisonPluginConfig pluginConfig : allPluginsConfig) {
             TaijituPlugin plugin = PluginRegistry.getPlugin(pluginConfig.getName());
             plugin.start(pluginConfig);
         }
@@ -171,9 +157,8 @@ public final class Taijitu {
                                                     ComparisonConfig[] comparisonConfigs) {
         final ComparisonResult[] result = new ComparisonResult[comparisonConfigs.length];
         for (int i = 0; i < comparisonConfigs.length; i++) {
-            Future<ComparisonResult> future;
             try {
-                future = completionService.take();
+                Future<ComparisonResult> future = completionService.take();
                 try {
                     result[i] = future.get();
                 } catch (ExecutionException e) {
@@ -220,8 +205,7 @@ public final class Taijitu {
                 result.add(future);
 
             } catch (final TaijituException e) {
-                logger.error("Error while creating comparison: " + comparisonConfig + "\n Please review properties.",
-                        e);
+                logger.error("Error while creating comparison: " + comparisonConfig + "\n Please review config.", e);
             }
         }
 

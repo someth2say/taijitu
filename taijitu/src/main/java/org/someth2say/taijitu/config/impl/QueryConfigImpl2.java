@@ -17,7 +17,7 @@ public class QueryConfigImpl2 extends NamedConfig implements QueryConfig {
     public QueryConfigImpl2(final ImmutableHierarchicalConfiguration configuration,
                             final QueryConfig parent) {
         super(configuration.getRootElementName());
-        this.configuration = configuration.immutableConfigurationAt(getName());
+        this.configuration = configuration;
         this.parent = parent;
     }
 

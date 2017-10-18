@@ -1,6 +1,7 @@
 package org.someth2say.taijitu.config.impl;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
+import org.apache.commons.configuration2.ex.ConfigurationRuntimeException;
 import org.someth2say.taijitu.config.*;
 import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
 import org.someth2say.taijitu.config.ConfigurationLabels.Setup;
@@ -27,7 +28,7 @@ public class ComparisonConfigImpl2 extends NamedConfig implements ComparisonConf
             try {
                 ImmutableHierarchicalConfiguration strategyConfiguration = configuration.immutableConfigurationAt(Comparison.STRATEGY);
                 strategyConfig = new StrategyConfigImpl2(strategyConfiguration);
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException | ConfigurationRuntimeException e) {
                 //No Strategy defined (or many)
                 strategyConfig = parent.getStrategyConfig();
             }
@@ -91,11 +92,11 @@ public class ComparisonConfigImpl2 extends NamedConfig implements ComparisonConf
 
     @Override
     public Object[] getQueryParameters() {
-        Object[] keys = configuration.get(Object[].class, Comparison.QUERY_PARAMETERS, null);
-        if (keys == null) {
-            keys = parent.getQueryParameters();
+        Object[] params = configuration.get(Object[].class, Comparison.QUERY_PARAMETERS, null);
+        if (params == null) {
+            params = parent.getQueryParameters();
         }
-        return keys;
+        return params;
     }
 
     /**

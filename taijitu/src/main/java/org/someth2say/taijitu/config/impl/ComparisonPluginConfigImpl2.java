@@ -13,6 +13,6 @@ public class ComparisonPluginConfigImpl2 extends NamedConfig implements Comparis
 
     public ComparisonPluginConfigImpl2(final ImmutableHierarchicalConfiguration configuration) {
         super(configuration.getRootElementName());
-        this.configuration = configuration.immutableConfigurationAt(getName());
+        this.configuration = configuration;
     }
 }

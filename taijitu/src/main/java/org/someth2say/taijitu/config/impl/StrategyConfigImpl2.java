@@ -9,6 +9,6 @@ public class StrategyConfigImpl2 extends NamedConfig implements StrategyConfig {
 
     public StrategyConfigImpl2(final ImmutableHierarchicalConfiguration configuration) {
         super(configuration.getRootElementName());
-        this.configuration = configuration.immutableConfigurationAt(getName());
+        this.configuration = configuration;
     }
 }
