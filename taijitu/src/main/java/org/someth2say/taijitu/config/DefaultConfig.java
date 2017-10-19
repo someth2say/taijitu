@@ -2,6 +2,7 @@ package org.someth2say.taijitu.config;
 
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.someth2say.taijitu.compare.ToStringEqualityStrategy;
 import org.someth2say.taijitu.matcher.NamingColumnMatcher;
 import org.someth2say.taijitu.plugins.logging.TimeLoggingPlugin;
 import org.someth2say.taijitu.strategy.sorted.SortedStrategy;
@@ -19,6 +20,7 @@ public class DefaultConfig {
     //TODO: Fix default strategy!!!!
     public static final String DEFAULT_STRATEGY_NAME = SortedStrategy.NAME;
     public static final StrategyConfig DEFAULT_STRATEGY_CONFIG = SortedStrategy.defaultConfig();
+    public static final EqualityConfig DEFAULT_EQUALITY_CONFIG = ToStringEqualityStrategy.defaultConfig();
 
     public static final String DEFAULT_COLUMN_MATCHING_STRATEGY_NAME = NamingColumnMatcher.NAME;
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("yyyyMMdd");

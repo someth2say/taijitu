@@ -11,6 +11,7 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.ex.ConfigurationRuntimeException;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.TaijituException;
+import org.someth2say.taijitu.compare.ToStringEqualityStrategy;
 import org.someth2say.taijitu.config.*;
 import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
 import org.someth2say.taijitu.config.ConfigurationLabels.Sections;
@@ -19,6 +20,7 @@ import org.someth2say.taijitu.config.ConfigurationLabels.Setup;
 import java.io.File;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.someth2say.taijitu.config.DefaultConfig.*;
 
@@ -156,18 +158,27 @@ public final class TaijituConfigImpl implements TaijituConfig, ComparisonConfig 
     }
 
     @Override
-    public ComparisonPluginConfig[] getComparisonPluginConfigs() {
+    public PluginConfig[] getComparisonPluginConfigs() {
         final List<ImmutableHierarchicalConfiguration> pluginConfigs = configuration.immutableChildConfigurationsAt(Sections.PLUGINS);
-        ComparisonPluginConfig[] result = new ComparisonPluginConfig[pluginConfigs.size()];
+        PluginConfig[] result = new PluginConfig[pluginConfigs.size()];
         int pos = 0;
         for (ImmutableHierarchicalConfiguration pluginConfig : pluginConfigs) {
-            result[pos++] = new ComparisonPluginConfigImpl(pluginConfig);
+            result[pos++] = new PluginConfigImpl(pluginConfig);
         }
         return result;
     }
 
     public Object[] getQueryParameters() {
         return configuration.get(Object[].class, Comparison.QUERY_PARAMETERS, DEFAULT_QUERY_PARAMETERS);
+    }
+
+    @Override
+    public List<EqualityConfig> getEqualityConfigs() {
+        final List<ImmutableHierarchicalConfiguration> thisEqConfigs = configuration.immutableChildConfigurationsAt(Comparison.EQUALITY);
+        final List<EqualityConfig> equalityConfigs = thisEqConfigs.stream().map(EqualityConfigImpl::new).collect(Collectors.toList());
+        // Default equality strategy should be always present.
+        equalityConfigs.add(DEFAULT_EQUALITY_CONFIG);
+        return equalityConfigs;
     }
 
     /**** STRATEGY *********************************************************************/

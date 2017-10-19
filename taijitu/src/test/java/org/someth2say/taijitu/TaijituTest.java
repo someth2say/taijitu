@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.SimpleComparisonResult;
+import org.someth2say.taijitu.compare.ToStringEqualityStrategy;
 import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.database.QueryUtilsException;
@@ -95,8 +96,8 @@ public class TaijituTest {
         };
         TestUtils.createTable(conn, "test", commonSchema, commonValues);
         // introduce some changes..
-        commonValues[0][13]="CURRENT_DATE+1";
-        commonValues[1][13]="CURRENT_DATE+1";
+        commonValues[0][13] = "CURRENT_DATE+1";
+        commonValues[1][13] = "CURRENT_DATE+1";
         TestUtils.createTable(conn, "test2", commonSchema, commonValues);
 
         conn.close();
@@ -130,6 +131,12 @@ public class TaijituTest {
     private void commonPropertiesSetup(PropertiesConfiguration testProperties) {
         testProperties.setProperty(ConfigurationLabels.Comparison.STRATEGY, strategyName);
         testProperties.setProperty(ConfigurationLabels.Sections.SETUP + "." + ConfigurationLabels.Setup.CONSOLE_LOG, "DEBUG");
+
+        //Add another comparator
+//        testProperties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ToStringEqualityStrategy.NAME, ToStringEqualityStrategy.NAME);
+        testProperties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ToStringEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Integer.class.getName());
+
+
     }
 
 

@@ -5,7 +5,7 @@ import org.someth2say.taijitu.ComparisonRuntime;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.tuple.ComparableTuple;
-import org.someth2say.taijitu.config.ComparisonPluginConfig;
+import org.someth2say.taijitu.config.PluginConfig;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.util.Pair;
 
@@ -176,12 +176,12 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //    }
 
     @Override
-    public void start(final ComparisonPluginConfig config) throws TaijituException {
+    public void start(final PluginConfig config) throws TaijituException {
         // Do nothing
     }
 
     @Override
-    public void end(final ComparisonPluginConfig config) throws TaijituException {
+    public void end(final PluginConfig config) throws TaijituException {
         // Do nothing
     }
 

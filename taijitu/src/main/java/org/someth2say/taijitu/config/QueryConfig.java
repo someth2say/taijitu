@@ -2,6 +2,8 @@ package org.someth2say.taijitu.config;
 
 import org.someth2say.taijitu.util.Named;
 
+import java.util.List;
+
 public interface QueryConfig extends Named{
     
     String getName();
@@ -10,11 +12,11 @@ public interface QueryConfig extends Named{
     
     int getFetchSize();
     
-//    String getParameter(final String parameterName);
-
     String[] getKeyFields();
 
     String getDatabaseRef();
 
     Object[] getQueryParameters();
+
+    List<EqualityConfig> getEqualityConfigs();
 }

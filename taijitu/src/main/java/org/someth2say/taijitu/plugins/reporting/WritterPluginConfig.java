@@ -1,8 +1,8 @@
 package org.someth2say.taijitu.plugins.reporting;
 
-import org.someth2say.taijitu.config.ComparisonPluginConfig;
+import org.someth2say.taijitu.config.PluginConfig;
 
-public class WritterPluginConfig implements ComparisonPluginConfig {
+public class WritterPluginConfig implements PluginConfig {
     public static final String NAME = "writter";
 
     @Override

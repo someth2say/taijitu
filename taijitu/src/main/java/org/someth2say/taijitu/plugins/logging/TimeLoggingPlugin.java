@@ -6,7 +6,7 @@ import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
 import org.joda.time.format.PeriodFormatter;
 import org.someth2say.taijitu.TaijituException;
-import org.someth2say.taijitu.config.ComparisonPluginConfig;
+import org.someth2say.taijitu.config.PluginConfig;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.ComparisonRuntime;
 
@@ -29,25 +29,25 @@ public class TimeLoggingPlugin implements TaijituPlugin {
 
 
     @Override
-    public void preComparison(ComparisonRuntime taijituData, ComparisonPluginConfig comparisonConfig) throws TaijituException {
+    public void preComparison(ComparisonRuntime taijituData, PluginConfig comparisonConfig) throws TaijituException {
         comparisonStart = System.currentTimeMillis();
     }
 
     @Override
-    public void postComparison(ComparisonRuntime taijituData, ComparisonPluginConfig comparisonConfig) throws TaijituException {
+    public void postComparison(ComparisonRuntime taijituData, PluginConfig comparisonConfig) throws TaijituException {
         comparisonEnd = System.currentTimeMillis();
         logComparisonTimes(taijituData);
         comparisonCount++;
     }
 
     @Override
-    public void start(ComparisonPluginConfig config) throws TaijituException {
+    public void start(PluginConfig config) throws TaijituException {
         start = System.currentTimeMillis();
 
     }
 
     @Override
-    public void end(ComparisonPluginConfig config) throws TaijituException {
+    public void end(PluginConfig config) throws TaijituException {
         end = System.currentTimeMillis();
         logTotalTimes();
 

@@ -2,10 +2,11 @@ package org.someth2say.taijitu;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.EqualityStrategy;
-import org.someth2say.taijitu.compare.ToStringEqualityStrategy;
 import org.someth2say.taijitu.config.ComparisonConfig;
+import org.someth2say.taijitu.config.EqualityConfig;
 import org.someth2say.taijitu.config.QueryConfig;
 import org.someth2say.taijitu.matcher.ColumnMatcher;
+import org.someth2say.taijitu.registry.EqualityStrategyRegistry;
 
 import java.util.*;
 
@@ -143,9 +144,26 @@ public class ComparisonRuntime {
     }
 
 
-    public <T> EqualityStrategy<Object> getEqualityStrategy(Class<T> aClass) {
-        //TODO: Work out comparison!!!!
-        return new ToStringEqualityStrategy<>();
+    public EqualityStrategy getEqualityStrategy(final EqualityConfig equalityConfig) {
+        final String equalityName = equalityConfig.getName();
+        return EqualityStrategyRegistry.getEqualityStrategy(equalityName);
+    }
+
+    public <T> EqualityConfig getEqualityConfigFor(Class<T> fieldClass, String name, QueryConfig queryConfig) {
+        final List<EqualityConfig> equalityConfigs = queryConfig.getEqualityConfigs();
+        return equalityConfigs.stream()
+                .filter(equalityConfig -> {
+                            final Class<?> aClass;
+                            try {
+                                aClass = Class.forName(equalityConfig.getFieldClass());
+                                return name.equals(equalityConfig.getFieldName())
+                                        || equalityConfig.getFieldName() == null && aClass.isAssignableFrom(fieldClass)
+                                        || equalityConfig.getFieldName() == null && equalityConfig.getFieldClass() == null;
+                            } catch (ClassNotFoundException e) {
+                                return false;
+                            }
+                        }
+                ).findFirst().get();
     }
 
     public ComparisonConfig getComparisonConfig() {

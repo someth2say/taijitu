@@ -5,7 +5,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.config.ComparisonConfig;
-import org.someth2say.taijitu.config.ComparisonPluginConfig;
+import org.someth2say.taijitu.config.PluginConfig;
 import org.someth2say.taijitu.config.DatabaseConfig;
 import org.someth2say.taijitu.config.TaijituConfig;
 import org.someth2say.taijitu.config.impl.TaijituConfigImpl;
@@ -13,6 +13,7 @@ import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.database.QueryUtilsException;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.registry.ComparisonStrategyRegistry;
+import org.someth2say.taijitu.registry.EqualityStrategyRegistry;
 import org.someth2say.taijitu.registry.MatcherRegistry;
 import org.someth2say.taijitu.registry.PluginRegistry;
 import org.someth2say.taijitu.util.FileUtil;
@@ -63,10 +64,12 @@ public final class Taijitu {
             PluginRegistry.scanClassPath();
             ComparisonStrategyRegistry.scanClassPath();
             MatcherRegistry.scanClassPath();
+            EqualityStrategyRegistry.scanClassPath();
         } else {
             PluginRegistry.useDefaults();
             ComparisonStrategyRegistry.useDefaults();
             MatcherRegistry.useDefaults();
+            EqualityStrategyRegistry.useDefaults();
         }
     }
 
@@ -137,16 +140,16 @@ public final class Taijitu {
 
 
     private void endPlugins(TaijituConfig config) throws TaijituException {
-        ComparisonPluginConfig[] allPluginsConfig = config.getComparisonPluginConfigs();
-        for (ComparisonPluginConfig pluginConfig : allPluginsConfig) {
+        PluginConfig[] allPluginsConfig = config.getComparisonPluginConfigs();
+        for (PluginConfig pluginConfig : allPluginsConfig) {
             TaijituPlugin plugin = PluginRegistry.getPlugin(pluginConfig.getName());
             plugin.end(pluginConfig);
         }
     }
 
     private void startPlugins(TaijituConfig config) throws TaijituException {
-        ComparisonPluginConfig[] allPluginsConfig = config.getComparisonPluginConfigs();
-        for (ComparisonPluginConfig pluginConfig : allPluginsConfig) {
+        PluginConfig[] allPluginsConfig = config.getComparisonPluginConfigs();
+        for (PluginConfig pluginConfig : allPluginsConfig) {
             TaijituPlugin plugin = PluginRegistry.getPlugin(pluginConfig.getName());
             plugin.start(pluginConfig);
         }
@@ -161,9 +164,11 @@ public final class Taijitu {
                 try {
                     result[i] = future.get();
                 } catch (ExecutionException e) {
+                    logger.error("Unable to obtain comparison result.",e);
                     result[i] = null;
                 }
-            } catch (InterruptedException e1) {
+            } catch (InterruptedException e) {
+                logger.error("Unable to obtain comparison result.",e);
                 result[i] = null;
             }
         }

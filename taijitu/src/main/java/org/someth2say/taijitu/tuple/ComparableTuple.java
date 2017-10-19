@@ -1,7 +1,10 @@
 package org.someth2say.taijitu.tuple;
 
+import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonRuntime;
 import org.someth2say.taijitu.compare.EqualityStrategy;
+import org.someth2say.taijitu.config.EqualityConfig;
+import org.someth2say.taijitu.config.QueryConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,12 +15,15 @@ import java.util.List;
  * @author Jordi Sola
  */
 public class ComparableTuple extends Tuple implements Comparable<ComparableTuple> {
+    private static final Logger logger = Logger.getLogger(ComparableTuple.class);
 
     private final ComparisonRuntime runtime;
+    private final QueryConfig queryConfig;
 
-    public ComparableTuple(Object[] values, final ComparisonRuntime runtime) {
+    public ComparableTuple(Object[] values, final ComparisonRuntime runtime, final QueryConfig queryConfig) {
         super(values);
         this.runtime = runtime;
+        this.queryConfig = queryConfig;
     }
 
     public List<String> toStringList() {
@@ -34,8 +40,13 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
         int result = 1;
         for (int keyColumnIdx : runtime.getKeyColumnsIdxs()) {
             Object keyValue = getValue(keyColumnIdx);
-            final EqualityStrategy<Object> comparator = runtime.getEqualityStrategy(keyValue.getClass());
-            int keyHashCode = comparator.computeHashCode(keyValue);
+            String fieldName = runtime.getCanonicalColumns().get(keyColumnIdx);
+
+            final EqualityConfig equalityConfig = runtime.getEqualityConfigFor(keyValue.getClass(), fieldName, queryConfig);
+            final EqualityStrategy comparator = runtime.getEqualityStrategy(equalityConfig);
+
+            int keyHashCode = comparator.computeHashCode(keyValue, equalityConfig.getEqualityParameters());
+
             result = 31 * result + keyHashCode;
         }
         return result;
@@ -58,8 +69,11 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
         for (int columnIdx : columnsIdxs) {
             Object keyValue = getValue(columnIdx);
             Object otherKeyValue = other.getValue(columnIdx);
-            final EqualityStrategy<Object> comparator = runtime.getEqualityStrategy(keyValue.getClass());
-            if (!comparator.equals(keyValue, otherKeyValue)) {
+            String fieldName = runtime.getCanonicalColumns().get(columnIdx);
+            final EqualityConfig equalityConfig = runtime.getEqualityConfigFor(keyValue.getClass(), fieldName, queryConfig);
+            final EqualityStrategy comparator = runtime.getEqualityStrategy(equalityConfig);
+            //logger.debug("Comparing field: " + fieldName + " this: " + keyValue + " other: " + otherKeyValue + " comparator: " + comparator.getName() + " config: " + equalityConfig.getEqualityParameters());
+            if (!comparator.equals(keyValue, otherKeyValue, equalityConfig.getEqualityParameters())) {
                 return false;
             }
         }
@@ -72,8 +86,10 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
         for (int columnIdx : columnsIdxs) {
             Object keyValue = getValue(columnIdx);
             Object otherKeyValue = other.getValue(columnIdx);
-            final EqualityStrategy<Object> comparator = runtime.getEqualityStrategy(keyValue.getClass());
-            final int keyComparison = comparator.compare(keyValue, otherKeyValue);
+            String fieldName = runtime.getCanonicalColumns().get(columnIdx);
+            final EqualityConfig equalityConfig = runtime.getEqualityConfigFor(keyValue.getClass(), fieldName, queryConfig);
+            final EqualityStrategy comparator = runtime.getEqualityStrategy(equalityConfig);
+            final int keyComparison = comparator.compare(keyValue, otherKeyValue, equalityConfig.getEqualityParameters());
             if (keyComparison != 0) {
                 return keyComparison;
             }

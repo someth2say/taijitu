@@ -2,6 +2,7 @@ package org.someth2say.taijitu.tuple;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonRuntime;
+import org.someth2say.taijitu.config.QueryConfig;
 import org.someth2say.taijitu.matcher.ColumnMatcher;
 
 import java.sql.ResultSet;
@@ -13,20 +14,20 @@ public class ResultSetTupleBuilder implements TupleBuilder<ResultSet, Comparable
 
     private final ColumnMatcher matcher;
     private final ComparisonRuntime runtime;
-    private final String queryName;
+    private final QueryConfig queryConfig;
 
-    public ResultSetTupleBuilder(final ColumnMatcher matcher, final ComparisonRuntime runtime, String queryName) {
+    public ResultSetTupleBuilder(final ColumnMatcher matcher, final ComparisonRuntime runtime, final QueryConfig queryConfig) {
         this.matcher = matcher;
         this.runtime = runtime;
-        this.queryName = queryName;
+        this.queryConfig = queryConfig;
     }
 
     @Override
     public ComparableTuple apply(ResultSet resultSet) {
         List<String> canonicalColumns = runtime.getCanonicalColumns();
-        List<String> providedColumns = runtime.getProvidedColumns(queryName);
+        List<String> providedColumns = runtime.getProvidedColumns(queryConfig.getName());
         Object[] values = extract(matcher, resultSet, canonicalColumns, providedColumns);
-        return new ComparableTuple(values, runtime);
+        return new ComparableTuple(values, runtime, queryConfig);
     }
 
     private static Object[] extract(ColumnMatcher matcher, ResultSet rs, List<String> canonicalColumns, List<String> providedColumns) {

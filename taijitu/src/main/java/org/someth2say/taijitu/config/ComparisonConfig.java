@@ -5,7 +5,7 @@ import org.someth2say.taijitu.util.Named;
 public interface ComparisonConfig extends Named, QueryConfig {
     StrategyConfig getStrategyConfig();
 
-    ComparisonPluginConfig[] getComparisonPluginConfigs();
+    PluginConfig[] getComparisonPluginConfigs();
 
     int getFetchSize();
 

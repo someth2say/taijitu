@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.config;
 
-public interface ComparisonPluginConfig {
+public interface PluginConfig {
 	
 	public String getName();
 }

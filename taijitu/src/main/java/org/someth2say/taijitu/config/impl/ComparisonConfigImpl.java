@@ -6,6 +6,9 @@ import org.someth2say.taijitu.config.*;
 import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
 import org.someth2say.taijitu.config.ConfigurationLabels.Setup;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 public class ComparisonConfigImpl extends NamedConfig implements ComparisonConfig {
     private final ImmutableHierarchicalConfiguration configuration;
@@ -39,7 +42,7 @@ public class ComparisonConfigImpl extends NamedConfig implements ComparisonConfi
     /*** PLUGINS ***/
 
     @Override
-    public ComparisonPluginConfig[] getComparisonPluginConfigs() {
+    public PluginConfig[] getComparisonPluginConfigs() {
         // right now, we only allow global plugins. Maybe we can set-up per-comparison plugins someday...
         return parent.getComparisonPluginConfigs();
     }
@@ -97,6 +100,15 @@ public class ComparisonConfigImpl extends NamedConfig implements ComparisonConfi
             params = parent.getQueryParameters();
         }
         return params;
+    }
+
+    @Override
+    public List<EqualityConfig> getEqualityConfigs() {
+        final List<ImmutableHierarchicalConfiguration> thisEqConfigs = configuration.immutableChildConfigurationsAt(Comparison.EQUALITY);
+        final List<EqualityConfig> equalityConfigs = thisEqConfigs.stream().map(EqualityConfigImpl::new).collect(Collectors.toList());
+        final List<EqualityConfig> parentEqualityConfigs = parent.getEqualityConfigs();
+        equalityConfigs.addAll(parentEqualityConfigs);
+        return equalityConfigs;
     }
 
     /**
