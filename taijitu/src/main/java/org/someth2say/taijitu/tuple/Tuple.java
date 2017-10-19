@@ -4,9 +4,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 /**
+ * Abstract concept of a Tuple, that is, a sorted collection of objects.
  *
+ * @author Jordi Sola
  */
-//TODO: Please, do not re-invent array...
 public abstract class Tuple {
     private final Object[] columns;
 
@@ -31,12 +32,10 @@ public abstract class Tuple {
         }
     }
 
-    //@Override
     public Object getValue(int pos) {
         return this.columns[pos];
     }
 
-    //@Override
     public Iterator<Object> iterator() {
         return Arrays.asList(this.columns).iterator();
     }

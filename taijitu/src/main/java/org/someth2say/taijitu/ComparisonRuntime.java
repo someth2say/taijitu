@@ -34,10 +34,8 @@ public class ComparisonRuntime {
     //TODO: Move to ComparatorRegistry and ComparatorConfig
     private Map<Class<?>, Comparator<Object>> buildComparators() {
         Map<Class<?>, Comparator<Object>> res = new HashMap<>();
-//        final double threshold = getPrecisionThreshold();
-//        if (threshold > 0) {
-//            res.put(BigDecimal.class, new PrecissionThresholdComparator(threshold));
-//        }
+
+
         return res;
     }
 
@@ -58,6 +56,7 @@ public class ComparisonRuntime {
             if (canonicalColumns == null) {
                 canonicalColumns = Arrays.asList(providedColumns);
                 canonicalKeys = providedKeysList;
+                updateIndexes();
                 return true;
             } else {
                 if (validateCanonicalKeysAreProvided(queryConfig, columnMatcher, providedKeysList, providedColumnsList)) {
@@ -67,6 +66,32 @@ public class ComparisonRuntime {
             }
         }
         return false;
+    }
+
+    private int[] keyColumnIndexes;
+    private int[] nonKeyColumnIndexes;
+
+    private void updateIndexes() {
+        keyColumnIndexes = new int[canonicalKeys.size()];
+        nonKeyColumnIndexes = new int[canonicalColumns.size() - canonicalKeys.size()];
+        int keyPos = 0;
+        int nonKeyPos = 0;
+        for (int colPos = 0; colPos < canonicalColumns.size(); colPos++) {
+            String columnName = canonicalColumns.get(colPos);
+            if (canonicalKeys.contains(columnName)) {
+                keyColumnIndexes[keyPos++] = colPos;
+            } else {
+                nonKeyColumnIndexes[nonKeyPos++] = colPos;
+            }
+        }
+    }
+
+    public int[] getKeyColumnsIdxs() {
+        return keyColumnIndexes;
+    }
+
+    public int[] getNonKeyColumnsIdxs() {
+        return nonKeyColumnIndexes;
     }
 
     private boolean validateCanonicalKeysAreProvided(final QueryConfig queryConfig, final ColumnMatcher columnMatcher, final List<String> providedKeysList, final List<String> providedColumnsList) {
@@ -92,7 +117,6 @@ public class ComparisonRuntime {
         // .- Provided keys should be a subset for provide columns.
         for (String providedKey : providedKeysList) {
             if (!providedColumnsList.contains(providedKey)) {
-                // throw new QueryUtilsException("Key " + providedKey + " in query " + queryConfig.getName() + " is not provided by query results.");
                 logger.error("Key " + providedKey + " in query " + queryConfig.getName() + " is not provided by query results.");
                 return false;
             }
@@ -118,25 +142,6 @@ public class ComparisonRuntime {
         return canonicalKeys;
     }
 
-    public int[] getKeyColumnsIdxs() {
-        int[] result = new int[canonicalKeys.size()];
-        int idx = 0;
-        for (String canonicalKey : canonicalKeys) {
-            result[idx++] = canonicalKeys.indexOf(canonicalKey);
-        }
-        return result;
-    }
-
-    public int[] getNonKeyColumnsIdxs() {
-        int[] result = new int[canonicalColumns.size() - canonicalKeys.size()];
-        int idx = 0;
-        for (String canonicalColumn : canonicalColumns) {
-            if (!canonicalKeys.contains(canonicalColumn)) {
-                result[idx++] = canonicalColumns.indexOf(canonicalColumn);
-            }
-        }
-        return result;
-    }
 
     public <T> EqualityStrategy<Object> getEqualityStrategy(Class<T> aClass) {
         //TODO: Work out comparison!!!!

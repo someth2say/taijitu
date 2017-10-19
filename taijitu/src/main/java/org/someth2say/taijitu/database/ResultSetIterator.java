@@ -1,6 +1,10 @@
 package org.someth2say.taijitu.database;
 
 import org.apache.log4j.Logger;
+import org.someth2say.taijitu.tuple.ComparableTuple;
+import org.someth2say.taijitu.tuple.ResultSetTupleBuilder;
+import org.someth2say.taijitu.tuple.Tuple;
+import org.someth2say.taijitu.tuple.TupleBuilder;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -11,7 +15,7 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.function.Function;
 
-public class ResultSetIterator<T> implements Iterator<T> {
+public class ResultSetIterator implements Iterator<ComparableTuple> {
     private static final Logger logger = Logger.getLogger(ResultSetIterator.class);
 
     //TODO: Considering adding an the last exception raised, so we can check the status.
@@ -19,11 +23,11 @@ public class ResultSetIterator<T> implements Iterator<T> {
     private PreparedStatement preparedStatement;
     private Connection connection;
     private String sql;
-    private Function<ResultSet, T> builder;
+    private ResultSetTupleBuilder builder;
     private int fetchSize;
     private Object[] parameters;
 
-    public ResultSetIterator(Connection connection, String sql, Function<ResultSet, T> builder, final int fetchSize, final Object[] parameters) {
+    public ResultSetIterator(Connection connection, String sql, ResultSetTupleBuilder builder, final int fetchSize, final Object[] parameters) {
         this.fetchSize = fetchSize;
         this.parameters = parameters;
         assert connection != null;
@@ -89,7 +93,7 @@ public class ResultSetIterator<T> implements Iterator<T> {
     }
 
     @Override
-    public T next() {
+    public ComparableTuple next() {
         try {
             return builder.apply(resultSet);
         } catch (Exception e) {

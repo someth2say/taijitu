@@ -9,6 +9,6 @@ import java.util.ArrayList;
  */
 public class SimpleComparisonResult extends ComparisonResult {
     public SimpleComparisonResult(final ComparisonConfig comparisonConfig) {
-        super(comparisonConfig, new ArrayList<>(), disjoint);
+        super(comparisonConfig, new ArrayList<>(), new ArrayList<>());
     }
 }

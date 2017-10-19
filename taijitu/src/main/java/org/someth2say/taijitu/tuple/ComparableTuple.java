@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * This class represents a {@link Tuple}, but having the capabilities to compare itself with other tuples, but using {@link EqualityStrategy} objects.
+ *
  * @author Jordi Sola
  */
 public class ComparableTuple extends Tuple implements Comparable<ComparableTuple> {
@@ -27,11 +29,6 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
         return result;
     }
 
-    //Hashcode and equals should both be base on comparators
-    // As for investigation, "comparator" is not the right name.
-    // Eclipse Collections use the so called "HashingStrategy", that covers equals/hashcode contract
-    // But I do not like this name, as implies "hashing".
-    // I do prefer the term "EqualityStrategy"
     @Override
     public int hashCode() {
         int result = 1;
@@ -77,14 +74,14 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
             Object otherKeyValue = other.getValue(columnIdx);
             final EqualityStrategy<Object> comparator = runtime.getEqualityStrategy(keyValue.getClass());
             final int keyComparison = comparator.compare(keyValue, otherKeyValue);
-            if (keyComparison !=0) {
+            if (keyComparison != 0) {
                 return keyComparison;
             }
         }
         return 0;
     }
 
-    public int compareKeysTo(ComparableTuple other){
+    public int compareKeysTo(ComparableTuple other) {
         return compareTo(other);
     }
 

@@ -22,25 +22,25 @@ import java.util.List;
 
 import static org.someth2say.taijitu.config.DefaultConfig.*;
 
-public final class TaijituConfigImpl2 implements TaijituConfig, ComparisonConfig {
+public final class TaijituConfigImpl implements TaijituConfig, ComparisonConfig {
 
-    private static final Logger logger = Logger.getLogger(TaijituConfigImpl2.class);
+    private static final Logger logger = Logger.getLogger(TaijituConfigImpl.class);
 
     final ImmutableHierarchicalConfiguration configuration;
 
-    private TaijituConfigImpl2(final ImmutableHierarchicalConfiguration configuration) {
+    private TaijituConfigImpl(final ImmutableHierarchicalConfiguration configuration) {
         super();
         this.configuration = configuration;
     }
 
     public static TaijituConfig fromFile(final String file) throws TaijituException {
         ImmutableHierarchicalConfiguration config = load(file);
-        return new TaijituConfigImpl2(config);
+        return new TaijituConfigImpl(config);
     }
 
 
     public static TaijituConfig fromProperties(final ImmutableHierarchicalConfiguration config) throws TaijituException {
-        return new TaijituConfigImpl2(config);
+        return new TaijituConfigImpl(config);
     }
 
     /**** COMPARISONS *********************************************************************/
@@ -50,7 +50,7 @@ public final class TaijituConfigImpl2 implements TaijituConfig, ComparisonConfig
         ComparisonConfig[] result = new ComparisonConfig[comparisonConfigs.size()];
         int pos = 0;
         for (ImmutableHierarchicalConfiguration comparisonConfig : comparisonConfigs) {
-            result[pos++] = new ComparisonConfigImpl2(comparisonConfig, this);
+            result[pos++] = new ComparisonConfigImpl(comparisonConfig, this);
         }
         return result;
     }
@@ -63,7 +63,7 @@ public final class TaijituConfigImpl2 implements TaijituConfig, ComparisonConfig
         DatabaseConfig[] result = new DatabaseConfig[databaseConfigs.size()];
         int pos = 0;
         for (ImmutableHierarchicalConfiguration databaseConfig : databaseConfigs) {
-            result[pos++] = new DatabaseConfigImpl2(databaseConfig);
+            result[pos++] = new DatabaseConfigImpl(databaseConfig);
         }
         return result;
     }
@@ -103,7 +103,7 @@ public final class TaijituConfigImpl2 implements TaijituConfig, ComparisonConfig
     public QueryConfig getSourceQueryConfig() {
         try {
             final ImmutableHierarchicalConfiguration sourceConfig = this.configuration.immutableConfigurationAt(Comparison.SOURCE);
-            return new QueryConfigImpl2(sourceConfig, this);
+            return new QueryConfigImpl(sourceConfig, this);
         } catch (IllegalArgumentException e) {
             return null;
         }
@@ -113,7 +113,7 @@ public final class TaijituConfigImpl2 implements TaijituConfig, ComparisonConfig
     public QueryConfig getTargetQueryConfig() {
         try {
             final ImmutableHierarchicalConfiguration sourceConfig = this.configuration.immutableConfigurationAt(Comparison.TARGET);
-            return new QueryConfigImpl2(sourceConfig, this);
+            return new QueryConfigImpl(sourceConfig, this);
         } catch (IllegalArgumentException e) {
             return null;
         }
@@ -161,7 +161,7 @@ public final class TaijituConfigImpl2 implements TaijituConfig, ComparisonConfig
         ComparisonPluginConfig[] result = new ComparisonPluginConfig[pluginConfigs.size()];
         int pos = 0;
         for (ImmutableHierarchicalConfiguration pluginConfig : pluginConfigs) {
-            result[pos++] = new ComparisonPluginConfigImpl2(pluginConfig);
+            result[pos++] = new ComparisonPluginConfigImpl(pluginConfig);
         }
         return result;
     }
@@ -180,7 +180,7 @@ public final class TaijituConfigImpl2 implements TaijituConfig, ComparisonConfig
         if (strategyConfig == null) {
             try {
                 ImmutableHierarchicalConfiguration strategyConfiguration = configuration.immutableConfigurationAt(Comparison.STRATEGY);
-                strategyConfig = new StrategyConfigImpl2(strategyConfiguration);
+                strategyConfig = new StrategyConfigImpl(strategyConfiguration);
             } catch (IllegalArgumentException | ConfigurationRuntimeException e) {
                 //No Strategy defined (or many)
                 return DEFAULT_STRATEGY_CONFIG;

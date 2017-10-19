@@ -4,12 +4,11 @@ import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.ComparisonResult;
-import org.someth2say.taijitu.compare.SimpleComparisonResult;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.ComparisonPluginConfig;
 import org.someth2say.taijitu.config.DatabaseConfig;
 import org.someth2say.taijitu.config.TaijituConfig;
-import org.someth2say.taijitu.config.impl.TaijituConfigImpl2;
+import org.someth2say.taijitu.config.impl.TaijituConfigImpl;
 import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.database.QueryUtilsException;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
@@ -40,14 +39,14 @@ public final class Taijitu {
 
 
     private TaijituConfig initialise(final ImmutableHierarchicalConfiguration properties) throws TaijituException {
-        TaijituConfig config = TaijituConfigImpl2.fromProperties(properties);
+        TaijituConfig config = TaijituConfigImpl.fromProperties(properties);
         performSetup(config);
         return config;
     }
 
 
     private TaijituConfig initialise(final String configProperties) throws TaijituException {
-        TaijituConfig config = TaijituConfigImpl2.fromFile(configProperties);
+        TaijituConfig config = TaijituConfigImpl.fromFile(configProperties);
         performSetup(config);
         return config;
     }
@@ -162,12 +161,10 @@ public final class Taijitu {
                 try {
                     result[i] = future.get();
                 } catch (ExecutionException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    result[i] = null;
                 }
             } catch (InterruptedException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
+                result[i] = null;
             }
         }
         return result;

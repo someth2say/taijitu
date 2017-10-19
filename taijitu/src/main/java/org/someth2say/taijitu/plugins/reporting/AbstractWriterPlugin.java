@@ -3,7 +3,7 @@ package org.someth2say.taijitu.plugins.reporting;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonRuntime;
 import org.someth2say.taijitu.TaijituException;
-import org.someth2say.taijitu.compare.SimpleComparisonResult;
+import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.config.ComparisonPluginConfig;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
@@ -23,10 +23,10 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
     private File outputFolder;
     private WritterPluginConfig config;
 
-    private String[][] printDifferent(final SimpleComparisonResult comparisonResult, final ComparisonRuntime taijituData, final WritterPluginConfig config) {
+    private String[][] printDifferent(final ComparisonResult comparisonResult, final ComparisonRuntime taijituData, final WritterPluginConfig config) {
 //        this.config = config;
-        final Collection<Pair<ComparableTuple, ComparableTuple>> different = comparisonResult.getDifferent();
-        final String[][] result = new String[different.size() * 2 + 1][];
+//        final Collection<Pair<ComparableTuple, ComparableTuple>> different = comparisonResult.getDifferent();
+//        final String[][] result = new String[different.size() * 2 + 1][];
 //
 //        final List<String> fields = taijituData.getCanonicalColumns();
 //        final List<String> keyFields = taijituData.getCanonicalKeys();
@@ -52,7 +52,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //                copyDifferencesAndKeys(difference, result[sourceRowIdx], result[targetRowIdx], sourceFieldToColumnsMap, targetFieldToColumnsMap, keyFieldsMap, compareFieldsMap);
 //            }
 //        }
-        return result;
+        return null;
     }
 
     private void highLightKeyFields(List<String> header, List<String> keyFields) {
@@ -114,8 +114,8 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
         return keyFieldsMap[fieldIdx];
     }
 
-    private boolean isReportable(final SimpleComparisonResult comparisonResult) {
-        return !comparisonResult.getTargetOnly().isEmpty() || !comparisonResult.getSourceOnly().isEmpty() || !comparisonResult.getDifferent().isEmpty();
+    private boolean isReportable(final ComparisonResult comparisonResult) {
+        return !comparisonResult.getDifferent().isEmpty() || !comparisonResult.getDisjoint().isEmpty();
     }
 //
 //    private File createOutputFolder() throws TaijituException {
@@ -129,7 +129,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //        return result;
 //    }
 //
-//    private void writeResults(final SimpleComparisonResult result, final ComparisonRuntime comparison, final String targetOnlyFile, final String sourceOnlyFile, final String diffsFile, final String testName, final File outputFolder) throws TaijituException, CommandException {
+//    private void writeResults(final ComparisonResult result, final ComparisonRuntime comparison, final String targetOnlyFile, final String sourceOnlyFile, final String diffsFile, final String testName, final File outputFolder) throws TaijituException, CommandException {
 //        if (!result.getTargetOnly().isEmpty()) {
 //            logger.debug("Writing entries only in target for " + testName);
 //            final String[][] reportableStrings = printMissing(comparison, result.getTargetOnly());
@@ -157,7 +157,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //
 //    @Override
 //    public void postComparison(ComparisonRuntime taijituData) throws TaijituException {
-//        final SimpleComparisonResult result = taijituData.getResult();
+//        final ComparisonResult result = taijituData.getResult();
 //        final String testName = taijituData.getTestName();
 //
 //        if (isReportable(result)) {

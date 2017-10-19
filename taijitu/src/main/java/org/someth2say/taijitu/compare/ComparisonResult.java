@@ -10,7 +10,8 @@ import java.util.Collection;
 
 public abstract class ComparisonResult {
     protected final ComparisonConfig comparisonConfig;
-    //TODO: Consider using maps indexed by query, instead of a Collection.
+    // TODO: Moving forward to stream API will require a single difference class, covering both different and disjoint.
+    // TODO: Work out the structure for this kind of items. I.E. Disjoint, may be a Map<Query->Collection<Tuple>>, and Different may be a Collection<Map<Query->Tuple>>
     final private Collection<Pair<QueryAndTuple, QueryAndTuple>> different;
     final private Collection<QueryAndTuple> disjoint;
 

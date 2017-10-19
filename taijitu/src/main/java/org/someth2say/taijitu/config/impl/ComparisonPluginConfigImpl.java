@@ -7,11 +7,11 @@ import org.someth2say.taijitu.config.NamedConfig;
 /**
  * Right now, plugins have no configuration, only name references
  */
-public class ComparisonPluginConfigImpl2 extends NamedConfig implements ComparisonPluginConfig {
+public class ComparisonPluginConfigImpl extends NamedConfig implements ComparisonPluginConfig {
 
     private final ImmutableHierarchicalConfiguration configuration;
 
-    public ComparisonPluginConfigImpl2(final ImmutableHierarchicalConfiguration configuration) {
+    public ComparisonPluginConfigImpl(final ImmutableHierarchicalConfiguration configuration) {
         super(configuration.getRootElementName());
         this.configuration = configuration;
     }

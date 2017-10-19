@@ -1,18 +1,14 @@
 package org.someth2say.taijitu;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
-import java.util.function.Function;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.SimpleComparisonResult;
-import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.config.*;
 import org.someth2say.taijitu.database.ResultSetIterator;
 import org.someth2say.taijitu.matcher.ColumnMatcher;
@@ -22,6 +18,7 @@ import org.someth2say.taijitu.registry.PluginRegistry;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.strategy.ComparisonStrategy;
 import org.someth2say.taijitu.registry.ComparisonStrategyRegistry;
+import org.someth2say.taijitu.tuple.ResultSetTupleBuilder;
 
 /**
  * @author Jordi Sola
@@ -43,24 +40,19 @@ public class TaijituRunner implements Callable<ComparisonResult> {
      */
     public ComparisonResult call() {
         ComparisonResult result = new SimpleComparisonResult(config);
-        ComparisonRuntime comparison = new ComparisonRuntime(config);
+        ComparisonRuntime runtime = new ComparisonRuntime(config);
         Map<ComparisonPluginConfig, TaijituPlugin> plugins = PluginRegistry.getPlugins(config.getComparisonPluginConfigs());
 
         try {
 
-            //result.setStatus(SimpleComparisonResult.ComparisonResultStatus.RUNNING);
+            runPluginsPreComparison(runtime, plugins);
 
-            runPluginsPreComparison(comparison, plugins);
+            result = runComparison(runtime);
 
-            result = runComparison(comparison);
-
-            runPluginsPostComparison(comparison, plugins);
-
-            //result.setStatus(SimpleComparisonResult.ComparisonResultStatus.SUCCESS);
+            runPluginsPostComparison(runtime, plugins);
 
         } catch (final TaijituException e) {
             logger.error(e.getMessage(), e);
-            //result.setStatus(SimpleComparisonResult.ComparisonResultStatus.ERROR);
         }
 
         return result;
@@ -80,48 +72,48 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         }
     }
 
-    private ComparisonResult runComparison(ComparisonRuntime comparison) {
+    private ComparisonResult runComparison(ComparisonRuntime runtime) {
         // Show comparison description
-        logger.info("COMPARISON: " + config.getName() + "(strategy " + config.getStrategyConfig().getName() + ")");
-        //logger.debug("PARAMETERS: " + config.getAllParameters());
-        final ComparisonStrategy strategy = ComparisonStrategyRegistry.getStrategy(config.getStrategyConfig().getName());
+        final String strategyName = config.getStrategyConfig().getName();
+        logger.info("COMPARISON: " + config.getName() + "(strategy " + strategyName + ")");
+        final ComparisonStrategy strategy = ComparisonStrategyRegistry.getStrategy(strategyName);
         if (strategy != null) {
-            return runComparisonStrategy(comparison, strategy);
+            return runComparisonStrategy(runtime, strategy);
         } else {
-            logger.error("Unable to get comparison strategy " + config.getStrategyConfig().getName());
+            logger.error("Unable to get comparison strategy " + strategyName);
         }
         return null;
     }
 
-    private ComparisonResult runComparisonStrategy(ComparisonRuntime comparison, ComparisonStrategy strategy) {
-        ResultSetIterator<ComparableTuple> sourceIterator = getAndRegisterResultSetIterator(comparison, MatcherRegistry.getIdentityMatcher(), config.getSourceQueryConfig());
+    private ComparisonResult runComparisonStrategy(ComparisonRuntime runtime, ComparisonStrategy strategy) {
+        ResultSetIterator sourceIterator = getAndRegisterResultSetIterator(runtime, MatcherRegistry.getIdentityMatcher(), config.getSourceQueryConfig());
         if (sourceIterator != null) {
             final ColumnMatcher matcher = MatcherRegistry.getMatcher(config.getColumnMatchingStrategyName());
             if (matcher == null) {
                 logger.error("Unable to find column matching strategy '" + config.getColumnMatchingStrategyName() + "'");
             } else {
-                ResultSetIterator<ComparableTuple> targetIterator = getAndRegisterResultSetIterator(comparison, matcher, config.getTargetQueryConfig());
+                ResultSetIterator targetIterator = getAndRegisterResultSetIterator(runtime, matcher, config.getTargetQueryConfig());
                 if (targetIterator != null) {
-                    return strategy.runComparison(sourceIterator, targetIterator, comparison, config);
+                    return strategy.runComparison(sourceIterator, targetIterator, runtime, config);
                 }
             }
         }
         return null;
     }
 
-    private ResultSetIterator<ComparableTuple> getAndRegisterResultSetIterator(ComparisonRuntime comparison, ColumnMatcher columnMatcher, QueryConfig sourceQueryConfig) {
-        ResultSetIterator<ComparableTuple> rsIterator = getQueryIterator(sourceQueryConfig, comparison, columnMatcher);
+    private ResultSetIterator getAndRegisterResultSetIterator(ComparisonRuntime runtime, ColumnMatcher columnMatcher, QueryConfig sourceQueryConfig) {
+        ResultSetIterator rsIterator = getQueryIterator(sourceQueryConfig, runtime, columnMatcher);
         if (rsIterator == null) {
             return null;
         }
-        if (!comparison.registerColumns(rsIterator.getColumns(), sourceQueryConfig, columnMatcher)) {
+        if (!runtime.registerColumns(rsIterator.getColumns(), sourceQueryConfig, columnMatcher)) {
             return null;
         }
         return rsIterator;
     }
 
-    private ResultSetIterator<ComparableTuple> getQueryIterator(final QueryConfig queryConfig,
-                                                                final ComparisonRuntime comparison, final ColumnMatcher matcher) {
+    private ResultSetIterator getQueryIterator(final QueryConfig queryConfig,
+                                               final ComparisonRuntime runtime, final ColumnMatcher matcher) {
         Connection connection;
         try {
             connection = ConnectionManager.getConnection(queryConfig.getDatabaseRef());
@@ -130,37 +122,12 @@ public class TaijituRunner implements Callable<ComparisonResult> {
             return null;
         }
 
-        Function<ResultSet, ComparableTuple> tupleBuilder = (ResultSet rs) -> {
-            Object[] values = extractObjectsFromRs(matcher, rs, queryConfig, comparison);
-            return new ComparableTuple(values, comparison);
-        };
-
-        return new ResultSetIterator<>(connection, queryConfig.getStatement(), tupleBuilder, queryConfig.getFetchSize(), queryConfig.getQueryParameters());
+        ResultSetTupleBuilder tupleBuilder = new ResultSetTupleBuilder(matcher, runtime, queryConfig.getName());
+        final int fetchSize = queryConfig.getFetchSize();
+        final Object[] queryParameters = queryConfig.getQueryParameters();
+        final String statement = queryConfig.getStatement();
+        return new ResultSetIterator(connection, statement, tupleBuilder, fetchSize, queryParameters);
     }
 
-    /**
-     * It is VERY important that we extract the elements from the RS in the SAME order than the one defined by the canonical columns!
-     * As we are just returning an Object[], the column information on each value is lost. Keeping the order is the only way to match.
-     */
-    private static Object[] extractObjectsFromRs(ColumnMatcher matcher, ResultSet rs, QueryConfig queryConfig,
-                                                 final ComparisonRuntime comparison) {
-        String queryName = queryConfig.getName();
-        List<String> canonicalColumns = comparison.getCanonicalColumns();
-        List<String> providedColumns = comparison.getProvidedColumns(queryName);
-
-        Object[] columnValues = new Object[canonicalColumns.size()];
-        int columnIdx = 0;
-        for (String canonicalColumn : canonicalColumns) {
-            String column = matcher.getColumnFromCanonical(canonicalColumn, canonicalColumns, providedColumns);
-            try {
-                columnValues[columnIdx++] = rs.getObject(column);
-            } catch (SQLException e) {
-                logger.error("Can\'t retrieve value for column" + column + " for query " + queryName + "(canonical column was " + canonicalColumn + ")", e);
-                return null;
-            }
-
-        }
-        return columnValues;
-    }
 
 }

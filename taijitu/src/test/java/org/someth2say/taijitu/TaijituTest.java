@@ -13,6 +13,7 @@ import org.someth2say.taijitu.compare.SimpleComparisonResult;
 import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.database.QueryUtilsException;
+import org.someth2say.taijitu.strategy.mapping.MappingStrategy;
 import org.someth2say.taijitu.strategy.sorted.SortedStrategy;
 
 import java.sql.Connection;
@@ -21,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Properties;
 
+import static java.lang.Thread.sleep;
 import static org.junit.Assert.assertEquals;
 import static org.someth2say.taijitu.config.ConfigurationLabels.Comparison.*;
 import static org.someth2say.taijitu.config.ConfigurationLabels.Comparison.Fields.KEY;
@@ -45,10 +47,9 @@ public class TaijituTest {
     @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection strategies() {
         return Arrays.asList(
-                // ,
-//                new String[]{ParallelComparingMappingStrategy.NAME},
-//                new String[]{ParallelQueryingMappingStrategy.NAME}
-                SortedStrategy.NAME);
+                SortedStrategy.NAME,
+                MappingStrategy.NAME
+        );
     }
 
     private static Connection getConnection(String dbName, Properties databaseProps) throws SQLException {
@@ -63,9 +64,8 @@ public class TaijituTest {
     }
 
     @Test
-    public void genericTest() throws QueryUtilsException, TaijituException, SQLException, ConfigurationException {
+    public void genericTest() throws QueryUtilsException, TaijituException, SQLException, ConfigurationException, InterruptedException {
         // Create the tables and test data
-        final PropertiesConfiguration config = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).getConfiguration();
 
         final Properties databaseProps = TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD);
         Connection conn = getConnection(DB_NAME, databaseProps); // This generate the DB in H2
@@ -94,11 +94,15 @@ public class TaijituTest {
                 {"2", "'B'", "'STRING'", "true", "10000", "1000000000", "1000000000000000000", "23.456", "89.102", "34.56", "78.9012345", "67.8901234567890123", "45.6789012345678901", "CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP"}
         };
         TestUtils.createTable(conn, "test", commonSchema, commonValues);
+        // introduce some changes..
+        commonValues[0][13]="CURRENT_DATE+1";
+        commonValues[1][13]="CURRENT_DATE+1";
         TestUtils.createTable(conn, "test2", commonSchema, commonValues);
 
         conn.close();
 
 
+        final PropertiesConfiguration config = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).getConfiguration();
         //Databases
         putAll(config, databaseProps, DATABASE_REF + "." + DB_NAME + ".");
         // Comparisons
@@ -112,12 +116,10 @@ public class TaijituTest {
 
         assertEquals(2, comparisonResults.length);
         final ComparisonResult firstResult = comparisonResults[0];
-        assertEquals(0, firstResult.getSourceOnly().size());
-        assertEquals(0, firstResult.getTargetOnly().size());
+        assertEquals(0, firstResult.getDisjoint().size());
         assertEquals(0, firstResult.getDifferent().size());
         final ComparisonResult secondResult = comparisonResults[1];
-        assertEquals(0, secondResult.getSourceOnly().size());
-        assertEquals(0, secondResult.getTargetOnly().size());
+        assertEquals(0, secondResult.getDisjoint().size());
         assertEquals(2, secondResult.getDifferent().size());
     }
 
@@ -126,7 +128,7 @@ public class TaijituTest {
     }
 
     private void commonPropertiesSetup(PropertiesConfiguration testProperties) {
-        testProperties.setProperty("setup.strategy", strategyName);
+        testProperties.setProperty(ConfigurationLabels.Comparison.STRATEGY, strategyName);
         testProperties.setProperty(ConfigurationLabels.Sections.SETUP + "." + ConfigurationLabels.Setup.CONSOLE_LOG, "DEBUG");
     }
 

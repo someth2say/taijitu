@@ -2,6 +2,7 @@ package org.someth2say.taijitu.registry;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.strategy.ComparisonStrategy;
+import org.someth2say.taijitu.strategy.mapping.MappingStrategy;
 import org.someth2say.taijitu.strategy.sorted.SortedStrategy;
 import org.someth2say.taijitu.util.ClassScanUtils;
 
@@ -36,6 +37,7 @@ public class ComparisonStrategyRegistry {
         instances = new ConcurrentHashMap<>();
 //        addStrategy(new ParallelQueryingMappingStrategy());
 //        addStrategy(new ParallelComparingMappingStrategy());
+        addStrategy(new MappingStrategy());
         addStrategy(new SortedStrategy());
     }
 

@@ -7,12 +7,12 @@ import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
 import org.someth2say.taijitu.config.ConfigurationLabels.Setup;
 
 
-public class ComparisonConfigImpl2 extends NamedConfig implements ComparisonConfig {
+public class ComparisonConfigImpl extends NamedConfig implements ComparisonConfig {
     private final ImmutableHierarchicalConfiguration configuration;
     private final ComparisonConfig parent;
 
     //TODO: Sanity checks
-    public ComparisonConfigImpl2(final ImmutableHierarchicalConfiguration configuration, final ComparisonConfig parent) {
+    public ComparisonConfigImpl(final ImmutableHierarchicalConfiguration configuration, final ComparisonConfig parent) {
         super(configuration.getRootElementName());
         this.configuration = configuration;
         this.parent = parent;
@@ -27,7 +27,7 @@ public class ComparisonConfigImpl2 extends NamedConfig implements ComparisonConf
         if (strategyConfig == null) {
             try {
                 ImmutableHierarchicalConfiguration strategyConfiguration = configuration.immutableConfigurationAt(Comparison.STRATEGY);
-                strategyConfig = new StrategyConfigImpl2(strategyConfiguration);
+                strategyConfig = new StrategyConfigImpl(strategyConfiguration);
             } catch (IllegalArgumentException | ConfigurationRuntimeException e) {
                 //No Strategy defined (or many)
                 strategyConfig = parent.getStrategyConfig();
@@ -108,7 +108,7 @@ public class ComparisonConfigImpl2 extends NamedConfig implements ComparisonConf
         if (sourceQuery == null) {
             try {
                 final ImmutableHierarchicalConfiguration sourceConfig = this.configuration.immutableConfigurationAt(Comparison.SOURCE);
-                sourceQuery = new QueryConfigImpl2(sourceConfig, this);
+                sourceQuery = new QueryConfigImpl(sourceConfig, this);
             } catch (IllegalArgumentException e) {
                 sourceQuery = parent.getSourceQueryConfig();
             }
@@ -122,7 +122,7 @@ public class ComparisonConfigImpl2 extends NamedConfig implements ComparisonConf
         if (targetQuery == null) {
             try {
                 final ImmutableHierarchicalConfiguration targetConfig = this.configuration.immutableConfigurationAt(Comparison.TARGET);
-                targetQuery = new QueryConfigImpl2(targetConfig, this);
+                targetQuery = new QueryConfigImpl(targetConfig, this);
             } catch (IllegalArgumentException e) {
                 targetQuery = parent.getSourceQueryConfig();
             }

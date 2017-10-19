@@ -9,13 +9,13 @@ import org.someth2say.taijitu.config.QueryConfig;
 
 import java.util.List;
 
-public class QueryConfigImpl2 extends NamedConfig implements QueryConfig {
+public class QueryConfigImpl extends NamedConfig implements QueryConfig {
 
     private final ImmutableHierarchicalConfiguration configuration;
     private final QueryConfig parent;
 
-    public QueryConfigImpl2(final ImmutableHierarchicalConfiguration configuration,
-                            final QueryConfig parent) {
+    public QueryConfigImpl(final ImmutableHierarchicalConfiguration configuration,
+                           final QueryConfig parent) {
         super(configuration.getRootElementName());
         this.configuration = configuration;
         this.parent = parent;

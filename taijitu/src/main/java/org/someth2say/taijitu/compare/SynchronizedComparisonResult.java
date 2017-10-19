@@ -10,6 +10,6 @@ import java.util.Collections;
  */
 public class SynchronizedComparisonResult extends ComparisonResult {
    public SynchronizedComparisonResult(final ComparisonConfig comparisonConfig) {
-        super(comparisonConfig, Collections.synchronizedCollection(new ArrayList<>()), disjoint);
+        super(comparisonConfig, Collections.synchronizedCollection(new ArrayList<>()), new ArrayList<>());
     }
 }

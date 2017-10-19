@@ -33,7 +33,7 @@
     <artifactId>root</artifactId>
     <version>1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>taijitu</name>
+    <name>root</name>
 
     <issueManagement>
         <url>https://github.com/someth2say/taijitu/issues</url>
@@ -64,8 +64,6 @@
 
 
     <modules>
-        <module>commons</module>
-        <module>properties</module>
         <module>taijitu</module>
     </modules>
 

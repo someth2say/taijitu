@@ -16,7 +16,7 @@ taijitu is based on the following concepts:
  - Entries appearing in both, but having different contents. Those are named `differences`
 
 # The properties
-When running a comparison, one or several properties files should be provided, in order to define a) data sources, b) comparison(s) to run anc c) behaviour for the application.
+When running a runtime, one or several properties files should be provided, in order to define a) data sources, b) runtime(s) to run anc c) behaviour for the application.
 Properties are provided in a hierarchical manner. So you can define things like the following:
 ```
 property=value
@@ -55,28 +55,28 @@ _Note: This way of storing database passwords is not secure. Cryptographic capab
 Be aware that database identifying name should be unique.
 
 ## Comparison definitions
-Properties defining a comparison are prefixed (obviously) by the root `comparison`.
+Properties defining a runtime are prefixed (obviously) by the root `runtime`.
 
-Each comparison should define the following entries:
+Each runtime should define the following entries:
 
-- `comparison.test_name.disabled=false`: If `true`, just skips the comparison when running.
+- `runtime.test_name.disabled=false`: If `true`, just skips the runtime when running.
 
-- `comparison.test_name.fields = field1, field2...` : Defines the list of columns that are related to the comparison somehow.
+- `runtime.test_name.fields = field1, field2...` : Defines the list of columns that are related to the runtime somehow.
 This field have many purposes, like creating the header for reports, or expanding `*` in SQL queries.
 
-- `comparison.test_name.fields.compare = field1, field2`: Defines wich fields should be compared looking for differences in contents.
+- `runtime.test_name.fields.compare = field1, field2`: Defines wich fields should be compared looking for differences in contents.
 
-- `comparison.test_name.fields.key = field1, field2`: List of fields that should be used as keys.
+- `runtime.test_name.fields.key = field1, field2`: List of fields that should be used as keys.
 Keys are used for matching entries from both queries: entries will be considered the same if all fields in `key` property match.
 _Note: Currently there are no `fields.source.key` nor `fields.target.key` entries defined. This means both queries (source and target) should have the same key field names.
 This may change in future releases._
 
-- `comparison.test_name.source.query = select * from test` and `comparison.test.test1.target.query = select * from test`: Sets the queries to be used to obtain `source` and `target` data.
+- `runtime.test_name.source.query = select * from test` and `runtime.test.test1.target.query = select * from test`: Sets the queries to be used to obtain `source` and `target` data.
 _Warning: All fields in `fields` property should be provided by those queries! Else there may be dragons._
 _Note: Setting `setup.queryOptimization` property to `true`  will allow the application to replace the `*` in "select * from" by the lists of fields in `fields` property.
 Some DBMS perform much better if `*` is not used. _
 
-- `comparison.test_name.source.database = test` and `comparison.test_name.target.database = test`: Sets the database used for `source` and `target`.
+- `runtime.test_name.source.database = test` and `runtime.test_name.target.database = test`: Sets the database used for `source` and `target`.
 Should refer to database identifiers as defined in `database` section.
 
 ## Behaviour configuration
@@ -90,7 +90,7 @@ parameters.testDate = 20120907
 ```
 And then, it can be used in any query, by using the parameter name between curly brackets:
 ```
-comparison.test_name.source.query = select * from test where date='{testDate}'
+runtime.test_name.source.query = select * from test where date='{testDate}'
 ```
 
 ## Program behaviour
@@ -111,14 +111,14 @@ _Warning: This same property may be used by plugins to identify the folder where
 
 - `setup.precisionThreshold = 0`: When comparing numeric entries, some threshold will be permitted. If the difference between two numeric columns is _below_ threshold, no difference will be assumed.
 
-- `setup.queryOptimization  = true`: If set to true, queries starting by "select * from..." will have the `*` replaced by the list of fields, as provided in `comparison.test_name.fields`.
+- `setup.queryOptimization  = true`: If set to true, queries starting by "select * from..." will have the `*` replaced by the list of fields, as provided in `runtime.test_name.fields`.
 This may sometimes improve performance, and avoid typos when copying the list of fields.
 
 - `setup.plugins   = org.someth2say.taijitu.plugins.taijituWriter,org.someth2say.taijitu.plugins.taijituSQLProvider`: Comma separated list of `thread plugins`.
-Each hook will perform different actions before and after each comparison is executed. Those can be understand as plug-ins for the comparison architecture.
+Each hook will perform different actions before and after each runtime is executed. Those can be understand as plug-ins for the runtime architecture.
  Currently, only those two hooks are provided:
- - `org.someth2say.taijitu.plugins.taijituWriter`: Write the comparison results into XLS or CSV files, as per configuration properties.
- Also can dump comparison statistics in those same formats.
+ - `org.someth2say.taijitu.plugins.taijituWriter`: Write the runtime results into XLS or CSV files, as per configuration properties.
+ Also can dump runtime statistics in those same formats.
  - `org.someth2say.taijitu.plugins.taijituSQLProvider`: Generate a SQL text file, with the needed SQL sentences for repairing found differences.
  Will generate INSERT statements for missing entries, and UPDATE statements for differences.
  

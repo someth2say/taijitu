@@ -7,11 +7,11 @@ import org.someth2say.taijitu.config.NamedConfig;
 import java.util.Iterator;
 import java.util.Properties;
 
-public class DatabaseConfigImpl2 extends NamedConfig implements DatabaseConfig {
+public class DatabaseConfigImpl extends NamedConfig implements DatabaseConfig {
 
     private final ImmutableHierarchicalConfiguration configuration;
 
-    public DatabaseConfigImpl2(final ImmutableHierarchicalConfiguration configuration) {
+    public DatabaseConfigImpl(final ImmutableHierarchicalConfiguration configuration) {
         super(configuration.getRootElementName());
         this.configuration = configuration;
     }
