@@ -18,5 +18,4 @@ public interface QueryConfig extends Named{
 
     Object[] getQueryParameters();
 
-    List<EqualityConfig> getEqualityConfigs();
 }

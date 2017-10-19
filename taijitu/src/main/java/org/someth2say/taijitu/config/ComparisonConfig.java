@@ -1,5 +1,7 @@
 package org.someth2say.taijitu.config;
 
+import java.util.List;
+
 import org.someth2say.taijitu.util.Named;
 
 public interface ComparisonConfig extends Named, QueryConfig {
@@ -22,4 +24,6 @@ public interface ComparisonConfig extends Named, QueryConfig {
     Object[] getQueryParameters();
 
     String getDatabaseRef();
+
+	List<EqualityConfig> getEqualityConfigs();
 }

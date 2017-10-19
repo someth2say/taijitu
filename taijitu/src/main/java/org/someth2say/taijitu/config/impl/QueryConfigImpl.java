@@ -25,42 +25,40 @@ public class QueryConfigImpl extends NamedConfig implements QueryConfig {
 
     @Override
     public String getStatement() {
-        String statement = configuration.getString(Comparison.STATEMENT);
-        return statement != null ? statement : parent.getStatement();
+        String statement = getConfiguration().getString(Comparison.STATEMENT);
+        return statement != null ? statement : getParent().getStatement();
     }
 
     @Override
     public int getFetchSize() {
-        Integer fs = configuration.getInteger(Setup.FETCH_SIZE, null);
-        return fs != null ? fs : parent.getFetchSize();
+        Integer fs = getConfiguration().getInteger(Setup.FETCH_SIZE, null);
+        return fs != null ? fs : getParent().getFetchSize();
     }
 
     @Override
     public String[] getKeyFields() {
-        String[] keys = configuration.get(String[].class, Fields.KEY, null);
-        return keys != null ? keys : parent.getKeyFields();
+        String[] keys = getConfiguration().get(String[].class, Fields.KEY, null);
+        return keys != null ? keys : getParent().getKeyFields();
     }
 
     @Override
     public String getDatabaseRef() {
-        String statement = configuration.getString(Comparison.DATABASE_REF);
-        return statement != null ? statement : parent.getDatabaseRef();
+        String statement = getConfiguration().getString(Comparison.DATABASE_REF);
+        return statement != null ? statement : getParent().getDatabaseRef();
     }
 
     @Override
     public Object[] getQueryParameters() {
-        final Object[] params = configuration.get(Object[].class, Comparison.QUERY_PARAMETERS, null);
-        return params != null ? params : parent.getQueryParameters();
+        final Object[] params = getConfiguration().get(Object[].class, Comparison.QUERY_PARAMETERS, null);
+        return params != null ? params : getParent().getQueryParameters();
     }
 
-    //TODO: Move those methods to superclass
-    @Override
-    public List<EqualityConfig> getEqualityConfigs() {
-        final List<ImmutableHierarchicalConfiguration> thisEqConfigs = configuration.immutableChildConfigurationsAt(Comparison.EQUALITY);
-        final List<EqualityConfig> equalityConfigs = thisEqConfigs.stream().map(EqualityConfigImpl::new).collect(Collectors.toList());
-        final List<EqualityConfig> parentEqualityConfigs = parent.getEqualityConfigs();
-        equalityConfigs.addAll(parentEqualityConfigs);
-        return equalityConfigs;
-    }
+	public ImmutableHierarchicalConfiguration getConfiguration() {
+		return configuration;
+	}
+
+	public QueryConfig getParent() {
+		return parent;
+	}
 
 }

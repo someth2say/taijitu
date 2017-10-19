@@ -1,16 +1,16 @@
 package org.someth2say.taijitu.config.impl;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
-import org.apache.commons.configuration2.ex.ConfigurationRuntimeException;
-import org.someth2say.taijitu.config.*;
+import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
 import org.someth2say.taijitu.config.ConfigurationLabels.Setup;
+import org.someth2say.taijitu.config.NamedConfig;
+import org.someth2say.taijitu.config.PluginConfig;
+import org.someth2say.taijitu.config.QueryConfig;
+import org.someth2say.taijitu.config.StrategyConfig;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
-
-public class ComparisonConfigImpl extends NamedConfig implements ComparisonConfig {
+public class ComparisonConfigImpl extends NamedConfig implements ApacheBasedComparisonConfig {
     private final ImmutableHierarchicalConfiguration configuration;
     private final ComparisonConfig parent;
 
@@ -28,23 +28,19 @@ public class ComparisonConfigImpl extends NamedConfig implements ComparisonConfi
     @Override
     public StrategyConfig getStrategyConfig() {
         if (strategyConfig == null) {
-            try {
-                ImmutableHierarchicalConfiguration strategyConfiguration = configuration.immutableConfigurationAt(Comparison.STRATEGY);
-                strategyConfig = new StrategyConfigImpl(strategyConfiguration);
-            } catch (IllegalArgumentException | ConfigurationRuntimeException e) {
-                //No Strategy defined (or many)
-                strategyConfig = parent.getStrategyConfig();
-            }
+        	strategyConfig = ApacheBasedComparisonConfig.super.getStrategyConfig();
         }
         return strategyConfig;
     }
+
+
 
     /*** PLUGINS ***/
 
     @Override
     public PluginConfig[] getComparisonPluginConfigs() {
         // right now, we only allow global plugins. Maybe we can set-up per-comparison plugins someday...
-        return parent.getComparisonPluginConfigs();
+        return getParent().getComparisonPluginConfigs();
     }
 
     /**
@@ -52,8 +48,8 @@ public class ComparisonConfigImpl extends NamedConfig implements ComparisonConfi
      **/
     @Override
     public String getDatabaseRef() {
-        String databaseRef = configuration.getString(Comparison.DATABASE_REF);
-        if (databaseRef == null) databaseRef = parent.getDatabaseRef();
+        String databaseRef = getConfiguration().getString(Comparison.DATABASE_REF);
+        if (databaseRef == null) databaseRef = getParent().getDatabaseRef();
         return databaseRef;
     }
 
@@ -62,9 +58,9 @@ public class ComparisonConfigImpl extends NamedConfig implements ComparisonConfi
      **/
     @Override
     public int getFetchSize() {
-        Integer fs = configuration.getInteger(Setup.FETCH_SIZE, null);
+        Integer fs = getConfiguration().getInteger(Setup.FETCH_SIZE, null);
         if (fs == null) {
-            fs = parent.getFetchSize();
+            fs = getParent().getFetchSize();
         }
         return fs;
     }
@@ -77,40 +73,32 @@ public class ComparisonConfigImpl extends NamedConfig implements ComparisonConfi
     //TODO: Consider moving form Arrays to Lists
     @Override
     public String[] getKeyFields() {
-        String[] keys = configuration.get(String[].class, Comparison.Fields.KEY, null);
-        return keys != null ? keys : parent.getKeyFields();
+        String[] keys = getConfiguration().get(String[].class, Comparison.Fields.KEY, null);
+        return keys != null ? keys : getParent().getKeyFields();
     }
 
     @Override
     public String getColumnMatchingStrategyName() {
-        String columnMatchingStrategy = configuration.getString(Setup.COLUMN_MATCHING_STRATEGY);
-        return columnMatchingStrategy != null ? columnMatchingStrategy : parent.getColumnMatchingStrategyName();
+        String columnMatchingStrategy = getConfiguration().getString(Setup.COLUMN_MATCHING_STRATEGY);
+        return columnMatchingStrategy != null ? columnMatchingStrategy : getParent().getColumnMatchingStrategyName();
     }
 
     @Override
     public String getStatement() {
-        final String statement = configuration.getString(Comparison.STATEMENT);
-        return statement != null ? statement : parent.getStatement();
+        final String statement = getConfiguration().getString(Comparison.STATEMENT);
+        return statement != null ? statement : getParent().getStatement();
     }
 
     @Override
     public Object[] getQueryParameters() {
-        Object[] params = configuration.get(Object[].class, Comparison.QUERY_PARAMETERS, null);
+        Object[] params = getConfiguration().get(Object[].class, Comparison.QUERY_PARAMETERS, null);
         if (params == null) {
-            params = parent.getQueryParameters();
+            params = getParent().getQueryParameters();
         }
         return params;
     }
 
-    @Override
-    public List<EqualityConfig> getEqualityConfigs() {
-        final List<ImmutableHierarchicalConfiguration> thisEqConfigs = configuration.immutableChildConfigurationsAt(Comparison.EQUALITY);
-        final List<EqualityConfig> equalityConfigs = thisEqConfigs.stream().map(EqualityConfigImpl::new).collect(Collectors.toList());
-        final List<EqualityConfig> parentEqualityConfigs = parent.getEqualityConfigs();
-        equalityConfigs.addAll(parentEqualityConfigs);
-        return equalityConfigs;
-    }
-
+    
     /**
      * QUERIES
      **/
@@ -119,10 +107,10 @@ public class ComparisonConfigImpl extends NamedConfig implements ComparisonConfi
     public QueryConfig getSourceQueryConfig() {
         if (sourceQuery == null) {
             try {
-                final ImmutableHierarchicalConfiguration sourceConfig = this.configuration.immutableConfigurationAt(Comparison.SOURCE);
+                final ImmutableHierarchicalConfiguration sourceConfig = this.getConfiguration().immutableConfigurationAt(Comparison.SOURCE);
                 sourceQuery = new QueryConfigImpl(sourceConfig, this);
             } catch (IllegalArgumentException e) {
-                sourceQuery = parent.getSourceQueryConfig();
+                sourceQuery = getParent().getSourceQueryConfig();
             }
         }
         return sourceQuery;
@@ -133,14 +121,23 @@ public class ComparisonConfigImpl extends NamedConfig implements ComparisonConfi
     public QueryConfig getTargetQueryConfig() {
         if (targetQuery == null) {
             try {
-                final ImmutableHierarchicalConfiguration targetConfig = this.configuration.immutableConfigurationAt(Comparison.TARGET);
+                final ImmutableHierarchicalConfiguration targetConfig = this.getConfiguration().immutableConfigurationAt(Comparison.TARGET);
                 targetQuery = new QueryConfigImpl(targetConfig, this);
             } catch (IllegalArgumentException e) {
-                targetQuery = parent.getSourceQueryConfig();
+                targetQuery = getParent().getSourceQueryConfig();
             }
         }
         return targetQuery;
     }
+
+	public ImmutableHierarchicalConfiguration getConfiguration() {
+		return configuration;
+	}
+	
+	@Override
+	public ComparisonConfig getParent() {
+		return parent;
+	}
 
 
 }

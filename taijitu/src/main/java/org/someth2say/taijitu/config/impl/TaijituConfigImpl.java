@@ -1,5 +1,22 @@
 package org.someth2say.taijitu.config.impl;
 
+import static org.someth2say.taijitu.config.DefaultConfig.DATE_TIME_FORMATTER;
+import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_COLUMN_MATCHING_STRATEGY_NAME;
+import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_CONSOLE_LOG_LEVEL;
+import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_EQUALITY_CONFIG;
+import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_FETCHSIZE;
+import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_FILE_LOG_LEVEL;
+import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_OUTPUT_FOLDER;
+import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_QUERY_PARAMETERS;
+import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_SCAN_CLASSPATH;
+import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_STRATEGY_CONFIG;
+import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_THREADS;
+
+import java.io.File;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
@@ -11,24 +28,22 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.ex.ConfigurationRuntimeException;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.TaijituException;
-import org.someth2say.taijitu.compare.ToStringEqualityStrategy;
-import org.someth2say.taijitu.config.*;
+import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
 import org.someth2say.taijitu.config.ConfigurationLabels.Sections;
 import org.someth2say.taijitu.config.ConfigurationLabels.Setup;
-
-import java.io.File;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.someth2say.taijitu.config.DefaultConfig.*;
+import org.someth2say.taijitu.config.DatabaseConfig;
+import org.someth2say.taijitu.config.EqualityConfig;
+import org.someth2say.taijitu.config.PluginConfig;
+import org.someth2say.taijitu.config.QueryConfig;
+import org.someth2say.taijitu.config.StrategyConfig;
+import org.someth2say.taijitu.config.TaijituConfig;
 
 public final class TaijituConfigImpl implements TaijituConfig, ComparisonConfig {
 
     private static final Logger logger = Logger.getLogger(TaijituConfigImpl.class);
 
-    final ImmutableHierarchicalConfiguration configuration;
+    private final ImmutableHierarchicalConfiguration configuration;
 
     private TaijituConfigImpl(final ImmutableHierarchicalConfiguration configuration) {
         super();
@@ -48,7 +63,7 @@ public final class TaijituConfigImpl implements TaijituConfig, ComparisonConfig 
     /**** COMPARISONS *********************************************************************/
     @Override
     public ComparisonConfig[] getComparisons() {
-        final List<ImmutableHierarchicalConfiguration> comparisonConfigs = configuration.immutableChildConfigurationsAt(Sections.COMPARISON);
+        final List<ImmutableHierarchicalConfiguration> comparisonConfigs = getConfiguration().immutableChildConfigurationsAt(Sections.COMPARISON);
         ComparisonConfig[] result = new ComparisonConfig[comparisonConfigs.size()];
         int pos = 0;
         for (ImmutableHierarchicalConfiguration comparisonConfig : comparisonConfigs) {
@@ -61,7 +76,7 @@ public final class TaijituConfigImpl implements TaijituConfig, ComparisonConfig 
 
     @Override
     public DatabaseConfig[] getAllDatabaseConfigs() {
-        final List<ImmutableHierarchicalConfiguration> databaseConfigs = configuration.immutableChildConfigurationsAt(Sections.DATABASE);
+        final List<ImmutableHierarchicalConfiguration> databaseConfigs = getConfiguration().immutableChildConfigurationsAt(Sections.DATABASE);
         DatabaseConfig[] result = new DatabaseConfig[databaseConfigs.size()];
         int pos = 0;
         for (ImmutableHierarchicalConfiguration databaseConfig : databaseConfigs) {
@@ -72,10 +87,10 @@ public final class TaijituConfigImpl implements TaijituConfig, ComparisonConfig 
 
     @Override
     public String getDatabaseRef() {
-        String dbRef = configuration.getString(Comparison.DATABASE_REF, null);
+        String dbRef = getConfiguration().getString(Comparison.DATABASE_REF, null);
         if (dbRef == null) {
             //If no dbRef defined, just use a reference to the first database defined
-            final List<ImmutableHierarchicalConfiguration> dbConfigs = configuration.immutableChildConfigurationsAt(Sections.DATABASE);
+            final List<ImmutableHierarchicalConfiguration> dbConfigs = getConfiguration().immutableChildConfigurationsAt(Sections.DATABASE);
             if (!dbConfigs.isEmpty()) {
                 dbRef = dbConfigs.get(0).getRootElementName();
             }
@@ -85,17 +100,17 @@ public final class TaijituConfigImpl implements TaijituConfig, ComparisonConfig 
 
     @Override
     public String[] getKeyFields() {
-        return configuration.get(String[].class, Comparison.Fields.KEY, null);
+        return getConfiguration().get(String[].class, Comparison.Fields.KEY, null);
     }
 
     @Override
     public String getColumnMatchingStrategyName() {
-        return configuration.getString(Setup.COLUMN_MATCHING_STRATEGY, DEFAULT_COLUMN_MATCHING_STRATEGY_NAME);
+        return getConfiguration().getString(Setup.COLUMN_MATCHING_STRATEGY, DEFAULT_COLUMN_MATCHING_STRATEGY_NAME);
     }
 
     @Override
     public String getStatement() {
-        return configuration.getString(Comparison.STATEMENT, null);
+        return getConfiguration().getString(Comparison.STATEMENT, null);
     }
 
     /**
@@ -104,7 +119,7 @@ public final class TaijituConfigImpl implements TaijituConfig, ComparisonConfig 
     @Override
     public QueryConfig getSourceQueryConfig() {
         try {
-            final ImmutableHierarchicalConfiguration sourceConfig = this.configuration.immutableConfigurationAt(Comparison.SOURCE);
+            final ImmutableHierarchicalConfiguration sourceConfig = this.getConfiguration().immutableConfigurationAt(Comparison.SOURCE);
             return new QueryConfigImpl(sourceConfig, this);
         } catch (IllegalArgumentException e) {
             return null;
@@ -114,7 +129,7 @@ public final class TaijituConfigImpl implements TaijituConfig, ComparisonConfig 
     @Override
     public QueryConfig getTargetQueryConfig() {
         try {
-            final ImmutableHierarchicalConfiguration sourceConfig = this.configuration.immutableConfigurationAt(Comparison.TARGET);
+            final ImmutableHierarchicalConfiguration sourceConfig = this.getConfiguration().immutableConfigurationAt(Comparison.TARGET);
             return new QueryConfigImpl(sourceConfig, this);
         } catch (IllegalArgumentException e) {
             return null;
@@ -129,37 +144,37 @@ public final class TaijituConfigImpl implements TaijituConfig, ComparisonConfig 
      */
     @Override
     public int getThreads() {
-        return configuration.getInt(Setup.THREADS, DEFAULT_THREADS);
+        return getConfiguration().getInt(Setup.THREADS, DEFAULT_THREADS);
     }
 
     @Override
     public String getConsoleLog() {
-        return configuration.getString(Setup.CONSOLE_LOG, DEFAULT_CONSOLE_LOG_LEVEL);
+        return getConfiguration().getString(Setup.CONSOLE_LOG, DEFAULT_CONSOLE_LOG_LEVEL);
     }
 
     @Override
     public String getFileLog() {
-        return configuration.getString(Setup.FILE_LOG, DEFAULT_FILE_LOG_LEVEL);
+        return getConfiguration().getString(Setup.FILE_LOG, DEFAULT_FILE_LOG_LEVEL);
     }
 
     @Override
     public String getOutputFolder() {
-        return configuration.getString(Setup.OUTPUT_FOLDER, DEFAULT_OUTPUT_FOLDER);
+        return getConfiguration().getString(Setup.OUTPUT_FOLDER, DEFAULT_OUTPUT_FOLDER);
     }
 
     @Override
     public int getFetchSize() {
-        return configuration.getInt(Setup.FETCH_SIZE, DEFAULT_FETCHSIZE);
+        return getConfiguration().getInt(Setup.FETCH_SIZE, DEFAULT_FETCHSIZE);
     }
 
     @Override
     public Boolean isUseScanClassPath() {
-        return configuration.getBoolean(Setup.SCAN_CLASSPATH, DEFAULT_SCAN_CLASSPATH);
+        return getConfiguration().getBoolean(Setup.SCAN_CLASSPATH, DEFAULT_SCAN_CLASSPATH);
     }
 
     @Override
     public PluginConfig[] getComparisonPluginConfigs() {
-        final List<ImmutableHierarchicalConfiguration> pluginConfigs = configuration.immutableChildConfigurationsAt(Sections.PLUGINS);
+        final List<ImmutableHierarchicalConfiguration> pluginConfigs = getConfiguration().immutableChildConfigurationsAt(Sections.PLUGINS);
         PluginConfig[] result = new PluginConfig[pluginConfigs.size()];
         int pos = 0;
         for (ImmutableHierarchicalConfiguration pluginConfig : pluginConfigs) {
@@ -169,12 +184,12 @@ public final class TaijituConfigImpl implements TaijituConfig, ComparisonConfig 
     }
 
     public Object[] getQueryParameters() {
-        return configuration.get(Object[].class, Comparison.QUERY_PARAMETERS, DEFAULT_QUERY_PARAMETERS);
+        return getConfiguration().get(Object[].class, Comparison.QUERY_PARAMETERS, DEFAULT_QUERY_PARAMETERS);
     }
 
     @Override
     public List<EqualityConfig> getEqualityConfigs() {
-        final List<ImmutableHierarchicalConfiguration> thisEqConfigs = configuration.immutableChildConfigurationsAt(Comparison.EQUALITY);
+        final List<ImmutableHierarchicalConfiguration> thisEqConfigs = getConfiguration().immutableChildConfigurationsAt(Comparison.EQUALITY);
         final List<EqualityConfig> equalityConfigs = thisEqConfigs.stream().map(EqualityConfigImpl::new).collect(Collectors.toList());
         // Default equality strategy should be always present.
         equalityConfigs.add(DEFAULT_EQUALITY_CONFIG);
@@ -190,7 +205,7 @@ public final class TaijituConfigImpl implements TaijituConfig, ComparisonConfig 
     public StrategyConfig getStrategyConfig() {
         if (strategyConfig == null) {
             try {
-                ImmutableHierarchicalConfiguration strategyConfiguration = configuration.immutableConfigurationAt(Comparison.STRATEGY);
+                ImmutableHierarchicalConfiguration strategyConfiguration = getConfiguration().immutableConfigurationAt(Comparison.STRATEGY);
                 strategyConfig = new StrategyConfigImpl(strategyConfiguration);
             } catch (IllegalArgumentException | ConfigurationRuntimeException e) {
                 //No Strategy defined (or many)
@@ -245,4 +260,8 @@ public final class TaijituConfigImpl implements TaijituConfig, ComparisonConfig 
     public String getName() {
         return null;
     }
+
+	public ImmutableHierarchicalConfiguration getConfiguration() {
+		return configuration;
+	}
 }
