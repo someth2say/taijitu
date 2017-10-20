@@ -1,13 +1,12 @@
 package org.someth2say.taijitu;
 
-import org.someth2say.taijitu.query.properties.HProperties;
-import org.someth2say.taijitu.util.StringUtil;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
+
+import org.someth2say.taijitu.util.StringUtil;
 
 /**
  * Created by Jordi Sola on 10/02/2017.

@@ -1,13 +1,9 @@
 package org.someth2say.taijitu;
 
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.compare.EqualityStrategy;
 import org.someth2say.taijitu.config.ComparisonConfig;
-import org.someth2say.taijitu.config.EqualityConfig;
 import org.someth2say.taijitu.config.QueryConfig;
 import org.someth2say.taijitu.matcher.ColumnMatcher;
-import org.someth2say.taijitu.registry.EqualityStrategyRegistry;
-
 import java.util.*;
 
 /**

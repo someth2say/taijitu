@@ -15,6 +15,4 @@ public interface TaijituConfig extends ComparisonConfig {
 
 	Boolean isUseScanClassPath();
 
-	PluginConfig[] getComparisonPluginConfigs();
-
 }

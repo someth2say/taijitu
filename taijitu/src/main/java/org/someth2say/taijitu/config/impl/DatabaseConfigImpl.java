@@ -8,7 +8,8 @@ public class DatabaseConfigImpl extends NamedConfig implements ApacheBasedDataba
 
     private final ImmutableHierarchicalConfiguration configuration;
 
-    public ImmutableHierarchicalConfiguration getConfiguration() {
+    @Override
+	public ImmutableHierarchicalConfiguration getConfiguration() {
         return configuration;
     }
 

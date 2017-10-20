@@ -1,7 +1,6 @@
 package org.someth2say.taijitu.registry;
 
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.matcher.ColumnMatcher;
 import org.someth2say.taijitu.matcher.IdentityColumnMatcher;
 import org.someth2say.taijitu.matcher.NamingColumnMatcher;

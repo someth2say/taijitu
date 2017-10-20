@@ -25,6 +25,7 @@ public class PrecissionThresholdComparator implements Comparator<Object>, Serial
 		}
 	}
 
+	@Override
 	public int compare(final Object arg0, final Object arg1) {
 		if ((arg0 instanceof BigDecimal) && (arg1 instanceof BigDecimal)) {
 			return compare((BigDecimal) arg0, (BigDecimal) arg1);

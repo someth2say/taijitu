@@ -1,7 +1,6 @@
 package org.someth2say.taijitu.strategy.sorted;
 
 import org.apache.log4j.Logger;
-import org.apache.poi.ss.formula.functions.T;
 import org.someth2say.taijitu.ComparisonRuntime;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.SimpleComparisonResult;

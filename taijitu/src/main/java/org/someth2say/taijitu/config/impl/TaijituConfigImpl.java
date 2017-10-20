@@ -1,22 +1,8 @@
 package org.someth2say.taijitu.config.impl;
 
 import static org.someth2say.taijitu.config.DefaultConfig.DATE_TIME_FORMATTER;
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_COLUMN_MATCHING_STRATEGY_NAME;
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_CONSOLE_LOG_LEVEL;
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_EQUALITY_CONFIG;
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_FETCHSIZE;
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_FILE_LOG_LEVEL;
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_OUTPUT_FOLDER;
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_QUERY_PARAMETERS;
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_SCAN_CLASSPATH;
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_STRATEGY_CONFIG;
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_THREADS;
-
 import java.io.File;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
@@ -25,20 +11,11 @@ import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.builder.fluent.PropertiesBuilderParameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.apache.commons.configuration2.ex.ConfigurationRuntimeException;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.config.ComparisonConfig;
-import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
-import org.someth2say.taijitu.config.ConfigurationLabels.Sections;
-import org.someth2say.taijitu.config.ConfigurationLabels.Setup;
-import org.someth2say.taijitu.config.DatabaseConfig;
-import org.someth2say.taijitu.config.EqualityConfig;
-import org.someth2say.taijitu.config.PluginConfig;
-import org.someth2say.taijitu.config.QueryConfig;
 import org.someth2say.taijitu.config.StrategyConfig;
 import org.someth2say.taijitu.config.TaijituConfig;
-import org.someth2say.taijitu.config.impl.apache.ApacheBasedComparisonConfig;
 import org.someth2say.taijitu.config.impl.apache.ApacheBasedTaijituConfig;
 
 public final class TaijituConfigImpl implements ApacheBasedTaijituConfig {
@@ -120,7 +97,8 @@ public final class TaijituConfigImpl implements ApacheBasedTaijituConfig {
         }
     }
 
-    public ImmutableHierarchicalConfiguration getConfiguration() {
+    @Override
+	public ImmutableHierarchicalConfiguration getConfiguration() {
         return configuration;
     }
 

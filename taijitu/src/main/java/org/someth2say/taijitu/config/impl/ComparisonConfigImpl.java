@@ -2,7 +2,6 @@ package org.someth2say.taijitu.config.impl;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.someth2say.taijitu.config.*;
-import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
 import org.someth2say.taijitu.config.impl.apache.ApacheBasedComparisonConfig;
 
 
@@ -33,7 +32,8 @@ public class ComparisonConfigImpl extends NamedConfig implements ApacheBasedComp
      * QUERIES
      **/
     private QueryConfig sourceQuery = null;
-    public QueryConfig getSourceQueryConfig() {
+    @Override
+	public QueryConfig getSourceQueryConfig() {
         if (sourceQuery == null) {
             sourceQuery = ApacheBasedComparisonConfig.super.getSourceQueryConfig();
         }
@@ -43,14 +43,16 @@ public class ComparisonConfigImpl extends NamedConfig implements ApacheBasedComp
 
     private QueryConfig targetQuery = null;
 
-    public QueryConfig getTargetQueryConfig() {
+    @Override
+	public QueryConfig getTargetQueryConfig() {
         if (targetQuery == null) {
             targetQuery = ApacheBasedComparisonConfig.super.getTargetQueryConfig();
         }
         return targetQuery;
     }
 
-    public ImmutableHierarchicalConfiguration getConfiguration() {
+    @Override
+	public ImmutableHierarchicalConfiguration getConfiguration() {
         return configuration;
     }
 
