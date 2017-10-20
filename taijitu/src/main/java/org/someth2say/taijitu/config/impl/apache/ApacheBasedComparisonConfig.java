@@ -16,7 +16,8 @@ import static org.someth2say.taijitu.config.DefaultConfig.*;
 
 public interface ApacheBasedComparisonConfig extends ComparisonConfig, ApacheBasedQueryConfig {
 
-    ComparisonConfig getParent();
+    @Override
+	ComparisonConfig getParent();
 
     @Override
     default List<EqualityConfig> getEqualityConfigs() {

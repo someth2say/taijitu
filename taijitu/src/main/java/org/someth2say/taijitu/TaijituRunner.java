@@ -38,7 +38,8 @@ public class TaijituRunner implements Callable<ComparisonResult> {
      *
      * @see java.lang.Runnable#run()
      */
-    public ComparisonResult call() {
+    @Override
+	public ComparisonResult call() {
         ComparisonResult result = new SimpleComparisonResult(config);
         ComparisonRuntime runtime = new ComparisonRuntime(config);
         Map<PluginConfig, TaijituPlugin> plugins = PluginRegistry.getPlugins(config.getComparisonPluginConfigs());

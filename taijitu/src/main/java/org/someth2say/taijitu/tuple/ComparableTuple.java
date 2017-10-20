@@ -1,15 +1,13 @@
 package org.someth2say.taijitu.tuple;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonRuntime;
 import org.someth2say.taijitu.compare.EqualityStrategy;
-import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.EqualityConfig;
-import org.someth2say.taijitu.config.QueryConfig;
 import org.someth2say.taijitu.registry.EqualityStrategyRegistry;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class represents a {@link Tuple}, but having the capabilities to compare itself with other tuples, but using {@link EqualityStrategy} objects.

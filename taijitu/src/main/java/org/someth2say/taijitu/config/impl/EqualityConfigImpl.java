@@ -6,7 +6,8 @@ import org.someth2say.taijitu.config.impl.apache.ApacheBasedEqualityConfig;
 
 public class EqualityConfigImpl extends NamedConfig implements ApacheBasedEqualityConfig {
 
-    public ImmutableHierarchicalConfiguration getConfiguration() {
+    @Override
+	public ImmutableHierarchicalConfiguration getConfiguration() {
         return configuration;
     }
 

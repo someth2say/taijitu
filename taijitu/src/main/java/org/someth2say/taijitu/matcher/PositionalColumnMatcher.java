@@ -10,7 +10,7 @@ public class PositionalColumnMatcher implements ColumnMatcher {
 
     @Override
     public String getName() {
-        return this.NAME;
+        return PositionalColumnMatcher.NAME;
     }
 
     @Override

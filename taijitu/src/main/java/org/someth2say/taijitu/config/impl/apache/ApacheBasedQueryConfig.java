@@ -2,7 +2,6 @@ package org.someth2say.taijitu.config.impl.apache;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.someth2say.taijitu.config.ConfigurationLabels;
-import org.someth2say.taijitu.config.DefaultConfig;
 import org.someth2say.taijitu.config.QueryConfig;
 import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
 import org.someth2say.taijitu.config.ConfigurationLabels.Setup;

@@ -17,11 +17,13 @@ public class QueryConfigImpl extends NamedConfig implements ApacheBasedQueryConf
         this.parent = parent;
     }
 
-    public ImmutableHierarchicalConfiguration getConfiguration() {
+    @Override
+	public ImmutableHierarchicalConfiguration getConfiguration() {
         return configuration;
     }
 
-    public QueryConfig getParent() {
+    @Override
+	public QueryConfig getParent() {
         return parent;
     }
 

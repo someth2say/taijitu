@@ -1,6 +1,5 @@
 package org.someth2say.taijitu.compare;
 
-import org.apache.log4j.Logger;
 import org.someth2say.taijitu.config.EqualityConfig;
 
 //TODO: Null safety

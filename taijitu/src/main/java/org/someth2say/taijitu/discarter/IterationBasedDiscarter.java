@@ -19,7 +19,8 @@ public class IterationBasedDiscarter implements Discarter {
         this.method = _method;
     }
 
-    public Object execute(Object... parameters) {
+    @Override
+	public Object execute(Object... parameters) {
         --this.iterationsRemaining;
         if (this.iterationsRemaining <= 0L) {
             this.iterationsRemaining = this.iterations;

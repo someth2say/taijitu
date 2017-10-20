@@ -9,7 +9,8 @@ public abstract class NamedConfig implements Named {
         this.name = name;
     }
 
-    public String getName(){
+    @Override
+	public String getName(){
         return this.name;
     }
 

@@ -3,9 +3,6 @@ package org.someth2say.taijitu.database;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.tuple.ResultSetTupleBuilder;
-import org.someth2say.taijitu.tuple.Tuple;
-import org.someth2say.taijitu.tuple.TupleBuilder;
-
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -13,7 +10,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.function.Function;
 
 public class ResultSetIterator implements Iterator<ComparableTuple> {
     private static final Logger logger = Logger.getLogger(ResultSetIterator.class);
