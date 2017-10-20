@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.config.impl;
+package org.someth2say.taijitu.config.impl.apache;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 

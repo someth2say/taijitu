@@ -1,13 +1,11 @@
 package org.someth2say.taijitu.config;
 
-public interface TaijituConfig {
+public interface TaijituConfig extends ComparisonConfig {
 	ComparisonConfig[] getComparisons();
 
 	DatabaseConfig[] getAllDatabaseConfigs();
 
 	int getThreads();
-
-	int getFetchSize();
 
 	String getConsoleLog();
 
@@ -18,18 +16,5 @@ public interface TaijituConfig {
 	Boolean isUseScanClassPath();
 
 	PluginConfig[] getComparisonPluginConfigs();
-	
-	Object[] getQueryParameters();
 
-	StrategyConfig getStrategyConfig();
-
-    String getDatabaseRef();
-
-	String[] getKeyFields();
-
-	String getColumnMatchingStrategyName();
-
-	String getStatement();
-
-	QueryConfig getSourceQueryConfig();
 }

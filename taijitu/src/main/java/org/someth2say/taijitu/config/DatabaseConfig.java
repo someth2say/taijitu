@@ -4,7 +4,7 @@ import java.util.Properties;
 
 public interface DatabaseConfig {
 
-	Properties getAsProperties();
+	Properties getDatabaseProperties();
 
 	String getName();
 }

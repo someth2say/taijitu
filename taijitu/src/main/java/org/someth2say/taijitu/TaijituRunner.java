@@ -101,12 +101,12 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         return null;
     }
 
-    private ResultSetIterator getAndRegisterResultSetIterator(ComparisonRuntime runtime, ColumnMatcher columnMatcher, QueryConfig sourceQueryConfig) {
-        ResultSetIterator rsIterator = getQueryIterator(sourceQueryConfig, runtime, columnMatcher);
+    private ResultSetIterator getAndRegisterResultSetIterator(ComparisonRuntime runtime, ColumnMatcher columnMatcher, QueryConfig queryConfig) {
+        ResultSetIterator rsIterator = getQueryIterator(queryConfig, runtime, columnMatcher);
         if (rsIterator == null) {
             return null;
         }
-        if (!runtime.registerColumns(rsIterator.getColumns(), sourceQueryConfig, columnMatcher)) {
+        if (!runtime.registerColumns(rsIterator.getColumns(), queryConfig, columnMatcher)) {
             return null;
         }
         return rsIterator;
@@ -123,7 +123,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
             return null;
         }
 
-        ResultSetTupleBuilder tupleBuilder = new ResultSetTupleBuilder(matcher, runtime, queryConfig);
+        ResultSetTupleBuilder tupleBuilder = new ResultSetTupleBuilder(matcher, runtime, queryConfig, config.getEqualityConfigs());
         final int fetchSize = queryConfig.getFetchSize();
         final Object[] queryParameters = queryConfig.getQueryParameters();
         final String statement = queryConfig.getStatement();

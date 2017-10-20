@@ -64,4 +64,8 @@ public class TimeLoggingPlugin implements TaijituPlugin {
         final Period periodTotal = new Duration(start, end).toPeriod();
         logger.info("DONE " + comparisonCount + " comparisons:" + formatter.print(periodTotal));
     }
+
+    public static PluginConfig defaultConfig() {
+        return () -> TimeLoggingPlugin.NAME;
+    }
 }
