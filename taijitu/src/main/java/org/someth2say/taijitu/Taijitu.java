@@ -178,7 +178,7 @@ public final class Taijitu {
     private void startDataSources(TaijituConfig config) {
         DatabaseConfig[] dbConfigs = config.getAllDatabaseConfigs();
         for (DatabaseConfig databaseConfig : dbConfigs) {
-            Properties dbProperties = databaseConfig.getAsProperties();
+            Properties dbProperties = databaseConfig.getDatabaseProperties();
             ConnectionManager.buildDataSource(databaseConfig.getName(), dbProperties);
         }
     }

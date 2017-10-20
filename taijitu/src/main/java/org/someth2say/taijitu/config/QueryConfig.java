@@ -5,9 +5,7 @@ import org.someth2say.taijitu.util.Named;
 import java.util.List;
 
 public interface QueryConfig extends Named{
-    
-    String getName();
-    
+
     String getStatement();
     
     int getFetchSize();
