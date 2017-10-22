@@ -3,12 +3,9 @@ package org.someth2say.taijitu.database;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.tuple.ResultSetTupleBuilder;
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import org.someth2say.taijitu.util.ImmutablePair;
+
+import java.sql.*;
 import java.util.Iterator;
 
 public class ResultSetIterator implements Iterator<ComparableTuple> {
@@ -91,6 +88,7 @@ public class ResultSetIterator implements Iterator<ComparableTuple> {
     @Override
     public ComparableTuple next() {
         try {
+            //TODO: Built tuple should also include the comparators!
             return builder.apply(resultSet);
         } catch (Exception e) {
             close();
@@ -102,11 +100,10 @@ public class ResultSetIterator implements Iterator<ComparableTuple> {
     /**
      * Return the column names, as provided by resultSet metadata.
      *
-     * @return
-     * @throws SQLException
+     * @return Array with description for each column.
      */
-    // TODO: Maybe some day will be worth returning more information (i.e. column type).
-    public String[] getColumns() {
+    // TODO: Create `FieldDescription` class
+    public ImmutablePair<String, String>[] getColumns() {
         if (preparedStatement == null) {
             init();
         }
@@ -114,12 +111,13 @@ public class ResultSetIterator implements Iterator<ComparableTuple> {
         try {
             ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
             int rsColumnCount = resultSetMetaData.getColumnCount();
-            String[] result = new String[rsColumnCount];
+            ImmutablePair<String, String>[] result = new ImmutablePair[rsColumnCount];
             for (int columnIdx = 1; columnIdx <= rsColumnCount; ++columnIdx) {
                 String columnName = resultSetMetaData.getColumnName(columnIdx);
-                if (columnName != null && !"".equals(columnName)) {
-                    result[columnIdx - 1] = columnName;
-                }
+                final String columnClassName = resultSetMetaData.getColumnClassName(columnIdx);
+
+                result[columnIdx - 1] = new ImmutablePair<>(columnName, columnClassName);
+
             }
             return result;
         } catch (SQLException e) {

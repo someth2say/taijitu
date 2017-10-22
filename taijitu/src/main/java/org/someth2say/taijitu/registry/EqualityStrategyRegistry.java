@@ -2,6 +2,7 @@ package org.someth2say.taijitu.registry;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.EqualityStrategy;
+import org.someth2say.taijitu.compare.NaturalEqualityStrategy;
 import org.someth2say.taijitu.compare.ToStringEqualityStrategy;
 import org.someth2say.taijitu.util.ClassScanUtils;
 
@@ -33,6 +34,7 @@ public class EqualityStrategyRegistry {
     public static void useDefaults() {
         instances = new ConcurrentHashMap<>();
         addEqualityStrategy(new ToStringEqualityStrategy());
+        addEqualityStrategy(new NaturalEqualityStrategy());
     }
 
     private static void addEqualityStrategy(EqualityStrategy equalityStrategy) {

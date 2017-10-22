@@ -1,13 +1,13 @@
 package org.someth2say.taijitu.tuple;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonRuntime;
 import org.someth2say.taijitu.compare.EqualityStrategy;
 import org.someth2say.taijitu.config.EqualityConfig;
 import org.someth2say.taijitu.registry.EqualityStrategyRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents a {@link Tuple}, but having the capabilities to compare itself with other tuples, but using {@link EqualityStrategy} objects.
@@ -72,7 +72,7 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
             String fieldName = runtime.getCanonicalColumns().get(columnIdx);
             final EqualityConfig equalityConfig = getEqualityConfigFor(keyValue.getClass(), fieldName, equalityConfigs);
             final EqualityStrategy comparator = getEqualityStrategy(equalityConfig);
-            logger.info("Comparing field: " + fieldName + " this: " + keyValue + "("+keyValue.getClass().getName()+") other: " + otherKeyValue + "("+otherKeyValue.getClass().getName()+") comparator: " + comparator.getName() + " config: " + equalityConfig.getEqualityParameters());
+            logger.info("Comparing field: " + fieldName + " this: " + keyValue + "(" + keyValue.getClass().getName() + ") other: " + otherKeyValue + "(" + otherKeyValue.getClass().getName() + ") comparator: " + comparator.getName() + " config: " + equalityConfig.getEqualityParameters());
             if (!comparator.equals(keyValue, otherKeyValue, equalityConfig.getEqualityParameters())) {
                 return false;
             }
@@ -104,16 +104,21 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
                             try {
                                 final String configClassName = equalityConfig.getFieldClass();
                                 final Class<?> configClass = configClassName != null ? Class.forName(configClassName) : null;
-                                final String configFieldName = equalityConfig.getFieldName();
-
-                                return (fieldName.equals(configFieldName) && configClass != null && configClass.isAssignableFrom(fieldClass)) ||
-                                        (configFieldName == null && configClass != null && configClass.isAssignableFrom(fieldClass)) ||
-                                        (configFieldName == null && configClass == null);
+                                return (fieldNameMatch(fieldName, equalityConfig.getFieldName()) && fieldClassMatch(fieldClass, configClass));
                             } catch (ClassNotFoundException e) {
+                                //TODO: Log error
                                 return false;
                             }
                         }
                 ).findFirst().get();
+    }
+
+    private <T> boolean fieldClassMatch(Class<T> fieldClass, Class<?> configClass) {
+        return configClass == null || configClass.isAssignableFrom(fieldClass);
+    }
+
+    private boolean fieldNameMatch(String fieldName, String configFieldName) {
+        return configFieldName == null || fieldName.equals(configFieldName);
     }
 
 

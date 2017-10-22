@@ -4,6 +4,8 @@ import org.apache.log4j.Logger;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.QueryConfig;
 import org.someth2say.taijitu.matcher.ColumnMatcher;
+import org.someth2say.taijitu.util.ImmutablePair;
+
 import java.util.*;
 
 /**
@@ -20,7 +22,7 @@ public class ComparisonRuntime {
     //TODO: This hurts! should be final...
     private List<String> canonicalColumns;
     private List<String> canonicalKeys;
-    private Map<String, String[]> providedColumnsMap = new HashMap<>();
+    private Map<String, ImmutablePair<String, String>[]> providedColumnsMap = new HashMap<String, ImmutablePair<String, String>[]>();
 
     public ComparisonRuntime(final ComparisonConfig comparisonConfig) {
         this.comparisonConfig = comparisonConfig;
@@ -36,12 +38,12 @@ public class ComparisonRuntime {
         return res;
     }
 
-    public List<String> getProvidedColumns(String name) {
+    public List<ImmutablePair<String, String>> getProvidedColumns(String name) {
         return Arrays.asList(providedColumnsMap.get(name));
     }
 
 
-    boolean registerColumns(final String[] providedColumns, final QueryConfig queryConfig, final ColumnMatcher columnMatcher) {
+    boolean registerColumns(final ImmutablePair<String, String>[] providedColumns, final QueryConfig queryConfig, final ColumnMatcher columnMatcher) {
         if (providedColumns == null) return false;
         providedColumnsMap.put(queryConfig.getName(), providedColumns);
 

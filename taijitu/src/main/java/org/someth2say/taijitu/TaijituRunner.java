@@ -95,6 +95,12 @@ public class TaijituRunner implements Callable<ComparisonResult> {
             } else {
                 ResultSetIterator targetIterator = getAndRegisterResultSetIterator(runtime, matcher, config.getTargetQueryConfig());
                 if (targetIterator != null) {
+
+                    //This point we can actually define comparators (we finally know the canonical columns)
+
+                    sourceIterator.registerComparators();
+                    targetIterator.registerComparators();
+
                     return strategy.runComparison(sourceIterator, targetIterator, runtime, config);
                 }
             }
@@ -124,7 +130,9 @@ public class TaijituRunner implements Callable<ComparisonResult> {
             return null;
         }
 
+
         ResultSetTupleBuilder tupleBuilder = new ResultSetTupleBuilder(matcher, runtime, queryConfig, config.getEqualityConfigs());
+
         final int fetchSize = queryConfig.getFetchSize();
         final Object[] queryParameters = queryConfig.getQueryParameters();
         final String statement = queryConfig.getStatement();

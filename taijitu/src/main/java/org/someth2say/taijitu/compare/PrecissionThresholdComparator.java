@@ -7,6 +7,7 @@ import java.util.Comparator;
 /**
  * @author Jordi Sola
  */
+@Deprecated
 public class PrecissionThresholdComparator implements Comparator<Object>, Serializable {
 	private static final long serialVersionUID = 3436641942039712284L;
 	private final double threshold;

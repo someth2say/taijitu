@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.someth2say.taijitu.compare.ComparisonResult;
+import org.someth2say.taijitu.compare.NaturalEqualityStrategy;
 import org.someth2say.taijitu.compare.ToStringEqualityStrategy;
 import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.database.ConnectionManager;
@@ -132,7 +133,7 @@ public class TaijituTest {
 
         //Add another comparator
 //        testProperties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ToStringEqualityStrategy.NAME, ToStringEqualityStrategy.NAME);
-        testProperties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ToStringEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Integer.class.getName());
+        testProperties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + NaturalEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Integer.class.getName());
 
 
     }
