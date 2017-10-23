@@ -8,9 +8,9 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.someth2say.taijitu.compare.equality.CaseInsensitiveEqualityStrategy;
 import org.someth2say.taijitu.compare.ComparisonResult;
-import org.someth2say.taijitu.compare.NaturalEqualityStrategy;
-import org.someth2say.taijitu.compare.ToStringEqualityStrategy;
+import org.someth2say.taijitu.compare.equality.ValueThresholdEqualityStrategy;
 import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.database.QueryUtilsException;
@@ -132,8 +132,9 @@ public class TaijituTest {
         testProperties.setProperty(ConfigurationLabels.Sections.SETUP + "." + ConfigurationLabels.Setup.CONSOLE_LOG, "DEBUG");
 
         //Add another comparator
-//        testProperties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ToStringEqualityStrategy.NAME, ToStringEqualityStrategy.NAME);
-        testProperties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + NaturalEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Integer.class.getName());
+        testProperties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + CaseInsensitiveEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, String.class.getName());
+        testProperties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Double.class.getName());
+        testProperties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "0.01");
 
 
     }

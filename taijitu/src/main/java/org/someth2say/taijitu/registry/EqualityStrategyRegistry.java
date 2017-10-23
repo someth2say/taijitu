@@ -1,9 +1,10 @@
 package org.someth2say.taijitu.registry;
 
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.compare.EqualityStrategy;
-import org.someth2say.taijitu.compare.NaturalEqualityStrategy;
-import org.someth2say.taijitu.compare.ToStringEqualityStrategy;
+import org.someth2say.taijitu.compare.equality.CaseInsensitiveEqualityStrategy;
+import org.someth2say.taijitu.compare.equality.EqualityStrategy;
+import org.someth2say.taijitu.compare.equality.ToStringEqualityStrategy;
+import org.someth2say.taijitu.compare.equality.ValueThresholdEqualityStrategy;
 import org.someth2say.taijitu.util.ClassScanUtils;
 
 import java.util.Map;
@@ -34,7 +35,9 @@ public class EqualityStrategyRegistry {
     public static void useDefaults() {
         instances = new ConcurrentHashMap<>();
         addEqualityStrategy(new ToStringEqualityStrategy());
-        addEqualityStrategy(new NaturalEqualityStrategy());
+        addEqualityStrategy(new CaseInsensitiveEqualityStrategy());
+        addEqualityStrategy(new ValueThresholdEqualityStrategy());
+
     }
 
     private static void addEqualityStrategy(EqualityStrategy equalityStrategy) {

@@ -2,7 +2,7 @@ package org.someth2say.taijitu.config;
 
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.someth2say.taijitu.compare.ToStringEqualityStrategy;
+import org.someth2say.taijitu.compare.equality.ToStringEqualityStrategy;
 import org.someth2say.taijitu.matcher.NamingFieldMatcher;
 import org.someth2say.taijitu.plugins.logging.TimeLoggingPlugin;
 import org.someth2say.taijitu.strategy.sorted.SortedStrategy;

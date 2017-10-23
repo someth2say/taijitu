@@ -2,7 +2,7 @@ package org.someth2say.taijitu.tuple;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonRuntime;
-import org.someth2say.taijitu.compare.EqualityStrategy;
+import org.someth2say.taijitu.compare.equality.EqualityStrategy;
 import org.someth2say.taijitu.config.EqualityConfig;
 import org.someth2say.taijitu.registry.EqualityStrategyRegistry;
 

@@ -5,7 +5,9 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.ComparisonResult;
@@ -127,9 +129,14 @@ public class TaijituRunner implements Callable<ComparisonResult> {
     }
 
     private EqualityConfig getEqualityConfigFor(final String fieldClass, final String fieldName, final List<EqualityConfig> equalityConfigs) {
-        return equalityConfigs.stream()
-                .filter(equalityConfig -> configMatch(fieldName, equalityConfig.getFieldName()) && configMatch(fieldClass, equalityConfig.getFieldClass())
-                ).findFirst().get();
+
+        Optional<EqualityConfig> perfectMatches = equalityConfigs.stream().filter(eq -> fieldName.equals(eq.getFieldName()) && fieldClass.equals(eq.getFieldClass())).findFirst();
+        Optional<EqualityConfig> nameMatches = equalityConfigs.stream().filter(eq -> fieldName.equals(eq.getFieldName()) && eq.getFieldClass() == null).findFirst();
+        Optional<EqualityConfig> classMathes = equalityConfigs.stream().filter(eq -> eq.getFieldName() == null && fieldClass.equals(eq.getFieldClass())).findFirst();
+        Optional<EqualityConfig> allMathes = equalityConfigs.stream().filter(eq -> eq.getFieldName() == null && eq.getFieldClass() == null).findFirst();
+
+        return perfectMatches.orElse(nameMatches.orElse(classMathes.orElse(allMathes.get())));
+
     }
 
     private boolean configMatch(String field, String config) {

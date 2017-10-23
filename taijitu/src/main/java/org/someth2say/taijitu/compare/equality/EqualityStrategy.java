@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.compare;
+package org.someth2say.taijitu.compare.equality;
 
 import org.someth2say.taijitu.util.Named;
 
@@ -8,12 +8,12 @@ import org.someth2say.taijitu.util.Named;
  * But I do not like this name, as implies "hashing".
  * I do prefer the term "EqualityStrategy", adding the definition for the natural order (compare)
  */
-public interface EqualityStrategy extends Named {
+public interface EqualityStrategy<T> extends Named {
 
-    int computeHashCode(Object keyValue, Object equalityConfig);
+    int computeHashCode(T keyValue, Object equalityConfig);
 
-    boolean equals(Object object1, Object o2, Object equalityConfig);
+    boolean equals(T object1, T o2, Object equalityConfig);
 
-    int compare(Object object1, Object o2, Object equalityConfig);
+    int compare(T object1, T o2, Object equalityConfig);
 
 }

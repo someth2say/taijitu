@@ -1,25 +1,24 @@
-package org.someth2say.taijitu.compare;
+package org.someth2say.taijitu.compare.equality;
 
 import org.someth2say.taijitu.config.EqualityConfig;
 
-//TODO: Null safety
-public class ToStringEqualityStrategy implements EqualityStrategy {
+public class CaseInsensitiveEqualityStrategy implements EqualityStrategy<String> {
 
-    public static String NAME = "toString";
+    public static String NAME = "caseInsensitive";
 
     @Override
-    public int computeHashCode(Object object, Object equalityConfig) {
-        return object.toString().hashCode();
+    public int computeHashCode(String object, Object equalityConfig) {
+        return object.toUpperCase().hashCode();
     }
 
     @Override
-    public boolean equals(Object object1, Object object2, Object equalityConfig) {
-        return object1.toString().equals(object2.toString());
+    public boolean equals(String object1, String object2, Object equalityConfig) {
+        return object1.toUpperCase().equals(object2.toUpperCase());
     }
 
     @Override
-    public int compare(Object object1, Object object2, Object equalityConfig) {
-        return object1.toString().compareTo(object2.toString());
+    public int compare(String object1, String object2, Object equalityConfig) {
+        return object1.toUpperCase().compareTo(object2.toUpperCase());
     }
 
 
@@ -42,7 +41,7 @@ public class ToStringEqualityStrategy implements EqualityStrategy {
 
             @Override
             public String getName() {
-                return ToStringEqualityStrategy.NAME;
+                return CaseInsensitiveEqualityStrategy.NAME;
             }
         };
     }
