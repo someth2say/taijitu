@@ -12,7 +12,7 @@ import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.SimpleComparisonResult;
 import org.someth2say.taijitu.config.*;
 import org.someth2say.taijitu.database.ResultSetIterator;
-import org.someth2say.taijitu.matcher.ColumnMatcher;
+import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.registry.MatcherRegistry;
 import org.someth2say.taijitu.registry.PluginRegistry;
@@ -91,13 +91,13 @@ public class TaijituRunner implements Callable<ComparisonResult> {
     private ComparisonResult runComparisonStrategy(ComparisonRuntime runtime, ComparisonStrategy strategy) {
 
         QueryConfig sourceQueryConfig = config.getSourceQueryConfig();
-        ColumnMatcher sourceMatcher = MatcherRegistry.getIdentityMatcher();
+        FieldMatcher sourceMatcher = MatcherRegistry.getIdentityMatcher();
         ResultSetTupleBuilder sourceTupleBuilder = new ResultSetTupleBuilder(sourceMatcher, runtime, sourceQueryConfig);
         ResultSetIterator sourceIterator = getAndRegisterResultSetIterator(runtime, sourceMatcher, sourceQueryConfig, sourceTupleBuilder);
         if (sourceIterator != null) {
-            final ColumnMatcher targetMatcher = MatcherRegistry.getMatcher(config.getColumnMatchingStrategyName());
+            final FieldMatcher targetMatcher = MatcherRegistry.getMatcher(config.getMatchingStrategyName());
             if (targetMatcher == null) {
-                logger.error("Unable to find column matching strategy '" + config.getColumnMatchingStrategyName() + "'");
+                logger.error("Unable to find matching strategy '" + config.getMatchingStrategyName() + "'");
             } else {
 
                 QueryConfig targetQueryConfig = config.getTargetQueryConfig();
@@ -105,8 +105,8 @@ public class TaijituRunner implements Callable<ComparisonResult> {
                 ResultSetIterator targetIterator = getAndRegisterResultSetIterator(runtime, targetMatcher, targetQueryConfig, targetTupleBuilder);
                 if (targetIterator != null) {
 
-                    //This point we can actually define comparators (we finally know the canonical columns)
-                    EqualityConfig[] equalityConfigs = getEqualityConfigs(runtime.getCanonicalColumns());
+                    //This point we can actually define comparators (we finally know the canonical fields)
+                    EqualityConfig[] equalityConfigs = getEqualityConfigs(runtime.getCanonicalFields());
                     sourceTupleBuilder.setEqualityConfigs(equalityConfigs);
                     targetTupleBuilder.setEqualityConfigs(equalityConfigs);
 
@@ -117,10 +117,10 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         return null;
     }
 
-    private EqualityConfig[] getEqualityConfigs(final List<FieldDescription> canonicalColumns) {
-        EqualityConfig[] result = new EqualityConfig[canonicalColumns.size()];
+    private EqualityConfig[] getEqualityConfigs(final List<FieldDescription> canonicalFields) {
+        EqualityConfig[] result = new EqualityConfig[canonicalFields.size()];
         int pos = 0;
-        for (FieldDescription fieldDescription : canonicalColumns) {
+        for (FieldDescription fieldDescription : canonicalFields) {
             result[pos++] = getEqualityConfigFor(fieldDescription.getClazz(), fieldDescription.getName(), config.getEqualityConfigs());
         }
         return result;
@@ -136,12 +136,12 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         return config == null || config.equals(field);
     }
 
-    private ResultSetIterator getAndRegisterResultSetIterator(ComparisonRuntime runtime, ColumnMatcher columnMatcher, QueryConfig queryConfig, ResultSetTupleBuilder tupleBuilder) {
+    private ResultSetIterator getAndRegisterResultSetIterator(ComparisonRuntime runtime, FieldMatcher fieldMatcher, QueryConfig queryConfig, ResultSetTupleBuilder tupleBuilder) {
         ResultSetIterator rsIterator = getQueryIterator(queryConfig, tupleBuilder);
         if (rsIterator == null) {
             return null;
         }
-        if (!runtime.registerColumns(rsIterator.getColumns(), queryConfig, columnMatcher)) {
+        if (!runtime.registerFields(rsIterator.getFields(), queryConfig, fieldMatcher)) {
             return null;
         }
         return rsIterator;

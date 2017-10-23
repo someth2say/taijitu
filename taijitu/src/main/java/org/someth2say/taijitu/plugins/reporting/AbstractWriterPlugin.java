@@ -30,7 +30,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //        final Collection<Pair<ComparableTuple, ComparableTuple>> different = comparisonResult.getDifferent();
 //        final String[][] result = new String[different.size() * 2 + 1][];
 //
-//        final List<String> fields = taijituData.getCanonicalColumns();
+//        final List<String> fields = taijituData.getCanonicalFields();
 //        final List<String> keyFields = taijituData.getCanonicalKeys();
 //
 //        int rowIdx = 0;
@@ -42,7 +42,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //            highLightKeyFields(result[rowIdx], keyFields);
 //
 //            boolean[] keyFieldsMap = StringUtil.getBitMap(fields, keyFields);
-//            boolean[] compareFieldsMap = StringUtil.getBitMap(fields, taijituData.getCanonicalColumns());
+//            boolean[] compareFieldsMap = StringUtil.getBitMap(fields, taijituData.getCanonicalFields());
 //            int[] sourceFieldToColumnsMap = ColumnDescriptionUtils.getFieldPositions(fields, comparisonResult.getSourceColumnDescriptions());
 //            int[] targetFieldToColumnsMap = ColumnDescriptionUtils.getFieldPositions(fields, comparisonResult.getTargetColumnDescriptions());
 //            // Contents
@@ -58,9 +58,9 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
     }
 
     private void highLightKeyFields(List<String> header, List<String> keyFields) {
-        for (int columnIdx = 0; columnIdx < header.size(); columnIdx++) {
-            if (keyFields.contains(header.get(columnIdx))) {
-                header.set(columnIdx, header.get(columnIdx) + "*");
+        for (int fieldIdx = 0; fieldIdx < header.size(); fieldIdx++) {
+            if (keyFields.contains(header.get(fieldIdx))) {
+                header.set(fieldIdx, header.get(fieldIdx) + "*");
             }
         }
     }
@@ -90,7 +90,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
         if (!missings.isEmpty()) {
             int idx = 0;
             // Headers
-            result[idx] = comparison.getCanonicalColumns().stream().map(FieldDescription::getName).collect(Collectors.toList());
+            result[idx] = comparison.getCanonicalFields().stream().map(FieldDescription::getName).collect(Collectors.toList());
 
             final List<String> keyFields = comparison.getCanonicalKeys();
             highLightKeyFields(result[0], keyFields);

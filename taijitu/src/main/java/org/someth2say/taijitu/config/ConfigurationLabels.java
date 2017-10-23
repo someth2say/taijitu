@@ -58,7 +58,7 @@ public final class ConfigurationLabels {
         public static final String FILE_LOG = "fileLog";
         public static final String OUTPUT_FOLDER = "outputFolder";
         public static final String PRECISION_THRESHOLD = "precisionThreshold";
-        public static final String COLUMN_MATCHING_STRATEGY = "columnMatcher";
+        public static final String MATCHING_STRATEGY = "matching";
         public static final String QUERY_OPTIMIZATION = "queryOptimization";
         public static final String SCAN_CLASSPATH = "scanClasspath";
 

@@ -13,7 +13,7 @@ public interface ComparisonConfig extends Named, QueryConfig {
 
     QueryConfig getTargetQueryConfig();
 
-    String getColumnMatchingStrategyName();
+    String getMatchingStrategyName();
 
     List<EqualityConfig> getEqualityConfigs();
 }

@@ -104,7 +104,7 @@ public class ResultSetIterator implements Iterator<ComparableTuple> {
      * @return Array with description for each column.
      */
     // TODO: Create `FieldDescription` class
-    public FieldDescription[] getColumns() {
+    public FieldDescription[] getFields() {
         if (preparedStatement == null) {
             init();
         }

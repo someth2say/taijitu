@@ -54,10 +54,10 @@ public interface ApacheBasedComparisonConfig extends ComparisonConfig, ApacheBas
     }
 
     @Override
-    default String getColumnMatchingStrategyName() {
-        String columnMatchingStrategy = getConfiguration().getString(ConfigurationLabels.Setup.COLUMN_MATCHING_STRATEGY);
-        return columnMatchingStrategy != null ? columnMatchingStrategy
-                : getParent() != null ? getParent().getColumnMatchingStrategyName() : DEFAULT_COLUMN_MATCHING_STRATEGY_NAME;
+    default String getMatchingStrategyName() {
+        String matchingStrategy = getConfiguration().getString(ConfigurationLabels.Setup.MATCHING_STRATEGY);
+        return matchingStrategy != null ? matchingStrategy
+                : getParent() != null ? getParent().getMatchingStrategyName() : DEFAULT_MATCHING_STRATEGY_NAME;
     }
 
     @Override

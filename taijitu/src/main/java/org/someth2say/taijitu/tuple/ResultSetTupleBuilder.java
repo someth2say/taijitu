@@ -4,7 +4,7 @@ import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonRuntime;
 import org.someth2say.taijitu.config.EqualityConfig;
 import org.someth2say.taijitu.config.QueryConfig;
-import org.someth2say.taijitu.matcher.ColumnMatcher;
+import org.someth2say.taijitu.matcher.FieldMatcher;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,12 +13,12 @@ import java.util.List;
 public class ResultSetTupleBuilder implements TupleBuilder<ResultSet, ComparableTuple> {
     private static final Logger logger = Logger.getLogger(ResultSetTupleBuilder.class);
 
-    private final ColumnMatcher matcher;
+    private final FieldMatcher matcher;
     private final ComparisonRuntime runtime;
     private final QueryConfig queryConfig;
     private EqualityConfig[] equalityConfigs;
 
-    public ResultSetTupleBuilder(final ColumnMatcher matcher, final ComparisonRuntime runtime, final QueryConfig queryConfig) {
+    public ResultSetTupleBuilder(final FieldMatcher matcher, final ComparisonRuntime runtime, final QueryConfig queryConfig) {
         this.matcher = matcher;
         this.runtime = runtime;
         this.queryConfig = queryConfig;
@@ -26,25 +26,25 @@ public class ResultSetTupleBuilder implements TupleBuilder<ResultSet, Comparable
 
     @Override
     public ComparableTuple apply(ResultSet resultSet) {
-        List<FieldDescription> canonicalColumns = runtime.getCanonicalColumns();
-        List<FieldDescription> providedColumns = runtime.getProvidedColumns(queryConfig.getName());
-        Object[] values = extract(matcher, resultSet, canonicalColumns, providedColumns);
+        List<FieldDescription> canonicalFields = runtime.getCanonicalFields();
+        List<FieldDescription> providedFields = runtime.getProvidedFields(queryConfig.getName());
+        Object[] values = extract(matcher, resultSet, canonicalFields, providedFields);
         return new ComparableTuple(values, runtime, equalityConfigs);
     }
 
-    private static Object[] extract(ColumnMatcher matcher, ResultSet rs, List<FieldDescription> canonicalColumns, List<FieldDescription> providedColumns) {
-        Object[] columnValues = new Object[canonicalColumns.size()];
-        int columnIdx = 0;
-        for (FieldDescription canonicalColumn : canonicalColumns) {
-            String column = matcher.getColumnFromCanonical(canonicalColumn, canonicalColumns, providedColumns);
+    private static Object[] extract(FieldMatcher matcher, ResultSet rs, List<FieldDescription> canonicalFields, List<FieldDescription> providedFields) {
+        Object[] fieldValues = new Object[canonicalFields.size()];
+        int fieldIdx = 0;
+        for (FieldDescription canonicalField : canonicalFields) {
+            String field = matcher.getFieldFromCanonical(canonicalField, canonicalFields, providedFields);
             try {
-                columnValues[columnIdx++] = rs.getObject(column);
+                fieldValues[fieldIdx++] = rs.getObject(field);
             } catch (SQLException e) {
-                logger.error("Can\'t retrieve value for column" + column + "(canonical column was " + canonicalColumn + ")", e);
+                logger.error("Can\'t retrieve value for field" + field + "(canonical field was " + canonicalField + ")", e);
                 return null;
             }
         }
-        return columnValues;
+        return fieldValues;
     }
 
     public void setEqualityConfigs(EqualityConfig[] equalityConfigs) {

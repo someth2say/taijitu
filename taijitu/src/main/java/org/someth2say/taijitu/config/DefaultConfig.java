@@ -3,7 +3,7 @@ package org.someth2say.taijitu.config;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.someth2say.taijitu.compare.ToStringEqualityStrategy;
-import org.someth2say.taijitu.matcher.NamingColumnMatcher;
+import org.someth2say.taijitu.matcher.NamingFieldMatcher;
 import org.someth2say.taijitu.plugins.logging.TimeLoggingPlugin;
 import org.someth2say.taijitu.strategy.sorted.SortedStrategy;
 
@@ -22,7 +22,7 @@ public class DefaultConfig {
     public static final EqualityConfig DEFAULT_EQUALITY_CONFIG = ToStringEqualityStrategy.defaultConfig();
     public static final PluginConfig[] DEFAULT_PLUGINS_CONFIG = {TimeLoggingPlugin.defaultConfig()};
 
-    public static final String DEFAULT_COLUMN_MATCHING_STRATEGY_NAME = NamingColumnMatcher.NAME;
+    public static final String DEFAULT_MATCHING_STRATEGY_NAME = NamingFieldMatcher.NAME;
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("yyyyMMdd");
     public static final Object[] DEFAULT_QUERY_PARAMETERS = new Object[0];
 

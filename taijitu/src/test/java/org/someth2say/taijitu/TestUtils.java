@@ -36,13 +36,13 @@ public class TestUtils {
         return result;
     }
 
-    public static void createTable(Connection conn, String tableName, String[] columnDefs, String[][] columnValues) throws SQLException {
+    public static void createTable(Connection conn, String tableName, String[] fieldDefs, String[][] fieldValues) throws SQLException {
         //Create the table
-        conn.createStatement().executeUpdate("CREATE TABLE " + tableName + " (" + StringUtil.join(columnDefs) + ");");
+        conn.createStatement().executeUpdate("CREATE TABLE " + tableName + " (" + StringUtil.join(fieldDefs) + ");");
 
         //Insert values
-        for (String[] columnValue : columnValues) {
-            conn.createStatement().executeUpdate("INSERT INTO " + tableName + " VALUES(" + StringUtil.join(columnValue) + ");");
+        for (String[] fieldValue : fieldValues) {
+            conn.createStatement().executeUpdate("INSERT INTO " + tableName + " VALUES(" + StringUtil.join(fieldValue) + ");");
         }
 
         registerTable(tableName);

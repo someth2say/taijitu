@@ -38,9 +38,9 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
     @Override
     public int hashCode() {
         int result = 1;
-        for (int keyColumnIdx : runtime.getKeyColumnsIdxs()) {
-            Object keyValue = getValue(keyColumnIdx);
-            final EqualityConfig equalityConfig = equalityConfigs[keyColumnIdx];
+        for (int keyFieldIdx : runtime.getKeyFieldIdxs()) {
+            Object keyValue = getValue(keyFieldIdx);
+            final EqualityConfig equalityConfig = equalityConfigs[keyFieldIdx];
             final EqualityStrategy equalityStrategy = getEqualityStrategy(equalityConfig);
             int keyHashCode = equalityStrategy.computeHashCode(keyValue, equalityConfig.getEqualityParameters());
             result = 31 * result + keyHashCode;
@@ -54,19 +54,19 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
     }
 
     private boolean equalKeys(ComparableTuple other) {
-        return equalColumns(other, runtime.getKeyColumnsIdxs());
+        return equalFields(other, runtime.getKeyFieldIdxs());
     }
 
     public boolean equalsNonKeys(ComparableTuple other) {
-        return equalColumns(other, runtime.getNonKeyColumnsIdxs());
+        return equalFields(other, runtime.getNonKeyFieldsIdxs());
     }
 
-    private boolean equalColumns(ComparableTuple other, int[] columnsIdxs) {
-        for (int columnIdx : columnsIdxs) {
-            Object keyValue = getValue(columnIdx);
-            Object otherKeyValue = other.getValue(columnIdx);
-            FieldDescription fieldDescription = runtime.getCanonicalColumns().get(columnIdx);
-            final EqualityConfig equalityConfig = equalityConfigs[columnIdx];
+    private boolean equalFields(ComparableTuple other, int[] fieldIdxs) {
+        for (int fieldIdx : fieldIdxs) {
+            Object keyValue = getValue(fieldIdx);
+            Object otherKeyValue = other.getValue(fieldIdx);
+            FieldDescription fieldDescription = runtime.getCanonicalFields().get(fieldIdx);
+            final EqualityConfig equalityConfig = equalityConfigs[fieldIdx];
             final EqualityStrategy equalityStrategy = getEqualityStrategy(equalityConfig);
             //TODO: Lazy logging
             logger.info("Comparing field: " + fieldDescription + " this: " + keyValue + "(" + keyValue.getClass().getName() + ") other: " + otherKeyValue + "(" + otherKeyValue.getClass().getName() + ") equalityStrategy: " + equalityStrategy.getName() + " config: " + equalityConfig.getEqualityParameters());
@@ -79,11 +79,11 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
 
     @Override
     public int compareTo(ComparableTuple other) {
-        int[] columnsIdxs = runtime.getKeyColumnsIdxs();
-        for (int columnIdx : columnsIdxs) {
-            Object keyValue = getValue(columnIdx);
-            Object otherKeyValue = other.getValue(columnIdx);
-            final EqualityConfig equalityConfig = equalityConfigs[columnIdx];
+        int[] fieldIdxs = runtime.getKeyFieldIdxs();
+        for (int fieldIdx : fieldIdxs) {
+            Object keyValue = getValue(fieldIdx);
+            Object otherKeyValue = other.getValue(fieldIdx);
+            final EqualityConfig equalityConfig = equalityConfigs[fieldIdx];
             final EqualityStrategy equalityStrategy = getEqualityStrategy(equalityConfig);
             final int keyComparison = equalityStrategy.compare(keyValue, otherKeyValue, equalityConfig.getEqualityParameters());
             if (keyComparison != 0) {

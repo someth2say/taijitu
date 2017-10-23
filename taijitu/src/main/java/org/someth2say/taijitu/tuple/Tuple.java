@@ -9,15 +9,15 @@ import java.util.Iterator;
  * @author Jordi Sola
  */
 public abstract class Tuple {
-    private final Object[] columns;
+    private final Object[] fieldValues;
 
-    public Tuple(Object[] columns) {
-        this.columns = columns;
+    public Tuple(Object[] fieldValues) {
+        this.fieldValues = fieldValues;
     }
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(this.columns);
+        return java.util.Objects.hash(this.fieldValues);
     }
 
     @Override
@@ -28,16 +28,16 @@ public abstract class Tuple {
             return false;
         } else {
             Tuple other = (Tuple) obj;
-            return Arrays.equals(this.columns, other.columns);
+            return Arrays.equals(this.fieldValues, other.fieldValues);
         }
     }
 
     public Object getValue(int pos) {
-        return this.columns[pos];
+        return this.fieldValues[pos];
     }
 
     public Iterator<Object> iterator() {
-        return Arrays.asList(this.columns).iterator();
+        return Arrays.asList(this.fieldValues).iterator();
     }
 
     @Override
@@ -61,7 +61,7 @@ public abstract class Tuple {
     }
 
     public int size() {
-        return this.columns.length;
+        return this.fieldValues.length;
     }
 
 }
