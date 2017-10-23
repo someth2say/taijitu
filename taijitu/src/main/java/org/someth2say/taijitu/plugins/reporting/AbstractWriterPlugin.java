@@ -7,11 +7,13 @@ import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.config.PluginConfig;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
+import org.someth2say.taijitu.tuple.FieldDescription;
 import org.someth2say.taijitu.util.Pair;
 
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Jordi Sola on 22/02/2017.
@@ -88,7 +90,8 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
         if (!missings.isEmpty()) {
             int idx = 0;
             // Headers
-            result[idx] = comparison.getCanonicalColumns();
+            result[idx] = comparison.getCanonicalColumns().stream().map(FieldDescription::getName).collect(Collectors.toList());
+
             final List<String> keyFields = comparison.getCanonicalKeys();
             highLightKeyFields(result[0], keyFields);
 

@@ -2,6 +2,7 @@ package org.someth2say.taijitu;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
@@ -18,6 +19,7 @@ import org.someth2say.taijitu.registry.PluginRegistry;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.strategy.ComparisonStrategy;
 import org.someth2say.taijitu.registry.ComparisonStrategyRegistry;
+import org.someth2say.taijitu.tuple.FieldDescription;
 import org.someth2say.taijitu.tuple.ResultSetTupleBuilder;
 
 /**
@@ -39,7 +41,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
      * @see java.lang.Runnable#run()
      */
     @Override
-	public ComparisonResult call() {
+    public ComparisonResult call() {
         ComparisonResult result = new SimpleComparisonResult(config);
         ComparisonRuntime runtime = new ComparisonRuntime(config);
         Map<PluginConfig, TaijituPlugin> plugins = PluginRegistry.getPlugins(config.getComparisonPluginConfigs());
@@ -87,19 +89,26 @@ public class TaijituRunner implements Callable<ComparisonResult> {
     }
 
     private ComparisonResult runComparisonStrategy(ComparisonRuntime runtime, ComparisonStrategy strategy) {
-        ResultSetIterator sourceIterator = getAndRegisterResultSetIterator(runtime, MatcherRegistry.getIdentityMatcher(), config.getSourceQueryConfig());
+
+        QueryConfig sourceQueryConfig = config.getSourceQueryConfig();
+        ColumnMatcher sourceMatcher = MatcherRegistry.getIdentityMatcher();
+        ResultSetTupleBuilder sourceTupleBuilder = new ResultSetTupleBuilder(sourceMatcher, runtime, sourceQueryConfig);
+        ResultSetIterator sourceIterator = getAndRegisterResultSetIterator(runtime, sourceMatcher, sourceQueryConfig, sourceTupleBuilder);
         if (sourceIterator != null) {
-            final ColumnMatcher matcher = MatcherRegistry.getMatcher(config.getColumnMatchingStrategyName());
-            if (matcher == null) {
+            final ColumnMatcher targetMatcher = MatcherRegistry.getMatcher(config.getColumnMatchingStrategyName());
+            if (targetMatcher == null) {
                 logger.error("Unable to find column matching strategy '" + config.getColumnMatchingStrategyName() + "'");
             } else {
-                ResultSetIterator targetIterator = getAndRegisterResultSetIterator(runtime, matcher, config.getTargetQueryConfig());
+
+                QueryConfig targetQueryConfig = config.getTargetQueryConfig();
+                ResultSetTupleBuilder targetTupleBuilder = new ResultSetTupleBuilder(targetMatcher, runtime, targetQueryConfig);
+                ResultSetIterator targetIterator = getAndRegisterResultSetIterator(runtime, targetMatcher, targetQueryConfig, targetTupleBuilder);
                 if (targetIterator != null) {
 
                     //This point we can actually define comparators (we finally know the canonical columns)
-
-                    sourceIterator.registerComparators();
-                    targetIterator.registerComparators();
+                    EqualityConfig[] equalityConfigs = getEqualityConfigs(runtime.getCanonicalColumns());
+                    sourceTupleBuilder.setEqualityConfigs(equalityConfigs);
+                    targetTupleBuilder.setEqualityConfigs(equalityConfigs);
 
                     return strategy.runComparison(sourceIterator, targetIterator, runtime, config);
                 }
@@ -108,8 +117,27 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         return null;
     }
 
-    private ResultSetIterator getAndRegisterResultSetIterator(ComparisonRuntime runtime, ColumnMatcher columnMatcher, QueryConfig queryConfig) {
-        ResultSetIterator rsIterator = getQueryIterator(queryConfig, runtime, columnMatcher);
+    private EqualityConfig[] getEqualityConfigs(final List<FieldDescription> canonicalColumns) {
+        EqualityConfig[] result = new EqualityConfig[canonicalColumns.size()];
+        int pos = 0;
+        for (FieldDescription fieldDescription : canonicalColumns) {
+            result[pos++] = getEqualityConfigFor(fieldDescription.getClazz(), fieldDescription.getName(), config.getEqualityConfigs());
+        }
+        return result;
+    }
+
+    private EqualityConfig getEqualityConfigFor(final String fieldClass, final String fieldName, final List<EqualityConfig> equalityConfigs) {
+        return equalityConfigs.stream()
+                .filter(equalityConfig -> configMatch(fieldName, equalityConfig.getFieldName()) && configMatch(fieldClass, equalityConfig.getFieldClass())
+                ).findFirst().get();
+    }
+
+    private boolean configMatch(String field, String config) {
+        return config == null || config.equals(field);
+    }
+
+    private ResultSetIterator getAndRegisterResultSetIterator(ComparisonRuntime runtime, ColumnMatcher columnMatcher, QueryConfig queryConfig, ResultSetTupleBuilder tupleBuilder) {
+        ResultSetIterator rsIterator = getQueryIterator(queryConfig, tupleBuilder);
         if (rsIterator == null) {
             return null;
         }
@@ -121,7 +149,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
 
     //TODO: Move to TupleIterator (something that provide both field names and tuple stream)
     private ResultSetIterator getQueryIterator(final QueryConfig queryConfig,
-                                               final ComparisonRuntime runtime, final ColumnMatcher matcher) {
+                                               ResultSetTupleBuilder tupleBuilder) {
         Connection connection;
         try {
             connection = ConnectionManager.getConnection(queryConfig.getDatabaseRef());
@@ -129,9 +157,6 @@ public class TaijituRunner implements Callable<ComparisonResult> {
             logger.error("Unable to connect to " + queryConfig.getDatabaseRef(), e);
             return null;
         }
-
-
-        ResultSetTupleBuilder tupleBuilder = new ResultSetTupleBuilder(matcher, runtime, queryConfig, config.getEqualityConfigs());
 
         final int fetchSize = queryConfig.getFetchSize();
         final Object[] queryParameters = queryConfig.getQueryParameters();

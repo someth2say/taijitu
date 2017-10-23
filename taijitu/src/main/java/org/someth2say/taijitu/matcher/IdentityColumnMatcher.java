@@ -1,5 +1,7 @@
 package org.someth2say.taijitu.matcher;
 
+import org.someth2say.taijitu.tuple.FieldDescription;
+
 import java.util.List;
 
 /**
@@ -11,13 +13,13 @@ public class IdentityColumnMatcher implements ColumnMatcher {
     public static final String NAME = "identity";
 
     @Override
-    public String getCanonicalFromColumn(final String column, final List<String> canonicalColumns, final List<String> columns) {
-        return column;
+    public FieldDescription getCanonicalFromColumn(final String column, final List<FieldDescription> canonicalColumns, final List<FieldDescription> columns) {
+        return canonicalColumns.stream().filter(fd -> fd.getName().equals(column)).findFirst().get();
     }
 
     @Override
-    public String getColumnFromCanonical(final String canonicalColumn, final List<String> canonicalColumns, final List<String> columns) {
-        return canonicalColumn;
+    public String getColumnFromCanonical(final FieldDescription canonicalColumn, final List<FieldDescription> canonicalColumns, final List<FieldDescription> columns) {
+        return canonicalColumn.getName();
     }
 
     @Override

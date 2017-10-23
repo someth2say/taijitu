@@ -2,6 +2,7 @@ package org.someth2say.taijitu.database;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.tuple.ComparableTuple;
+import org.someth2say.taijitu.tuple.FieldDescription;
 import org.someth2say.taijitu.tuple.ResultSetTupleBuilder;
 import org.someth2say.taijitu.util.ImmutablePair;
 
@@ -103,7 +104,7 @@ public class ResultSetIterator implements Iterator<ComparableTuple> {
      * @return Array with description for each column.
      */
     // TODO: Create `FieldDescription` class
-    public ImmutablePair<String, String>[] getColumns() {
+    public FieldDescription[] getColumns() {
         if (preparedStatement == null) {
             init();
         }
@@ -111,12 +112,12 @@ public class ResultSetIterator implements Iterator<ComparableTuple> {
         try {
             ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
             int rsColumnCount = resultSetMetaData.getColumnCount();
-            ImmutablePair<String, String>[] result = new ImmutablePair[rsColumnCount];
+            FieldDescription[] result = new FieldDescription[rsColumnCount];
             for (int columnIdx = 1; columnIdx <= rsColumnCount; ++columnIdx) {
                 String columnName = resultSetMetaData.getColumnName(columnIdx);
                 final String columnClassName = resultSetMetaData.getColumnClassName(columnIdx);
 
-                result[columnIdx - 1] = new ImmutablePair<>(columnName, columnClassName);
+                result[columnIdx - 1] = new FieldDescription(columnName, columnClassName);
 
             }
             return result;
@@ -125,6 +126,5 @@ public class ResultSetIterator implements Iterator<ComparableTuple> {
             return null;
         }
     }
-
 
 }

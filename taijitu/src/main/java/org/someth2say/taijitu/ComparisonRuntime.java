@@ -1,12 +1,14 @@
 package org.someth2say.taijitu;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.QueryConfig;
 import org.someth2say.taijitu.matcher.ColumnMatcher;
-import org.someth2say.taijitu.util.ImmutablePair;
+import org.someth2say.taijitu.tuple.FieldDescription;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Jordi Sola
@@ -20,9 +22,9 @@ public class ComparisonRuntime {
     private final ComparisonConfig comparisonConfig;
 
     //TODO: This hurts! should be final...
-    private List<String> canonicalColumns;
+    private List<FieldDescription> canonicalColumns;
     private List<String> canonicalKeys;
-    private Map<String, ImmutablePair<String, String>[]> providedColumnsMap = new HashMap<String, ImmutablePair<String, String>[]>();
+    private Map<String, FieldDescription[]> providedColumnsMap = new HashMap<String, FieldDescription[]>();
 
     public ComparisonRuntime(final ComparisonConfig comparisonConfig) {
         this.comparisonConfig = comparisonConfig;
@@ -38,18 +40,18 @@ public class ComparisonRuntime {
         return res;
     }
 
-    public List<ImmutablePair<String, String>> getProvidedColumns(String name) {
+    public List<FieldDescription> getProvidedColumns(String name) {
         return Arrays.asList(providedColumnsMap.get(name));
     }
 
 
-    boolean registerColumns(final ImmutablePair<String, String>[] providedColumns, final QueryConfig queryConfig, final ColumnMatcher columnMatcher) {
+    boolean registerColumns(final FieldDescription[] providedColumns, final QueryConfig queryConfig, final ColumnMatcher columnMatcher) {
         if (providedColumns == null) return false;
         providedColumnsMap.put(queryConfig.getName(), providedColumns);
 
         String[] providedKeys = queryConfig.getKeyFields();
         List<String> providedKeysList = Arrays.asList(providedKeys);
-        List<String> providedColumnsList = Arrays.asList(providedColumns);
+        List<FieldDescription> providedColumnsList = Arrays.asList(providedColumns);
 
         if (validateKeyColumnsAreProvided(queryConfig, providedKeysList, providedColumnsList)) {
             if (canonicalColumns == null) {
@@ -76,7 +78,7 @@ public class ComparisonRuntime {
         int keyPos = 0;
         int nonKeyPos = 0;
         for (int colPos = 0; colPos < canonicalColumns.size(); colPos++) {
-            String columnName = canonicalColumns.get(colPos);
+            String columnName = canonicalColumns.get(colPos).getName();
             if (canonicalKeys.contains(columnName)) {
                 keyColumnIndexes[keyPos++] = colPos;
             } else {
@@ -93,16 +95,16 @@ public class ComparisonRuntime {
         return nonKeyColumnIndexes;
     }
 
-    private boolean validateCanonicalKeysAreProvided(final QueryConfig queryConfig, final ColumnMatcher columnMatcher, final List<String> providedKeysList, final List<String> providedColumnsList) {
+    private boolean validateCanonicalKeysAreProvided(final QueryConfig queryConfig, final ColumnMatcher columnMatcher, final List<String> providedKeysList, final List<FieldDescription> providedColumnsList) {
         // .- Both provided and canonical keys should be exactly the same
         ArrayList<String> canonicalProvidedKeyList = new ArrayList<>(providedKeysList.size());
         for (String providedKey : providedKeysList) {
-            String canonicalProvidedKey = columnMatcher.getCanonicalFromColumn(providedKey, canonicalColumns, providedColumnsList);
+            FieldDescription canonicalProvidedKey = columnMatcher.getCanonicalFromColumn(providedKey, canonicalColumns, providedColumnsList);
             if (canonicalProvidedKey == null) {
                 logger.error("Key column " + providedKey + " in query " + queryConfig.getName() + " do not have a canonical match (using matching strategy " + columnMatcher.getName() + ")");
                 return false;
             } else {
-                canonicalProvidedKeyList.add(canonicalProvidedKey);
+                canonicalProvidedKeyList.add(canonicalProvidedKey.getName());
             }
         }
         if (!canonicalKeys.equals(canonicalProvidedKeyList)) {
@@ -112,28 +114,22 @@ public class ComparisonRuntime {
         return true;
     }
 
-    private boolean validateKeyColumnsAreProvided(QueryConfig queryConfig, List<String> providedKeysList, List<String> providedColumnsList) {
+    private boolean validateKeyColumnsAreProvided(QueryConfig queryConfig, List<String> providedKeysList, List<FieldDescription> providedColumnsList) {
         // .- Provided keys should be a subset for provide columns.
-        for (String providedKey : providedKeysList) {
-            if (!providedColumnsList.contains(providedKey)) {
-                logger.error("Key " + providedKey + " in query " + queryConfig.getName() + " is not provided by query results.");
-                return false;
-            }
-        }
-        return true;
+        return providedColumnsList.stream().map(FieldDescription::getName).collect(Collectors.toList()).containsAll(providedKeysList);
     }
 
-    private void shrinkCanonicalColumnsToProvided(ColumnMatcher columnMatcher, List<String> providedColumnsList) {
+    private void shrinkCanonicalColumnsToProvided(ColumnMatcher columnMatcher, List<FieldDescription> providedColumnsList) {
         // .- Canonical columns not provided are removed from comparison
-        List<String> canonicalProvidedColumnsList = new ArrayList<>(providedColumnsList.size());
-        for (String providedColum : providedColumnsList) {
-            String canonicalProvidedColumn = columnMatcher.getCanonicalFromColumn(providedColum, canonicalColumns, providedColumnsList);
+        List<FieldDescription> canonicalProvidedColumnsList = new ArrayList<>(providedColumnsList.size());
+        for (FieldDescription providedColum : providedColumnsList) {
+            FieldDescription canonicalProvidedColumn = columnMatcher.getCanonicalFromColumn(providedColum.getName(), canonicalColumns, providedColumnsList);
             canonicalProvidedColumnsList.add(canonicalProvidedColumn);
         }
         canonicalColumns.retainAll(canonicalProvidedColumnsList);
     }
 
-    public List<String> getCanonicalColumns() {
+    public List<FieldDescription> getCanonicalColumns() {
         return canonicalColumns;
     }
 

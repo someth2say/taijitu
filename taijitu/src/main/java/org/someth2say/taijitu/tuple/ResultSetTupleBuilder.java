@@ -16,27 +16,26 @@ public class ResultSetTupleBuilder implements TupleBuilder<ResultSet, Comparable
     private final ColumnMatcher matcher;
     private final ComparisonRuntime runtime;
     private final QueryConfig queryConfig;
-    private List<EqualityConfig> equalityConfigs;
+    private EqualityConfig[] equalityConfigs;
 
-    public ResultSetTupleBuilder(final ColumnMatcher matcher, final ComparisonRuntime runtime, final QueryConfig queryConfig, List<EqualityConfig> equalityConfigs) {
+    public ResultSetTupleBuilder(final ColumnMatcher matcher, final ComparisonRuntime runtime, final QueryConfig queryConfig) {
         this.matcher = matcher;
         this.runtime = runtime;
         this.queryConfig = queryConfig;
-        this.equalityConfigs = equalityConfigs;
     }
 
     @Override
     public ComparableTuple apply(ResultSet resultSet) {
-        List<String> canonicalColumns = runtime.getCanonicalColumns();
-        List<String> providedColumns = runtime.getProvidedColumns(queryConfig.getName());
+        List<FieldDescription> canonicalColumns = runtime.getCanonicalColumns();
+        List<FieldDescription> providedColumns = runtime.getProvidedColumns(queryConfig.getName());
         Object[] values = extract(matcher, resultSet, canonicalColumns, providedColumns);
         return new ComparableTuple(values, runtime, equalityConfigs);
     }
 
-    private static Object[] extract(ColumnMatcher matcher, ResultSet rs, List<String> canonicalColumns, List<String> providedColumns) {
+    private static Object[] extract(ColumnMatcher matcher, ResultSet rs, List<FieldDescription> canonicalColumns, List<FieldDescription> providedColumns) {
         Object[] columnValues = new Object[canonicalColumns.size()];
         int columnIdx = 0;
-        for (String canonicalColumn : canonicalColumns) {
+        for (FieldDescription canonicalColumn : canonicalColumns) {
             String column = matcher.getColumnFromCanonical(canonicalColumn, canonicalColumns, providedColumns);
             try {
                 columnValues[columnIdx++] = rs.getObject(column);
@@ -46,5 +45,9 @@ public class ResultSetTupleBuilder implements TupleBuilder<ResultSet, Comparable
             }
         }
         return columnValues;
+    }
+
+    public void setEqualityConfigs(EqualityConfig[] equalityConfigs) {
+        this.equalityConfigs = equalityConfigs;
     }
 }
