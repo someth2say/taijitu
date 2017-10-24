@@ -5,6 +5,7 @@ import org.someth2say.taijitu.ComparisonRuntime;
 import org.someth2say.taijitu.config.EqualityConfig;
 import org.someth2say.taijitu.config.QueryConfig;
 import org.someth2say.taijitu.matcher.FieldMatcher;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,6 +30,7 @@ public class ResultSetTupleBuilder implements TupleBuilder<ResultSet, Comparable
         List<FieldDescription> canonicalFields = runtime.getCanonicalFields();
         List<FieldDescription> providedFields = runtime.getProvidedFields(queryConfig.getName());
         Object[] values = extract(matcher, resultSet, canonicalFields, providedFields);
+        //logger.info("Built tuple: "+StringUtils.join(values,","));
         return new ComparableTuple(values, runtime, equalityConfigs);
     }
 

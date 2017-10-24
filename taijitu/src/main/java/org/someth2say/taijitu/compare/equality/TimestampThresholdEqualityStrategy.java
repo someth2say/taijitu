@@ -1,27 +1,27 @@
 package org.someth2say.taijitu.compare.equality;
 
 import org.someth2say.taijitu.config.EqualityConfig;
+import java.sql.Timestamp;
 
-public class ValueThresholdEqualityStrategy implements EqualityStrategy<Number> {
+public class TimestampThresholdEqualityStrategy implements EqualityStrategy<Timestamp> {
 
-    public static String NAME = "threshold";
+    public static String NAME = "timestamp";
 
     @Override
-    public int computeHashCode(Number object, Object equalityConfig) {
-        //TODO: Fail!! Should have threshold into account!
-        return Double.valueOf(object.doubleValue()).hashCode();
+    public int computeHashCode(Timestamp object, Object equalityConfig) {
+        return 0;
     }
 
     @Override
-    public boolean equals(Number object1, Number object2, Object equalityConfig) {
+    public boolean equals(Timestamp object1, Timestamp object2, Object equalityConfig) {
         Double threshold = Double.parseDouble(equalityConfig.toString());
-        return (Math.abs(object1.doubleValue() - object2.doubleValue()) < threshold);
+        return (Math.abs(object1.getTime() - object2.getTime()) < threshold);
     }
 
     @Override
-    public int compare(Number object1, Number object2, Object equalityConfig) {
+    public int compare(Timestamp object1, Timestamp object2, Object equalityConfig) {
         Double threshold = Double.parseDouble(equalityConfig.toString());
-        double diff = object1.doubleValue() - object2.doubleValue();
+        long diff = object1.getTime() - object2.getTime();
         return Math.abs(diff) < threshold ? 0 : diff < 0 ? -1 : 1;
     }
 
@@ -45,7 +45,7 @@ public class ValueThresholdEqualityStrategy implements EqualityStrategy<Number> 
 
             @Override
             public String getName() {
-                return ValueThresholdEqualityStrategy.NAME;
+                return TimestampThresholdEqualityStrategy.NAME;
             }
         };
     }

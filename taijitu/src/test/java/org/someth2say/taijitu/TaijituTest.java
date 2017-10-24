@@ -11,6 +11,7 @@ import org.junit.runners.Parameterized;
 import org.someth2say.taijitu.compare.equality.CaseInsensitiveEqualityStrategy;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.equality.ValueThresholdEqualityStrategy;
+import org.someth2say.taijitu.compare.equality.TimestampThresholdEqualityStrategy;
 import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.database.QueryUtilsException;
@@ -19,6 +20,7 @@ import org.someth2say.taijitu.strategy.sorted.SortedStrategy;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Properties;
@@ -96,7 +98,8 @@ public class TaijituTest {
         TestUtils.createTable(conn, "test", commonSchema, commonValues);
         // introduce some changes..
         commonValues[0][13] = "CURRENT_DATE+1";
-        commonValues[1][13] = "CURRENT_DATE+1";
+        //commonValues[1][13] = "CURRENT_DATE+1";
+        commonValues[1][9] ="34.57"; // This one should be absorved by threshold
         TestUtils.createTable(conn, "test2", commonSchema, commonValues);
 
         conn.close();
@@ -106,7 +109,7 @@ public class TaijituTest {
         //Databases
         putAll(config, databaseProps, DATABASE_REF + "." + DB_NAME + ".");
         // Comparisons
-        putAll(config, makeComparisonProps("test1", "KEY", "select * from test", "select * from test", "test"), "");
+        //putAll(config, makeComparisonProps("test1", "KEY", "select * from test", "select * from test", "test"), "");
         putAll(config, makeComparisonProps("test2", "KEY", "select * from test", "select * from test2", "test"), "");
 
         // Disable plugins, 'cause we need to write nothing.
@@ -114,13 +117,13 @@ public class TaijituTest {
 
         final ComparisonResult[] comparisonResults = new Taijitu().compare(ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(config)));
 
-        assertEquals(2, comparisonResults.length);
+        //assertEquals(2, comparisonResults.length);
         final ComparisonResult firstResult = comparisonResults[0];
         assertEquals(0, firstResult.getDisjoint().size());
-        assertEquals(0, firstResult.getDifferent().size());
-        final ComparisonResult secondResult = comparisonResults[1];
-        assertEquals(0, secondResult.getDisjoint().size());
-        assertEquals(2, secondResult.getDifferent().size());
+        assertEquals(1, firstResult.getDifferent().size());
+        //final ComparisonResult secondResult = comparisonResults[1];
+        //assertEquals(0, secondResult.getDisjoint().size());
+        //assertEquals(2, secondResult.getDifferent().size());
     }
 
     private void putAll(final PropertiesConfiguration configuration, final Properties props, final String keyPrefix) {
@@ -136,7 +139,8 @@ public class TaijituTest {
         testProperties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Double.class.getName());
         testProperties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "0.01");
 
-
+        testProperties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Timestamp.class.getName());
+        testProperties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "100");
     }
 
 

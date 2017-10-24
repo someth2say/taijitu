@@ -18,7 +18,7 @@ public class XSLFileCommandTest {
     private File folder = new File(".");
     private String sheetname = "sheet";
 
-    @Test
+    //@Test
     public void process() throws Exception {
         final XSLFileCommand fileCommand = new XSLFileCommand(folder, filename, sheetname);
         fileCommand.process(vals);
@@ -27,7 +27,7 @@ public class XSLFileCommandTest {
         file.delete();
     }
 
-    @Test
+    //@Test
     public void processWriter() throws Exception {
         final XSLFileCommand fileCommand = new XSLFileCommand(folder, filename, sheetname);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -35,7 +35,7 @@ public class XSLFileCommandTest {
         assertTrue("Contents should not be empty", !os.toString().isEmpty());
     }
 
-    @Test
+    //@Test
     public void getFileExtension() throws Exception {
         assertEquals("Extension should be fixed", new XSLFileCommand(folder, filename, sheetname).getFileExtension(), "xls");
     }

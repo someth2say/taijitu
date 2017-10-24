@@ -5,6 +5,7 @@ import org.someth2say.taijitu.compare.equality.CaseInsensitiveEqualityStrategy;
 import org.someth2say.taijitu.compare.equality.EqualityStrategy;
 import org.someth2say.taijitu.compare.equality.ToStringEqualityStrategy;
 import org.someth2say.taijitu.compare.equality.ValueThresholdEqualityStrategy;
+import org.someth2say.taijitu.compare.equality.TimestampThresholdEqualityStrategy;
 import org.someth2say.taijitu.util.ClassScanUtils;
 
 import java.util.Map;
@@ -37,7 +38,7 @@ public class EqualityStrategyRegistry {
         addEqualityStrategy(new ToStringEqualityStrategy());
         addEqualityStrategy(new CaseInsensitiveEqualityStrategy());
         addEqualityStrategy(new ValueThresholdEqualityStrategy());
-
+        addEqualityStrategy(new TimestampThresholdEqualityStrategy());
     }
 
     private static void addEqualityStrategy(EqualityStrategy equalityStrategy) {

@@ -16,7 +16,7 @@ public class CSVFileCommandTest {
     private String[][] vals = new String[][]{new String[]{null, "Some", "Value"}};
     private File folder = new File(".");
 
-    @Test
+    //@Test
     public void process() throws Exception {
         final CSVFileCommand csvFileCommand = new CSVFileCommand(folder, filename);
         csvFileCommand.process(vals);
@@ -25,7 +25,7 @@ public class CSVFileCommandTest {
         csvFileCommand.rollback();
     }
 
-    @Test
+    //@Test
     public void processWriter() throws Exception {
         final CSVFileCommand csvFileCommand = new CSVFileCommand(folder, filename);
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -34,7 +34,7 @@ public class CSVFileCommandTest {
         csvFileCommand.rollback();
     }
 
-    @Test
+    //@Test
     public void testAppend() throws Exception {
         final CSVFileCommand csvFileCommand = new CSVFileCommand(folder, filename);
         csvFileCommand.setAppend(false);
@@ -43,7 +43,7 @@ public class CSVFileCommandTest {
         assertTrue("Append should be retained", csvFileCommand.isAppend());
     }
 
-    @Test
+    //@Test
     public void getFileExtension() throws Exception {
         assertEquals("Extension should be fixed", new CSVFileCommand(folder, filename).getFileExtension(), "csv");
     }
