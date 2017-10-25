@@ -39,6 +39,11 @@ public class TimestampThresholdEqualityStrategy implements EqualityStrategy<Time
             }
 
             @Override
+            public boolean fieldClassStrict() {
+                return false;
+            }
+
+            @Override
             public Object getEqualityParameters() {
                 return null;
             }

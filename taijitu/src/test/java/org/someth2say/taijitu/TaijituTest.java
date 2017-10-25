@@ -96,10 +96,9 @@ public class TaijituTest {
                 {"2", "'B'", "'STRING'", "true", "10000", "1000000000", "1000000000000000000", "23.456", "89.102", "34.56", "78.9012345", "67.8901234567890123", "45.6789012345678901", "CURRENT_DATE", "CURRENT_TIME", "CURRENT_TIMESTAMP"}
         };
         TestUtils.createTable(conn, "test", commonSchema, commonValues);
-        // introduce some changes..
+        // introduce some differences..
         commonValues[0][13] = "CURRENT_DATE+1";
-        //commonValues[1][13] = "CURRENT_DATE+1";
-        commonValues[1][9] ="34.57"; // This one should be absorved by threshold
+        commonValues[1][9] ="34.57"; // This one should be absorbed by threshold
         TestUtils.createTable(conn, "test2", commonSchema, commonValues);
 
         conn.close();
@@ -109,21 +108,31 @@ public class TaijituTest {
         //Databases
         putAll(config, databaseProps, DATABASE_REF + "." + DB_NAME + ".");
         // Comparisons
-        //putAll(config, makeComparisonProps("test1", "KEY", "select * from test", "select * from test", "test"), "");
+        putAll(config, makeComparisonProps("test1", "KEY", "select * from test", "select * from test", "test"), "");
         putAll(config, makeComparisonProps("test2", "KEY", "select * from test", "select * from test2", "test"), "");
 
         // Disable plugins, 'cause we need to write nothing.
         commonPropertiesSetup(config);
+
+        //Add comparators
+        //Case insensitive strings
+        config.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + CaseInsensitiveEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, String.class.getName());
+        //Threshold 0.1 for Numbers
+        config.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Number.class.getName());
+        config.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "0.01");
+        //Threshold 0.1s for dates.
+        config.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Timestamp.class.getName());
+        config.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "100");
 
         final ComparisonResult[] comparisonResults = new Taijitu().compare(ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(config)));
 
         //assertEquals(2, comparisonResults.length);
         final ComparisonResult firstResult = comparisonResults[0];
         assertEquals(0, firstResult.getDisjoint().size());
-        assertEquals(1, firstResult.getDifferent().size());
-        //final ComparisonResult secondResult = comparisonResults[1];
-        //assertEquals(0, secondResult.getDisjoint().size());
-        //assertEquals(2, secondResult.getDifferent().size());
+        assertEquals(0, firstResult.getDifferent().size());
+        final ComparisonResult secondResult = comparisonResults[1];
+        assertEquals(0, secondResult.getDisjoint().size());
+        assertEquals(1, secondResult.getDifferent().size());
     }
 
     private void putAll(final PropertiesConfiguration configuration, final Properties props, final String keyPrefix) {
@@ -134,13 +143,6 @@ public class TaijituTest {
         testProperties.setProperty(ConfigurationLabels.Comparison.STRATEGY, strategyName);
         testProperties.setProperty(ConfigurationLabels.Sections.SETUP + "." + ConfigurationLabels.Setup.CONSOLE_LOG, "DEBUG");
 
-        //Add another comparator
-        testProperties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + CaseInsensitiveEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, String.class.getName());
-        testProperties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Double.class.getName());
-        testProperties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "0.01");
-
-        testProperties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Timestamp.class.getName());
-        testProperties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "100");
     }
 
 

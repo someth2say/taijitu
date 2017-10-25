@@ -35,6 +35,11 @@ public class CaseInsensitiveEqualityStrategy implements EqualityStrategy<String>
             }
 
             @Override
+            public boolean fieldClassStrict() {
+                return false;
+            }
+
+            @Override
             public Object getEqualityParameters() {
                 return null;
             }

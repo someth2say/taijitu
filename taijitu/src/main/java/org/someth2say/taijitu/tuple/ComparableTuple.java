@@ -69,7 +69,7 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
             final EqualityConfig equalityConfig = equalityConfigs[fieldIdx];
             final EqualityStrategy equalityStrategy = getEqualityStrategy(equalityConfig);
             //TODO: Lazy logging
-            logger.info("Comparing field: " + fieldDescription + " values: " + keyValue + "<=>" + otherKeyValue + "(" + otherKeyValue.getClass().getName() + ") equalityStrategy: " + equalityStrategy.getName() + " config: " + equalityConfig.getEqualityParameters());
+            logger.info(fieldDescription + ":"+ keyValue + "<=>" + otherKeyValue + "(" + otherKeyValue.getClass().getName() + ") strategy: " + equalityStrategy.getName() + " config: " + equalityConfig.getEqualityParameters());
             if (!equalityStrategy.equals(keyValue, otherKeyValue, equalityConfig.getEqualityParameters())) {
                 logger.info("Difference found: Field "+fieldDescription.getName() +" Values: "+keyValue +"<=>"+otherKeyValue);
                 return false;

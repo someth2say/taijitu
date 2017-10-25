@@ -32,6 +32,7 @@ public final class ConfigurationLabels {
         public static final String STRATEGY = "strategy";
         public static final String QUERY_PARAMETERS = "queryParameters";
         public static final String EQUALITY_PARAMS = "parameters";
+        public static final String FIELD_CLASS_STRICT = "exactClass";
 
         private Comparison() {
         }

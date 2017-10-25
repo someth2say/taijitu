@@ -8,5 +8,7 @@ public interface EqualityConfig extends Named {
 
     String getFieldClass();
 
+    boolean fieldClassStrict();
+
     Object getEqualityParameters();
 }

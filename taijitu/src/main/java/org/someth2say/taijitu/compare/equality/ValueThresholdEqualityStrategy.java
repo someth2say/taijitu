@@ -39,6 +39,11 @@ public class ValueThresholdEqualityStrategy implements EqualityStrategy<Number> 
             }
 
             @Override
+            public boolean fieldClassStrict() {
+                return false;
+            }
+
+            @Override
             public Object getEqualityParameters() {
                 return null;
             }

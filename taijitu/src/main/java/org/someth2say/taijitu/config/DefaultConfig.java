@@ -29,4 +29,5 @@ public class DefaultConfig {
     public static final String DEFAULT_LOG_FILE = "taijitu.logger";
     public static final String DEFAULT_CONFIG_FILE = "taijitu.properties";
 
+    public static final boolean DEFAULT_FIELD_CLASS_STRICT = false;
 }

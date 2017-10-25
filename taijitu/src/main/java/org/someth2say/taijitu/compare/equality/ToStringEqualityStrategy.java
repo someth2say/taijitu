@@ -22,7 +22,7 @@ public class ToStringEqualityStrategy implements EqualityStrategy<Object> {
         return object1.toString().compareTo(object2.toString());
     }
 
-
+    //TODO: Maybe all default configs should share a common interface
     public static EqualityConfig defaultConfig() {
         return new EqualityConfig() {
             @Override
@@ -33,6 +33,11 @@ public class ToStringEqualityStrategy implements EqualityStrategy<Object> {
             @Override
             public String getFieldClass() {
                 return null;
+            }
+
+            @Override
+            public boolean fieldClassStrict() {
+                return false;
             }
 
             @Override
