@@ -27,32 +27,7 @@ public class TimestampThresholdEqualityStrategy implements EqualityStrategy<Time
 
 
     public static EqualityConfig defaultConfig() {
-        return new EqualityConfig() {
-            @Override
-            public String getFieldName() {
-                return null;
-            }
-
-            @Override
-            public String getFieldClass() {
-                return null;
-            }
-
-            @Override
-            public boolean fieldClassStrict() {
-                return false;
-            }
-
-            @Override
-            public Object getEqualityParameters() {
-                return null;
-            }
-
-            @Override
-            public String getName() {
-                return TimestampThresholdEqualityStrategy.NAME;
-            }
-        };
+        return (DefaultEqualityConfig) () -> TimestampThresholdEqualityStrategy.NAME;
     }
 
 

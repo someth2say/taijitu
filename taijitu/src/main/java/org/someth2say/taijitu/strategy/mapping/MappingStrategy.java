@@ -1,7 +1,7 @@
 package org.someth2say.taijitu.strategy.mapping;
 
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.ComparisonRuntime;
+import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.ComparisonResult.QueryAndTuple;
 import org.someth2say.taijitu.compare.SynchronizedComparisonResult;
@@ -34,7 +34,7 @@ public class MappingStrategy extends AbstractComparisonStrategy implements Compa
     }
 
     @Override
-    public ComparisonResult runComparison(ResultSetIterator source, ResultSetIterator target, ComparisonRuntime comparisonRuntime, ComparisonConfig comparisonConfig) {
+    public ComparisonResult runComparison(ResultSetIterator source, ResultSetIterator target, ComparisonContext comparisonContext, ComparisonConfig comparisonConfig) {
         final String comparisonName = comparisonConfig.getName();
         logger.debug("Start mapping strategy comparison for " + comparisonName);
         SynchronizedComparisonResult result = new SynchronizedComparisonResult(comparisonConfig);

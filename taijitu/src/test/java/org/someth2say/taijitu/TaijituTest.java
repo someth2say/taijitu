@@ -1,6 +1,7 @@
 package org.someth2say.taijitu;
 
 import org.apache.commons.configuration2.ConfigurationUtils;
+import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.builder.BasicConfigurationBuilder;
 import org.apache.commons.configuration2.ex.ConfigurationException;
@@ -103,28 +104,29 @@ public class TaijituTest {
 
         conn.close();
 
-
-        final PropertiesConfiguration config = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).getConfiguration();
+        final PropertiesConfiguration properties = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).getConfiguration();
         //Databases
-        putAll(config, databaseProps, DATABASE_REF + "." + DB_NAME + ".");
+        putAll(properties, databaseProps, DATABASE_REF + "." + DB_NAME + ".");
         // Comparisons
-        putAll(config, makeComparisonProps("test1", "KEY", "select * from test", "select * from test", "test"), "");
-        putAll(config, makeComparisonProps("test2", "KEY", "select * from test", "select * from test2", "test"), "");
+        putAll(properties, makeComparisonProps("test1", "KEY", "select * from test", "select * from test", "test"), "");
+        putAll(properties, makeComparisonProps("test2", "KEY", "select * from test", "select * from test2", "test"), "");
 
         // Disable plugins, 'cause we need to write nothing.
-        commonPropertiesSetup(config);
+        commonPropertiesSetup(properties);
 
         //Add comparators
         //Case insensitive strings
-        config.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + CaseInsensitiveEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, String.class.getName());
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + CaseInsensitiveEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, String.class.getName());
         //Threshold 0.1 for Numbers
-        config.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Number.class.getName());
-        config.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "0.01");
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Number.class.getName());
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "0.01");
         //Threshold 0.1s for dates.
-        config.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Timestamp.class.getName());
-        config.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "100");
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Timestamp.class.getName());
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "100");
 
-        final ComparisonResult[] comparisonResults = new Taijitu().compare(ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(config)));
+        final ImmutableHierarchicalConfiguration configuration = ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(properties));
+
+        final ComparisonResult[] comparisonResults = new Taijitu().compare(configuration);
 
         //assertEquals(2, comparisonResults.length);
         final ComparisonResult firstResult = comparisonResults[0];

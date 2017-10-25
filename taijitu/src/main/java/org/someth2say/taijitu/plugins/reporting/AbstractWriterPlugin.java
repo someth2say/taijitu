@@ -1,7 +1,7 @@
 package org.someth2say.taijitu.plugins.reporting;
 
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.ComparisonRuntime;
+import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.tuple.ComparableTuple;
@@ -25,7 +25,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
     private File outputFolder;
     private WritterPluginConfig config;
 
-    private String[][] printDifferent(final ComparisonResult comparisonResult, final ComparisonRuntime taijituData, final WritterPluginConfig config) {
+    private String[][] printDifferent(final ComparisonResult comparisonResult, final ComparisonContext taijituData, final WritterPluginConfig config) {
 //        this.config = config;
 //        final Collection<Pair<ComparableTuple, ComparableTuple>> different = comparisonResult.getDifferent();
 //        final String[][] result = new String[different.size() * 2 + 1][];
@@ -85,7 +85,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
         }
     }
 
-    private List<String>[] printMissing(final ComparisonRuntime comparison, Collection<ComparableTuple> missings) {
+    private List<String>[] printMissing(final ComparisonContext comparison, Collection<ComparableTuple> missings) {
         final List<String>[] result = new List[missings.size() + 1];
         if (!missings.isEmpty()) {
             int idx = 0;
@@ -132,7 +132,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //        return result;
 //    }
 //
-//    private void writeResults(final ComparisonResult result, final ComparisonRuntime comparison, final String targetOnlyFile, final String sourceOnlyFile, final String diffsFile, final String testName, final File outputFolder) throws TaijituException, CommandException {
+//    private void writeResults(final ComparisonResult result, final ComparisonContext comparison, final String targetOnlyFile, final String sourceOnlyFile, final String diffsFile, final String testName, final File outputFolder) throws TaijituException, CommandException {
 //        if (!result.getTargetOnly().isEmpty()) {
 //            logger.debug("Writing entries only in target for " + testName);
 //            final String[][] reportableStrings = printMissing(comparison, result.getTargetOnly());
@@ -154,12 +154,12 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //    protected abstract FileCommand getFileCommand(String fileNameSource, String sheetName, File outputFolder) throws CommandException;
 
 //    @Override
-//    public void preComparison(ComparisonRuntime taijituData) throws TaijituException {
+//    public void preComparison(ComparisonContext taijituData) throws TaijituException {
 //        outputFolder = createOutputFolder();
 //    }
 //
 //    @Override
-//    public void postComparison(ComparisonRuntime taijituData) throws TaijituException {
+//    public void postComparison(ComparisonContext taijituData) throws TaijituException {
 //        final ComparisonResult result = taijituData.getResult();
 //        final String testName = taijituData.getTestName();
 //

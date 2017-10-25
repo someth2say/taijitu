@@ -1,7 +1,7 @@
 package org.someth2say.taijitu.tuple;
 
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.ComparisonRuntime;
+import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.config.QueryConfig;
 import org.someth2say.taijitu.matcher.FieldMatcher;
 
@@ -13,22 +13,21 @@ public class ResultSetTupleBuilder implements TupleBuilder<ResultSet, Comparable
     private static final Logger logger = Logger.getLogger(ResultSetTupleBuilder.class);
 
     private final FieldMatcher matcher;
-    private final ComparisonRuntime runtime;
+    private final ComparisonContext context;
     private final QueryConfig queryConfig;
 
-    public ResultSetTupleBuilder(final FieldMatcher matcher, final ComparisonRuntime runtime, final QueryConfig queryConfig) {
+    public ResultSetTupleBuilder(final FieldMatcher matcher, final ComparisonContext context, final QueryConfig queryConfig) {
         this.matcher = matcher;
-        this.runtime = runtime;
+        this.context = context;
         this.queryConfig = queryConfig;
     }
 
     @Override
     public ComparableTuple apply(ResultSet resultSet) {
-        List<FieldDescription> canonicalFields = runtime.getCanonicalFields();
-        List<FieldDescription> providedFields = runtime.getProvidedFields(queryConfig.getName());
+        List<FieldDescription> canonicalFields = context.getCanonicalFields();
+        List<FieldDescription> providedFields = context.getProvidedFields(queryConfig.getName());
         Object[] values = extract(matcher, resultSet, canonicalFields, providedFields);
-        //logger.info("Built tuple: "+StringUtils.join(values,","));
-        return new ComparableTuple(values, runtime);
+        return new ComparableTuple(values, context);
     }
 
     private static Object[] extract(FieldMatcher matcher, ResultSet rs, List<FieldDescription> canonicalFields, List<FieldDescription> providedFields) {

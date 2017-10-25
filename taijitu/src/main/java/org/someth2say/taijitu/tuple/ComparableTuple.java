@@ -1,7 +1,7 @@
 package org.someth2say.taijitu.tuple;
 
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.ComparisonRuntime;
+import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.compare.equality.EqualityStrategy;
 import org.someth2say.taijitu.config.EqualityConfig;
 import org.someth2say.taijitu.registry.EqualityStrategyRegistry;
@@ -10,19 +10,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class represents a {@link Tuple}, but having the capabilities to compare itself with other tuples, but using {@link EqualityStrategy} objects.
+ * This class represents a {@link Tuple}, but delegating capabilities to compare itself with other tuples to  {@link EqualityStrategy} objects.
  *
  * @author Jordi Sola
  */
 public class ComparableTuple extends Tuple implements Comparable<ComparableTuple> {
     private static final Logger logger = Logger.getLogger(ComparableTuple.class);
 
-    private final ComparisonRuntime runtime;
+    private final ComparisonContext context;
 
-    public ComparableTuple(Object[] values, final ComparisonRuntime runtime) {
+    public ComparableTuple(Object[] values, final ComparisonContext context) {
         super(values);
-        this.runtime = runtime;
+        this.context = context;
     }
+
+    //TODO: Consider passing those three fields (or a data class containing them) instead of the ComparisonContext
+    private List<EqualityConfig> getEqualityConfigs() {
+        return context.getEqualityConfigs();
+    }
+
+    private List<FieldDescription> getCanonicalFields() {
+        return context.getCanonicalFields();
+    }
+
+    private int[] getKeyFieldIdxs() {
+        return context.getKeyFieldIdxs();
+    }
+
 
     public List<String> toStringList() {
         List<String> result = new ArrayList<>(size());
@@ -35,9 +49,9 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
 
     @Override
     public int hashCode() {
-        List<EqualityConfig> equalityConfigs = runtime.getEqualityConfigs();
+        List<EqualityConfig> equalityConfigs = getEqualityConfigs();
         int result = 1;
-        for (int keyFieldIdx : runtime.getKeyFieldIdxs()) {
+        for (int keyFieldIdx : getKeyFieldIdxs()) {
             Object keyValue = getValue(keyFieldIdx);
             final EqualityConfig equalityConfig = equalityConfigs.get(keyFieldIdx);
             final EqualityStrategy equalityStrategy = getEqualityStrategy(equalityConfig);
@@ -53,19 +67,19 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
     }
 
     private boolean equalKeys(ComparableTuple other) {
-        return equalFields(other, runtime.getKeyFieldIdxs());
+        return equalFields(other, getKeyFieldIdxs());
     }
 
     public boolean equalsNonKeys(ComparableTuple other) {
-        return equalFields(other, runtime.getNonKeyFieldsIdxs());
+        return equalFields(other, context.getNonKeyFieldsIdxs());
     }
 
     private boolean equalFields(ComparableTuple other, int[] fieldIdxs) {
-        List<EqualityConfig> equalityConfigs = runtime.getEqualityConfigs();
+        List<EqualityConfig> equalityConfigs = getEqualityConfigs();
         for (int fieldIdx : fieldIdxs) {
             Object keyValue = getValue(fieldIdx);
             Object otherKeyValue = other.getValue(fieldIdx);
-            FieldDescription fieldDescription = runtime.getCanonicalFields().get(fieldIdx);
+            FieldDescription fieldDescription = getCanonicalFields().get(fieldIdx);
             final EqualityConfig equalityConfig = equalityConfigs.get(fieldIdx);
             final EqualityStrategy equalityStrategy = getEqualityStrategy(equalityConfig);
             //TODO: Lazy logging
@@ -80,8 +94,8 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
 
     @Override
     public int compareTo(ComparableTuple other) {
-        List<EqualityConfig> equalityConfigs = runtime.getEqualityConfigs();
-        int[] fieldIdxs = runtime.getKeyFieldIdxs();
+        List<EqualityConfig> equalityConfigs = getEqualityConfigs();
+        int[] fieldIdxs = getKeyFieldIdxs();
         for (int fieldIdx : fieldIdxs) {
             Object keyValue = getValue(fieldIdx);
             Object otherKeyValue = other.getValue(fieldIdx);

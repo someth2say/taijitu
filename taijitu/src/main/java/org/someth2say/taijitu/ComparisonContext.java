@@ -12,11 +12,10 @@ import java.util.stream.Collectors;
 
 /**
  * @author Jordi Sola
- * This class keep all values defined for a single comparison, as per in configuration file.
+ * This class will keep all data that may be pre-computed before comparison: canonical fields, indexes, equality configurations...
  */
-//TODO: This class will die, as runtime data should be kept by the comparison runner (thread)
-public class ComparisonRuntime {
-    private static final Logger logger = Logger.getLogger(ComparisonRuntime.class);
+public class ComparisonContext {
+    private static final Logger logger = Logger.getLogger(ComparisonContext.class);
 
     private final ComparisonConfig comparisonConfig;
 
@@ -27,7 +26,7 @@ public class ComparisonRuntime {
 
     private Map<String, FieldDescription[]> providedFieldsMap = new HashMap<>();
 
-    public ComparisonRuntime(final ComparisonConfig comparisonConfig) {
+    public ComparisonContext(final ComparisonConfig comparisonConfig) {
         this.comparisonConfig = comparisonConfig;
     }
 

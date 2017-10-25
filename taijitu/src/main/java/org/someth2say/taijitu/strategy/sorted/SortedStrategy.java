@@ -1,7 +1,7 @@
 package org.someth2say.taijitu.strategy.sorted;
 
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.ComparisonRuntime;
+import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.SimpleComparisonResult;
 import org.someth2say.taijitu.config.QueryConfig;
@@ -26,7 +26,7 @@ public class SortedStrategy extends AbstractComparisonStrategy implements Compar
     }
 
     @Override
-    public ComparisonResult runComparison(ResultSetIterator source, ResultSetIterator target, ComparisonRuntime comparisonRuntime, ComparisonConfig comparisonConfig) {
+    public ComparisonResult runComparison(ResultSetIterator source, ResultSetIterator target, ComparisonContext comparisonContext, ComparisonConfig comparisonConfig) {
         final String comparisonName = comparisonConfig.getName();
         logger.debug("Start sorted strategy comparison for " + comparisonName);
         SimpleComparisonResult result = new SimpleComparisonResult(comparisonConfig);

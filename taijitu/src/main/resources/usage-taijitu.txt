@@ -12,13 +12,13 @@ database.test2.driver               = org.h2.Driver
 database.test2.password             = password         
 database.test2.username             = user             
 
-runtime.test.source.database    = test
-runtime.test.source.query       = select * from test
-runtime.test.target.database    = test2
-runtime.test.target.query       = select * from test2
+context.test.source.database    = test
+context.test.source.query       = select * from test
+context.test.target.database    = test2
+context.test.target.query       = select * from test2
 
-runtime.test.fields             = KEY,VALUE
-runtime.test.fields.compare     = KEY,VALUE
-runtime.test.fields.key         = KEY
+context.test.fields             = KEY,VALUE
+context.test.fields.compare     = KEY,VALUE
+context.test.fields.key         = KEY
 
 output.format.xsl = true

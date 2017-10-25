@@ -27,32 +27,7 @@ public class ValueThresholdEqualityStrategy implements EqualityStrategy<Number> 
 
 
     public static EqualityConfig defaultConfig() {
-        return new EqualityConfig() {
-            @Override
-            public String getFieldName() {
-                return null;
-            }
-
-            @Override
-            public String getFieldClass() {
-                return null;
-            }
-
-            @Override
-            public boolean fieldClassStrict() {
-                return false;
-            }
-
-            @Override
-            public Object getEqualityParameters() {
-                return null;
-            }
-
-            @Override
-            public String getName() {
-                return ValueThresholdEqualityStrategy.NAME;
-            }
-        };
+        return (DefaultEqualityConfig) () -> ValueThresholdEqualityStrategy.NAME;
     }
 
 

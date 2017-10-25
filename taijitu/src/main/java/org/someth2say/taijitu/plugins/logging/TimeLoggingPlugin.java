@@ -8,7 +8,7 @@ import org.joda.time.format.PeriodFormatter;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.config.PluginConfig;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
-import org.someth2say.taijitu.ComparisonRuntime;
+import org.someth2say.taijitu.ComparisonContext;
 
 /**
  * Created by Jordi Sola on 24/02/2017.
@@ -29,12 +29,12 @@ public class TimeLoggingPlugin implements TaijituPlugin {
 
 
     @Override
-    public void preComparison(ComparisonRuntime taijituData, PluginConfig comparisonConfig) throws TaijituException {
+    public void preComparison(ComparisonContext taijituData, PluginConfig comparisonConfig) throws TaijituException {
         comparisonStart = System.currentTimeMillis();
     }
 
     @Override
-    public void postComparison(ComparisonRuntime taijituData, PluginConfig comparisonConfig) throws TaijituException {
+    public void postComparison(ComparisonContext taijituData, PluginConfig comparisonConfig) throws TaijituException {
         comparisonEnd = System.currentTimeMillis();
         logComparisonTimes(taijituData);
         comparisonCount++;
@@ -53,7 +53,7 @@ public class TimeLoggingPlugin implements TaijituPlugin {
 
     }
 
-    private void logComparisonTimes(ComparisonRuntime taijituData) {
+    private void logComparisonTimes(ComparisonContext taijituData) {
         final PeriodFormatter formatter = ISOPeriodFormat.standard();
         final Period periodTotal = new Duration(comparisonStart, comparisonEnd).toPeriod();
         logger.info("DONE comparison " + taijituData.getComparisonConfig().getName() + ":" + formatter.print(periodTotal));
