@@ -18,12 +18,10 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
     private static final Logger logger = Logger.getLogger(ComparableTuple.class);
 
     private final ComparisonRuntime runtime;
-    private final EqualityConfig[] equalityConfigs;
 
-    public ComparableTuple(Object[] values, final ComparisonRuntime runtime, final EqualityConfig[] equalityConfigs) {
+    public ComparableTuple(Object[] values, final ComparisonRuntime runtime) {
         super(values);
         this.runtime = runtime;
-        this.equalityConfigs = equalityConfigs;
     }
 
     public List<String> toStringList() {
@@ -37,10 +35,11 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
 
     @Override
     public int hashCode() {
+        List<EqualityConfig> equalityConfigs = runtime.getEqualityConfigs();
         int result = 1;
         for (int keyFieldIdx : runtime.getKeyFieldIdxs()) {
             Object keyValue = getValue(keyFieldIdx);
-            final EqualityConfig equalityConfig = equalityConfigs[keyFieldIdx];
+            final EqualityConfig equalityConfig = equalityConfigs.get(keyFieldIdx);
             final EqualityStrategy equalityStrategy = getEqualityStrategy(equalityConfig);
             int keyHashCode = equalityStrategy.computeHashCode(keyValue, equalityConfig.getEqualityParameters());
             result = 31 * result + keyHashCode;
@@ -62,16 +61,17 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
     }
 
     private boolean equalFields(ComparableTuple other, int[] fieldIdxs) {
+        List<EqualityConfig> equalityConfigs = runtime.getEqualityConfigs();
         for (int fieldIdx : fieldIdxs) {
             Object keyValue = getValue(fieldIdx);
             Object otherKeyValue = other.getValue(fieldIdx);
             FieldDescription fieldDescription = runtime.getCanonicalFields().get(fieldIdx);
-            final EqualityConfig equalityConfig = equalityConfigs[fieldIdx];
+            final EqualityConfig equalityConfig = equalityConfigs.get(fieldIdx);
             final EqualityStrategy equalityStrategy = getEqualityStrategy(equalityConfig);
             //TODO: Lazy logging
-            logger.info(fieldDescription + ":"+ keyValue + "<=>" + otherKeyValue + "(" + otherKeyValue.getClass().getName() + ") strategy: " + equalityStrategy.getName() + " config: " + equalityConfig.getEqualityParameters());
+            logger.debug(fieldDescription + ":" + keyValue + "<=>" + otherKeyValue + "(" + otherKeyValue.getClass().getName() + ") strategy: " + equalityStrategy.getName() + " config: " + equalityConfig.getEqualityParameters());
             if (!equalityStrategy.equals(keyValue, otherKeyValue, equalityConfig.getEqualityParameters())) {
-                logger.info("Difference found: Field "+fieldDescription.getName() +" Values: "+keyValue +"<=>"+otherKeyValue);
+                logger.debug("Difference found: Field " + fieldDescription.getName() + " Values: " + keyValue + "<=>" + otherKeyValue);
                 return false;
             }
         }
@@ -80,11 +80,12 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
 
     @Override
     public int compareTo(ComparableTuple other) {
+        List<EqualityConfig> equalityConfigs = runtime.getEqualityConfigs();
         int[] fieldIdxs = runtime.getKeyFieldIdxs();
         for (int fieldIdx : fieldIdxs) {
             Object keyValue = getValue(fieldIdx);
             Object otherKeyValue = other.getValue(fieldIdx);
-            final EqualityConfig equalityConfig = equalityConfigs[fieldIdx];
+            final EqualityConfig equalityConfig = equalityConfigs.get(fieldIdx);
             final EqualityStrategy equalityStrategy = getEqualityStrategy(equalityConfig);
             final int keyComparison = equalityStrategy.compare(keyValue, otherKeyValue, equalityConfig.getEqualityParameters());
             if (keyComparison != 0) {
@@ -93,7 +94,6 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
         }
         return 0;
     }
-
 
 
     private EqualityStrategy getEqualityStrategy(final EqualityConfig equalityConfig) {

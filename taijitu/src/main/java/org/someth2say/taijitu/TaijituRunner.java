@@ -106,58 +106,11 @@ public class TaijituRunner implements Callable<ComparisonResult> {
                 ResultSetTupleBuilder targetTupleBuilder = new ResultSetTupleBuilder(targetMatcher, runtime, targetQueryConfig);
                 ResultSetIterator targetIterator = getAndRegisterResultSetIterator(runtime, targetMatcher, targetQueryConfig, targetTupleBuilder);
                 if (targetIterator != null) {
-
-                    //This point we can actually define comparators (we finally know the canonical fields)
-                    EqualityConfig[] equalityConfigs = getEqualityConfigs(runtime.getCanonicalFields());
-                    sourceTupleBuilder.setEqualityConfigs(equalityConfigs);
-                    targetTupleBuilder.setEqualityConfigs(equalityConfigs);
-
                     return strategy.runComparison(sourceIterator, targetIterator, runtime, config);
                 }
             }
         }
         return null;
-    }
-
-    private EqualityConfig[] getEqualityConfigs(final List<FieldDescription> canonicalFields) {
-        EqualityConfig[] result = new EqualityConfig[canonicalFields.size()];
-        int pos = 0;
-        for (FieldDescription fieldDescription : canonicalFields) {
-            result[pos++] = getEqualityConfigFor(fieldDescription.getClazz(), fieldDescription.getName(), config.getEqualityConfigs());
-        }
-        return result;
-    }
-
-    private EqualityConfig getEqualityConfigFor(final String fieldClass, final String fieldName, final List<EqualityConfig> equalityConfigs) {
-
-        Optional<EqualityConfig> perfectMatches = equalityConfigs.stream().filter(eq -> fieldNameMatch(fieldName, eq) && fieldClassMatch(fieldClass, eq)).findFirst();
-        Optional<EqualityConfig> nameMatches = equalityConfigs.stream().filter(eq -> fieldNameMatch(fieldName, eq) && eq.getFieldClass() == null).findFirst();
-        Optional<EqualityConfig> classMathes = equalityConfigs.stream().filter(eq -> eq.getFieldName() == null && fieldClassMatch(fieldClass, eq)).findFirst();
-        Optional<EqualityConfig> allMathes = equalityConfigs.stream().filter(eq -> eq.getFieldName() == null && eq.getFieldClass() == null).findFirst();
-
-        return perfectMatches.orElse(nameMatches.orElse(classMathes.orElse(allMathes.get())));
-
-    }
-
-    private boolean fieldNameMatch(String fieldName, EqualityConfig eq) {
-        return eq.getFieldName() != null && fieldName.equals(eq.getFieldName());
-    }
-
-    private boolean fieldClassMatch(String fieldClassName, EqualityConfig eq) {
-        String configClassName = eq.getFieldClass();
-        if (configClassName == null) return false;
-        if (eq.fieldClassStrict()) {
-            return fieldClassName.equals(configClassName);
-        } else {
-            try {
-                Class<?> configClass = Class.forName(configClassName);
-                Class<?> fieldClass = Class.forName(fieldClassName);
-                return configClass.isAssignableFrom(fieldClass);
-            } catch (ClassNotFoundException e) {
-                logger.error("Class defined in equality config not found: " + configClassName);
-                return false;
-            }
-        }
     }
 
 

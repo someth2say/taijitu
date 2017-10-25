@@ -2,10 +2,8 @@ package org.someth2say.taijitu.tuple;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonRuntime;
-import org.someth2say.taijitu.config.EqualityConfig;
 import org.someth2say.taijitu.config.QueryConfig;
 import org.someth2say.taijitu.matcher.FieldMatcher;
-import org.apache.commons.lang3.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,7 +15,6 @@ public class ResultSetTupleBuilder implements TupleBuilder<ResultSet, Comparable
     private final FieldMatcher matcher;
     private final ComparisonRuntime runtime;
     private final QueryConfig queryConfig;
-    private EqualityConfig[] equalityConfigs;
 
     public ResultSetTupleBuilder(final FieldMatcher matcher, final ComparisonRuntime runtime, final QueryConfig queryConfig) {
         this.matcher = matcher;
@@ -31,7 +28,7 @@ public class ResultSetTupleBuilder implements TupleBuilder<ResultSet, Comparable
         List<FieldDescription> providedFields = runtime.getProvidedFields(queryConfig.getName());
         Object[] values = extract(matcher, resultSet, canonicalFields, providedFields);
         //logger.info("Built tuple: "+StringUtils.join(values,","));
-        return new ComparableTuple(values, runtime, equalityConfigs);
+        return new ComparableTuple(values, runtime);
     }
 
     private static Object[] extract(FieldMatcher matcher, ResultSet rs, List<FieldDescription> canonicalFields, List<FieldDescription> providedFields) {
@@ -49,7 +46,4 @@ public class ResultSetTupleBuilder implements TupleBuilder<ResultSet, Comparable
         return fieldValues;
     }
 
-    public void setEqualityConfigs(EqualityConfig[] equalityConfigs) {
-        this.equalityConfigs = equalityConfigs;
-    }
 }

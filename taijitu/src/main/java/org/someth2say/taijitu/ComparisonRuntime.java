@@ -2,6 +2,7 @@ package org.someth2say.taijitu;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.config.ComparisonConfig;
+import org.someth2say.taijitu.config.EqualityConfig;
 import org.someth2say.taijitu.config.QueryConfig;
 import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.tuple.FieldDescription;
@@ -17,26 +18,17 @@ import java.util.stream.Collectors;
 public class ComparisonRuntime {
     private static final Logger logger = Logger.getLogger(ComparisonRuntime.class);
 
-    private final Map<Class<?>, Comparator<Object>> comparators;
     private final ComparisonConfig comparisonConfig;
 
     //TODO: This hurts! should be final...
     private List<FieldDescription> canonicalFields;
     private List<String> canonicalKeys;
+    private List<EqualityConfig> equalityConfigs;
+
     private Map<String, FieldDescription[]> providedFieldsMap = new HashMap<>();
 
     public ComparisonRuntime(final ComparisonConfig comparisonConfig) {
         this.comparisonConfig = comparisonConfig;
-
-        this.comparators = buildComparators();
-    }
-
-    //TODO: Move to ComparatorRegistry and ComparatorConfig
-    private Map<Class<?>, Comparator<Object>> buildComparators() {
-        Map<Class<?>, Comparator<Object>> res = new HashMap<>();
-
-
-        return res;
     }
 
     public List<FieldDescription> getProvidedFields(String name) {
@@ -56,11 +48,16 @@ public class ComparisonRuntime {
             if (canonicalFields == null) {
                 canonicalFields = Arrays.asList(providedFields);
                 canonicalKeys = providedKeysList;
-                updateIndexes();
+                rebuildIndexes();
+                updateEqualityConfigs();
                 return true;
             } else {
                 if (validateCanonicalKeysAreProvided(queryConfig, fieldMatcher, providedKeysList, providedFieldsList)) {
-                    shrinkCanonicalFieldsToProvided(fieldMatcher, providedFieldsList);
+                    if (shrinkCanonicalFieldsToProvided(fieldMatcher, providedFieldsList)) {
+                        rebuildIndexes();
+                        //TODO: Maybe equalityConfigs can be shrink with fields...
+                        updateEqualityConfigs();
+                    }
                     return true;
                 }
             }
@@ -68,10 +65,51 @@ public class ComparisonRuntime {
         return false;
     }
 
+    private void updateEqualityConfigs() {
+        equalityConfigs = new ArrayList<>(canonicalFields.size());
+        for (FieldDescription fieldDescription : canonicalFields) {
+            equalityConfigs.add(getEqualityConfigFor(fieldDescription.getClazz(), fieldDescription.getName(), comparisonConfig.getEqualityConfigs()));
+        }
+    }
+
+    private EqualityConfig getEqualityConfigFor(final String fieldClass, final String fieldName, final List<EqualityConfig> equalityConfigs) {
+
+        Optional<EqualityConfig> perfectMatches = equalityConfigs.stream().filter(eq -> fieldNameMatch(fieldName, eq) && fieldClassMatch(fieldClass, eq)).findFirst();
+        Optional<EqualityConfig> nameMatches = equalityConfigs.stream().filter(eq -> fieldNameMatch(fieldName, eq) && eq.getFieldClass() == null).findFirst();
+        Optional<EqualityConfig> classMathes = equalityConfigs.stream().filter(eq -> eq.getFieldName() == null && fieldClassMatch(fieldClass, eq)).findFirst();
+        Optional<EqualityConfig> allMathes = equalityConfigs.stream().filter(eq -> eq.getFieldName() == null && eq.getFieldClass() == null).findFirst();
+
+        return perfectMatches.orElse(nameMatches.orElse(classMathes.orElse(allMathes.orElse(null))));
+
+    }
+
+    private boolean fieldNameMatch(String fieldName, EqualityConfig eq) {
+        return eq.getFieldName() != null && fieldName.equals(eq.getFieldName());
+    }
+
+    private boolean fieldClassMatch(String fieldClassName, EqualityConfig eq) {
+        String configClassName = eq.getFieldClass();
+        if (configClassName == null) return false;
+        if (eq.fieldClassStrict()) {
+            return fieldClassName.equals(configClassName);
+        } else {
+            try {
+                Class<?> configClass = Class.forName(configClassName);
+                Class<?> fieldClass = Class.forName(fieldClassName);
+                return configClass.isAssignableFrom(fieldClass);
+            } catch (ClassNotFoundException e) {
+                logger.error("Class defined in equality config not found: " + configClassName);
+                return false;
+            }
+        }
+    }
+
+
     private int[] keyFieldIdxs;
     private int[] nonKeyFieldIndexes;
 
-    private void updateIndexes() {
+    private void rebuildIndexes() {
+        //TODO: Canonical key fields should not change, so do not need to be recalculated (assuming no key field may have been removed while shrink)
         keyFieldIdxs = new int[canonicalKeys.size()];
         nonKeyFieldIndexes = new int[canonicalFields.size() - canonicalKeys.size()];
         int keyPos = 0;
@@ -118,14 +156,14 @@ public class ComparisonRuntime {
         return providedFieldsList.stream().map(FieldDescription::getName).collect(Collectors.toList()).containsAll(providedKeysList);
     }
 
-    private void shrinkCanonicalFieldsToProvided(FieldMatcher fieldMatcher, List<FieldDescription> providedFieldsList) {
+    private boolean shrinkCanonicalFieldsToProvided(FieldMatcher fieldMatcher, List<FieldDescription> providedFieldsList) {
         // .- Canonical fields not provided are removed from comparison
         List<FieldDescription> canonicalProvidedFieldsList = new ArrayList<>(providedFieldsList.size());
-        for (FieldDescription providedColum : providedFieldsList) {
-            FieldDescription canonicalProvidedField = fieldMatcher.getCanonicalFromField(providedColum.getName(), canonicalFields, providedFieldsList);
+        for (FieldDescription providedColumn : providedFieldsList) {
+            FieldDescription canonicalProvidedField = fieldMatcher.getCanonicalFromField(providedColumn.getName(), canonicalFields, providedFieldsList);
             canonicalProvidedFieldsList.add(canonicalProvidedField);
         }
-        canonicalFields.retainAll(canonicalProvidedFieldsList);
+        return canonicalFields.retainAll(canonicalProvidedFieldsList);
     }
 
     public List<FieldDescription> getCanonicalFields() {
@@ -139,5 +177,9 @@ public class ComparisonRuntime {
 
     public ComparisonConfig getComparisonConfig() {
         return comparisonConfig;
+    }
+
+    public List<EqualityConfig> getEqualityConfigs() {
+        return equalityConfigs;
     }
 }
