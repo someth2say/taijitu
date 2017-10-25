@@ -8,10 +8,12 @@ import org.someth2say.taijitu.config.QueryConfig;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.StrategyConfig;
-import org.someth2say.taijitu.database.ResultSetIterator;
+import org.someth2say.taijitu.source.ResultSetSource;
 import org.someth2say.taijitu.strategy.AbstractComparisonStrategy;
 import org.someth2say.taijitu.strategy.ComparisonStrategy;
 import org.someth2say.taijitu.util.ImmutablePair;
+
+import java.util.Iterator;
 
 /**
  * Created by Jordi Sola on 02/03/2017.
@@ -26,7 +28,7 @@ public class SortedStrategy extends AbstractComparisonStrategy implements Compar
     }
 
     @Override
-    public ComparisonResult runComparison(ResultSetIterator source, ResultSetIterator target, ComparisonContext comparisonContext, ComparisonConfig comparisonConfig) {
+    public ComparisonResult runComparison(Iterator<ComparableTuple> source, Iterator<ComparableTuple> target, ComparisonContext comparisonContext, ComparisonConfig comparisonConfig) {
         final String comparisonName = comparisonConfig.getName();
         logger.debug("Start sorted strategy comparison for " + comparisonName);
         SimpleComparisonResult result = new SimpleComparisonResult(comparisonConfig);

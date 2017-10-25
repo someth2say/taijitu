@@ -15,7 +15,6 @@ import org.someth2say.taijitu.compare.equality.ValueThresholdEqualityStrategy;
 import org.someth2say.taijitu.compare.equality.TimestampThresholdEqualityStrategy;
 import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.database.ConnectionManager;
-import org.someth2say.taijitu.database.QueryUtilsException;
 import org.someth2say.taijitu.strategy.mapping.MappingStrategy;
 import org.someth2say.taijitu.strategy.sorted.SortedStrategy;
 
@@ -61,13 +60,13 @@ public class TaijituTest {
     }
 
     @After
-    public void dropTables() throws SQLException, QueryUtilsException {
+    public void dropTables() throws SQLException {
         Connection conn = getConnection(DB_NAME, TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD));
         TestUtils.dropRegisteredTables(conn);
     }
 
     @Test
-    public void genericTest() throws QueryUtilsException, TaijituException, SQLException, ConfigurationException, InterruptedException {
+    public void genericTest() throws TaijituException, SQLException, ConfigurationException, InterruptedException {
         // Create the tables and test data
 
         final Properties databaseProps = TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD);

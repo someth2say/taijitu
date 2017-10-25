@@ -8,13 +8,14 @@ import org.someth2say.taijitu.compare.SynchronizedComparisonResult;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.QueryConfig;
 import org.someth2say.taijitu.config.StrategyConfig;
-import org.someth2say.taijitu.database.ResultSetIterator;
+import org.someth2say.taijitu.source.ResultSetSource;
 import org.someth2say.taijitu.strategy.AbstractComparisonStrategy;
 import org.someth2say.taijitu.strategy.ComparisonStrategy;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.util.ImmutablePair;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -34,7 +35,7 @@ public class MappingStrategy extends AbstractComparisonStrategy implements Compa
     }
 
     @Override
-    public ComparisonResult runComparison(ResultSetIterator source, ResultSetIterator target, ComparisonContext comparisonContext, ComparisonConfig comparisonConfig) {
+    public ComparisonResult runComparison(Iterator<ComparableTuple> source, Iterator<ComparableTuple> target, ComparisonContext comparisonContext, ComparisonConfig comparisonConfig) {
         final String comparisonName = comparisonConfig.getName();
         logger.debug("Start mapping strategy comparison for " + comparisonName);
         SynchronizedComparisonResult result = new SynchronizedComparisonResult(comparisonConfig);
@@ -44,8 +45,8 @@ public class MappingStrategy extends AbstractComparisonStrategy implements Compa
         //TODO: Another option is running queries/pages alternating, so we can "restrict" memory usage, but only using a single thread
         final ExecutorService executorService = Executors.newFixedThreadPool(2);
         Map<ComparableTuple, QueryAndTuple> sharedMap = new ConcurrentHashMap<>();
-        Runnable sourceMapper = new Mapper(source, sharedMap, result, comparisonConfig.getSourceQueryConfig());
-        Runnable targetMapper = new Mapper(target, sharedMap, result, comparisonConfig.getTargetQueryConfig());
+        Runnable sourceMapper = new TupleMapper(source, sharedMap, result, comparisonConfig.getSourceQueryConfig());
+        Runnable targetMapper = new TupleMapper(target, sharedMap, result, comparisonConfig.getTargetQueryConfig());
         executorService.submit(sourceMapper);// Map source
         executorService.submit(targetMapper);// Map target
 
@@ -77,14 +78,14 @@ public class MappingStrategy extends AbstractComparisonStrategy implements Compa
         return () -> MappingStrategy.NAME;
     }
 
-    private class Mapper implements Runnable {
-        private final ResultSetIterator resultSetIterator;
+    private class TupleMapper implements Runnable {
+        private final Iterator<ComparableTuple> resultSetSource;
         private final Map<ComparableTuple, ComparisonResult.QueryAndTuple> sharedSet;
         private final SynchronizedComparisonResult result;
         private final QueryConfig queryConfig;
 
-        private <T extends ComparableTuple> Mapper(final ResultSetIterator resultSetIterator, final Map<ComparableTuple, ComparisonResult.QueryAndTuple> sharedMap, final SynchronizedComparisonResult result, QueryConfig queryConfig) {
-            this.resultSetIterator = resultSetIterator;
+        private TupleMapper(final Iterator<ComparableTuple> resultSetSource, final Map<ComparableTuple, QueryAndTuple> sharedMap, final SynchronizedComparisonResult result, QueryConfig queryConfig) {
+            this.resultSetSource = resultSetSource;
             this.sharedSet = sharedMap;
             this.result = result;
             this.queryConfig = queryConfig;
@@ -92,7 +93,7 @@ public class MappingStrategy extends AbstractComparisonStrategy implements Compa
 
         @Override
         public void run() {
-            for (ComparableTuple thisRecord = getNextRecord(resultSetIterator); thisRecord != null; thisRecord = getNextRecord(resultSetIterator)) {
+            for (ComparableTuple thisRecord = getNextRecord(resultSetSource); thisRecord != null; thisRecord = getNextRecord(resultSetSource)) {
 
                 final QueryAndTuple otherQueryAndTuple = sharedSet.putIfAbsent(thisRecord, new QueryAndTuple(queryConfig, thisRecord));
                 if (otherQueryAndTuple != null) {

@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.SimpleComparisonResult;
 import org.someth2say.taijitu.config.*;
-import org.someth2say.taijitu.database.ResultSetIterator;
+import org.someth2say.taijitu.source.ResultSetSource;
 import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.registry.MatcherRegistry;
@@ -91,8 +91,8 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         QueryConfig sourceQueryConfig = config.getSourceQueryConfig();
         FieldMatcher sourceMatcher = MatcherRegistry.getIdentityMatcher();
         ResultSetTupleBuilder sourceTupleBuilder = new ResultSetTupleBuilder(sourceMatcher, context, sourceQueryConfig);
-        ResultSetIterator sourceIterator = getAndRegisterResultSetIterator(context, sourceMatcher, sourceQueryConfig, sourceTupleBuilder);
-        if (sourceIterator != null) {
+        ResultSetSource sourceSource = getAndRegisterResultSetSource(context, sourceMatcher, sourceQueryConfig, sourceTupleBuilder);
+        if (sourceSource != null) {
             final FieldMatcher targetMatcher = MatcherRegistry.getMatcher(config.getMatchingStrategyName());
             if (targetMatcher == null) {
                 logger.error("Unable to find matching strategy '" + config.getMatchingStrategyName() + "'");
@@ -100,9 +100,9 @@ public class TaijituRunner implements Callable<ComparisonResult> {
 
                 QueryConfig targetQueryConfig = config.getTargetQueryConfig();
                 ResultSetTupleBuilder targetTupleBuilder = new ResultSetTupleBuilder(targetMatcher, context, targetQueryConfig);
-                ResultSetIterator targetIterator = getAndRegisterResultSetIterator(context, targetMatcher, targetQueryConfig, targetTupleBuilder);
-                if (targetIterator != null) {
-                    return strategy.runComparison(sourceIterator, targetIterator, context, config);
+                ResultSetSource targetSource = getAndRegisterResultSetSource(context, targetMatcher, targetQueryConfig, targetTupleBuilder);
+                if (targetSource != null) {
+                    return strategy.runComparison(sourceSource.iterator(), targetSource.iterator(), context, config);
                 }
             }
         }
@@ -110,20 +110,20 @@ public class TaijituRunner implements Callable<ComparisonResult> {
     }
 
 
-    private ResultSetIterator getAndRegisterResultSetIterator(ComparisonContext context, FieldMatcher fieldMatcher, QueryConfig queryConfig, ResultSetTupleBuilder tupleBuilder) {
-        ResultSetIterator rsIterator = getQueryIterator(queryConfig, tupleBuilder);
-        if (rsIterator == null) {
+    private ResultSetSource getAndRegisterResultSetSource(ComparisonContext context, FieldMatcher fieldMatcher, QueryConfig queryConfig, ResultSetTupleBuilder tupleBuilder) {
+        ResultSetSource source = getQueryIterator(queryConfig, tupleBuilder);
+        if (source == null) {
             return null;
         }
-        if (!context.registerFields(rsIterator.getFields(), queryConfig, fieldMatcher)) {
+        if (!context.registerFields(source.getFieldDescriptions(), queryConfig, fieldMatcher)) {
             return null;
         }
-        return rsIterator;
+        return source;
     }
 
     //TODO: Move to TupleIterator (something that provide both field names and tuple stream)
-    private ResultSetIterator getQueryIterator(final QueryConfig queryConfig,
-                                               ResultSetTupleBuilder tupleBuilder) {
+    private ResultSetSource getQueryIterator(final QueryConfig queryConfig,
+                                             ResultSetTupleBuilder tupleBuilder) {
         Connection connection;
         try {
             connection = ConnectionManager.getConnection(queryConfig.getDatabaseRef());
@@ -135,7 +135,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         final int fetchSize = queryConfig.getFetchSize();
         final Object[] queryParameters = queryConfig.getQueryParameters();
         final String statement = queryConfig.getStatement();
-        return new ResultSetIterator(connection, statement, tupleBuilder, fetchSize, queryParameters);
+        return new ResultSetSource(connection, statement, tupleBuilder, fetchSize, queryParameters);
     }
 
 

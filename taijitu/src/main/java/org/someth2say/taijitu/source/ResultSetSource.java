@@ -1,16 +1,15 @@
-package org.someth2say.taijitu.database;
+package org.someth2say.taijitu.source;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.tuple.FieldDescription;
 import org.someth2say.taijitu.tuple.ResultSetTupleBuilder;
-import org.someth2say.taijitu.util.ImmutablePair;
 
 import java.sql.*;
 import java.util.Iterator;
 
-public class ResultSetIterator implements Iterator<ComparableTuple> {
-    private static final Logger logger = Logger.getLogger(ResultSetIterator.class);
+public class ResultSetSource implements Source<ComparableTuple> {
+    private static final Logger logger = Logger.getLogger(ResultSetSource.class);
 
     //TODO: Considering adding an the last exception raised, so we can check the status.
     private ResultSet resultSet;
@@ -21,24 +20,16 @@ public class ResultSetIterator implements Iterator<ComparableTuple> {
     private int fetchSize;
     private Object[] parameters;
 
-    public ResultSetIterator(Connection connection, String sql, ResultSetTupleBuilder builder, final int fetchSize, final Object[] parameters) {
-        this.fetchSize = fetchSize;
-        this.parameters = parameters;
+    public ResultSetSource(Connection connection, String sql, ResultSetTupleBuilder builder, final int fetchSize, final Object[] parameters) {
         assert connection != null;
         assert sql != null;
+        this.fetchSize = fetchSize;
+        this.parameters = parameters;
         this.builder = builder;
         this.connection = connection;
         this.sql = sql;
     }
 
-    private void init() {
-        try {
-            preparedStatement = getPreparedStatement();
-            resultSet = preparedStatement.executeQuery();
-        } catch (SQLException e) {
-            close();
-        }
-    }
 
     private PreparedStatement getPreparedStatement() throws SQLException {
         PreparedStatement preparedStatement;
@@ -55,23 +46,15 @@ public class ResultSetIterator implements Iterator<ComparableTuple> {
         return preparedStatement;
     }
 
-
-    @Override
-    public boolean hasNext() {
-        if (preparedStatement == null) {
-            init();
-        }
+    private void init() {
         try {
-            boolean hasMore = resultSet.next();
-            if (!hasMore) {
-                close();
-            }
-            return hasMore;
+            preparedStatement = getPreparedStatement();
+            resultSet = preparedStatement.executeQuery();
         } catch (SQLException e) {
             close();
-            return false;
         }
     }
+
 
     private void close() {
         try {
@@ -87,24 +70,7 @@ public class ResultSetIterator implements Iterator<ComparableTuple> {
     }
 
     @Override
-    public ComparableTuple next() {
-        try {
-            //TODO: Built tuple should also include the comparators!
-            return builder.apply(resultSet);
-        } catch (Exception e) {
-            close();
-            throw e;
-        }
-    }
-
-
-    /**
-     * Return the column names, as provided by resultSet metadata.
-     *
-     * @return Array with description for each column.
-     */
-    // TODO: Create `FieldDescription` class
-    public FieldDescription[] getFields() {
+    public FieldDescription[] getFieldDescriptions() {
         if (preparedStatement == null) {
             init();
         }
@@ -125,6 +91,40 @@ public class ResultSetIterator implements Iterator<ComparableTuple> {
             logger.error("Unable to extract columns from ResultSet metadata.", e);
             return null;
         }
+    }
+
+    @Override
+    public Iterator<ComparableTuple> iterator() {
+        return new Iterator<>() {
+
+            @Override
+            public boolean hasNext() {
+                if (preparedStatement == null) {
+                    init();
+                }
+                try {
+                    boolean hasMore = resultSet.next();
+                    if (!hasMore) {
+                        close();
+                    }
+                    return hasMore;
+                } catch (SQLException e) {
+                    close();
+                    return false;
+                }
+            }
+
+
+            @Override
+            public ComparableTuple next() {
+                try {
+                    return builder.apply(resultSet);
+                } catch (Exception e) {
+                    close();
+                    throw e;
+                }
+            }
+        };
     }
 
 }

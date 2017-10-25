@@ -10,7 +10,6 @@ import org.someth2say.taijitu.config.DatabaseConfig;
 import org.someth2say.taijitu.config.TaijituConfig;
 import org.someth2say.taijitu.config.impl.TaijituConfigImpl;
 import org.someth2say.taijitu.database.ConnectionManager;
-import org.someth2say.taijitu.database.QueryUtilsException;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.registry.ComparisonStrategyRegistry;
 import org.someth2say.taijitu.registry.EqualityStrategyRegistry;
@@ -164,11 +163,11 @@ public final class Taijitu {
                 try {
                     result[i] = future.get();
                 } catch (ExecutionException e) {
-                    logger.error("Unable to obtain comparison result.",e);
+                    logger.error("Unable to obtain comparison result.", e);
                     result[i] = null;
                 }
             } catch (InterruptedException e) {
-                logger.error("Unable to obtain comparison result.",e);
+                logger.error("Unable to obtain comparison result.", e);
                 result[i] = null;
             }
         }
@@ -184,11 +183,7 @@ public final class Taijitu {
     }
 
     private void closeDataSources() {
-        try {
-            ConnectionManager.closeAllDataSources();
-        } catch (QueryUtilsException e) {
-            logger.error("Error while closing connections (will continue)" + e.getMessage(), e);
-        }
+        ConnectionManager.closeAllDataSources();
     }
 
     private Collection<Future<ComparisonResult>> runComparisonThreads(

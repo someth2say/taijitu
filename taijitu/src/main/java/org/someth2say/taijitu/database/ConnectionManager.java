@@ -14,15 +14,12 @@ import com.zaxxer.hikari.HikariDataSource;
  * @author Jordi Sola
  */
 public final class ConnectionManager {
-    // TODO: Should be moved to DataSourceManager, mapping datasources to names, and
-    // delegating connection pooling to an specialist (HicariCP?)
-
     private static final Map<String, HikariDataSource> datasourceMap = new HashMap<>();
 
     private ConnectionManager() {
     }
 
-    public static void closeAllDataSources() throws QueryUtilsException {
+    public static void closeAllDataSources() {
         for (Entry<String, HikariDataSource> entry : datasourceMap.entrySet()) {
             entry.getValue().close();
         }
