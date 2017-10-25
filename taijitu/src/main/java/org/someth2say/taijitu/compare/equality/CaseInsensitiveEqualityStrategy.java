@@ -21,11 +21,9 @@ public class CaseInsensitiveEqualityStrategy implements EqualityStrategy<String>
         return object1.toUpperCase().compareTo(object2.toUpperCase());
     }
 
-
     public static EqualityConfig defaultConfig() {
         return (DefaultEqualityConfig) () -> CaseInsensitiveEqualityStrategy.NAME;
     }
-
 
     @Override
     public String getName() {

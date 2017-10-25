@@ -117,10 +117,10 @@ public class TaijituTest {
         //Add comparators
         //Case insensitive strings
         properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + CaseInsensitiveEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, String.class.getName());
-        //Threshold 0.1 for Numbers
+        //Decimal places for Numbers
         properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Number.class.getName());
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "0.01");
-        //Threshold 0.1s for dates.
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "2");
+        //Threshold 100ms for Timestamps.
         properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Timestamp.class.getName());
         properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "100");
 

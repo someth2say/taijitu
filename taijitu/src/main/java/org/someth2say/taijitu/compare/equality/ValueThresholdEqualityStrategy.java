@@ -2,29 +2,51 @@ package org.someth2say.taijitu.compare.equality;
 
 import org.someth2say.taijitu.config.EqualityConfig;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public class ValueThresholdEqualityStrategy implements EqualityStrategy<Number> {
 
     public static String NAME = "threshold";
 
     @Override
     public int computeHashCode(Number object, Object equalityConfig) {
-        //TODO: Fail!! Should have threshold into account!
-        return Double.valueOf(object.doubleValue()).hashCode();
+        int scale = getScale(equalityConfig);
+        double doubleValue = object.doubleValue();
+        double rounded = round(doubleValue, scale);
+        return Double.valueOf(rounded).hashCode();
+    }
+
+    private int getScale(Object equalityConfig) {
+        return Integer.parseInt(equalityConfig.toString());
+    }
+
+    private static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+        BigDecimal bd = new BigDecimal(Double.toString(value));
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 
     @Override
     public boolean equals(Number object1, Number object2, Object equalityConfig) {
-        Double threshold = Double.parseDouble(equalityConfig.toString());
-        return (Math.abs(object1.doubleValue() - object2.doubleValue()) < threshold);
+        int scale = getScale(equalityConfig);
+        double diff = object1.doubleValue() - object2.doubleValue();
+        double scaleRange = getScaleRange(scale);
+        return (Math.abs(diff) < scaleRange);
+    }
+
+    private double getScaleRange(int scale) {
+        return 1d / (10 ^ scale);
     }
 
     @Override
     public int compare(Number object1, Number object2, Object equalityConfig) {
-        Double threshold = Double.parseDouble(equalityConfig.toString());
+        int scale = getScale(equalityConfig);
         double diff = object1.doubleValue() - object2.doubleValue();
-        return Math.abs(diff) < threshold ? 0 : diff < 0 ? -1 : 1;
+        double scaleRange = getScaleRange(scale);
+        return Math.abs(diff) < scaleRange ? 0 : diff < 0 ? -1 : 1;
     }
-
 
     public static EqualityConfig defaultConfig() {
         return (DefaultEqualityConfig) () -> ValueThresholdEqualityStrategy.NAME;

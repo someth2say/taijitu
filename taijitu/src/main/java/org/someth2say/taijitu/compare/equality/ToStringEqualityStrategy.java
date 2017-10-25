@@ -1,6 +1,5 @@
 package org.someth2say.taijitu.compare.equality;
 
-import org.someth2say.taijitu.config.DefaultConfig;
 import org.someth2say.taijitu.config.EqualityConfig;
 
 //TODO: Null safety
@@ -23,7 +22,6 @@ public class ToStringEqualityStrategy implements EqualityStrategy<Object> {
         return object1.toString().compareTo(object2.toString());
     }
 
-    //TODO: Maybe all default configs should share a common interface
     public static EqualityConfig defaultConfig() {
         return (DefaultEqualityConfig) () -> ToStringEqualityStrategy.NAME;
     }
