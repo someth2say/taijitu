@@ -5,10 +5,10 @@ import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.SimpleComparisonResult;
 import org.someth2say.taijitu.config.QueryConfig;
+import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.StrategyConfig;
-import org.someth2say.taijitu.source.ResultSetSource;
 import org.someth2say.taijitu.strategy.AbstractComparisonStrategy;
 import org.someth2say.taijitu.strategy.ComparisonStrategy;
 import org.someth2say.taijitu.util.ImmutablePair;
@@ -28,16 +28,19 @@ public class SortedStrategy extends AbstractComparisonStrategy implements Compar
     }
 
     @Override
-    public ComparisonResult runComparison(Iterator<ComparableTuple> source, Iterator<ComparableTuple> target, ComparisonContext comparisonContext, ComparisonConfig comparisonConfig) {
+    public ComparisonResult runComparison(Source source, Source target, ComparisonContext comparisonContext, ComparisonConfig comparisonConfig) {
         final String comparisonName = comparisonConfig.getName();
         logger.debug("Start sorted strategy comparison for " + comparisonName);
         SimpleComparisonResult result = new SimpleComparisonResult(comparisonConfig);
 
-        ComparableTuple sourceRecord = getNextRecord(source);
-        ComparableTuple targetRecord = getNextRecord(target);
 
-        final QueryConfig targetQueryConfig = comparisonConfig.getTargetQueryConfig();
-        final QueryConfig sourceQueryConfig = comparisonConfig.getSourceQueryConfig();
+        Iterator<ComparableTuple> sourceIterator = source.iterator();
+        Iterator<ComparableTuple> targetIterator = target.iterator();
+        ComparableTuple sourceRecord = getNextRecord(sourceIterator);
+        ComparableTuple targetRecord = getNextRecord(targetIterator);
+
+        final QueryConfig targetQueryConfig = target.getConfig();
+        final QueryConfig sourceQueryConfig = source.getConfig();
 
         while (sourceRecord != null && targetRecord != null) {
 
@@ -45,13 +48,11 @@ public class SortedStrategy extends AbstractComparisonStrategy implements Compar
             if (keyComparison > 0) {
                 // Source is after target -> target record is not in source stream
                 result.getDisjoint().add(new ComparisonResult.QueryAndTuple(targetQueryConfig, targetRecord));
-                //result.getTargetOnly().add(targetRecord);
-                targetRecord = getNextRecord(target);
+                targetRecord = getNextRecord(targetIterator);
             } else if (keyComparison < 0) {
                 // Source is before target -> source record is not in target stream
                 result.getDisjoint().add(new ComparisonResult.QueryAndTuple(sourceQueryConfig, sourceRecord));
-                //result.getSourceOnly().add(sourceRecord);
-                sourceRecord = getNextRecord(source);
+                sourceRecord = getNextRecord(sourceIterator);
             } else {
                 // same Keys
                 //TODO Consider more fine-grained value comparison result than a simple boolean (i.e. a set of different fields)
@@ -61,17 +62,17 @@ public class SortedStrategy extends AbstractComparisonStrategy implements Compar
                             new ComparisonResult.QueryAndTuple(sourceQueryConfig, sourceRecord),
                             new ComparisonResult.QueryAndTuple(targetQueryConfig, targetRecord)));
                 }
-                sourceRecord = getNextRecord(source);
-                targetRecord = getNextRecord(target);
+                sourceRecord = getNextRecord(sourceIterator);
+                targetRecord = getNextRecord(targetIterator);
             }
         }
 
         //At least, one stream is fully consumed, so add every other stream's element to "missing"
-        while (source.hasNext()) {
-            result.getDisjoint().add(new ComparisonResult.QueryAndTuple(targetQueryConfig, targetRecord));
+        while (sourceIterator.hasNext()) {
+            result.getDisjoint().add(new ComparisonResult.QueryAndTuple(sourceQueryConfig, sourceIterator.next()));
         }
-        while (target.hasNext()) {
-            result.getDisjoint().add(new ComparisonResult.QueryAndTuple(targetQueryConfig, target.next()));
+        while (targetIterator.hasNext()) {
+            result.getDisjoint().add(new ComparisonResult.QueryAndTuple(targetQueryConfig, targetIterator.next()));
         }
 
         return result;

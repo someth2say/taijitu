@@ -9,11 +9,9 @@ public interface ComparisonConfig extends Named, QueryConfig {
 
     PluginConfig[] getComparisonPluginConfigs();
 
-    QueryConfig getSourceQueryConfig();
-
-    QueryConfig getTargetQueryConfig();
-
     String getMatchingStrategyName();
 
     List<EqualityConfig> getEqualityConfigs();
+
+    QueryConfig getQueryConfig(String sourceId);
 }

@@ -82,11 +82,11 @@ Should refer to database identifiers as defined in `database` section.
 ## Behaviour configuration
 Some extra features may be defined as per execution basis in properties files.
 
-### Query parameters
-In order to set a common value to several queries, that also can be changed easily, query parameters are introduced.
+### Query sqlParameters
+In order to set a common value to several queries, that also can be changed easily, query sqlParameters are introduced.
 A query parameter is defined with the `parameter` keyword:
 ```
-parameters.testDate = 20120907
+sqlParameters.testDate = 20120907
 ```
 And then, it can be used in any query, by using the parameter name between curly brackets:
 ```

@@ -4,6 +4,10 @@ import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.someth2say.taijitu.config.*;
 import org.someth2say.taijitu.config.impl.apache.ApacheBasedComparisonConfig;
 
+import javax.management.Query;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 
 public class ComparisonConfigImpl extends NamedConfig implements ApacheBasedComparisonConfig {
     private final ImmutableHierarchicalConfiguration configuration;
@@ -31,28 +35,15 @@ public class ComparisonConfigImpl extends NamedConfig implements ApacheBasedComp
     /**
      * QUERIES
      **/
-    private QueryConfig sourceQuery = null;
-    @Override
-	public QueryConfig getSourceQueryConfig() {
-        if (sourceQuery == null) {
-            sourceQuery = ApacheBasedComparisonConfig.super.getSourceQueryConfig();
-        }
-        return sourceQuery;
-    }
-
-
-    private QueryConfig targetQuery = null;
+    private Map<String, QueryConfig> queryCache = new ConcurrentHashMap<>();
 
     @Override
-	public QueryConfig getTargetQueryConfig() {
-        if (targetQuery == null) {
-            targetQuery = ApacheBasedComparisonConfig.super.getTargetQueryConfig();
-        }
-        return targetQuery;
+    public QueryConfig getQueryConfig(String sourceId) {
+        return queryCache.computeIfAbsent(sourceId, ApacheBasedComparisonConfig.super::getQueryConfig);
     }
 
     @Override
-	public ImmutableHierarchicalConfiguration getConfiguration() {
+    public ImmutableHierarchicalConfiguration getConfiguration() {
         return configuration;
     }
 

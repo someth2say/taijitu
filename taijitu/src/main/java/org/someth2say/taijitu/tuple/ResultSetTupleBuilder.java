@@ -9,23 +9,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-public class ResultSetTupleBuilder implements TupleBuilder<ResultSet, ComparableTuple> {
+public class ResultSetTupleBuilder implements TupleBuilder<ResultSet> {
     private static final Logger logger = Logger.getLogger(ResultSetTupleBuilder.class);
 
     private final FieldMatcher matcher;
     private final ComparisonContext context;
-    private final QueryConfig queryConfig;
+    private final String sourceId;
 
-    public ResultSetTupleBuilder(final FieldMatcher matcher, final ComparisonContext context, final QueryConfig queryConfig) {
+    public ResultSetTupleBuilder(final FieldMatcher matcher, final ComparisonContext context, final String sourceId) {
         this.matcher = matcher;
         this.context = context;
-        this.queryConfig = queryConfig;
+        this.sourceId = sourceId;
     }
 
     @Override
     public ComparableTuple apply(ResultSet resultSet) {
         List<FieldDescription> canonicalFields = context.getCanonicalFields();
-        List<FieldDescription> providedFields = context.getProvidedFields(queryConfig.getName());
+        List<FieldDescription> providedFields = context.getProvidedFields(sourceId);
         Object[] values = extract(matcher, resultSet, canonicalFields, providedFields);
         return new ComparableTuple(values, context);
     }

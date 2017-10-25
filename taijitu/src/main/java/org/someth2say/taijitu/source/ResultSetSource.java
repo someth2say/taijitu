@@ -1,49 +1,65 @@
 package org.someth2say.taijitu.source;
 
 import org.apache.log4j.Logger;
+import org.someth2say.taijitu.ComparisonContext;
+import org.someth2say.taijitu.config.ComparisonConfig;
+import org.someth2say.taijitu.config.QueryConfig;
+import org.someth2say.taijitu.matcher.FieldMatcher;
+import org.someth2say.taijitu.registry.MatcherRegistry;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.tuple.FieldDescription;
 import org.someth2say.taijitu.tuple.ResultSetTupleBuilder;
+import org.someth2say.taijitu.tuple.TupleBuilder;
 
 import java.sql.*;
 import java.util.Iterator;
 
-public class ResultSetSource implements Source<ComparableTuple> {
+public class ResultSetSource implements Source {
     private static final Logger logger = Logger.getLogger(ResultSetSource.class);
 
     //TODO: Considering adding an the last exception raised, so we can check the status.
     private ResultSet resultSet;
     private PreparedStatement preparedStatement;
     private Connection connection;
-    private String sql;
-    private ResultSetTupleBuilder builder;
-    private int fetchSize;
-    private Object[] parameters;
+    private final ComparisonConfig comparisonConfig;
+    private final ComparisonContext context;
 
-    public ResultSetSource(Connection connection, String sql, ResultSetTupleBuilder builder, final int fetchSize, final Object[] parameters) {
-        assert connection != null;
-        assert sql != null;
-        this.fetchSize = fetchSize;
-        this.parameters = parameters;
-        this.builder = builder;
+    @Override
+    public QueryConfig getConfig() {
+        return queryConfig;
+    }
+
+    private final QueryConfig queryConfig;
+    private ResultSetTupleBuilder builder;
+
+    public ResultSetSource(Connection connection, final ComparisonConfig comparisonConfig, final String sourceId, final ComparisonContext context) {
         this.connection = connection;
-        this.sql = sql;
+        assert connection != null;
+        this.queryConfig = comparisonConfig.getQueryConfig(sourceId);
+        assert queryConfig != null;
+        this.comparisonConfig = comparisonConfig;
+        this.context = context;
     }
 
 
     private PreparedStatement getPreparedStatement() throws SQLException {
         PreparedStatement preparedStatement;
-        preparedStatement = connection.prepareStatement(sql);
-        preparedStatement.setFetchSize(fetchSize);
-        for (int paramIdx = 0; paramIdx < parameters.length; paramIdx++) {
-            Object object = parameters[paramIdx];
+        preparedStatement = connection.prepareStatement(queryConfig.getStatement());
+        preparedStatement.setFetchSize(queryConfig.getFetchSize());
+        assignSqlParameters(preparedStatement);
+        return preparedStatement;
+    }
+
+    private void assignSqlParameters(PreparedStatement preparedStatement) throws SQLException {
+        Object[] sqlParameters = queryConfig.getQueryParameters();
+        for (int paramIdx = 0; paramIdx < sqlParameters.length; paramIdx++) {
+            Object object = sqlParameters[paramIdx];
             if (object instanceof java.util.Date) {
                 preparedStatement.setDate(paramIdx + 1, new Date(((java.util.Date) object).getTime()));
             } else {
                 preparedStatement.setObject(paramIdx + 1, object);
             }
         }
-        return preparedStatement;
     }
 
     private void init() {
@@ -118,13 +134,22 @@ public class ResultSetSource implements Source<ComparableTuple> {
             @Override
             public ComparableTuple next() {
                 try {
-                    return builder.apply(resultSet);
+                    return getTupleBuilder().apply(resultSet);
                 } catch (Exception e) {
                     close();
                     throw e;
                 }
             }
         };
+    }
+
+    @Override
+    public TupleBuilder<ResultSet> getTupleBuilder() {
+        if (builder == null) {
+            final FieldMatcher matcher = MatcherRegistry.getMatcher(comparisonConfig.getMatchingStrategyName());
+            builder = new ResultSetTupleBuilder(matcher, context, queryConfig.getName());
+        }
+        return builder;
     }
 
 }

@@ -16,8 +16,10 @@ import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.registry.MatcherRegistry;
 import org.someth2say.taijitu.registry.PluginRegistry;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
+import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.strategy.ComparisonStrategy;
 import org.someth2say.taijitu.registry.ComparisonStrategyRegistry;
+import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.tuple.ResultSetTupleBuilder;
 
 /**
@@ -88,42 +90,41 @@ public class TaijituRunner implements Callable<ComparisonResult> {
 
     private ComparisonResult runComparisonStrategy(ComparisonContext context, ComparisonStrategy strategy) {
 
-        QueryConfig sourceQueryConfig = config.getSourceQueryConfig();
-        FieldMatcher sourceMatcher = MatcherRegistry.getIdentityMatcher();
-        ResultSetTupleBuilder sourceTupleBuilder = new ResultSetTupleBuilder(sourceMatcher, context, sourceQueryConfig);
-        ResultSetSource sourceSource = getAndRegisterResultSetSource(context, sourceMatcher, sourceQueryConfig, sourceTupleBuilder);
+        //TODO: Maybe we should iterate on queryConfig's? Then we need to ensure config sanity
+        Source sourceSource = buildSource(ConfigurationLabels.Comparison.SOURCE, MatcherRegistry.getIdentityMatcher(), context, config);
         if (sourceSource != null) {
             final FieldMatcher targetMatcher = MatcherRegistry.getMatcher(config.getMatchingStrategyName());
-            if (targetMatcher == null) {
-                logger.error("Unable to find matching strategy '" + config.getMatchingStrategyName() + "'");
-            } else {
-
-                QueryConfig targetQueryConfig = config.getTargetQueryConfig();
-                ResultSetTupleBuilder targetTupleBuilder = new ResultSetTupleBuilder(targetMatcher, context, targetQueryConfig);
-                ResultSetSource targetSource = getAndRegisterResultSetSource(context, targetMatcher, targetQueryConfig, targetTupleBuilder);
-                if (targetSource != null) {
-                    return strategy.runComparison(sourceSource.iterator(), targetSource.iterator(), context, config);
-                }
+            Source targetSource = buildSource(ConfigurationLabels.Comparison.TARGET, targetMatcher, context, config);
+            if (targetSource != null) {
+                return strategy.runComparison(sourceSource, targetSource, context, config);
             }
         }
         return null;
     }
 
+    private Source buildSource(final String sourceId, FieldMatcher matcher, ComparisonContext context, ComparisonConfig comparisonConfig) {
+        if (matcher == null) {
+            logger.error("Unable to find matching strategy '" + config.getMatchingStrategyName() + "'");
+        }
 
-    private ResultSetSource getAndRegisterResultSetSource(ComparisonContext context, FieldMatcher fieldMatcher, QueryConfig queryConfig, ResultSetTupleBuilder tupleBuilder) {
-        ResultSetSource source = getQueryIterator(queryConfig, tupleBuilder);
-        if (source == null) {
-            return null;
+        final QueryConfig queryConfig = comparisonConfig.getQueryConfig(sourceId);
+
+        //TODO: Decide the type for the source based on the config!
+        Source source = getResultSetSource(queryConfig, comparisonConfig, context);
+
+
+        if (source != null && registerSourceFieldsToContext(queryConfig, matcher, context, source)) {
+            return source;
         }
-        if (!context.registerFields(source.getFieldDescriptions(), queryConfig, fieldMatcher)) {
-            return null;
-        }
-        return source;
+        return null;
     }
 
-    //TODO: Move to TupleIterator (something that provide both field names and tuple stream)
-    private ResultSetSource getQueryIterator(final QueryConfig queryConfig,
-                                             ResultSetTupleBuilder tupleBuilder) {
+    private boolean registerSourceFieldsToContext(QueryConfig queryConfig, FieldMatcher matcher, ComparisonContext context, Source source) {
+        return context.registerFields(source.getFieldDescriptions(), queryConfig, matcher);
+    }
+
+
+    private ResultSetSource getResultSetSource(final QueryConfig queryConfig, final ComparisonConfig comparisonConfig, final ComparisonContext context) {
         Connection connection;
         try {
             connection = ConnectionManager.getConnection(queryConfig.getDatabaseRef());
@@ -132,10 +133,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
             return null;
         }
 
-        final int fetchSize = queryConfig.getFetchSize();
-        final Object[] queryParameters = queryConfig.getQueryParameters();
-        final String statement = queryConfig.getStatement();
-        return new ResultSetSource(connection, statement, tupleBuilder, fetchSize, queryParameters);
+        return new ResultSetSource(connection, comparisonConfig, queryConfig.getName(), context);
     }
 
 

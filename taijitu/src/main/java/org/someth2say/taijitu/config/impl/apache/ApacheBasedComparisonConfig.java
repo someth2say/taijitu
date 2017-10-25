@@ -17,7 +17,7 @@ import static org.someth2say.taijitu.config.DefaultConfig.*;
 public interface ApacheBasedComparisonConfig extends ComparisonConfig, ApacheBasedQueryConfig {
 
     @Override
-	ComparisonConfig getParent();
+    ComparisonConfig getParent();
 
     @Override
     default List<EqualityConfig> getEqualityConfigs() {
@@ -60,23 +60,14 @@ public interface ApacheBasedComparisonConfig extends ComparisonConfig, ApacheBas
                 : getParent() != null ? getParent().getMatchingStrategyName() : DEFAULT_MATCHING_STRATEGY_NAME;
     }
 
-    @Override
-    default QueryConfig getSourceQueryConfig() {
-        try {
-            final ImmutableHierarchicalConfiguration sourceConfig = this.getConfiguration().immutableConfigurationAt(Comparison.SOURCE);
-            return new QueryConfigImpl(sourceConfig, this);
-        } catch (IllegalArgumentException e) {
-            return getParent() != null ? getParent().getSourceQueryConfig() : null;
-        }
-    }
 
     @Override
-    default QueryConfig getTargetQueryConfig() {
+    default QueryConfig getQueryConfig(final String sourceId) {
         try {
-            final ImmutableHierarchicalConfiguration sourceConfig = this.getConfiguration().immutableConfigurationAt(Comparison.TARGET);
+            final ImmutableHierarchicalConfiguration sourceConfig = this.getConfiguration().immutableConfigurationAt(sourceId);
             return new QueryConfigImpl(sourceConfig, this);
         } catch (IllegalArgumentException e) {
-            return getParent() != null ? getParent().getTargetQueryConfig() : null;
+            return getParent() != null ? getParent().getQueryConfig(sourceId) : null;
         }
     }
 }
