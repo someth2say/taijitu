@@ -12,7 +12,9 @@ import org.someth2say.taijitu.tuple.ResultSetTupleBuilder;
 import org.someth2say.taijitu.tuple.TupleBuilder;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class ResultSetSource implements Source {
     private static final Logger logger = Logger.getLogger(ResultSetSource.class);
@@ -86,7 +88,7 @@ public class ResultSetSource implements Source {
     }
 
     @Override
-    public FieldDescription[] getFieldDescriptions() {
+    public List<FieldDescription> getFieldDescriptions() {
         if (preparedStatement == null) {
             init();
         }
@@ -94,12 +96,12 @@ public class ResultSetSource implements Source {
         try {
             ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
             int rsColumnCount = resultSetMetaData.getColumnCount();
-            FieldDescription[] result = new FieldDescription[rsColumnCount];
+            ArrayList<FieldDescription> result = new ArrayList<>(rsColumnCount);
             for (int columnIdx = 1; columnIdx <= rsColumnCount; ++columnIdx) {
                 String columnName = resultSetMetaData.getColumnName(columnIdx);
                 final String columnClassName = resultSetMetaData.getColumnClassName(columnIdx);
 
-                result[columnIdx - 1] = new FieldDescription(columnName, columnClassName);
+                result.add(new FieldDescription(columnName, columnClassName));
 
             }
             return result;

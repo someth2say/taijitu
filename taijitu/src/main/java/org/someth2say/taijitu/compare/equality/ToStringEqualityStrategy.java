@@ -2,7 +2,6 @@ package org.someth2say.taijitu.compare.equality;
 
 import org.someth2say.taijitu.config.EqualityConfig;
 
-//TODO: Null safety
 public class ToStringEqualityStrategy implements EqualityStrategy<Object> {
 
     public static String NAME = "toString";

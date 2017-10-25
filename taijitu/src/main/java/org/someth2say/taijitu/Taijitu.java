@@ -106,7 +106,7 @@ public final class Taijitu {
 
         ComparisonConfig[] comparisonConfigs = config.getComparisons();
 
-        startDataSources(config);
+//        startDataSources(config);
 
         startPlugins(config);
 
@@ -174,13 +174,13 @@ public final class Taijitu {
         return result;
     }
 
-    private void startDataSources(TaijituConfig config) {
-        DatabaseConfig[] dbConfigs = config.getAllDatabaseConfigs();
-        for (DatabaseConfig databaseConfig : dbConfigs) {
-            Properties dbProperties = databaseConfig.getDatabaseProperties();
-            ConnectionManager.buildDataSource(databaseConfig.getName(), dbProperties);
-        }
-    }
+//    private void startDataSources(TaijituConfig config) {
+//        DatabaseConfig[] dbConfigs = config.getAllDatabaseConfigs();
+//        for (DatabaseConfig databaseConfig : dbConfigs) {
+//            Properties dbProperties = databaseConfig.getDatabaseProperties();
+//            ConnectionManager.buildDataSource(databaseConfig);
+//        }
+//    }
 
     private void closeDataSources() {
         ConnectionManager.closeAllDataSources();

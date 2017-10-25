@@ -10,7 +10,7 @@ public interface ApacheBasedDatabaseConfig extends ApacheBasedConfig, DatabaseCo
     @Override
     default Properties getDatabaseProperties() {
         Properties result = new Properties();
-        // Why Configuration is not iterable?!
+        //TODO: This dumps ALL configuration entries to the properties. Maybe worth filtering out...
         final Iterator<String> keys = getConfiguration().getKeys();
         while (keys.hasNext()){
             final String key = keys.next();

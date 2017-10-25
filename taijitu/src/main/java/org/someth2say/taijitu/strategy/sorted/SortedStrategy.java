@@ -47,20 +47,20 @@ public class SortedStrategy extends AbstractComparisonStrategy implements Compar
             int keyComparison = sourceRecord.compareKeysTo(targetRecord);
             if (keyComparison > 0) {
                 // Source is after target -> target record is not in source stream
-                result.getDisjoint().add(new ComparisonResult.QueryAndTuple(targetQueryConfig, targetRecord));
+                result.addDisjoint(new ComparisonResult.QueryAndTuple(targetQueryConfig, targetRecord));
                 targetRecord = getNextRecord(targetIterator);
             } else if (keyComparison < 0) {
                 // Source is before target -> source record is not in target stream
-                result.getDisjoint().add(new ComparisonResult.QueryAndTuple(sourceQueryConfig, sourceRecord));
+                result.addDisjoint(new ComparisonResult.QueryAndTuple(sourceQueryConfig, sourceRecord));
                 sourceRecord = getNextRecord(sourceIterator);
             } else {
                 // same Keys
                 //TODO Consider more fine-grained value comparison result than a simple boolean (i.e. a set of different fields)
                 if (!sourceRecord.equalsNonKeys(targetRecord)) {
                     // Records are different
-                    result.getDifferent().add(new ImmutablePair<>(
+                    result.addDifference(
                             new ComparisonResult.QueryAndTuple(sourceQueryConfig, sourceRecord),
-                            new ComparisonResult.QueryAndTuple(targetQueryConfig, targetRecord)));
+                            new ComparisonResult.QueryAndTuple(targetQueryConfig, targetRecord));
                 }
                 sourceRecord = getNextRecord(sourceIterator);
                 targetRecord = getNextRecord(targetIterator);

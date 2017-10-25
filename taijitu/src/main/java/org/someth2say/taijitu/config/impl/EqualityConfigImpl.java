@@ -14,7 +14,6 @@ public class EqualityConfigImpl extends NamedConfig implements ApacheBasedEquali
     private final ImmutableHierarchicalConfiguration configuration;
 
     public EqualityConfigImpl(final ImmutableHierarchicalConfiguration configuration) {
-        //TODO: This only works because we are using the schema "..equality.name=name"
         super(configuration.getRootElementName());
         this.configuration = configuration;
     }

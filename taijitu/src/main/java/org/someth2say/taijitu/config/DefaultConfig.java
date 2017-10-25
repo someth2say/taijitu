@@ -5,6 +5,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.someth2say.taijitu.compare.equality.ToStringEqualityStrategy;
 import org.someth2say.taijitu.matcher.NamingFieldMatcher;
 import org.someth2say.taijitu.plugins.logging.TimeLoggingPlugin;
+import org.someth2say.taijitu.strategy.mapping.MappingStrategy;
 import org.someth2say.taijitu.strategy.sorted.SortedStrategy;
 
 public class DefaultConfig {
@@ -12,13 +13,11 @@ public class DefaultConfig {
     public static final String DEFAULT_FILE_LOG_LEVEL = "OFF";
     public static final String DEFAULT_CONSOLE_LOG_LEVEL = "INFO";
     public static final String DEFAULT_OUTPUT_FOLDER = ".";
-    public static final double DEFAULT_PRECISION_THRESHOLD = 0d;
     public static final int DEFAULT_FETCHSIZE = 1024;
     public static final int DEFAULT_THREADS = 1;
     public static final boolean DEFAULT_SCAN_CLASSPATH = false;
 
-    //TODO: Fix default strategy!!!!
-    public static final StrategyConfig DEFAULT_STRATEGY_CONFIG = SortedStrategy.defaultConfig();
+    public static final StrategyConfig DEFAULT_STRATEGY_CONFIG = MappingStrategy.defaultConfig();
     public static final EqualityConfig DEFAULT_EQUALITY_CONFIG = ToStringEqualityStrategy.defaultConfig();
     public static final PluginConfig[] DEFAULT_PLUGINS_CONFIG = {TimeLoggingPlugin.defaultConfig()};
 

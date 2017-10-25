@@ -6,6 +6,7 @@ import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.util.ImmutablePair;
 import org.someth2say.taijitu.util.Pair;
 
+import javax.management.Query;
 import java.util.Collection;
 
 public abstract class ComparisonResult {
@@ -33,10 +34,22 @@ public abstract class ComparisonResult {
         return disjoint;
     }
 
+
     public static class QueryAndTuple extends ImmutablePair<QueryConfig, ComparableTuple> {
         public QueryAndTuple(QueryConfig queryConfig, ComparableTuple tuple) {
             super(queryConfig, tuple);
         }
     }
 
+    public void addDifference(final QueryAndTuple first, final QueryAndTuple second) {
+        different.add(new ImmutablePair<>(first, second));
+    }
+
+    public void addDisjoint(final QueryAndTuple element) {
+        disjoint.add(element);
+    }
+
+    public void addAllDisjoint(Collection<QueryAndTuple> entries) {
+        disjoint.addAll(entries);
+    }
 }

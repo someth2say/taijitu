@@ -1,5 +1,6 @@
 package org.someth2say.taijitu;
 
+import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
@@ -14,6 +15,8 @@ import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.equality.ValueThresholdEqualityStrategy;
 import org.someth2say.taijitu.compare.equality.TimestampThresholdEqualityStrategy;
 import org.someth2say.taijitu.config.ConfigurationLabels;
+import org.someth2say.taijitu.config.DatabaseConfig;
+import org.someth2say.taijitu.config.impl.DatabaseConfigImpl;
 import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.strategy.mapping.MappingStrategy;
 import org.someth2say.taijitu.strategy.sorted.SortedStrategy;
@@ -54,13 +57,16 @@ public class TaijituTest {
         );
     }
 
-    private static Connection getConnection(String dbName, Properties databaseProps) throws SQLException {
-        ConnectionManager.buildDataSource(dbName, databaseProps);
-        return ConnectionManager.getConnection(dbName);
+    private static Connection getConnection(String dbName, Properties databaseProps) throws SQLException, ConfigurationException {
+        final PropertiesConfiguration configuration = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).getConfiguration();
+        putAll(configuration, databaseProps,"");
+        ImmutableHierarchicalConfiguration immutableHierarchicalConfiguration = ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(configuration));
+        DatabaseConfig databaseConfig = new DatabaseConfigImpl(immutableHierarchicalConfiguration);
+        return ConnectionManager.getConnection(databaseConfig);
     }
 
     @After
-    public void dropTables() throws SQLException {
+    public void dropTables() throws SQLException, ConfigurationException {
         Connection conn = getConnection(DB_NAME, TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD));
         TestUtils.dropRegisteredTables(conn);
     }
@@ -136,7 +142,7 @@ public class TaijituTest {
         assertEquals(1, secondResult.getDifferent().size());
     }
 
-    private void putAll(final PropertiesConfiguration configuration, final Properties props, final String keyPrefix) {
+    private static void putAll(final PropertiesConfiguration configuration, final Properties props, final String keyPrefix) {
         props.forEach((o, o2) -> configuration.addProperty(keyPrefix + o.toString(), o2));
     }
 

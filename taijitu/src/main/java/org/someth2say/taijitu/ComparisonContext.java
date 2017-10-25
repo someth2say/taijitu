@@ -24,28 +24,27 @@ public class ComparisonContext {
     private List<String> canonicalKeys;
     private List<EqualityConfig> equalityConfigs;
 
-    private Map<String, FieldDescription[]> providedFieldsMap = new HashMap<>();
+    private Map<String, List<FieldDescription>> providedFieldsMap = new HashMap<String, List<FieldDescription>>();
 
     public ComparisonContext(final ComparisonConfig comparisonConfig) {
         this.comparisonConfig = comparisonConfig;
     }
 
     public List<FieldDescription> getProvidedFields(String name) {
-        return Arrays.asList(providedFieldsMap.get(name));
+        return providedFieldsMap.get(name);
     }
 
 
-    boolean registerFields(final FieldDescription[] providedFields, final QueryConfig queryConfig, final FieldMatcher fieldMatcher) {
-        if (providedFields == null) return false;
-        providedFieldsMap.put(queryConfig.getName(), providedFields);
+    boolean registerFields(final List<FieldDescription> providedFieldsList, final QueryConfig queryConfig, final FieldMatcher fieldMatcher) {
+        if (providedFieldsList == null) return false;
+        providedFieldsMap.put(queryConfig.getName(), providedFieldsList);
 
-        String[] providedKeys = queryConfig.getKeyFields();
-        List<String> providedKeysList = Arrays.asList(providedKeys);
-        List<FieldDescription> providedFieldsList = Arrays.asList(providedFields);
+        List<String> providedKeysList = queryConfig.getKeyFields();
+
 
         if (validateKeyFieldsAreProvided(providedKeysList, providedFieldsList)) {
             if (canonicalFields == null) {
-                canonicalFields = Arrays.asList(providedFields);
+                canonicalFields = providedFieldsList;
                 canonicalKeys = providedKeysList;
                 rebuildIndexes();
                 updateEqualityConfigs();

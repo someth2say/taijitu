@@ -6,10 +6,11 @@ import org.someth2say.taijitu.tuple.FieldDescription;
 import org.someth2say.taijitu.tuple.TupleBuilder;
 
 import java.util.Iterator;
+import java.util.List;
 
 public interface Source {
 
-    FieldDescription[] getFieldDescriptions();
+    List<FieldDescription> getFieldDescriptions();
 
     Iterator<ComparableTuple> iterator();
 

@@ -54,7 +54,7 @@ public class MappingStrategy extends AbstractComparisonStrategy implements Compa
 
         //2.- When both mapping tasks are completed, remaining data are source/target only
         final Collection<QueryAndTuple> entries = sharedMap.values();
-        result.getDisjoint().addAll(entries);
+        result.addAllDisjoint(entries);
 
         return result;
     }
@@ -95,14 +95,15 @@ public class MappingStrategy extends AbstractComparisonStrategy implements Compa
         public void run() {
             for (ComparableTuple thisRecord = getNextRecord(tupleIterator); thisRecord != null; thisRecord = getNextRecord(tupleIterator)) {
 
-                final QueryAndTuple otherQueryAndTuple = sharedSet.putIfAbsent(thisRecord, new QueryAndTuple(queryConfig, thisRecord));
+                QueryAndTuple thisQueryAndTuple = new QueryAndTuple(queryConfig, thisRecord);
+                final QueryAndTuple otherQueryAndTuple = sharedSet.putIfAbsent(thisRecord, thisQueryAndTuple);
                 if (otherQueryAndTuple != null) {
                     //we have a key match ...
                     sharedSet.remove(otherQueryAndTuple.getValue());
                     final ComparableTuple otherRecord = otherQueryAndTuple.getValue();
                     if (!thisRecord.equalsNonKeys(otherRecord)) {
                         // ...and contents differ
-                        result.getDifferent().add(new ImmutablePair<>(new QueryAndTuple(queryConfig, thisRecord), otherQueryAndTuple));
+                        result.addDifference(thisQueryAndTuple, otherQueryAndTuple);
                     }
                 }
 

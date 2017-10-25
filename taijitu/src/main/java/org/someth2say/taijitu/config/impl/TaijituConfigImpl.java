@@ -14,7 +14,6 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.config.ComparisonConfig;
-import org.someth2say.taijitu.config.StrategyConfig;
 import org.someth2say.taijitu.config.TaijituConfig;
 import org.someth2say.taijitu.config.impl.apache.ApacheBasedTaijituConfig;
 
@@ -39,40 +38,27 @@ public final class TaijituConfigImpl implements ApacheBasedTaijituConfig {
         return new TaijituConfigImpl(config);
     }
 
-    /**** STRATEGY *********************************************************************/
-
-    // TODO: Reconsider memoization strategy
-    private StrategyConfig strategyConfig = null;
-
     @Override
     public ComparisonConfig getParent() {
         return null;
     }
 
-    @Override
-    public StrategyConfig getStrategyConfig() {
-        if (strategyConfig == null) {
-            strategyConfig = ApacheBasedTaijituConfig.super.getStrategyConfig();
-        }
-        return strategyConfig;
-    }
-
     /**** UTILITIES *********************************************************************/
 
-    public File getOutputFolderFile() {
-        return new File(getOutputFolder());
-    }
-
-    public static Date parseDate(String dateStr) {
-        if (dateStr != null) {
-            try {
-                return new Date(DATE_TIME_FORMATTER.parseMillis(dateStr));
-            } catch (final IllegalArgumentException e) {
-                return null;
-            }
-        }
-        return null;
-    }
+//    public File getOutputFolderFile() {
+//        return new File(getOutputFolder());
+//    }
+//
+//    public static Date parseDate(String dateStr) {
+//        if (dateStr != null) {
+//            try {
+//                return new Date(DATE_TIME_FORMATTER.parseMillis(dateStr));
+//            } catch (final IllegalArgumentException e) {
+//                return null;
+//            }
+//        }
+//        return null;
+//    }
 
     /**
      * Tries to load configuration from supported format files (just properties right now...).

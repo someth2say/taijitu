@@ -127,7 +127,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
     private ResultSetSource getResultSetSource(final QueryConfig queryConfig, final ComparisonConfig comparisonConfig, final ComparisonContext context) {
         Connection connection;
         try {
-            connection = ConnectionManager.getConnection(queryConfig.getDatabaseRef());
+            connection = ConnectionManager.getConnection(queryConfig.getDatabaseConfig());
         } catch (SQLException e) {
             logger.error("Unable to connect to " + queryConfig.getDatabaseRef(), e);
             return null;

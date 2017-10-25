@@ -22,11 +22,8 @@ public final class ConfigurationLabels {
     }
 
     public static final class Comparison {
-        public static final String FIELDS = "fields";
-        public static final String QUERY = "query";
         public static final String STATEMENT = "sql";
         public static final String DATABASE_REF = "database";
-        public static final String PARAMETERS = "parameters";
         public static final String SOURCE = "source";
         public static final String TARGET = "target";
         public static final String STRATEGY = "strategy";
@@ -39,7 +36,6 @@ public final class ConfigurationLabels {
 
         public static final class Fields {
             public static final String KEY = "key";
-            public static final String COMPARE = "compare";
 
             private Fields() {
             }
@@ -55,12 +51,9 @@ public final class ConfigurationLabels {
         public static final String FETCH_SIZE = "fetchSize";
         public static final String CONSOLE_LOG = "consoleLog";
         public static final String THREADS = "threads";
-        public static final String PLUGINS = "plugins";
         public static final String FILE_LOG = "fileLog";
         public static final String OUTPUT_FOLDER = "outputFolder";
-        public static final String PRECISION_THRESHOLD = "precisionThreshold";
         public static final String MATCHING_STRATEGY = "matching";
-        public static final String QUERY_OPTIMIZATION = "queryOptimization";
         public static final String SCAN_CLASSPATH = "scanClasspath";
 
         private Setup() {

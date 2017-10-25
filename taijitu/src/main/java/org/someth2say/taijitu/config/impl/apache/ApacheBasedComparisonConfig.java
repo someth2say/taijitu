@@ -49,7 +49,7 @@ public interface ApacheBasedComparisonConfig extends ComparisonConfig, ApacheBas
 
     @Override
     default PluginConfig[] getComparisonPluginConfigs() {
-        // right now, we only allow global plugins. Maybe we can set-up per-comparison plugins someday...
+        // right now, we only allow global plugins. Maybe we can allow per-comparison plugins someday...
         return getParent() != null ? getParent().getComparisonPluginConfigs() : DEFAULT_PLUGINS_CONFIG;
     }
 
