@@ -6,5 +6,4 @@ public interface DatabaseConfig {
 
 	Properties getDatabaseProperties();
 
-	String getName();
 }

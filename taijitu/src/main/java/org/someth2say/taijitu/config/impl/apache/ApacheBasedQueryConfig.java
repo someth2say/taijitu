@@ -38,13 +38,13 @@ public interface ApacheBasedQueryConfig extends ApacheBasedConfig, QueryConfig {
         return keys != null ? keys : getParent() != null ? getParent().getKeyFields() : null;
     }
 
-    @Override
-    default String getDatabaseRef() {
-        String statement = getConfiguration().getString(Comparison.DATABASE_REF);
-        return statement != null ? statement
-                : getParent() != null ? getParent().getDatabaseRef()
-                : getRefToFirstDbDefined();
-    }
+//    @Override
+//    default String getDatabaseRef() {
+//        String statement = getConfiguration().getString(Comparison.DATABASE_REF);
+//        return statement != null ? statement
+//                : getParent() != null ? getParent().getDatabaseRef()
+//                : getRefToFirstDbDefined();
+//    }
 
     private String getRefToFirstDbDefined() {
         final List<ImmutableHierarchicalConfiguration> dbConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.Sections.DATABASE);

@@ -23,16 +23,16 @@ public interface ApacheBasedTaijituConfig extends TaijituConfig, ApacheBasedComp
         return result;
     }
 
-    @Override
-    default DatabaseConfig[] getAllDatabaseConfigs() {
-        final List<ImmutableHierarchicalConfiguration> databaseConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.Sections.DATABASE);
-        DatabaseConfig[] result = new DatabaseConfig[databaseConfigs.size()];
-        int pos = 0;
-        for (ImmutableHierarchicalConfiguration databaseConfig : databaseConfigs) {
-            result[pos++] = new DatabaseConfigImpl(databaseConfig);
-        }
-        return result;
-    }
+//    @Override
+//    default DatabaseConfig[] getAllDatabaseConfigs() {
+//        final List<ImmutableHierarchicalConfiguration> databaseConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.Sections.DATABASE);
+//        DatabaseConfig[] result = new DatabaseConfig[databaseConfigs.size()];
+//        int pos = 0;
+//        for (ImmutableHierarchicalConfiguration databaseConfig : databaseConfigs) {
+//            result[pos++] = new DatabaseConfigImpl(databaseConfig);
+//        }
+//        return result;
+//    }
 
     @Override
     default PluginConfig[] getComparisonPluginConfigs() {

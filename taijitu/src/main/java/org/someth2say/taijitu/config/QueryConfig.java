@@ -12,7 +12,7 @@ public interface QueryConfig extends Named{
     
     List<String> getKeyFields();
 
-    String getDatabaseRef();
+//    String getDatabaseRef();
 
     Object[] getQueryParameters();
 

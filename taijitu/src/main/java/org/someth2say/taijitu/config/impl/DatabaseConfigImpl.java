@@ -4,7 +4,7 @@ import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.someth2say.taijitu.config.NamedConfig;
 import org.someth2say.taijitu.config.impl.apache.ApacheBasedDatabaseConfig;
 
-public class DatabaseConfigImpl extends NamedConfig implements ApacheBasedDatabaseConfig {
+public class DatabaseConfigImpl implements ApacheBasedDatabaseConfig {
 
     private final ImmutableHierarchicalConfiguration configuration;
 
@@ -14,7 +14,6 @@ public class DatabaseConfigImpl extends NamedConfig implements ApacheBasedDataba
     }
 
     public DatabaseConfigImpl(final ImmutableHierarchicalConfiguration configuration) {
-        super(configuration.getRootElementName());
         this.configuration = configuration;
     }
 

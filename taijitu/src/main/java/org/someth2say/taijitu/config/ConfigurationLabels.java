@@ -23,7 +23,7 @@ public final class ConfigurationLabels {
 
     public static final class Comparison {
         public static final String STATEMENT = "sql";
-        public static final String DATABASE_REF = "database";
+//        public static final String DATABASE_REF = "database";
         public static final String SOURCE = "source";
         public static final String TARGET = "target";
         public static final String STRATEGY = "strategy";

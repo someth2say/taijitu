@@ -1,6 +1,5 @@
 package org.someth2say.taijitu;
 
-import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
@@ -32,6 +31,7 @@ import static org.junit.Assert.assertEquals;
 import static org.someth2say.taijitu.config.ConfigurationLabels.Comparison.*;
 import static org.someth2say.taijitu.config.ConfigurationLabels.Comparison.Fields.KEY;
 import static org.someth2say.taijitu.config.ConfigurationLabels.Sections.COMPARISON;
+import static org.someth2say.taijitu.config.ConfigurationLabels.Sections.DATABASE;
 
 
 /**
@@ -57,17 +57,21 @@ public class TaijituTest {
         );
     }
 
-    private static Connection getConnection(String dbName, Properties databaseProps) throws SQLException, ConfigurationException {
-        final PropertiesConfiguration configuration = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).getConfiguration();
-        putAll(configuration, databaseProps,"");
-        ImmutableHierarchicalConfiguration immutableHierarchicalConfiguration = ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(configuration));
-        DatabaseConfig databaseConfig = new DatabaseConfigImpl(immutableHierarchicalConfiguration);
+    private static Connection getConnection(Properties databaseProps) throws SQLException, ConfigurationException {
+        DatabaseConfig databaseConfig = getDatabaseConfig(databaseProps);
         return ConnectionManager.getConnection(databaseConfig);
+    }
+
+    private static DatabaseConfig getDatabaseConfig(Properties databaseProps) throws ConfigurationException {
+        final PropertiesConfiguration configuration = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).getConfiguration();
+        putAll(configuration, databaseProps, "");
+        ImmutableHierarchicalConfiguration immutableHierarchicalConfiguration = ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(configuration));
+        return new DatabaseConfigImpl(immutableHierarchicalConfiguration);
     }
 
     @After
     public void dropTables() throws SQLException, ConfigurationException {
-        Connection conn = getConnection(DB_NAME, TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD));
+        Connection conn = getConnection(TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD));
         TestUtils.dropRegisteredTables(conn);
     }
 
@@ -76,7 +80,7 @@ public class TaijituTest {
         // Create the tables and test data
 
         final Properties databaseProps = TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD);
-        Connection conn = getConnection(DB_NAME, databaseProps); // This generate the DB in H2
+        Connection conn = getConnection(databaseProps); // This generate the DB in H2
 
         String[] commonSchema = {
                 "key INTEGER(5) PRIMARY KEY",
@@ -104,17 +108,17 @@ public class TaijituTest {
         TestUtils.createTable(conn, "test", commonSchema, commonValues);
         // introduce some differences..
         commonValues[0][13] = "CURRENT_DATE+1";
-        commonValues[1][9] ="34.57"; // This one should be absorbed by threshold
+        commonValues[1][9] = "34.57"; // This one should be absorbed by threshold
         TestUtils.createTable(conn, "test2", commonSchema, commonValues);
 
         conn.close();
 
         final PropertiesConfiguration properties = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).getConfiguration();
         //Databases
-        putAll(properties, databaseProps, DATABASE_REF + "." + DB_NAME + ".");
+        putAll(properties, databaseProps, DATABASE + ".");
         // Comparisons
-        putAll(properties, makeComparisonProps("test1", "KEY", "select * from test", "select * from test", "test"), "");
-        putAll(properties, makeComparisonProps("test2", "KEY", "select * from test", "select * from test2", "test"), "");
+        putAll(properties, makeComparisonProps("test1", "KEY", "select * from test", "select * from test", null), "");
+        putAll(properties, makeComparisonProps("test2", "KEY", "select * from test", "select * from test2", null), "");
 
         // Disable plugins, 'cause we need to write nothing.
         commonPropertiesSetup(properties);
@@ -130,6 +134,14 @@ public class TaijituTest {
         properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "100");
 
         final ImmutableHierarchicalConfiguration configuration = ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(properties));
+
+        // Dump config, just for testing.
+        // as YAML
+        // YAMLConfiguration yamlConfiguration = new BasicConfigurationBuilder<>(YAMLConfiguration.class).getConfiguration();
+        // ConfigurationUtils.copy(inmutableConfig,yamlConfiguration);
+        // yamlConfiguration.write(new OutputStreamWriter(System.out));
+        // as Properties
+        System.out.println(ConfigurationUtils.toString(configuration));
 
         final ComparisonResult[] comparisonResults = new Taijitu().compare(configuration);
 
@@ -572,7 +584,7 @@ public class TaijituTest {
 //    }
 
 
-    private Properties makeComparisonProps(String name, String key, String sourceQuery, String targetQuery, String database) {
+    private Properties makeComparisonProps(String name, String key, String sourceQuery, String targetQuery, Properties database) {
         Properties result = new Properties();
         if (key != null)
             result.setProperty(COMPARISON + "." + name + "." + KEY, key);
@@ -580,7 +592,10 @@ public class TaijituTest {
             result.setProperty(COMPARISON + "." + name + "." + SOURCE + "." + STATEMENT, sourceQuery);
         if (targetQuery != null)
             result.setProperty(COMPARISON + "." + name + "." + TARGET + "." + STATEMENT, targetQuery);
-        if (database != null) result.setProperty(COMPARISON + "." + name + "." + DATABASE_REF, database);
+//        if (database != null) result.setProperty(COMPARISON + "." + name + "." + DATABASE_REF, database);
+        if (database != null) {
+            database.forEach((k, v) -> result.setProperty(COMPARISON + "." + name + "." + DATABASE + "." + k, v.toString()));
+        }
         return result;
     }
 
