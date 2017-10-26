@@ -4,12 +4,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.EqualityConfig;
-import org.someth2say.taijitu.config.QueryConfig;
+import org.someth2say.taijitu.config.QuerySourceConfig;
 import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.tuple.FieldDescription;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author Jordi Sola
@@ -36,12 +35,12 @@ public class ComparisonContext {
     }
 
 
-    boolean registerFields(final List<FieldDescription> providedFields, final QueryConfig queryConfig, final FieldMatcher fieldMatcher) {
+    boolean registerFields(final List<FieldDescription> providedFields, final QuerySourceConfig querySourceConfig, final FieldMatcher fieldMatcher) {
         if (providedFields == null) return false;
-        providedFieldsMap.put(queryConfig.getName(), providedFields);
+        providedFieldsMap.put(querySourceConfig.getName(), providedFields);
 
-        //List<String> configKeyFields = queryConfig.getKeyFields();
-        List<FieldDescription> providedKeyFields = getKeyFieldsFromConfig(queryConfig, providedFields);
+        //List<String> configKeyFields = querySourceConfig.getKeyFields();
+        List<FieldDescription> providedKeyFields = getKeyFieldsFromConfig(querySourceConfig, providedFields);
         if (providedKeyFields != null) {
             //if (validateKeyFieldsAreProvided(configKeyFields, providedFields)) {
             if (canonicalFields == null) {
@@ -53,7 +52,7 @@ public class ComparisonContext {
                 return true;
             } else {
                 // Already have canonical fields, so should shrink
-                //if (validateCanonicalKeysAreProvided(queryConfig, fieldMatcher, configKeyFields, providedFields)) {
+                //if (validateCanonicalKeysAreProvided(querySourceConfig, fieldMatcher, configKeyFields, providedFields)) {
                 if (shrinkCanonicalFieldsToProvided(fieldMatcher, providedFields)) {
                     rebuildIndexes();
                     //TODO: Maybe equalityConfigs can be shrink with fields...
@@ -64,20 +63,20 @@ public class ComparisonContext {
             }
         } else {
             // Null provided key fields means that some key field have not been provided.
-            logger.error("Not all key fields have been provided in " + queryConfig.getName() + " Provided: " + StringUtils.join(providedFields, ",") + " Keys: " + StringUtils.join(queryConfig.getKeyFields(), ","));
+            logger.error("Not all key fields have been provided in " + querySourceConfig.getName() + " Provided: " + StringUtils.join(providedFields, ",") + " Keys: " + StringUtils.join(querySourceConfig.getKeyFields(), ","));
         }
         return false;
     }
 
-    private List<FieldDescription> getKeyFieldsFromConfig(QueryConfig queryConfig, List<FieldDescription> providedFields) {
-        List<String> configKeyFields = queryConfig.getKeyFields();
+    private List<FieldDescription> getKeyFieldsFromConfig(QuerySourceConfig querySourceConfig, List<FieldDescription> providedFields) {
+        List<String> configKeyFields = querySourceConfig.getKeyFields();
         List<FieldDescription> result = new ArrayList<>(configKeyFields.size());
         for (String configKeyField : configKeyFields) {
             Optional<FieldDescription> keyField = providedFields.stream().filter(fieldDescription -> fieldDescription.getName().equals(configKeyField)).findFirst();
             if (keyField.isPresent()) {
                 result.add(keyField.get());
             } else {
-                logger.error("Key field " + configKeyField + " is not  provided in " + queryConfig.getName() + " Provided: " + StringUtils.join(providedFields, ","));
+                logger.error("Key field " + configKeyField + " is not  provided in " + querySourceConfig.getName() + " Provided: " + StringUtils.join(providedFields, ","));
                 return null;
             }
         }

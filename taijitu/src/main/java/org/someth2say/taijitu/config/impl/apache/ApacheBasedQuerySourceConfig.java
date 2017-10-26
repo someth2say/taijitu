@@ -4,7 +4,7 @@ import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.commons.configuration2.ex.ConfigurationRuntimeException;
 import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.config.DatabaseConfig;
-import org.someth2say.taijitu.config.QueryConfig;
+import org.someth2say.taijitu.config.QuerySourceConfig;
 import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
 import org.someth2say.taijitu.config.ConfigurationLabels.Setup;
 import org.someth2say.taijitu.config.ConfigurationLabels.Comparison.Fields;
@@ -14,11 +14,10 @@ import java.util.List;
 
 import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_FETCHSIZE;
 import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_QUERY_PARAMETERS;
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_STRATEGY_CONFIG;
 
-public interface ApacheBasedQueryConfig extends ApacheBasedConfig, QueryConfig {
+public interface ApacheBasedQuerySourceConfig extends ApacheBasedConfig, QuerySourceConfig {
 
-    QueryConfig getParent();
+    QuerySourceConfig getParent();
 
     @Override
     default String getStatement() {

@@ -3,7 +3,7 @@ package org.someth2say.taijitu.source;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.config.ComparisonConfig;
-import org.someth2say.taijitu.config.QueryConfig;
+import org.someth2say.taijitu.config.QuerySourceConfig;
 import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.registry.MatcherRegistry;
 import org.someth2say.taijitu.tuple.ComparableTuple;
@@ -27,18 +27,18 @@ public class ResultSetSource implements Source {
     private final ComparisonContext context;
 
     @Override
-    public QueryConfig getConfig() {
-        return queryConfig;
+    public QuerySourceConfig getConfig() {
+        return querySourceConfig;
     }
 
-    private final QueryConfig queryConfig;
+    private final QuerySourceConfig querySourceConfig;
     private ResultSetTupleBuilder builder;
 
     public ResultSetSource(Connection connection, final ComparisonConfig comparisonConfig, final String sourceId, final ComparisonContext context) {
         this.connection = connection;
         assert connection != null;
-        this.queryConfig = comparisonConfig.getQueryConfig(sourceId);
-        assert queryConfig != null;
+        this.querySourceConfig = comparisonConfig.getSourceConfig(sourceId);
+        assert querySourceConfig != null;
         this.comparisonConfig = comparisonConfig;
         this.context = context;
     }
@@ -46,14 +46,14 @@ public class ResultSetSource implements Source {
 
     private PreparedStatement getPreparedStatement() throws SQLException {
         PreparedStatement preparedStatement;
-        preparedStatement = connection.prepareStatement(queryConfig.getStatement());
-        preparedStatement.setFetchSize(queryConfig.getFetchSize());
+        preparedStatement = connection.prepareStatement(querySourceConfig.getStatement());
+        preparedStatement.setFetchSize(querySourceConfig.getFetchSize());
         assignSqlParameters(preparedStatement);
         return preparedStatement;
     }
 
     private void assignSqlParameters(PreparedStatement preparedStatement) throws SQLException {
-        Object[] sqlParameters = queryConfig.getQueryParameters();
+        Object[] sqlParameters = querySourceConfig.getQueryParameters();
         for (int paramIdx = 0; paramIdx < sqlParameters.length; paramIdx++) {
             Object object = sqlParameters[paramIdx];
             if (object instanceof java.util.Date) {
@@ -145,11 +145,10 @@ public class ResultSetSource implements Source {
         };
     }
 
-    @Override
-    public TupleBuilder<ResultSet> getTupleBuilder() {
+    private TupleBuilder<ResultSet> getTupleBuilder() {
         if (builder == null) {
             final FieldMatcher matcher = MatcherRegistry.getMatcher(comparisonConfig.getMatchingStrategyName());
-            builder = new ResultSetTupleBuilder(matcher, context, queryConfig.getName());
+            builder = new ResultSetTupleBuilder(matcher, context, querySourceConfig.getName());
         }
         return builder;
     }

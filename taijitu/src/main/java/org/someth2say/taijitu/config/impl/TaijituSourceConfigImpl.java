@@ -1,8 +1,5 @@
 package org.someth2say.taijitu.config.impl;
 
-import static org.someth2say.taijitu.config.DefaultConfig.DATE_TIME_FORMATTER;
-import java.io.File;
-import java.util.Date;
 import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
@@ -15,27 +12,27 @@ import org.apache.log4j.Logger;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.TaijituConfig;
-import org.someth2say.taijitu.config.impl.apache.ApacheBasedTaijituConfig;
+import org.someth2say.taijitu.config.impl.apache.ApacheBasedTaijituSourceConfig;
 
-public final class TaijituConfigImpl implements ApacheBasedTaijituConfig {
+public final class TaijituSourceConfigImpl implements ApacheBasedTaijituSourceConfig {
 
-    private static final Logger logger = Logger.getLogger(TaijituConfigImpl.class);
+    private static final Logger logger = Logger.getLogger(TaijituSourceConfigImpl.class);
 
     private final ImmutableHierarchicalConfiguration configuration;
 
-    private TaijituConfigImpl(final ImmutableHierarchicalConfiguration configuration) {
+    private TaijituSourceConfigImpl(final ImmutableHierarchicalConfiguration configuration) {
         super();
         this.configuration = configuration;
     }
 
     public static TaijituConfig fromFile(final String file) throws TaijituException {
         ImmutableHierarchicalConfiguration config = load(file);
-        return new TaijituConfigImpl(config);
+        return new TaijituSourceConfigImpl(config);
     }
 
 
     public static TaijituConfig fromProperties(final ImmutableHierarchicalConfiguration config) throws TaijituException {
-        return new TaijituConfigImpl(config);
+        return new TaijituSourceConfigImpl(config);
     }
 
     @Override

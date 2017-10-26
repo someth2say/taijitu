@@ -105,33 +105,33 @@ public class TaijituRunner implements Callable<ComparisonResult> {
             logger.error("Unable to find matching strategy '" + config.getMatchingStrategyName() + "'");
         }
 
-        final QueryConfig queryConfig = comparisonConfig.getQueryConfig(sourceId);
+        final QuerySourceConfig querySourceConfig = comparisonConfig.getSourceConfig(sourceId);
 
         //TODO: Decide the type for the source based on the config!
-        Source source = getResultSetSource(queryConfig, comparisonConfig, context);
+        Source source = getResultSetSource(querySourceConfig, comparisonConfig, context);
 
 
-        if (source != null && registerSourceFieldsToContext(queryConfig, matcher, context, source)) {
+        if (source != null && registerSourceFieldsToContext(querySourceConfig, matcher, context, source)) {
             return source;
         }
         return null;
     }
 
-    private boolean registerSourceFieldsToContext(QueryConfig queryConfig, FieldMatcher matcher, ComparisonContext context, Source source) {
-        return context.registerFields(source.getFieldDescriptions(), queryConfig, matcher);
+    private boolean registerSourceFieldsToContext(QuerySourceConfig querySourceConfig, FieldMatcher matcher, ComparisonContext context, Source source) {
+        return context.registerFields(source.getFieldDescriptions(), querySourceConfig, matcher);
     }
 
 
-    private ResultSetSource getResultSetSource(final QueryConfig queryConfig, final ComparisonConfig comparisonConfig, final ComparisonContext context) {
+    private ResultSetSource getResultSetSource(final QuerySourceConfig querySourceConfig, final ComparisonConfig comparisonConfig, final ComparisonContext context) {
         Connection connection;
         try {
-            connection = ConnectionManager.getConnection(queryConfig.getDatabaseConfig());
+            connection = ConnectionManager.getConnection(querySourceConfig.getDatabaseConfig());
         } catch (SQLException e) {
-            logger.error("Unable to connect to database at " + queryConfig.getName(), e);
+            logger.error("Unable to connect to database at " + querySourceConfig.getName(), e);
             return null;
         }
 
-        return new ResultSetSource(connection, comparisonConfig, queryConfig.getName(), context);
+        return new ResultSetSource(connection, comparisonConfig, querySourceConfig.getName(), context);
     }
 
 

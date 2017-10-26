@@ -6,9 +6,8 @@ import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.PluginConfig;
-import org.someth2say.taijitu.config.DatabaseConfig;
 import org.someth2say.taijitu.config.TaijituConfig;
-import org.someth2say.taijitu.config.impl.TaijituConfigImpl;
+import org.someth2say.taijitu.config.impl.TaijituSourceConfigImpl;
 import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.registry.ComparisonStrategyRegistry;
@@ -21,7 +20,6 @@ import org.someth2say.taijitu.util.LogUtils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Properties;
 import java.util.concurrent.*;
 
 import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_CONFIG_FILE;
@@ -39,14 +37,14 @@ public final class Taijitu {
 
 
     private TaijituConfig initialise(final ImmutableHierarchicalConfiguration properties) throws TaijituException {
-        TaijituConfig config = TaijituConfigImpl.fromProperties(properties);
+        TaijituConfig config = TaijituSourceConfigImpl.fromProperties(properties);
         performSetup(config);
         return config;
     }
 
 
     private TaijituConfig initialise(final String configProperties) throws TaijituException {
-        TaijituConfig config = TaijituConfigImpl.fromFile(configProperties);
+        TaijituConfig config = TaijituSourceConfigImpl.fromFile(configProperties);
         performSetup(config);
         return config;
     }

@@ -1,18 +1,14 @@
 package org.someth2say.taijitu.config;
 
-import org.someth2say.taijitu.util.Named;
-
 import java.util.List;
-
-public interface QueryConfig extends Named{
+// TODO: QuerySourceConfig is just a subtype of SourceConfig. Should find a way to discriminate
+public interface QuerySourceConfig extends SourceConfig {
 
     String getStatement();
     
     int getFetchSize();
     
     List<String> getKeyFields();
-
-//    String getDatabaseRef();
 
     Object[] getQueryParameters();
 

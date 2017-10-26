@@ -1,12 +1,11 @@
 package org.someth2say.taijitu.compare;
 
 import org.someth2say.taijitu.config.ComparisonConfig;
-import org.someth2say.taijitu.config.QueryConfig;
+import org.someth2say.taijitu.config.QuerySourceConfig;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.util.ImmutablePair;
 import org.someth2say.taijitu.util.Pair;
 
-import javax.management.Query;
 import java.util.Collection;
 
 public abstract class ComparisonResult {
@@ -35,9 +34,9 @@ public abstract class ComparisonResult {
     }
 
 
-    public static class QueryAndTuple extends ImmutablePair<QueryConfig, ComparableTuple> {
-        public QueryAndTuple(QueryConfig queryConfig, ComparableTuple tuple) {
-            super(queryConfig, tuple);
+    public static class QueryAndTuple extends ImmutablePair<QuerySourceConfig, ComparableTuple> {
+        public QueryAndTuple(QuerySourceConfig querySourceConfig, ComparableTuple tuple) {
+            super(querySourceConfig, tuple);
         }
     }
 

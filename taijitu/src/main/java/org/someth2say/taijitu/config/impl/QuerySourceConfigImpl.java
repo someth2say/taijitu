@@ -3,17 +3,16 @@ package org.someth2say.taijitu.config.impl;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.someth2say.taijitu.config.DatabaseConfig;
 import org.someth2say.taijitu.config.NamedConfig;
-import org.someth2say.taijitu.config.QueryConfig;
-import org.someth2say.taijitu.config.impl.apache.ApacheBasedComparisonConfig;
-import org.someth2say.taijitu.config.impl.apache.ApacheBasedQueryConfig;
+import org.someth2say.taijitu.config.QuerySourceConfig;
+import org.someth2say.taijitu.config.impl.apache.ApacheBasedQuerySourceConfig;
 
-public class QueryConfigImpl extends NamedConfig implements ApacheBasedQueryConfig {
+public class QuerySourceConfigImpl extends NamedConfig implements ApacheBasedQuerySourceConfig {
 
     private final ImmutableHierarchicalConfiguration configuration;
-    private final QueryConfig parent;
+    private final QuerySourceConfig parent;
 
-    public QueryConfigImpl(final ImmutableHierarchicalConfiguration configuration,
-                           final QueryConfig parent) {
+    public QuerySourceConfigImpl(final ImmutableHierarchicalConfiguration configuration,
+                                 final QuerySourceConfig parent) {
         super(configuration.getRootElementName());
         this.configuration = configuration;
         this.parent = parent;
@@ -25,7 +24,7 @@ public class QueryConfigImpl extends NamedConfig implements ApacheBasedQueryConf
     }
 
     @Override
-    public QueryConfig getParent() {
+    public QuerySourceConfig getParent() {
         return parent;
     }
 
@@ -34,7 +33,7 @@ public class QueryConfigImpl extends NamedConfig implements ApacheBasedQueryConf
     @Override
     public DatabaseConfig getDatabaseConfig() {
         if (databaseConfig == null) {
-            databaseConfig = ApacheBasedQueryConfig.super.getDatabaseConfig();
+            databaseConfig = ApacheBasedQuerySourceConfig.super.getDatabaseConfig();
         }
         return databaseConfig;
     }

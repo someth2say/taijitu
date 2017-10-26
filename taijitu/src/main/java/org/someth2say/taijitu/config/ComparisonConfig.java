@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.someth2say.taijitu.util.Named;
 
-public interface ComparisonConfig extends Named, QueryConfig {
+public interface ComparisonConfig extends SourceConfig {
     StrategyConfig getStrategyConfig();
 
     PluginConfig[] getComparisonPluginConfigs();
@@ -13,5 +13,5 @@ public interface ComparisonConfig extends Named, QueryConfig {
 
     List<EqualityConfig> getEqualityConfigs();
 
-    QueryConfig getQueryConfig(String sourceId);
+    SourceConfig getSourceConfig(String sourceId);
 }

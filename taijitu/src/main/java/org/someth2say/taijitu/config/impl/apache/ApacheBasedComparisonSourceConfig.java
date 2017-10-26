@@ -9,12 +9,12 @@ import org.apache.commons.configuration2.ex.ConfigurationRuntimeException;
 import org.someth2say.taijitu.config.*;
 import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
 import org.someth2say.taijitu.config.impl.EqualityConfigImpl;
-import org.someth2say.taijitu.config.impl.QueryConfigImpl;
+import org.someth2say.taijitu.config.impl.QuerySourceConfigImpl;
 import org.someth2say.taijitu.config.impl.StrategyConfigImpl;
 
 import static org.someth2say.taijitu.config.DefaultConfig.*;
 
-public interface ApacheBasedComparisonConfig extends ComparisonConfig, ApacheBasedQueryConfig {
+public interface ApacheBasedComparisonSourceConfig extends ComparisonConfig, ApacheBasedQuerySourceConfig {
 
     @Override
     ComparisonConfig getParent();
@@ -62,12 +62,13 @@ public interface ApacheBasedComparisonConfig extends ComparisonConfig, ApacheBas
 
 
     @Override
-    default QueryConfig getQueryConfig(final String sourceId) {
+    default QuerySourceConfig getSourceConfig(final String sourceId) {
         try {
             final ImmutableHierarchicalConfiguration sourceConfig = this.getConfiguration().immutableConfigurationAt(sourceId);
-            return new QueryConfigImpl(sourceConfig, this);
+            //TODO: Discriminate the kind of source.
+            return new QuerySourceConfigImpl(sourceConfig, this);
         } catch (IllegalArgumentException e) {
-            return getParent() != null ? getParent().getQueryConfig(sourceId) : null;
+            return getParent() != null ? getParent().getSourceConfig(sourceId) : null;
         }
     }
 }

@@ -10,7 +10,7 @@ import org.someth2say.taijitu.tuple.TupleBuilder;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-
+//  TODO: Move to an inner class for ResultSetSource
 public class ResultSetTupleBuilder implements TupleBuilder<ResultSet> {
     private static final Logger logger = Logger.getLogger(ResultSetTupleBuilder.class);
 

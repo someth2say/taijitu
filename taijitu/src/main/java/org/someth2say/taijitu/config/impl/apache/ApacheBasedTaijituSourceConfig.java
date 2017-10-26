@@ -2,15 +2,14 @@ package org.someth2say.taijitu.config.impl.apache;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.someth2say.taijitu.config.*;
-import org.someth2say.taijitu.config.impl.ComparisonConfigImpl;
-import org.someth2say.taijitu.config.impl.DatabaseConfigImpl;
+import org.someth2say.taijitu.config.impl.ComparisonSourceConfigImpl;
 import org.someth2say.taijitu.config.impl.PluginConfigImpl;
 
 import java.util.List;
 
 import static org.someth2say.taijitu.config.DefaultConfig.*;
 
-public interface ApacheBasedTaijituConfig extends TaijituConfig, ApacheBasedComparisonConfig {
+public interface ApacheBasedTaijituSourceConfig extends TaijituConfig, ApacheBasedComparisonSourceConfig {
 
     @Override
     default ComparisonConfig[] getComparisons() {
@@ -18,7 +17,7 @@ public interface ApacheBasedTaijituConfig extends TaijituConfig, ApacheBasedComp
         ComparisonConfig[] result = new ComparisonConfig[comparisonConfigs.size()];
         int pos = 0;
         for (ImmutableHierarchicalConfiguration comparisonConfig : comparisonConfigs) {
-            result[pos++] = new ComparisonConfigImpl(comparisonConfig, this);
+            result[pos++] = new ComparisonSourceConfigImpl(comparisonConfig, this);
         }
         return result;
     }

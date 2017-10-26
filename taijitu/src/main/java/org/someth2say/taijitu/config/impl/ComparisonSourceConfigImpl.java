@@ -2,19 +2,18 @@ package org.someth2say.taijitu.config.impl;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.someth2say.taijitu.config.*;
-import org.someth2say.taijitu.config.impl.apache.ApacheBasedComparisonConfig;
+import org.someth2say.taijitu.config.impl.apache.ApacheBasedComparisonSourceConfig;
 
-import javax.management.Query;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class ComparisonConfigImpl extends NamedConfig implements ApacheBasedComparisonConfig {
+public class ComparisonSourceConfigImpl extends NamedConfig implements ApacheBasedComparisonSourceConfig {
     private final ImmutableHierarchicalConfiguration configuration;
     private final ComparisonConfig parent;
 
     //TODO: Sanity checks
-    public ComparisonConfigImpl(final ImmutableHierarchicalConfiguration configuration, final ComparisonConfig parent) {
+    public ComparisonSourceConfigImpl(final ImmutableHierarchicalConfiguration configuration, final ComparisonConfig parent) {
         super(configuration.getRootElementName());
         this.configuration = configuration;
         this.parent = parent;
@@ -26,7 +25,7 @@ public class ComparisonConfigImpl extends NamedConfig implements ApacheBasedComp
     @Override
     public StrategyConfig getStrategyConfig() {
         if (strategyConfig == null) {
-            strategyConfig = ApacheBasedComparisonConfig.super.getStrategyConfig();
+            strategyConfig = ApacheBasedComparisonSourceConfig.super.getStrategyConfig();
         }
         return strategyConfig;
     }
@@ -34,11 +33,11 @@ public class ComparisonConfigImpl extends NamedConfig implements ApacheBasedComp
     /**
      * QUERIES
      **/
-    private Map<String, QueryConfig> queryCache = new ConcurrentHashMap<>();
+    private Map<String, QuerySourceConfig> queryCache = new ConcurrentHashMap<>();
 
     @Override
-    public QueryConfig getQueryConfig(String sourceId) {
-        return queryCache.computeIfAbsent(sourceId, ApacheBasedComparisonConfig.super::getQueryConfig);
+    public QuerySourceConfig getSourceConfig(String sourceId) {
+        return queryCache.computeIfAbsent(sourceId, ApacheBasedComparisonSourceConfig.super::getSourceConfig);
     }
 
     @Override
