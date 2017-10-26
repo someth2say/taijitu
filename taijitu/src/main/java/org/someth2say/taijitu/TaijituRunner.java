@@ -19,8 +19,6 @@ import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.strategy.ComparisonStrategy;
 import org.someth2say.taijitu.registry.ComparisonStrategyRegistry;
-import org.someth2say.taijitu.tuple.ComparableTuple;
-import org.someth2say.taijitu.tuple.ResultSetTupleBuilder;
 
 /**
  * @author Jordi Sola

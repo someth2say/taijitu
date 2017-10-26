@@ -38,23 +38,6 @@ public interface ApacheBasedQueryConfig extends ApacheBasedConfig, QueryConfig {
         return keys != null ? keys : getParent() != null ? getParent().getKeyFields() : null;
     }
 
-//    @Override
-//    default String getDatabaseRef() {
-//        String statement = getConfiguration().getString(Comparison.DATABASE_REF);
-//        return statement != null ? statement
-//                : getParent() != null ? getParent().getDatabaseRef()
-//                : getRefToFirstDbDefined();
-//    }
-
-    private String getRefToFirstDbDefined() {
-        final List<ImmutableHierarchicalConfiguration> dbConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.Sections.DATABASE);
-        if (!dbConfigs.isEmpty()) {
-            return dbConfigs.get(0).getRootElementName();
-        }
-        return null;
-    }
-
-
     @Override
     default Object[] getQueryParameters() {
         final Object[] params = getConfiguration().get(Object[].class, Comparison.QUERY_PARAMETERS, null);

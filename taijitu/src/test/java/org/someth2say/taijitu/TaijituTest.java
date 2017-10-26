@@ -3,6 +3,7 @@ package org.someth2say.taijitu;
 import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.YAMLConfiguration;
 import org.apache.commons.configuration2.builder.BasicConfigurationBuilder;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.junit.After;
@@ -20,6 +21,8 @@ import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.strategy.mapping.MappingStrategy;
 import org.someth2say.taijitu.strategy.sorted.SortedStrategy;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -135,13 +138,7 @@ public class TaijituTest {
 
         final ImmutableHierarchicalConfiguration configuration = ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(properties));
 
-        // Dump config, just for testing.
-        // as YAML
-        // YAMLConfiguration yamlConfiguration = new BasicConfigurationBuilder<>(YAMLConfiguration.class).getConfiguration();
-        // ConfigurationUtils.copy(inmutableConfig,yamlConfiguration);
-        // yamlConfiguration.write(new OutputStreamWriter(System.out));
-        // as Properties
-        System.out.println(ConfigurationUtils.toString(configuration));
+        dumpConfig(configuration);
 
         final ComparisonResult[] comparisonResults = new Taijitu().compare(configuration);
 
@@ -154,6 +151,20 @@ public class TaijituTest {
         assertEquals(1, secondResult.getDifferent().size());
     }
 
+    private void dumpConfig(ImmutableHierarchicalConfiguration configuration) throws ConfigurationException {
+        // Dump config, just for testing.
+        // as YAML
+        try {
+            YAMLConfiguration yamlConfiguration = new BasicConfigurationBuilder<>(YAMLConfiguration.class).getConfiguration();
+            ConfigurationUtils.copy(configuration, yamlConfiguration);
+            yamlConfiguration.write(new OutputStreamWriter(System.out));
+        } catch (IOException e) {
+            // Do nothing, this is just for test.
+        }
+        // as Properties
+//        System.out.println(ConfigurationUtils.toString(configuration));
+    }
+
     private static void putAll(final PropertiesConfiguration configuration, final Properties props, final String keyPrefix) {
         props.forEach((o, o2) -> configuration.addProperty(keyPrefix + o.toString(), o2));
     }
@@ -163,8 +174,7 @@ public class TaijituTest {
         testProperties.setProperty(ConfigurationLabels.Sections.SETUP + "." + ConfigurationLabels.Setup.CONSOLE_LOG, "DEBUG");
 
     }
-
-
+    
 //
 //    @Test
 //    public void missingStrategyTest() throws TaijituException, QueryUtilsException, SQLException {

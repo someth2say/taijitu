@@ -20,7 +20,6 @@ public class ComparisonConfigImpl extends NamedConfig implements ApacheBasedComp
         this.parent = parent;
     }
 
-
     /*** STRATEGY ***/
     private StrategyConfig strategyConfig = null;
 

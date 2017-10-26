@@ -1,5 +1,6 @@
 package org.someth2say.taijitu;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.EqualityConfig;
@@ -21,10 +22,10 @@ public class ComparisonContext {
 
     //TODO: This hurts! should be final...
     private List<FieldDescription> canonicalFields;
-    private List<String> canonicalKeys;
+    private List<FieldDescription> canonicalKeys;
     private List<EqualityConfig> equalityConfigs;
 
-    private Map<String, List<FieldDescription>> providedFieldsMap = new HashMap<String, List<FieldDescription>>();
+    private Map<String, List<FieldDescription>> providedFieldsMap = new HashMap<>();
 
     public ComparisonContext(final ComparisonConfig comparisonConfig) {
         this.comparisonConfig = comparisonConfig;
@@ -35,32 +36,52 @@ public class ComparisonContext {
     }
 
 
-    boolean registerFields(final List<FieldDescription> providedFieldsList, final QueryConfig queryConfig, final FieldMatcher fieldMatcher) {
-        if (providedFieldsList == null) return false;
-        providedFieldsMap.put(queryConfig.getName(), providedFieldsList);
+    boolean registerFields(final List<FieldDescription> providedFields, final QueryConfig queryConfig, final FieldMatcher fieldMatcher) {
+        if (providedFields == null) return false;
+        providedFieldsMap.put(queryConfig.getName(), providedFields);
 
-        List<String> providedKeysList = queryConfig.getKeyFields();
-
-
-        if (validateKeyFieldsAreProvided(providedKeysList, providedFieldsList)) {
+        //List<String> configKeyFields = queryConfig.getKeyFields();
+        List<FieldDescription> providedKeyFields = getKeyFieldsFromConfig(queryConfig, providedFields);
+        if (providedKeyFields != null) {
+            //if (validateKeyFieldsAreProvided(configKeyFields, providedFields)) {
             if (canonicalFields == null) {
-                canonicalFields = providedFieldsList;
-                canonicalKeys = providedKeysList;
+                // Have no canonical fields -> First source, interpreted as canonical.
+                canonicalFields = providedFields;
+                canonicalKeys = providedKeyFields;
                 rebuildIndexes();
                 updateEqualityConfigs();
                 return true;
             } else {
-                if (validateCanonicalKeysAreProvided(queryConfig, fieldMatcher, providedKeysList, providedFieldsList)) {
-                    if (shrinkCanonicalFieldsToProvided(fieldMatcher, providedFieldsList)) {
-                        rebuildIndexes();
-                        //TODO: Maybe equalityConfigs can be shrink with fields...
-                        updateEqualityConfigs();
-                    }
-                    return true;
+                // Already have canonical fields, so should shrink
+                //if (validateCanonicalKeysAreProvided(queryConfig, fieldMatcher, configKeyFields, providedFields)) {
+                if (shrinkCanonicalFieldsToProvided(fieldMatcher, providedFields)) {
+                    rebuildIndexes();
+                    //TODO: Maybe equalityConfigs can be shrink with fields...
+                    updateEqualityConfigs();
                 }
+                return true;
+                //}
             }
+        } else {
+            // Null provided key fields means that some key field have not been provided.
+            logger.error("Not all key fields have been provided in " + queryConfig.getName() + " Provided: " + StringUtils.join(providedFields, ",") + " Keys: " + StringUtils.join(queryConfig.getKeyFields(), ","));
         }
         return false;
+    }
+
+    private List<FieldDescription> getKeyFieldsFromConfig(QueryConfig queryConfig, List<FieldDescription> providedFields) {
+        List<String> configKeyFields = queryConfig.getKeyFields();
+        List<FieldDescription> result = new ArrayList<>(configKeyFields.size());
+        for (String configKeyField : configKeyFields) {
+            Optional<FieldDescription> keyField = providedFields.stream().filter(fieldDescription -> fieldDescription.getName().equals(configKeyField)).findFirst();
+            if (keyField.isPresent()) {
+                result.add(keyField.get());
+            } else {
+                logger.error("Key field " + configKeyField + " is not  provided in " + queryConfig.getName() + " Provided: " + StringUtils.join(providedFields, ","));
+                return null;
+            }
+        }
+        return result;
     }
 
     private void updateEqualityConfigs() {
@@ -112,12 +133,12 @@ public class ComparisonContext {
         nonKeyFieldIndexes = new int[canonicalFields.size() - canonicalKeys.size()];
         int keyPos = 0;
         int nonKeyPos = 0;
-        for (int colPos = 0; colPos < canonicalFields.size(); colPos++) {
-            String fieldName = canonicalFields.get(colPos).getName();
-            if (canonicalKeys.contains(fieldName)) {
-                keyFieldIdxs[keyPos++] = colPos;
+        for (int canonicalFieldPos = 0; canonicalFieldPos < canonicalFields.size(); canonicalFieldPos++) {
+            FieldDescription canonicalField = canonicalFields.get(canonicalFieldPos);
+            if (canonicalKeys.contains(canonicalField)) {
+                keyFieldIdxs[keyPos++] = canonicalFieldPos;
             } else {
-                nonKeyFieldIndexes[nonKeyPos++] = colPos;
+                nonKeyFieldIndexes[nonKeyPos++] = canonicalFieldPos;
             }
         }
     }
@@ -130,35 +151,11 @@ public class ComparisonContext {
         return nonKeyFieldIndexes;
     }
 
-    private boolean validateCanonicalKeysAreProvided(final QueryConfig queryConfig, final FieldMatcher fieldMatcher, final List<String> providedKeysList, final List<FieldDescription> providedFieldsList) {
-        // .- Both provided and canonical keys should be exactly the same
-        ArrayList<String> canonicalProvidedKeyList = new ArrayList<>(providedKeysList.size());
-        for (String providedKey : providedKeysList) {
-            FieldDescription canonicalProvidedKey = fieldMatcher.getCanonicalFromField(providedKey, canonicalFields, providedFieldsList);
-            if (canonicalProvidedKey == null) {
-                logger.error("Key field " + providedKey + " in query " + queryConfig.getName() + " do not have a canonical match (using matching strategy " + fieldMatcher.getName() + ")");
-                return false;
-            } else {
-                canonicalProvidedKeyList.add(canonicalProvidedKey.getName());
-            }
-        }
-        if (!canonicalKeys.equals(canonicalProvidedKeyList)) {
-            logger.error("Keys in query " + queryConfig.getName() + " must match (same amount, same order) canonical keys. " + canonicalProvidedKeyList.toString() + " vs " + canonicalKeys.toString());
-            return false;
-        }
-        return true;
-    }
-
-    private boolean validateKeyFieldsAreProvided(List<String> providedKeysList, List<FieldDescription> providedFieldsList) {
-        // .- Provided keys should be a subset for provide fields.
-        return providedFieldsList.stream().map(FieldDescription::getName).collect(Collectors.toList()).containsAll(providedKeysList);
-    }
-
     private boolean shrinkCanonicalFieldsToProvided(FieldMatcher fieldMatcher, List<FieldDescription> providedFieldsList) {
         // .- Canonical fields not provided are removed from comparison
         List<FieldDescription> canonicalProvidedFieldsList = new ArrayList<>(providedFieldsList.size());
         for (FieldDescription providedColumn : providedFieldsList) {
-            FieldDescription canonicalProvidedField = fieldMatcher.getCanonicalFromField(providedColumn.getName(), canonicalFields, providedFieldsList);
+            FieldDescription canonicalProvidedField = fieldMatcher.getCanonicalFromField(providedColumn, canonicalFields, providedFieldsList);
             canonicalProvidedFieldsList.add(canonicalProvidedField);
         }
         return canonicalFields.retainAll(canonicalProvidedFieldsList);
@@ -168,10 +165,9 @@ public class ComparisonContext {
         return canonicalFields;
     }
 
-    public List<String> getCanonicalKeys() {
+    public List<FieldDescription> getCanonicalKeys() {
         return canonicalKeys;
     }
-
 
     public ComparisonConfig getComparisonConfig() {
         return comparisonConfig;

@@ -8,7 +8,7 @@ import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.registry.MatcherRegistry;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.tuple.FieldDescription;
-import org.someth2say.taijitu.tuple.ResultSetTupleBuilder;
+import org.someth2say.taijitu.tuple.builder.ResultSetTupleBuilder;
 import org.someth2say.taijitu.tuple.TupleBuilder;
 
 import java.sql.*;

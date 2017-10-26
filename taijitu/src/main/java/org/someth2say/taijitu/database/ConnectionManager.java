@@ -26,7 +26,6 @@ public final class ConnectionManager {
     }
 
     public static Connection getConnection(DatabaseConfig databaseConfig) throws SQLException {
-
         HikariDataSource dataSource = datasourceMap.computeIfAbsent(databaseConfig, config -> new HikariDataSource(new HikariConfig(config.getDatabaseProperties())));
         return dataSource.getConnection();
     }

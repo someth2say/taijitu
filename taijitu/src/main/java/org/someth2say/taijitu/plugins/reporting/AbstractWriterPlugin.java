@@ -57,7 +57,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
         return null;
     }
 
-    private void highLightKeyFields(List<String> header, List<String> keyFields) {
+    private void highLightKeyFields(List<String> header, List<FieldDescription> keyFields) {
         for (int fieldIdx = 0; fieldIdx < header.size(); fieldIdx++) {
             if (keyFields.contains(header.get(fieldIdx))) {
                 header.set(fieldIdx, header.get(fieldIdx) + "*");
@@ -92,7 +92,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
             // Headers
             result[idx] = comparison.getCanonicalFields().stream().map(FieldDescription::getName).collect(Collectors.toList());
 
-            final List<String> keyFields = comparison.getCanonicalKeys();
+            final List<FieldDescription> keyFields = comparison.getCanonicalKeys();
             highLightKeyFields(result[0], keyFields);
 
             // Contents

@@ -7,7 +7,10 @@ import java.util.List;
 
 public interface FieldMatcher extends Named {
 
-    FieldDescription getCanonicalFromField(final String field, final List<FieldDescription> canonicalFields, final List<FieldDescription> fields);
+    FieldDescription getCanonicalFromField(final FieldDescription field, final List<FieldDescription> canonicalFields, final List<FieldDescription> fields);
 
-    String getFieldFromCanonical(final FieldDescription canonicalField, final List<FieldDescription> canonicalFields, final List<FieldDescription> fields);
+    //@Deprecated
+    //String getFieldNameFromCanonical(final FieldDescription canonicalField, final List<FieldDescription> canonicalFields, final List<FieldDescription> fields);
+
+    FieldDescription getFieldFromCanonical(FieldDescription canonicalField, List<FieldDescription> canonicalFields, List<FieldDescription> providedFields);
 }

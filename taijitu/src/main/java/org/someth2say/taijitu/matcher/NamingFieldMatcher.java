@@ -17,19 +17,12 @@ public class NamingFieldMatcher implements FieldMatcher {
     }
 
     @Override
-    public FieldDescription getCanonicalFromField(String field, List<FieldDescription> canonicalFields, List<FieldDescription> fields) {
-        for (FieldDescription fieldDescription : canonicalFields) {
-            if (fieldDescription.getName().equals(field))
-                return fieldDescription;
-
-        }
-        return null;
+    public FieldDescription getCanonicalFromField(FieldDescription field, List<FieldDescription> canonicalFields, List<FieldDescription> fields) {
+        return canonicalFields.stream().filter(fieldDescription -> fieldDescription.getName().equals(field.getName())).findFirst().orElse(null);
     }
 
     @Override
-    public String getFieldFromCanonical(FieldDescription canonicalField, List<FieldDescription> canonicalFields, List<FieldDescription> fields) {
-        return canonicalFields.contains(canonicalField) ? canonicalField.getName() : null;
+    public FieldDescription getFieldFromCanonical(FieldDescription canonicalField, List<FieldDescription> canonicalFields, List<FieldDescription> providedFields) {
+        return providedFields.stream().filter(fieldDescription -> fieldDescription.getName().equals(canonicalField.getName())).findFirst().orElse(null);
     }
-
-
 }
