@@ -18,6 +18,7 @@ import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.config.DatabaseConfig;
 import org.someth2say.taijitu.config.impl.DatabaseConfigImpl;
 import org.someth2say.taijitu.database.ConnectionManager;
+import org.someth2say.taijitu.source.ResultSetSource;
 import org.someth2say.taijitu.strategy.mapping.MappingStrategy;
 import org.someth2say.taijitu.strategy.sorted.SortedStrategy;
 
@@ -32,7 +33,7 @@ import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.someth2say.taijitu.config.ConfigurationLabels.Comparison.*;
-import static org.someth2say.taijitu.config.ConfigurationLabels.Comparison.Fields.KEY;
+import static org.someth2say.taijitu.config.ConfigurationLabels.Comparison.Fields.KEYS;
 import static org.someth2say.taijitu.config.ConfigurationLabels.Sections.COMPARISON;
 import static org.someth2say.taijitu.config.ConfigurationLabels.Sections.DATABASE;
 
@@ -120,8 +121,10 @@ public class TaijituTest {
         //Databases
         putAll(properties, databaseProps, DATABASE + ".");
         // Comparisons
-        putAll(properties, makeComparisonProps("test1", "KEY", "select * from test", "select * from test", null), "");
-        putAll(properties, makeComparisonProps("test2", "KEY", "select * from test", "select * from test2", null), "");
+        Properties properties1 = makeQueryProps("select * from test");
+        Properties properties2 = makeQueryProps("select * from test2");
+        putAll(properties, makeComparisonProps("test1", "KEY", properties1, properties1, null), "");
+        putAll(properties, makeComparisonProps("test2", "KEY", properties1, properties2, null), "");
 
         // Disable plugins, 'cause we need to write nothing.
         commonPropertiesSetup(properties);
@@ -142,7 +145,7 @@ public class TaijituTest {
 
         final ComparisonResult[] comparisonResults = new Taijitu().compare(configuration);
 
-        //assertEquals(2, comparisonResults.length);
+        assertEquals(2, comparisonResults.length);
         final ComparisonResult firstResult = comparisonResults[0];
         assertEquals(0, firstResult.getDisjoint().size());
         assertEquals(0, firstResult.getDifferent().size());
@@ -150,6 +153,7 @@ public class TaijituTest {
         assertEquals(0, secondResult.getDisjoint().size());
         assertEquals(1, secondResult.getDifferent().size());
     }
+
 
     private void dumpConfig(ImmutableHierarchicalConfiguration configuration) throws ConfigurationException {
         // Dump config, just for testing.
@@ -165,16 +169,12 @@ public class TaijituTest {
 //        System.out.println(ConfigurationUtils.toString(configuration));
     }
 
-    private static void putAll(final PropertiesConfiguration configuration, final Properties props, final String keyPrefix) {
-        props.forEach((o, o2) -> configuration.addProperty(keyPrefix + o.toString(), o2));
-    }
-
     private void commonPropertiesSetup(PropertiesConfiguration testProperties) {
         testProperties.setProperty(ConfigurationLabels.Comparison.STRATEGY, strategyName);
         testProperties.setProperty(ConfigurationLabels.Sections.SETUP + "." + ConfigurationLabels.Setup.CONSOLE_LOG, "DEBUG");
 
     }
-    
+
 //
 //    @Test
 //    public void missingStrategyTest() throws TaijituException, QueryUtilsException, SQLException {
@@ -594,19 +594,50 @@ public class TaijituTest {
 //    }
 
 
-    private Properties makeComparisonProps(String name, String key, String sourceQuery, String targetQuery, Properties database) {
+    private Properties makeComparisonProps(String name, String keys, Properties sourceSource, Properties targetSource, Properties database) {
+//    private Properties makeComparisonProps(String name, String keys, String sourceQuery, String targetQuery, Properties database) {
+        String comparisonPrefix = COMPARISON + "." + name + ".";
         Properties result = new Properties();
-        if (key != null)
-            result.setProperty(COMPARISON + "." + name + "." + KEY, key);
-        if (sourceQuery != null)
-            result.setProperty(COMPARISON + "." + name + "." + SOURCE + "." + STATEMENT, sourceQuery);
-        if (targetQuery != null)
-            result.setProperty(COMPARISON + "." + name + "." + TARGET + "." + STATEMENT, targetQuery);
-//        if (database != null) result.setProperty(COMPARISON + "." + name + "." + DATABASE_REF, database);
-        if (database != null) {
-            database.forEach((k, v) -> result.setProperty(COMPARISON + "." + name + "." + DATABASE + "." + k, v.toString()));
+        if (keys != null)
+            result.setProperty(comparisonPrefix + KEYS, keys);
+
+        if (sourceSource != null) {
+//            Properties sourceProps = new Properties();
+//            sourceProps.put(STATEMENT, sourceQuery);
+//            sourceProps.put(SOURCE_TYPE, ResultSetSource.NAME);
+            putAll(result, sourceSource, comparisonPrefix + SOURCES + "." + SOURCE + ".");
         }
+
+        if (targetSource != null) {
+//            Properties sourceProps = new Properties();
+//            sourceProps.put(STATEMENT, targetQuery);
+//            sourceProps.put(SOURCE_TYPE, ResultSetSource.NAME);
+            putAll(result, targetSource, comparisonPrefix + SOURCES + "." + TARGET + ".");
+        }
+
+        if (database != null) {
+            database.forEach((k, v) -> result.setProperty(comparisonPrefix + "." + DATABASE + "." + k, v.toString()));
+        }
+
         return result;
     }
+
+
+    private Properties makeQueryProps(String query) {
+        Properties result = new Properties();
+        result.put(STATEMENT, query);
+        result.put(SOURCE_TYPE, ResultSetSource.NAME);
+        return result;
+    }
+
+
+    private static void putAll(final PropertiesConfiguration to, final Properties from, final String keyPrefix) {
+        from.forEach((o, o2) -> to.addProperty(keyPrefix + o.toString(), o2));
+    }
+
+    private static void putAll(final Properties to, final Properties from, final String keyPrefix) {
+        from.forEach((o, o2) -> to.put(keyPrefix + o.toString(), o2));
+    }
+
 
 }

@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.FileSourceConfig;
+import org.someth2say.taijitu.config.QuerySourceConfig;
 import org.someth2say.taijitu.config.SourceConfig;
 import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.registry.MatcherRegistry;
@@ -14,6 +15,7 @@ import org.someth2say.taijitu.tuple.builder.CSVTupleBuilder;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -22,6 +24,7 @@ import java.util.stream.Stream;
 
 public class CSVFileSource implements Source {
     private static final Logger logger = Logger.getLogger(CSVFileSource.class);
+    public static final String NAME = "csv";
 
     //TODO: Considering adding an the last exception raised, so we can check the status.
     private final ComparisonConfig comparisonConfig;
@@ -36,14 +39,13 @@ public class CSVFileSource implements Source {
     private CSVTupleBuilder builder;
     private final Stream<String> lineStream;
 
-    public CSVFileSource(final ComparisonConfig comparisonConfig, final String sourceId, final ComparisonContext context) throws IOException {
+    public CSVFileSource(final FileSourceConfig fileConfig, final ComparisonConfig comparisonConfig, final ComparisonContext context) throws IOException {
+        this.fileConfig = fileConfig;
         this.comparisonConfig = comparisonConfig;
-        //TODO: Ugh.... cast...
-        fileConfig = (FileSourceConfig) comparisonConfig.getSourceConfig(sourceId);
-        assert fileConfig != null;
         this.context = context;
         this.lineStream = Files.lines(Paths.get(fileConfig.getPath()));
     }
+
 
     @Override
     public List<FieldDescription> getFieldDescriptions() {
@@ -75,4 +77,8 @@ public class CSVFileSource implements Source {
         return builder;
     }
 
+    @Override
+    public String getName() {
+        return CSVFileSource.NAME;
+    }
 }

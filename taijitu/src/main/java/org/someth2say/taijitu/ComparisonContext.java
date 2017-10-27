@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.EqualityConfig;
 import org.someth2say.taijitu.config.QuerySourceConfig;
+import org.someth2say.taijitu.config.SourceConfig;
 import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.tuple.FieldDescription;
 
@@ -35,40 +36,38 @@ public class ComparisonContext {
     }
 
 
-    boolean registerFields(final List<FieldDescription> providedFields, final QuerySourceConfig querySourceConfig, final FieldMatcher fieldMatcher) {
-        if (providedFields == null) return false;
+    boolean registerFields(final List<FieldDescription> providedFields, final SourceConfig querySourceConfig, final FieldMatcher fieldMatcher) {
+        if (providedFields == null) {
+            return false;
+        }
+
         providedFieldsMap.put(querySourceConfig.getName(), providedFields);
 
-        //List<String> configKeyFields = querySourceConfig.getKeyFields();
         List<FieldDescription> providedKeyFields = getKeyFieldsFromConfig(querySourceConfig, providedFields);
         if (providedKeyFields != null) {
-            //if (validateKeyFieldsAreProvided(configKeyFields, providedFields)) {
             if (canonicalFields == null) {
                 // Have no canonical fields -> First source, interpreted as canonical.
                 canonicalFields = providedFields;
                 canonicalKeys = providedKeyFields;
                 rebuildIndexes();
                 updateEqualityConfigs();
-                return true;
             } else {
                 // Already have canonical fields, so should shrink
-                //if (validateCanonicalKeysAreProvided(querySourceConfig, fieldMatcher, configKeyFields, providedFields)) {
                 if (shrinkCanonicalFieldsToProvided(fieldMatcher, providedFields)) {
                     rebuildIndexes();
                     //TODO: Maybe equalityConfigs can be shrink with fields...
                     updateEqualityConfigs();
                 }
-                return true;
-                //}
             }
+            return true;
         } else {
             // Null provided key fields means that some key field have not been provided.
             logger.error("Not all key fields have been provided in " + querySourceConfig.getName() + " Provided: " + StringUtils.join(providedFields, ",") + " Keys: " + StringUtils.join(querySourceConfig.getKeyFields(), ","));
+            return false;
         }
-        return false;
     }
 
-    private List<FieldDescription> getKeyFieldsFromConfig(QuerySourceConfig querySourceConfig, List<FieldDescription> providedFields) {
+    private List<FieldDescription> getKeyFieldsFromConfig(SourceConfig querySourceConfig, List<FieldDescription> providedFields) {
         List<String> configKeyFields = querySourceConfig.getKeyFields();
         List<FieldDescription> result = new ArrayList<>(configKeyFields.size());
         for (String configKeyField : configKeyFields) {

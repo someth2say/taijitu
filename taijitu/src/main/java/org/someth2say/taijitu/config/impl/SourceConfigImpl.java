@@ -4,16 +4,18 @@ import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.someth2say.taijitu.config.DatabaseConfig;
 import org.someth2say.taijitu.config.NamedConfig;
 import org.someth2say.taijitu.config.QuerySourceConfig;
+import org.someth2say.taijitu.config.SourceConfig;
 import org.someth2say.taijitu.config.impl.apache.ApacheBasedQuerySourceConfig;
+import org.someth2say.taijitu.config.impl.apache.ApacheBasedSourceConfig;
 
-public class QuerySourceConfigImpl extends SourceConfigImpl implements ApacheBasedQuerySourceConfig {
+public abstract class SourceConfigImpl extends NamedConfig implements ApacheBasedSourceConfig {
 
     private final ImmutableHierarchicalConfiguration configuration;
-    private final QuerySourceConfig parent;
+    private final SourceConfig parent;
 
-    public QuerySourceConfigImpl(final ImmutableHierarchicalConfiguration configuration,
-                                 final QuerySourceConfig parent) {
-        super(configuration, parent);
+    public SourceConfigImpl(final ImmutableHierarchicalConfiguration configuration,
+                            final SourceConfig parent) {
+        super(configuration.getRootElementName());
         this.configuration = configuration;
         this.parent = parent;
     }
@@ -24,17 +26,8 @@ public class QuerySourceConfigImpl extends SourceConfigImpl implements ApacheBas
     }
 
     @Override
-    public QuerySourceConfig getParent() {
+    public SourceConfig getParent() {
         return parent;
     }
 
-    private DatabaseConfig databaseConfig;
-
-    @Override
-    public DatabaseConfig getDatabaseConfig() {
-        if (databaseConfig == null) {
-            databaseConfig = ApacheBasedQuerySourceConfig.super.getDatabaseConfig();
-        }
-        return databaseConfig;
-    }
 }

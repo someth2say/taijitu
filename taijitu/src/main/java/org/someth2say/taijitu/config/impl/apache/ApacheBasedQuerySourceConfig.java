@@ -15,26 +15,20 @@ import java.util.List;
 import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_FETCHSIZE;
 import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_QUERY_PARAMETERS;
 
-public interface ApacheBasedQuerySourceConfig extends ApacheBasedConfig, QuerySourceConfig {
+public interface ApacheBasedQuerySourceConfig extends ApacheBasedSourceConfig, QuerySourceConfig {
 
     QuerySourceConfig getParent();
 
     @Override
     default String getStatement() {
         String statement = getConfiguration().getString(Comparison.STATEMENT);
-        return statement != null ? statement : getParent().getStatement();
+        return statement != null ? statement : getParent() != null ? getParent().getStatement() : null;
     }
 
     @Override
     default int getFetchSize() {
         Integer fs = getConfiguration().getInteger(Setup.FETCH_SIZE, null);
         return fs != null ? fs : getParent() != null ? getParent().getFetchSize() : DEFAULT_FETCHSIZE;
-    }
-
-    @Override
-    default List<String> getKeyFields() {
-        List<String> keys = getConfiguration().getList(String.class, Fields.KEY, null);
-        return keys != null ? keys : getParent() != null ? getParent().getKeyFields() : null;
     }
 
     @Override
