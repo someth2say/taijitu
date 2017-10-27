@@ -23,19 +23,23 @@ public final class ConfigurationLabels {
 
     public static final class Comparison {
         public static final String STATEMENT = "sql";
-//        public static final String DATABASE_REF = "database";
+        @Deprecated
         public static final String SOURCE = "source";
+        @Deprecated
         public static final String TARGET = "target";
         public static final String STRATEGY = "strategy";
         public static final String QUERY_PARAMETERS = "queryParameters";
         public static final String EQUALITY_PARAMS = "parameters";
         public static final String FIELD_CLASS_STRICT = "exactClass";
+        public static final String FILE_PATH = "file";
+        public static final String SOURCE_TYPE = "type";
+        public static final String SOURCES = "sources";
 
         private Comparison() {
         }
 
         public static final class Fields {
-            public static final String KEY = "key";
+            public static final String KEYS = "keys";
 
             private Fields() {
             }

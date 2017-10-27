@@ -3,8 +3,8 @@ package org.someth2say.taijitu.config;
 import java.util.List;
 
 import org.someth2say.taijitu.util.Named;
-
-public interface ComparisonConfig extends SourceConfig {
+//TODO: Forcing here to LIST all kind of Source configs is awfull!!!
+public interface ComparisonConfig extends QuerySourceConfig, FileSourceConfig {
     StrategyConfig getStrategyConfig();
 
     PluginConfig[] getComparisonPluginConfigs();
@@ -13,5 +13,7 @@ public interface ComparisonConfig extends SourceConfig {
 
     List<EqualityConfig> getEqualityConfigs();
 
-    SourceConfig getSourceConfig(String sourceId);
+    //SourceConfig getSourceConfig(String sourceId);
+
+    List<SourceConfig> getSourceConfigs();
 }

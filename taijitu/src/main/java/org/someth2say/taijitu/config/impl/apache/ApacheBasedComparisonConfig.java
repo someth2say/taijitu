@@ -1,5 +1,6 @@
 package org.someth2say.taijitu.config.impl.apache;
 
+import java.beans.Expression;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,14 +10,18 @@ import org.apache.commons.configuration2.ex.ConfigurationRuntimeException;
 import org.someth2say.taijitu.config.*;
 import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
 import org.someth2say.taijitu.config.impl.EqualityConfigImpl;
+import org.someth2say.taijitu.config.impl.FileSourceConfigImpl;
 import org.someth2say.taijitu.config.impl.QuerySourceConfigImpl;
 import org.someth2say.taijitu.config.impl.StrategyConfigImpl;
+import org.someth2say.taijitu.registry.SourceTypeRegistry;
+import org.someth2say.taijitu.source.CSVFileSource;
+import org.someth2say.taijitu.source.ResultSetSource;
+import org.someth2say.taijitu.source.Source;
 
 import static org.someth2say.taijitu.config.DefaultConfig.*;
 
-public interface ApacheBasedComparisonSourceConfig extends ComparisonConfig, ApacheBasedQuerySourceConfig {
+public interface ApacheBasedComparisonConfig extends ComparisonConfig, ApacheBasedQuerySourceConfig, ApacheBasedFileSourceConfig {
 
-    @Override
     ComparisonConfig getParent();
 
     @Override
@@ -61,14 +66,37 @@ public interface ApacheBasedComparisonSourceConfig extends ComparisonConfig, Apa
     }
 
 
+//    @Override
+//    default SourceConfig getSourceConfig(final String sourceId) {
+//        try {
+//            final ImmutableHierarchicalConfiguration sourceConfig = this.getConfiguration().immutableConfigurationAt(sourceId);
+//            //TODO: Discriminate the kind of source.
+//            return new QuerySourceConfigImpl(sourceConfig, this);
+//        } catch (IllegalArgumentException e) {
+//            return getParent() != null ? getParent().getSourceConfig(sourceId) : null;
+//        }
+//    }
+//
     @Override
-    default QuerySourceConfig getSourceConfig(final String sourceId) {
-        try {
-            final ImmutableHierarchicalConfiguration sourceConfig = this.getConfiguration().immutableConfigurationAt(sourceId);
-            //TODO: Discriminate the kind of source.
-            return new QuerySourceConfigImpl(sourceConfig, this);
-        } catch (IllegalArgumentException e) {
-            return getParent() != null ? getParent().getSourceConfig(sourceId) : null;
+    default List<SourceConfig> getSourceConfigs() {
+        final List<ImmutableHierarchicalConfiguration> sourceConfigs = this.getConfiguration().immutableChildConfigurationsAt(Comparison.SOURCES);
+        List<SourceConfig> localSourceConfigs = sourceConfigs.stream().map(this::buildSpecificConfig).collect(Collectors.toList());
+        if (getParent() != null) localSourceConfigs.addAll(getParent().getSourceConfigs());
+        return localSourceConfigs;
+        //return new QuerySourceConfigImpl(sourceConfigs, this);
+
+    }
+
+    private SourceConfig buildSpecificConfig(final ImmutableHierarchicalConfiguration config) {
+        //TODO: May we have some kind of configuration registry (but just for this apache implementation)?
+        String sourceType = config.getString(Comparison.SOURCE_TYPE);
+        switch (sourceType) {
+            case ResultSetSource.NAME:
+                return new QuerySourceConfigImpl(config, this);
+            case CSVFileSource.NAME:
+                return new FileSourceConfigImpl(config, this);
+            default:
+                return null;
         }
     }
 }

@@ -2,18 +2,21 @@ package org.someth2say.taijitu.config.impl;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.someth2say.taijitu.config.*;
-import org.someth2say.taijitu.config.impl.apache.ApacheBasedComparisonSourceConfig;
+import org.someth2say.taijitu.config.impl.apache.ApacheBasedComparisonConfig;
+import org.someth2say.taijitu.config.impl.apache.ApacheBasedQuerySourceConfig;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 
-public class ComparisonSourceConfigImpl extends NamedConfig implements ApacheBasedComparisonSourceConfig {
+public class ComparisonConfigImpl extends NamedConfig implements ApacheBasedComparisonConfig {
     private final ImmutableHierarchicalConfiguration configuration;
     private final ComparisonConfig parent;
 
     //TODO: Sanity checks
-    public ComparisonSourceConfigImpl(final ImmutableHierarchicalConfiguration configuration, final ComparisonConfig parent) {
+    public ComparisonConfigImpl(final ImmutableHierarchicalConfiguration configuration, final ComparisonConfig parent) {
         super(configuration.getRootElementName());
         this.configuration = configuration;
         this.parent = parent;
@@ -25,19 +28,19 @@ public class ComparisonSourceConfigImpl extends NamedConfig implements ApacheBas
     @Override
     public StrategyConfig getStrategyConfig() {
         if (strategyConfig == null) {
-            strategyConfig = ApacheBasedComparisonSourceConfig.super.getStrategyConfig();
+            strategyConfig = ApacheBasedComparisonConfig.super.getStrategyConfig();
         }
         return strategyConfig;
     }
 
-    /**
-     * QUERIES
-     **/
-    private Map<String, QuerySourceConfig> queryCache = new ConcurrentHashMap<>();
-
+    /*** SOURCES ***/
+    private List<SourceConfig> sourceConfigCache = null;
     @Override
-    public QuerySourceConfig getSourceConfig(String sourceId) {
-        return queryCache.computeIfAbsent(sourceId, ApacheBasedComparisonSourceConfig.super::getSourceConfig);
+    public List<SourceConfig> getSourceConfigs() {
+        if (sourceConfigCache == null) {
+            sourceConfigCache = ApacheBasedComparisonConfig.super.getSourceConfigs();
+        }
+        return sourceConfigCache;
     }
 
     @Override

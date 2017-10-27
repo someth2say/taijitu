@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.QuerySourceConfig;
+import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.registry.MatcherRegistry;
 import org.someth2say.taijitu.tuple.ComparableTuple;
@@ -18,6 +19,7 @@ import java.util.List;
 
 public class ResultSetSource implements Source {
     private static final Logger logger = Logger.getLogger(ResultSetSource.class);
+    public static final String NAME = "query";
 
     //TODO: Considering adding an the last exception raised, so we can check the status.
     private ResultSet resultSet;
@@ -34,13 +36,15 @@ public class ResultSetSource implements Source {
     private final QuerySourceConfig querySourceConfig;
     private ResultSetTupleBuilder builder;
 
-    public ResultSetSource(Connection connection, final ComparisonConfig comparisonConfig, final String sourceId, final ComparisonContext context) {
-        this.connection = connection;
-        assert connection != null;
-        this.querySourceConfig = comparisonConfig.getSourceConfig(sourceId);
-        assert querySourceConfig != null;
+    public ResultSetSource(final QuerySourceConfig querySourceConfig, final ComparisonConfig comparisonConfig, final ComparisonContext context) throws SQLException {
+        this.querySourceConfig = querySourceConfig;
+        assert this.querySourceConfig != null;
+
         this.comparisonConfig = comparisonConfig;
         this.context = context;
+
+        this.connection = ConnectionManager.getConnection(this.querySourceConfig.getDatabaseConfig());
+        assert connection != null;
     }
 
 
@@ -153,4 +157,8 @@ public class ResultSetSource implements Source {
         return builder;
     }
 
+    @Override
+    public String getName() {
+        return ResultSetSource.NAME;
+    }
 }

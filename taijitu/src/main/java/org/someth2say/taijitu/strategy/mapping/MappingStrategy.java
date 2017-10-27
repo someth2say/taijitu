@@ -6,7 +6,7 @@ import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.ComparisonResult.QueryAndTuple;
 import org.someth2say.taijitu.compare.SynchronizedComparisonResult;
 import org.someth2say.taijitu.config.ComparisonConfig;
-import org.someth2say.taijitu.config.QuerySourceConfig;
+import org.someth2say.taijitu.config.SourceConfig;
 import org.someth2say.taijitu.config.StrategyConfig;
 import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.strategy.AbstractComparisonStrategy;
@@ -81,20 +81,20 @@ public class MappingStrategy extends AbstractComparisonStrategy implements Compa
         private final Iterator<ComparableTuple> tupleIterator;
         private final Map<ComparableTuple, ComparisonResult.QueryAndTuple> sharedSet;
         private final SynchronizedComparisonResult result;
-        private final QuerySourceConfig querySourceConfig;
+        private final SourceConfig sourceConfig;
 
-        private TupleMapper(final Iterator<ComparableTuple> tupleIterator, final Map<ComparableTuple, QueryAndTuple> sharedMap, final SynchronizedComparisonResult result, QuerySourceConfig querySourceConfig) {
+        private TupleMapper(final Iterator<ComparableTuple> tupleIterator, final Map<ComparableTuple, QueryAndTuple> sharedMap, final SynchronizedComparisonResult result, SourceConfig sourceConfig) {
             this.tupleIterator = tupleIterator;
             this.sharedSet = sharedMap;
             this.result = result;
-            this.querySourceConfig = querySourceConfig;
+            this.sourceConfig = sourceConfig;
         }
 
         @Override
         public void run() {
             for (ComparableTuple thisRecord = getNextRecord(tupleIterator); thisRecord != null; thisRecord = getNextRecord(tupleIterator)) {
 
-                QueryAndTuple thisQueryAndTuple = new QueryAndTuple(querySourceConfig, thisRecord);
+                QueryAndTuple thisQueryAndTuple = new QueryAndTuple(sourceConfig, thisRecord);
                 final QueryAndTuple otherQueryAndTuple = sharedSet.putIfAbsent(thisRecord, thisQueryAndTuple);
                 if (otherQueryAndTuple != null) {
                     //we have a key match ...

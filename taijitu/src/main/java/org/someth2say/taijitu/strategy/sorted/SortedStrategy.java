@@ -5,6 +5,7 @@ import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.SimpleComparisonResult;
 import org.someth2say.taijitu.config.QuerySourceConfig;
+import org.someth2say.taijitu.config.SourceConfig;
 import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.config.ComparisonConfig;
@@ -38,8 +39,8 @@ public class SortedStrategy extends AbstractComparisonStrategy implements Compar
         ComparableTuple sourceRecord = getNextRecord(sourceIterator);
         ComparableTuple targetRecord = getNextRecord(targetIterator);
 
-        final QuerySourceConfig targetQuerySourceConfig = target.getConfig();
-        final QuerySourceConfig sourceQuerySourceConfig = source.getConfig();
+        final SourceConfig targetQuerySourceConfig = target.getConfig();
+        final SourceConfig sourceQuerySourceConfig = source.getConfig();
 
         while (sourceRecord != null && targetRecord != null) {
 

@@ -7,13 +7,10 @@ import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.PluginConfig;
 import org.someth2say.taijitu.config.TaijituConfig;
-import org.someth2say.taijitu.config.impl.TaijituSourceConfigImpl;
+import org.someth2say.taijitu.config.impl.TaijituConfigImpl;
 import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
-import org.someth2say.taijitu.registry.ComparisonStrategyRegistry;
-import org.someth2say.taijitu.registry.EqualityStrategyRegistry;
-import org.someth2say.taijitu.registry.MatcherRegistry;
-import org.someth2say.taijitu.registry.PluginRegistry;
+import org.someth2say.taijitu.registry.*;
 import org.someth2say.taijitu.util.FileUtil;
 import org.someth2say.taijitu.util.LogUtils;
 
@@ -37,14 +34,14 @@ public final class Taijitu {
 
 
     private TaijituConfig initialise(final ImmutableHierarchicalConfiguration properties) throws TaijituException {
-        TaijituConfig config = TaijituSourceConfigImpl.fromProperties(properties);
+        TaijituConfig config = TaijituConfigImpl.fromProperties(properties);
         performSetup(config);
         return config;
     }
 
 
     private TaijituConfig initialise(final String configProperties) throws TaijituException {
-        TaijituConfig config = TaijituSourceConfigImpl.fromFile(configProperties);
+        TaijituConfig config = TaijituConfigImpl.fromFile(configProperties);
         performSetup(config);
         return config;
     }
@@ -62,11 +59,13 @@ public final class Taijitu {
             ComparisonStrategyRegistry.scanClassPath();
             MatcherRegistry.scanClassPath();
             EqualityStrategyRegistry.scanClassPath();
+            SourceTypeRegistry.scanClassPath();
         } else {
             PluginRegistry.useDefaults();
             ComparisonStrategyRegistry.useDefaults();
             MatcherRegistry.useDefaults();
             EqualityStrategyRegistry.useDefaults();
+            SourceTypeRegistry.useDefaults();
         }
     }
 
@@ -171,14 +170,6 @@ public final class Taijitu {
         }
         return result;
     }
-
-//    private void startDataSources(TaijituConfig config) {
-//        DatabaseConfig[] dbConfigs = config.getAllDatabaseConfigs();
-//        for (DatabaseConfig databaseConfig : dbConfigs) {
-//            Properties dbProperties = databaseConfig.getDatabaseProperties();
-//            ConnectionManager.buildDataSource(databaseConfig);
-//        }
-//    }
 
     private void closeDataSources() {
         ConnectionManager.closeAllDataSources();

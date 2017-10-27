@@ -18,6 +18,7 @@ import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.config.DatabaseConfig;
 import org.someth2say.taijitu.config.impl.DatabaseConfigImpl;
 import org.someth2say.taijitu.database.ConnectionManager;
+import org.someth2say.taijitu.source.ResultSetSource;
 import org.someth2say.taijitu.strategy.mapping.MappingStrategy;
 import org.someth2say.taijitu.strategy.sorted.SortedStrategy;
 
@@ -32,7 +33,7 @@ import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.someth2say.taijitu.config.ConfigurationLabels.Comparison.*;
-import static org.someth2say.taijitu.config.ConfigurationLabels.Comparison.Fields.KEY;
+import static org.someth2say.taijitu.config.ConfigurationLabels.Comparison.Fields.KEYS;
 import static org.someth2say.taijitu.config.ConfigurationLabels.Sections.COMPARISON;
 import static org.someth2say.taijitu.config.ConfigurationLabels.Sections.DATABASE;
 
@@ -142,7 +143,7 @@ public class TaijituTest {
 
         final ComparisonResult[] comparisonResults = new Taijitu().compare(configuration);
 
-        //assertEquals(2, comparisonResults.length);
+        assertEquals(2, comparisonResults.length);
         final ComparisonResult firstResult = comparisonResults[0];
         assertEquals(0, firstResult.getDisjoint().size());
         assertEquals(0, firstResult.getDifferent().size());
@@ -174,7 +175,7 @@ public class TaijituTest {
         testProperties.setProperty(ConfigurationLabels.Sections.SETUP + "." + ConfigurationLabels.Setup.CONSOLE_LOG, "DEBUG");
 
     }
-    
+
 //
 //    @Test
 //    public void missingStrategyTest() throws TaijituException, QueryUtilsException, SQLException {
@@ -597,11 +598,15 @@ public class TaijituTest {
     private Properties makeComparisonProps(String name, String key, String sourceQuery, String targetQuery, Properties database) {
         Properties result = new Properties();
         if (key != null)
-            result.setProperty(COMPARISON + "." + name + "." + KEY, key);
-        if (sourceQuery != null)
-            result.setProperty(COMPARISON + "." + name + "." + SOURCE + "." + STATEMENT, sourceQuery);
-        if (targetQuery != null)
-            result.setProperty(COMPARISON + "." + name + "." + TARGET + "." + STATEMENT, targetQuery);
+            result.setProperty(COMPARISON + "." + name + "." + KEYS, key);
+        if (sourceQuery != null) {
+            result.setProperty(COMPARISON + "." + name + "." + SOURCES + "." + SOURCE + "." + STATEMENT, sourceQuery);
+            result.setProperty(COMPARISON + "." + name + "." + SOURCES + "." + SOURCE + "." + SOURCE_TYPE, ResultSetSource.NAME);
+        }
+        if (targetQuery != null) {
+            result.setProperty(COMPARISON + "." + name + "." + SOURCES + "." + TARGET + "." + STATEMENT, targetQuery);
+            result.setProperty(COMPARISON + "." + name + "." + SOURCES + "." + TARGET + "." + SOURCE_TYPE, ResultSetSource.NAME);
+        }
 //        if (database != null) result.setProperty(COMPARISON + "." + name + "." + DATABASE_REF, database);
         if (database != null) {
             database.forEach((k, v) -> result.setProperty(COMPARISON + "." + name + "." + DATABASE + "." + k, v.toString()));

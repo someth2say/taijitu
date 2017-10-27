@@ -12,27 +12,27 @@ import org.apache.log4j.Logger;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.TaijituConfig;
-import org.someth2say.taijitu.config.impl.apache.ApacheBasedTaijituSourceConfig;
+import org.someth2say.taijitu.config.impl.apache.ApacheBasedTaijituConfig;
 
-public final class TaijituSourceConfigImpl implements ApacheBasedTaijituSourceConfig {
+public final class TaijituConfigImpl implements ApacheBasedTaijituConfig {
 
-    private static final Logger logger = Logger.getLogger(TaijituSourceConfigImpl.class);
+    private static final Logger logger = Logger.getLogger(TaijituConfigImpl.class);
 
     private final ImmutableHierarchicalConfiguration configuration;
 
-    private TaijituSourceConfigImpl(final ImmutableHierarchicalConfiguration configuration) {
+    private TaijituConfigImpl(final ImmutableHierarchicalConfiguration configuration) {
         super();
         this.configuration = configuration;
     }
 
     public static TaijituConfig fromFile(final String file) throws TaijituException {
         ImmutableHierarchicalConfiguration config = load(file);
-        return new TaijituSourceConfigImpl(config);
+        return new TaijituConfigImpl(config);
     }
 
 
     public static TaijituConfig fromProperties(final ImmutableHierarchicalConfiguration config) throws TaijituException {
-        return new TaijituSourceConfigImpl(config);
+        return new TaijituConfigImpl(config);
     }
 
     @Override

@@ -5,6 +5,7 @@ import io.github.lukehutch.fastclasspathscanner.scanner.ScanResult;
 import org.apache.log4j.Logger;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +30,8 @@ public class ClassScanUtils {
             try {
                 if (!Modifier.isAbstract(clazz.getModifiers())) {
                     @SuppressWarnings("unchecked")
-                    T plugin = (T) clazz.getDeclaredConstructor().newInstance();
-                    result.put(plugin.getName(), plugin);
+                    T clazzInstance = (T) clazz.getDeclaredConstructor().newInstance();
+                    result.put(clazzInstance.getName(), clazzInstance);
                 }
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
                 logger.error("Unable to instantiate plugin class " + clazz.getName(), e);
@@ -38,4 +39,31 @@ public class ClassScanUtils {
         }
         return result;
     }
+
+
+    public static <T extends Named> Map<String, Class<T>> getClassesImplementing(Class<T> implementedInterface) {
+        Map<String, Class<T>> result = new ConcurrentHashMap<>();
+        final FastClasspathScanner fcs = new FastClasspathScanner();
+        final ScanResult scanResult = fcs.scan();
+        final List<String> classNames = scanResult.getNamesOfClassesImplementing(implementedInterface);
+        final List<Class<?>> clazzes = scanResult.classNamesToClassRefs(classNames);
+        for (Class<?> clazz : clazzes) {
+            Class<T> named = (Class<T>) clazz;
+            if (!Modifier.isAbstract(clazz.getModifiers())) {
+                try {
+                    //TODO: Find a type-safer way...
+                    Method getName = clazz.getDeclaredMethod("getName");
+                    if (getName != null) {
+                        Object getNameResult = getName.invoke(null);
+                        result.put(getNameResult.toString(), named);
+                    }
+                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    logger.error("Unable to invoke `getName` from class " + clazz.getName());
+                }
+            }
+        }
+        return result;
+    }
+
+
 }
