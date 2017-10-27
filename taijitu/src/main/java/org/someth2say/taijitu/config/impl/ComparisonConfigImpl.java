@@ -3,12 +3,7 @@ package org.someth2say.taijitu.config.impl;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.someth2say.taijitu.config.*;
 import org.someth2say.taijitu.config.impl.apache.ApacheBasedComparisonConfig;
-import org.someth2say.taijitu.config.impl.apache.ApacheBasedQuerySourceConfig;
-
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 
 public class ComparisonConfigImpl extends NamedConfig implements ApacheBasedComparisonConfig {

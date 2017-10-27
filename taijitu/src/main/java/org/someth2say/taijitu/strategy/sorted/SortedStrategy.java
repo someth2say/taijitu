@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.SimpleComparisonResult;
-import org.someth2say.taijitu.config.QuerySourceConfig;
 import org.someth2say.taijitu.config.SourceConfig;
 import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.tuple.ComparableTuple;

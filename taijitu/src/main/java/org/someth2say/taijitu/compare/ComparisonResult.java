@@ -1,7 +1,6 @@
 package org.someth2say.taijitu.compare;
 
 import org.someth2say.taijitu.config.ComparisonConfig;
-import org.someth2say.taijitu.config.QuerySourceConfig;
 import org.someth2say.taijitu.config.SourceConfig;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.util.ImmutablePair;

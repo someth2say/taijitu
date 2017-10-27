@@ -2,7 +2,6 @@ package org.someth2say.taijitu.config.impl;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.someth2say.taijitu.config.DatabaseConfig;
-import org.someth2say.taijitu.config.NamedConfig;
 import org.someth2say.taijitu.config.QuerySourceConfig;
 import org.someth2say.taijitu.config.impl.apache.ApacheBasedQuerySourceConfig;
 

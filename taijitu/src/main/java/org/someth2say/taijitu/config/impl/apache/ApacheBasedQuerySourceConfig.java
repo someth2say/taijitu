@@ -7,17 +7,15 @@ import org.someth2say.taijitu.config.DatabaseConfig;
 import org.someth2say.taijitu.config.QuerySourceConfig;
 import org.someth2say.taijitu.config.ConfigurationLabels.Comparison;
 import org.someth2say.taijitu.config.ConfigurationLabels.Setup;
-import org.someth2say.taijitu.config.ConfigurationLabels.Comparison.Fields;
 import org.someth2say.taijitu.config.impl.DatabaseConfigImpl;
-
-import java.util.List;
 
 import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_FETCHSIZE;
 import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_QUERY_PARAMETERS;
 
 public interface ApacheBasedQuerySourceConfig extends ApacheBasedSourceConfig, QuerySourceConfig {
 
-    QuerySourceConfig getParent();
+    @Override
+	QuerySourceConfig getParent();
 
     @Override
     default String getStatement() {
