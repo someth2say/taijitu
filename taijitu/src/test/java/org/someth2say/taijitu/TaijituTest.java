@@ -54,7 +54,7 @@ public class TaijituTest {
     }
 
     @Parameterized.Parameters(name = "{index}: {0}")
-    public static Collection strategies() {
+    public static Collection<String> strategies() {
         return Arrays.asList(
                 SortedStrategy.NAME,
                 MappingStrategy.NAME

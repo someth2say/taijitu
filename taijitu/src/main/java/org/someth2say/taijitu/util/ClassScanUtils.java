@@ -20,7 +20,7 @@ public class ClassScanUtils {
     private ClassScanUtils() {
     }
 
-    public static <T extends Named> Map<String, T> getInstancesForClassesImplementing(Class<T> implementedInterface) {
+    public static <T extends Named> Map<String, T> getInstancesForClassesImplementing(Class<? extends T> implementedInterface) {
         Map<String, T> result = new ConcurrentHashMap<>();
         final FastClasspathScanner fcs = new FastClasspathScanner();
         final ScanResult scanResult = fcs.scan();
@@ -41,14 +41,15 @@ public class ClassScanUtils {
     }
 
 
-    public static <T extends Named> Map<String, Class<T>> getClassesImplementing(Class<T> implementedInterface) {
-        Map<String, Class<T>> result = new ConcurrentHashMap<>();
+    public static <T extends Named> Map<String, Class<? extends T>> getClassesImplementing(Class<? extends T> implementedInterface) {
+        Map<String, Class<? extends T>> result = new ConcurrentHashMap<>();
         final FastClasspathScanner fcs = new FastClasspathScanner();
         final ScanResult scanResult = fcs.scan();
         final List<String> classNames = scanResult.getNamesOfClassesImplementing(implementedInterface);
         final List<Class<?>> clazzes = scanResult.classNamesToClassRefs(classNames);
         for (Class<?> clazz : clazzes) {
-            Class<T> named = (Class<T>) clazz;
+            @SuppressWarnings("unchecked")
+			Class<? extends T> named = (Class<? extends T>) clazz;
             if (!Modifier.isAbstract(clazz.getModifiers())) {
                 try {
                     //TODO: Find a type-safer way...

@@ -54,8 +54,10 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
         for (int keyFieldIdx : getKeyFieldIdxs()) {
             Object keyValue = getValue(keyFieldIdx);
             final EqualityConfig equalityConfig = equalityConfigs.get(keyFieldIdx);
-            final EqualityStrategy equalityStrategy = getEqualityStrategy(equalityConfig);
-            int keyHashCode = equalityStrategy.computeHashCode(keyValue, equalityConfig.getEqualityParameters());
+            @SuppressWarnings("rawtypes")
+			final EqualityStrategy equalityStrategy = getEqualityStrategy(equalityConfig);
+            @SuppressWarnings("unchecked")
+			int keyHashCode = equalityStrategy.computeHashCode(keyValue, equalityConfig.getEqualityParameters());
             result = 31 * result + keyHashCode;
         }
         return result;
@@ -74,14 +76,16 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
         return equalFields(other, context.getNonKeyFieldsIdxs());
     }
 
-    private boolean equalFields(ComparableTuple other, int[] fieldIdxs) {
+    @SuppressWarnings("unchecked")
+	private boolean equalFields(ComparableTuple other, int[] fieldIdxs) {
         List<EqualityConfig> equalityConfigs = getEqualityConfigs();
         for (int fieldIdx : fieldIdxs) {
             Object keyValue = getValue(fieldIdx);
             Object otherKeyValue = other.getValue(fieldIdx);
             FieldDescription fieldDescription = getCanonicalFields().get(fieldIdx);
             final EqualityConfig equalityConfig = equalityConfigs.get(fieldIdx);
-            final EqualityStrategy equalityStrategy = getEqualityStrategy(equalityConfig);
+            @SuppressWarnings("rawtypes")
+			final EqualityStrategy equalityStrategy = getEqualityStrategy(equalityConfig);
             //TODO: Lazy logging
             logger.debug(fieldDescription + ":" + keyValue + "<=>" + otherKeyValue + "(" + otherKeyValue.getClass().getName() + ") strategy: " + equalityStrategy.getName() + " config: " + equalityConfig.getEqualityParameters());
             if (!equalityStrategy.equals(keyValue, otherKeyValue, equalityConfig.getEqualityParameters())) {
@@ -92,7 +96,7 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
         return true;
     }
 
-    @Override
+	@Override
     public int compareTo(ComparableTuple other) {
         List<EqualityConfig> equalityConfigs = getEqualityConfigs();
         int[] fieldIdxs = getKeyFieldIdxs();
@@ -100,7 +104,9 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
             Object keyValue = getValue(fieldIdx);
             Object otherKeyValue = other.getValue(fieldIdx);
             final EqualityConfig equalityConfig = equalityConfigs.get(fieldIdx);
-            final EqualityStrategy equalityStrategy = getEqualityStrategy(equalityConfig);
+            @SuppressWarnings("rawtypes")
+			final EqualityStrategy equalityStrategy = getEqualityStrategy(equalityConfig);
+            @SuppressWarnings("unchecked")
             final int keyComparison = equalityStrategy.compare(keyValue, otherKeyValue, equalityConfig.getEqualityParameters());
             if (keyComparison != 0) {
                 return keyComparison;
@@ -110,7 +116,7 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
     }
 
 
-    private EqualityStrategy getEqualityStrategy(final EqualityConfig equalityConfig) {
+    private EqualityStrategy<?> getEqualityStrategy(final EqualityConfig equalityConfig) {
         final String equalityName = equalityConfig.getName();
         return EqualityStrategyRegistry.getEqualityStrategy(equalityName);
     }

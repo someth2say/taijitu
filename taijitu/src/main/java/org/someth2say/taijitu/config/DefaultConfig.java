@@ -6,7 +6,6 @@ import org.someth2say.taijitu.compare.equality.ToStringEqualityStrategy;
 import org.someth2say.taijitu.matcher.NamingFieldMatcher;
 import org.someth2say.taijitu.plugins.logging.TimeLoggingPlugin;
 import org.someth2say.taijitu.strategy.mapping.MappingStrategy;
-import org.someth2say.taijitu.strategy.sorted.SortedStrategy;
 
 public class DefaultConfig {
 

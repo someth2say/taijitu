@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SourceTypeRegistry {
     private static final Logger logger = Logger.getLogger(SourceTypeRegistry.class);
-    private static Map<String, Class<Source>> classes = new ConcurrentHashMap<>();
+    private static Map<String, Class<? extends Source>> classes = new ConcurrentHashMap<>();
 
     private SourceTypeRegistry() {
     }
@@ -32,11 +32,11 @@ public class SourceTypeRegistry {
         addSourceType(CSVFileSource.NAME, CSVFileSource.class);
     }
 
-    private static void addSourceType(String name, Class<? extends Source> clazz) {
-        classes.put(name, (Class<Source>) clazz);
+    private static <T extends Source> void addSourceType(String name, Class<T> clazz) {
+        classes.put(name, clazz);
     }
 
-    public static Class<Source> getSourceType(String type) {
+    public static Class<? extends Source> getSourceType(String type) {
         return classes.get(type);
     }
 }

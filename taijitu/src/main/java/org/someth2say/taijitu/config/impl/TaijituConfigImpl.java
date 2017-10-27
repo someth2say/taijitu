@@ -8,15 +8,12 @@ import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.builder.fluent.PropertiesBuilderParameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.apache.log4j.Logger;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.config.ComparisonConfig;
 import org.someth2say.taijitu.config.TaijituConfig;
 import org.someth2say.taijitu.config.impl.apache.ApacheBasedTaijituConfig;
 
 public final class TaijituConfigImpl implements ApacheBasedTaijituConfig {
-
-    private static final Logger logger = Logger.getLogger(TaijituConfigImpl.class);
 
     private final ImmutableHierarchicalConfiguration configuration;
 
@@ -41,21 +38,6 @@ public final class TaijituConfigImpl implements ApacheBasedTaijituConfig {
     }
 
     /**** UTILITIES *********************************************************************/
-
-//    public File getOutputFolderFile() {
-//        return new File(getOutputFolder());
-//    }
-//
-//    public static Date parseDate(String dateStr) {
-//        if (dateStr != null) {
-//            try {
-//                return new Date(DATE_TIME_FORMATTER.parseMillis(dateStr));
-//            } catch (final IllegalArgumentException e) {
-//                return null;
-//            }
-//        }
-//        return null;
-//    }
 
     /**
      * Tries to load configuration from supported format files (just properties right now...).
