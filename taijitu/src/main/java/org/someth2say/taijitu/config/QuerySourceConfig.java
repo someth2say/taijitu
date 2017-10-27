@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.config;
 
-// TODO: QuerySourceConfig is just a subtype of SourceConfig. Should find a way to discriminate
+// TODO: QuerySourceConfigNode is just a subtype of SourceConfigNode. Should find a way to discriminate
 public interface QuerySourceConfig extends SourceConfig {
 
     String getStatement();

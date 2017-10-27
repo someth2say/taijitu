@@ -23,9 +23,9 @@ public interface ApacheBasedTaijituConfig extends TaijituConfig, ApacheBasedComp
     }
 
 //    @Override
-//    default DatabaseConfig[] getAllDatabaseConfigs() {
+//    default DatabaseConfigNode[] getAllDatabaseConfigs() {
 //        final List<ImmutableHierarchicalConfiguration> databaseConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.Sections.DATABASE);
-//        DatabaseConfig[] result = new DatabaseConfig[databaseConfigs.size()];
+//        DatabaseConfigNode[] result = new DatabaseConfigNode[databaseConfigs.size()];
 //        int pos = 0;
 //        for (ImmutableHierarchicalConfiguration databaseConfig : databaseConfigs) {
 //            result[pos++] = new DatabaseConfigImpl(databaseConfig);
