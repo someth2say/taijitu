@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.config.impl.apache;
+package org.someth2say.taijitu.config2.hierarchy;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.commons.configuration2.ex.ConfigurationRuntimeException;
@@ -17,36 +17,22 @@ import java.util.stream.Collectors;
 
 import static org.someth2say.taijitu.config.DefaultConfig.*;
 
-public interface ApacheBasedComparisonConfig extends ComparisonConfig, ApacheBasedQuerySourceConfig, ApacheBasedFileSourceConfig {
+public interface HierarchyComparisonConfig extends ComparisonConfig, ApacheBasedQuerySourceConfig, ApacheBasedFileSourceConfig {
 
     ComparisonConfig getParent();
+    ComparisonConfig getDelegate();
 
     @Override
     default List<EqualityConfig> getEqualityConfigs() {
-        final List<EqualityConfig> equalityConfigs = getDelegatedEqualityConfigs();
+        final List<EqualityConfig> equalityConfigs = getDelegate().getEqualityConfigs();
         final List<EqualityConfig> parentEqualityConfigs = getParentEqualityConfigs();
         equalityConfigs.addAll(parentEqualityConfigs);
         return equalityConfigs;
     }
 
-    private List<EqualityConfig> getDelegatedEqualityConfigs() {
-        List<ImmutableHierarchicalConfiguration> thisEqConfigs;
-        try {
-            thisEqConfigs = getConfiguration().immutableChildConfigurationsAt(Comparison.EQUALITY);
-        } catch (ConfigurationRuntimeException e) {
-            thisEqConfigs = Collections.emptyList();
-        }
-        return thisEqConfigs.stream().map(EqualityConfigImpl::new).collect(Collectors.toList());
-    }
 
     private List<EqualityConfig> getParentEqualityConfigs() {
-        List<EqualityConfig> parentEqualityConfigs;
-        if (getParent() != null) {
-            parentEqualityConfigs = getParent().getEqualityConfigs();
-        } else {
-            parentEqualityConfigs= List.of(DEFAULT_EQUALITY_CONFIG);
-        }
-        return parentEqualityConfigs;
+        return getParent() != null ? getParent().getEqualityConfigs() : List.of(DEFAULT_EQUALITY_CONFIG);
     }
 
     @Override

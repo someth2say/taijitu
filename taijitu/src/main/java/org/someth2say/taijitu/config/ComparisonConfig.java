@@ -13,7 +13,5 @@ public interface ComparisonConfig extends QuerySourceConfig, FileSourceConfig {
 
     List<EqualityConfig> getEqualityConfigs();
 
-    //SourceConfig getSourceConfig(String sourceId);
-
     List<SourceConfig> getSourceConfigs();
 }
