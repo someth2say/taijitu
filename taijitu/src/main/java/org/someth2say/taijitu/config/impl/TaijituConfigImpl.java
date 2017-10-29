@@ -29,7 +29,7 @@ public final class TaijituConfigImpl extends ComparisonConfigImpl implements Tai
     private final TaijituConfig delegate;
 
     private TaijituConfigImpl(final ImmutableHierarchicalConfiguration configuration, TaijituConfig delegate) {
-        super();
+        super(configuration,null);
         this.configuration = configuration;
         this.delegate = delegate;
     }

@@ -13,10 +13,10 @@ import static org.someth2say.taijitu.config.DefaultConfig.*;
 public class ApacheTaijituConfigNode extends ApacheComparisonConfigNode implements TaijituConfig {
 
     public ApacheTaijituConfigNode(final ImmutableHierarchicalConfiguration configuration) {
-        super(configuration);
+        super(configuration,null);
     }
 
-    //TOD: Migrate to lists
+    //TODO: Migrate to lists
     @Override
     public ComparisonConfig[] getComparisons() {
         final List<ImmutableHierarchicalConfiguration> comparisonConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.Sections.COMPARISON);

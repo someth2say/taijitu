@@ -44,7 +44,7 @@ public class ComparisonConfigImpl extends NamedConfig implements ComparisonConfi
 
     /*** SOURCES ***/
     private List<SourceConfig> sourceConfigCache = null;
-    //@Override
+    @Override
     public List<SourceConfig> getSourceConfigs() {
         if (sourceConfigCache == null) {
             List<SourceConfig> localSourceConfigs = getDelegatedSourceConfigs();
