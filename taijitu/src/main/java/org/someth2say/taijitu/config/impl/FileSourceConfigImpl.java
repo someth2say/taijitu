@@ -1,10 +1,10 @@
 package org.someth2say.taijitu.config.impl;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
+import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.config.FileSourceConfig;
-import org.someth2say.taijitu.config.impl.apache.ApacheBasedFileSourceConfig;
 
-public class FileSourceConfigImpl extends SourceConfigImpl implements ApacheBasedFileSourceConfig {
+public class FileSourceConfigImpl extends SourceConfigImpl implements FileSourceConfig {
 
     private final ImmutableHierarchicalConfiguration configuration;
     private final FileSourceConfig parent;
@@ -16,13 +16,17 @@ public class FileSourceConfigImpl extends SourceConfigImpl implements ApacheBase
         this.parent = parent;
     }
 
-    @Override
     public ImmutableHierarchicalConfiguration getConfiguration() {
         return configuration;
     }
 
-    @Override
     public FileSourceConfig getParent() {
         return parent;
+    }
+
+    @Override
+    public String getPath() {
+        String statement = getConfiguration().getString(ConfigurationLabels.Comparison.FILE_PATH);
+        return statement != null ? statement : getParent().getPath();
     }
 }

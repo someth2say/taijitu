@@ -2,9 +2,9 @@ package org.someth2say.taijitu.config.impl;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.someth2say.taijitu.config.NamedConfig;
-import org.someth2say.taijitu.config.impl.apache.ApacheBasedStrategyConfig;
+import org.someth2say.taijitu.config.StrategyConfig;
 
-public class StrategyConfigImpl extends NamedConfig implements ApacheBasedStrategyConfig {
+public class StrategyConfigImpl extends NamedConfig implements StrategyConfig {
     private final ImmutableHierarchicalConfiguration configuration;
 
     public StrategyConfigImpl(final ImmutableHierarchicalConfiguration configuration) {
@@ -12,8 +12,7 @@ public class StrategyConfigImpl extends NamedConfig implements ApacheBasedStrate
         this.configuration = configuration;
     }
 
-    @Override
-	public ImmutableHierarchicalConfiguration getConfiguration() {
+    public ImmutableHierarchicalConfiguration getConfiguration() {
         return configuration;
     }
 }

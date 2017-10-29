@@ -1,11 +1,13 @@
 package org.someth2say.taijitu.config.impl;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
+import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.config.NamedConfig;
 import org.someth2say.taijitu.config.SourceConfig;
-import org.someth2say.taijitu.config.impl.apache.ApacheBasedSourceConfig;
 
-public abstract class SourceConfigImpl extends NamedConfig implements ApacheBasedSourceConfig {
+import java.util.List;
+
+public abstract class SourceConfigImpl extends NamedConfig implements SourceConfig {
 
     private final ImmutableHierarchicalConfiguration configuration;
     private final SourceConfig parent;
@@ -17,14 +19,23 @@ public abstract class SourceConfigImpl extends NamedConfig implements ApacheBase
         this.parent = parent;
     }
 
-    @Override
     public ImmutableHierarchicalConfiguration getConfiguration() {
         return configuration;
     }
 
-    @Override
     public SourceConfig getParent() {
         return parent;
     }
 
+    @Override
+    public List<String> getKeyFields() {
+        List<String> keys = getConfiguration().getList(String.class, ConfigurationLabels.Comparison.Fields.KEYS, null);
+        return keys != null ? keys : getParent() != null ? getParent().getKeyFields() : null;
+    }
+
+    @Override
+    public String getType() {
+        String statement = getConfiguration().getString(ConfigurationLabels.Comparison.SOURCE_TYPE);
+        return statement != null ? statement : getParent() != null ? getParent().getType() : null;
+    }
 }
