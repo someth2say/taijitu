@@ -11,6 +11,8 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.ex.ConfigurationRuntimeException;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.config.*;
+import org.someth2say.taijitu.config.apache.ApacheTaijituConfigNode;
+import org.someth2say.taijitu.config.node.TaijituConfigNode;
 import org.someth2say.taijitu.source.CSVFileSource;
 import org.someth2say.taijitu.source.ResultSetSource;
 
@@ -20,23 +22,28 @@ import java.util.stream.Collectors;
 
 import static org.someth2say.taijitu.config.DefaultConfig.*;
 
-public final class TaijituConfigImpl implements TaijituConfig, ComparisonConfig, FileSourceConfig, QuerySourceConfig, SourceConfig {
+public final class TaijituConfigImpl extends ComparisonConfigImpl implements TaijituConfig {
 
+    @Deprecated
     private final ImmutableHierarchicalConfiguration configuration;
+    private final TaijituConfig delegate;
 
-    private TaijituConfigImpl(final ImmutableHierarchicalConfiguration configuration) {
+    private TaijituConfigImpl(final ImmutableHierarchicalConfiguration configuration, TaijituConfig delegate) {
         super();
         this.configuration = configuration;
+        this.delegate = delegate;
     }
 
     public static TaijituConfig fromFile(final String file) throws TaijituException {
         ImmutableHierarchicalConfiguration config = load(file);
-        return new TaijituConfigImpl(config);
+        ApacheTaijituConfigNode atcn = new ApacheTaijituConfigNode(config);
+        return new TaijituConfigImpl(config, atcn);
     }
 
 
     public static TaijituConfig fromProperties(final ImmutableHierarchicalConfiguration config) throws TaijituException {
-        return new TaijituConfigImpl(config);
+        ApacheTaijituConfigNode atcn = new ApacheTaijituConfigNode(config);
+        return new TaijituConfigImpl(config, atcn);
     }
 
     public ComparisonConfig getParent() {
@@ -68,6 +75,7 @@ public final class TaijituConfigImpl implements TaijituConfig, ComparisonConfig,
         }
     }
 
+    @Deprecated
     public ImmutableHierarchicalConfiguration getConfiguration() {
         return configuration;
     }
@@ -79,49 +87,32 @@ public final class TaijituConfigImpl implements TaijituConfig, ComparisonConfig,
 
     @Override
     public ComparisonConfig[] getComparisons() {
-        final List<ImmutableHierarchicalConfiguration> comparisonConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.Sections.COMPARISON);
-        ComparisonConfig[] result = new ComparisonConfig[comparisonConfigs.size()];
-        int pos = 0;
-        for (ImmutableHierarchicalConfiguration comparisonConfig : comparisonConfigs) {
-            result[pos++] = new ComparisonConfigImpl(comparisonConfig, this);
-        }
-        return result;
-    }
-
-    @Override
-    public PluginConfig[] getComparisonPluginConfigs() {
-        final List<ImmutableHierarchicalConfiguration> pluginConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.Sections.PLUGINS);
-        PluginConfig[] result = new PluginConfig[pluginConfigs.size()];
-        int pos = 0;
-        for (ImmutableHierarchicalConfiguration pluginConfig : pluginConfigs) {
-            result[pos++] = new PluginConfigImpl(pluginConfig);
-        }
-        return result;
+        return getDelegate().getComparisons();
     }
 
     @Override
     public int getThreads() {
-        return getConfiguration().getInt(ConfigurationLabels.Setup.THREADS, DEFAULT_THREADS);
+        return getDelegate().getThreads();
     }
 
     @Override
     public String getConsoleLog() {
-        return getConfiguration().getString(ConfigurationLabels.Setup.CONSOLE_LOG, DEFAULT_CONSOLE_LOG_LEVEL);
+        return getDelegate().getConsoleLog();
     }
 
     @Override
-    public String getFileLog() {
-        return getConfiguration().getString(ConfigurationLabels.Setup.FILE_LOG, DEFAULT_FILE_LOG_LEVEL);
+       public String getFileLog() {
+        return getDelegate().getFileLog();
     }
 
     @Override
     public String getOutputFolder() {
-        return getConfiguration().getString(ConfigurationLabels.Setup.OUTPUT_FOLDER, DEFAULT_OUTPUT_FOLDER);
+        return getDelegate().getOutputFolder();
     }
 
     @Override
     public Boolean isUseScanClassPath() {
-        return getConfiguration().getBoolean(ConfigurationLabels.Setup.SCAN_CLASSPATH, DEFAULT_SCAN_CLASSPATH);
+        return getDelegate().isUseScanClassPath();
     }
 
     @Override
@@ -147,7 +138,7 @@ public final class TaijituConfigImpl implements TaijituConfig, ComparisonConfig,
         if (getParent() != null) {
             parentEqualityConfigs = getParent().getEqualityConfigs();
         } else {
-            parentEqualityConfigs= List.of(DEFAULT_EQUALITY_CONFIG);
+            parentEqualityConfigs = List.of(DEFAULT_EQUALITY_CONFIG);
         }
         return parentEqualityConfigs;
     }
@@ -247,5 +238,9 @@ public final class TaijituConfigImpl implements TaijituConfig, ComparisonConfig,
     public String getType() {
         String statement = getConfiguration().getString(ConfigurationLabels.Comparison.SOURCE_TYPE);
         return statement != null ? statement : getParent() != null ? getParent().getType() : null;
+    }
+
+    public TaijituConfigNode getDelegate() {
+        return delegate;
     }
 }

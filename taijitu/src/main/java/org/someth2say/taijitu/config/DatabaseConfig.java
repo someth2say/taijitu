@@ -1,9 +1,5 @@
 package org.someth2say.taijitu.config;
 
-import java.util.Properties;
+import org.someth2say.taijitu.config.node.DatabaseConfigNode;
 
-public interface DatabaseConfig {
-
-	Properties getDatabaseProperties();
-
-}
+public interface DatabaseConfig extends DatabaseConfigNode { }

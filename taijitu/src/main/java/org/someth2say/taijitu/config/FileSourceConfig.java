@@ -1,6 +1,7 @@
 package org.someth2say.taijitu.config;
 
-public interface FileSourceConfig extends SourceConfig {
+import org.someth2say.taijitu.config.node.FileSourceConfigNode;
 
-    String getPath();
+public interface FileSourceConfig extends FileSourceConfigNode {
+
 }

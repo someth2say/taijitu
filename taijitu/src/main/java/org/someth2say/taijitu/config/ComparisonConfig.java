@@ -1,15 +1,6 @@
 package org.someth2say.taijitu.config;
 
-import java.util.List;
-//TODO: Forcing here to LIST all kind of Source configs is awfull!!!
-public interface ComparisonConfig extends QuerySourceConfig, FileSourceConfig {
-    StrategyConfig getStrategyConfig();
+import org.someth2say.taijitu.config.node.ComparisonConfigNode;
 
-    PluginConfig[] getComparisonPluginConfigs();
-
-    String getMatchingStrategyName();
-
-    List<EqualityConfig> getEqualityConfigs();
-
-    List<SourceConfig> getSourceConfigs();
+public interface ComparisonConfig extends ComparisonConfigNode, QuerySourceConfig, FileSourceConfig {
 }

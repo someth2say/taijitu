@@ -1,16 +1,8 @@
 package org.someth2say.taijitu.config;
 
-public interface TaijituConfig extends ComparisonConfig {
-	ComparisonConfig[] getComparisons();
+import org.someth2say.taijitu.config.node.TaijituConfigNode;
 
-	int getThreads();
+public interface TaijituConfig extends TaijituConfigNode, ComparisonConfig {
 
-	String getConsoleLog();
-
-	String getFileLog();
-
-	String getOutputFolder();
-
-	Boolean isUseScanClassPath();
 
 }

@@ -1,6 +1,5 @@
 package org.someth2say.taijitu.config;
 
-public interface PluginConfig {
-	
-	public String getName();
-}
+import org.someth2say.taijitu.config.node.PluginConfigNode;
+
+public interface PluginConfig extends PluginConfigNode { }

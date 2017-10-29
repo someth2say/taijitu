@@ -4,7 +4,6 @@ import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.config.DefaultConfig;
 import org.someth2say.taijitu.config.EqualityConfig;
-import org.someth2say.taijitu.config.NamedConfig;
 
 public class EqualityConfigImpl extends NamedConfig implements EqualityConfig {
 

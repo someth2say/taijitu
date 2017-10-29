@@ -28,9 +28,16 @@ public class ComparisonConfigImpl extends NamedConfig implements ComparisonConfi
     private StrategyConfig strategyConfig = null;
 
     //@Override
-    public StrategyConfig getMemoizedStrategyConfig() {
+    public StrategyConfig getStrategyConfig() {
         if (strategyConfig == null) {
-            strategyConfig = getStrategyConfig();
+            StrategyConfig result;
+            try {
+                result = getDelegatedStrategyConfig();
+            } catch (IllegalArgumentException | ConfigurationRuntimeException e) {
+                //No Strategy defined (or many)
+                result = getParent() != null ? getParent().getStrategyConfig() : DEFAULT_STRATEGY_CONFIG;
+            }
+            strategyConfig = result;
         }
         return strategyConfig;
     }
@@ -38,9 +45,11 @@ public class ComparisonConfigImpl extends NamedConfig implements ComparisonConfi
     /*** SOURCES ***/
     private List<SourceConfig> sourceConfigCache = null;
     //@Override
-    public List<SourceConfig> getMemoizedSourceConfigs() {
+    public List<SourceConfig> getSourceConfigs() {
         if (sourceConfigCache == null) {
-            sourceConfigCache = getSourceConfigs();
+            List<SourceConfig> localSourceConfigs = getDelegatedSourceConfigs();
+            if (getParent() != null) localSourceConfigs.addAll(getParent().getSourceConfigs());
+            sourceConfigCache = localSourceConfigs;
         }
         return sourceConfigCache;
     }
@@ -87,16 +96,6 @@ public class ComparisonConfigImpl extends NamedConfig implements ComparisonConfi
         return parentEqualityConfigs;
     }
 
-    @Override
-    public StrategyConfig getStrategyConfig() {
-        try {
-            return getDelegatedStrategyConfig();
-        } catch (IllegalArgumentException | ConfigurationRuntimeException e) {
-            //No Strategy defined (or many)
-            return getParent() != null ? getParent().getStrategyConfig() : DEFAULT_STRATEGY_CONFIG;
-        }
-    }
-
     public StrategyConfig getDelegatedStrategyConfig() {
         ImmutableHierarchicalConfiguration strategyConfiguration = getConfiguration().immutableConfigurationAt(ConfigurationLabels.Comparison.STRATEGY);
         return new StrategyConfigImpl(strategyConfiguration);
@@ -111,13 +110,6 @@ public class ComparisonConfigImpl extends NamedConfig implements ComparisonConfi
 
     public String getDelegatedString() {
         return getConfiguration().getString(ConfigurationLabels.Setup.MATCHING_STRATEGY);
-    }
-
-    @Override
-    public List<SourceConfig> getSourceConfigs() {
-        List<SourceConfig> localSourceConfigs = getDelegatedSourceConfigs();
-        if (getParent() != null) localSourceConfigs.addAll(getParent().getSourceConfigs());
-        return localSourceConfigs;
     }
 
     public List<SourceConfig> getDelegatedSourceConfigs() {

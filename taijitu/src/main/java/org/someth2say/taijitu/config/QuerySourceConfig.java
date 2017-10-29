@@ -1,13 +1,7 @@
 package org.someth2say.taijitu.config;
 
-// TODO: QuerySourceConfigNode is just a subtype of SourceConfigNode. Should find a way to discriminate
-public interface QuerySourceConfig extends SourceConfig {
+import org.someth2say.taijitu.config.node.QuerySourceConfigNode;
 
-    String getStatement();
-    
-    int getFetchSize();
-    
-    Object[] getQueryParameters();
+public interface QuerySourceConfig extends QuerySourceConfigNode, SourceConfig {
 
-    DatabaseConfig getDatabaseConfig();
 }

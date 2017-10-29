@@ -1,7 +1,8 @@
-package org.someth2say.taijitu.config;
+package org.someth2say.taijitu.config.impl;
 
 import org.someth2say.taijitu.util.Named;
 
+@Deprecated
 public abstract class NamedConfig implements Named {
     public final String name;
 
