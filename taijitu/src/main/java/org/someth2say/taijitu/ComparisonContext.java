@@ -2,9 +2,7 @@ package org.someth2say.taijitu;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.config.ComparisonConfig;
-import org.someth2say.taijitu.config.EqualityConfig;
-import org.someth2say.taijitu.config.SourceConfig;
+import org.someth2say.taijitu.config.delegating.EqualityConfigIface;
 import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.tuple.FieldDescription;
 
@@ -17,17 +15,17 @@ import java.util.*;
 public class ComparisonContext {
     private static final Logger logger = Logger.getLogger(ComparisonContext.class);
 
-    private final ComparisonConfig comparisonConfig;
+    private final ComparisonConfigIface comparisonConfigIface;
 
     //TODO: This hurts! should be final...
     private List<FieldDescription> canonicalFields;
     private List<FieldDescription> canonicalKeys;
-    private List<EqualityConfig> equalityConfigs;
+    private List<EqualityConfigIface> equalityConfigIfaces;
 
     private Map<String, List<FieldDescription>> providedFieldsMap = new HashMap<>();
 
-    public ComparisonContext(final ComparisonConfig comparisonConfig) {
-        this.comparisonConfig = comparisonConfig;
+    public ComparisonContext(final ComparisonConfigIface comparisonConfigIface) {
+        this.comparisonConfigIface = comparisonConfigIface;
     }
 
     public List<FieldDescription> getProvidedFields(String name) {
@@ -35,14 +33,14 @@ public class ComparisonContext {
     }
 
 
-    boolean registerFields(final List<FieldDescription> providedFields, final SourceConfig querySourceConfig, final FieldMatcher fieldMatcher) {
+    boolean registerFields(final List<FieldDescription> providedFields, final SourceConfigIface<SourceConfigIface> querySourceConfigIface, final FieldMatcher fieldMatcher) {
         if (providedFields == null) {
             return false;
         }
 
-        providedFieldsMap.put(querySourceConfig.getName(), providedFields);
+        providedFieldsMap.put(querySourceConfigIface.getName(), providedFields);
 
-        List<FieldDescription> providedKeyFields = getKeyFieldsFromConfig(querySourceConfig, providedFields);
+        List<FieldDescription> providedKeyFields = getKeyFieldsFromConfig(querySourceConfigIface, providedFields);
         if (providedKeyFields != null) {
             if (canonicalFields == null) {
                 // Have no canonical fields -> First source, interpreted as canonical.
@@ -54,27 +52,27 @@ public class ComparisonContext {
                 // Already have canonical fields, so should shrink
                 if (shrinkCanonicalFieldsToProvided(fieldMatcher, providedFields)) {
                     rebuildIndexes();
-                    //TODO: Maybe equalityConfigs can be shrink with fields...
+                    //TODO: Maybe equalityConfigIfaces can be shrink with fields...
                     updateEqualityConfigs();
                 }
             }
             return true;
         } else {
             // Null provided key fields means that some key field have not been provided.
-            logger.error("Not all key fields have been provided in " + querySourceConfig.getName() + " Provided: " + StringUtils.join(providedFields, ",") + " Keys: " + StringUtils.join(querySourceConfig.getKeyFields(), ","));
+            logger.error("Not all key fields have been provided in " + querySourceConfigIface.getName() + " Provided: " + StringUtils.join(providedFields, ",") + " Keys: " + StringUtils.join(querySourceConfigIface.getKeyFields(), ","));
             return false;
         }
     }
 
-    private List<FieldDescription> getKeyFieldsFromConfig(SourceConfig querySourceConfig, List<FieldDescription> providedFields) {
-        List<String> configKeyFields = querySourceConfig.getKeyFields();
+    private List<FieldDescription> getKeyFieldsFromConfig(SourceConfigIface<SourceConfigIface> querySourceConfigIface, List<FieldDescription> providedFields) {
+        List<String> configKeyFields = querySourceConfigIface.getKeyFields();
         List<FieldDescription> result = new ArrayList<>(configKeyFields.size());
         for (String configKeyField : configKeyFields) {
             Optional<FieldDescription> keyField = providedFields.stream().filter(fieldDescription -> fieldDescription.getName().equals(configKeyField)).findFirst();
             if (keyField.isPresent()) {
                 result.add(keyField.get());
             } else {
-                logger.error("Key field " + configKeyField + " is not  provided in " + querySourceConfig.getName() + " Provided: " + StringUtils.join(providedFields, ","));
+                logger.error("Key field " + configKeyField + " is not  provided in " + querySourceConfigIface.getName() + " Provided: " + StringUtils.join(providedFields, ","));
                 return null;
             }
         }
@@ -82,31 +80,31 @@ public class ComparisonContext {
     }
 
     private void updateEqualityConfigs() {
-        equalityConfigs = new ArrayList<>(canonicalFields.size());
+        equalityConfigIfaces = new ArrayList<>(canonicalFields.size());
         for (FieldDescription fieldDescription : canonicalFields) {
-            equalityConfigs.add(getEqualityConfigFor(fieldDescription.getClazz(), fieldDescription.getName(), comparisonConfig.getEqualityConfigs()));
+            equalityConfigIfaces.add(getEqualityConfigFor(fieldDescription.getClazz(), fieldDescription.getName(), comparisonConfigIface.getEqualityConfigs()));
         }
     }
 
-    private EqualityConfig getEqualityConfigFor(final String fieldClass, final String fieldName, final List<EqualityConfig> equalityConfigs) {
+    private EqualityConfigIface getEqualityConfigFor(final String fieldClass, final String fieldName, final List<EqualityConfigIface> equalityConfigIfaces) {
 
-        Optional<EqualityConfig> perfectMatches = equalityConfigs.stream().filter(eq -> fieldNameMatch(fieldName, eq) && fieldClassMatch(fieldClass, eq)).findFirst();
-        Optional<EqualityConfig> nameMatches = equalityConfigs.stream().filter(eq -> fieldNameMatch(fieldName, eq) && eq.getFieldClass() == null).findFirst();
-        Optional<EqualityConfig> classMathes = equalityConfigs.stream().filter(eq -> eq.getFieldName() == null && fieldClassMatch(fieldClass, eq)).findFirst();
-        Optional<EqualityConfig> allMathes = equalityConfigs.stream().filter(eq -> eq.getFieldName() == null && eq.getFieldClass() == null).findFirst();
+        Optional<EqualityConfigIface> perfectMatches = equalityConfigIfaces.stream().filter(eq -> fieldNameMatch(fieldName, eq) && fieldClassMatch(fieldClass, eq)).findFirst();
+        Optional<EqualityConfigIface> nameMatches = equalityConfigIfaces.stream().filter(eq -> fieldNameMatch(fieldName, eq) && eq.getFieldClass() == null).findFirst();
+        Optional<EqualityConfigIface> classMathes = equalityConfigIfaces.stream().filter(eq -> eq.getFieldName() == null && fieldClassMatch(fieldClass, eq)).findFirst();
+        Optional<EqualityConfigIface> allMathes = equalityConfigIfaces.stream().filter(eq -> eq.getFieldName() == null && eq.getFieldClass() == null).findFirst();
 
         return perfectMatches.orElse(nameMatches.orElse(classMathes.orElse(allMathes.orElse(null))));
 
     }
 
-    private boolean fieldNameMatch(String fieldName, EqualityConfig eq) {
+    private boolean fieldNameMatch(String fieldName, EqualityConfigIface eq) {
         return eq.getFieldName() != null && fieldName.equals(eq.getFieldName());
     }
 
-    private boolean fieldClassMatch(String fieldClassName, EqualityConfig eq) {
+    private boolean fieldClassMatch(String fieldClassName, EqualityConfigIface eq) {
         String configClassName = eq.getFieldClass();
         if (configClassName == null) return false;
-        if (eq.fieldClassStrict()) {
+        if (eq.isFieldClassStrict()) {
             return fieldClassName.equals(configClassName);
         } else {
             try {
@@ -166,11 +164,11 @@ public class ComparisonContext {
         return canonicalKeys;
     }
 
-    public ComparisonConfig getComparisonConfig() {
-        return comparisonConfig;
+    public ComparisonConfigIface getComparisonConfigIface() {
+        return comparisonConfigIface;
     }
 
-    public List<EqualityConfig> getEqualityConfigs() {
-        return equalityConfigs;
+    public List<EqualityConfigIface> getEqualityConfigIfaces() {
+        return equalityConfigIfaces;
     }
 }

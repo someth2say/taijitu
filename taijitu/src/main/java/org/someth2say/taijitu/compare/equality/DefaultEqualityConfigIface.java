@@ -1,8 +1,8 @@
 package org.someth2say.taijitu.compare.equality;
 
-import org.someth2say.taijitu.config.EqualityConfig;
+import org.someth2say.taijitu.config.delegating.EqualityConfigIface;
 
-public interface DefaultEqualityConfig extends EqualityConfig {
+public interface DefaultEqualityConfigIface extends EqualityConfigIface {
     @Override
     default String getFieldName() {
         return null;
@@ -14,7 +14,7 @@ public interface DefaultEqualityConfig extends EqualityConfig {
     }
 
     @Override
-    default boolean fieldClassStrict() {
+    default Boolean isFieldClassStrict() {
         return false;
     }
 

@@ -1,14 +1,14 @@
 package org.someth2say.taijitu.config.apache;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
-import org.someth2say.taijitu.config.DatabaseConfig;
+import org.someth2say.taijitu.config.delegate.DatabaseConfigDelegate;
 
 import java.util.Iterator;
 import java.util.Properties;
 
-public class ApacheDatabaseConfigNode extends ApacheBasedConfigNode implements DatabaseConfig {
-    public ApacheDatabaseConfigNode(ImmutableHierarchicalConfiguration configuration, ApacheQuerySourceConfigNode parent) {
-        super(configuration,parent);
+public class ApacheDatabaseConfig extends ApacheBasedConfig implements DatabaseConfigDelegate {
+    public ApacheDatabaseConfig(ImmutableHierarchicalConfiguration configuration) {
+        super(configuration);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.compare.equality;
 
-import org.someth2say.taijitu.config.EqualityConfig;
+import org.someth2say.taijitu.config.delegating.EqualityConfigIface;
 
 public class CaseInsensitiveEqualityStrategy implements EqualityStrategy<String> {
 
@@ -21,8 +21,8 @@ public class CaseInsensitiveEqualityStrategy implements EqualityStrategy<String>
         return object1.toUpperCase().compareTo(object2.toUpperCase());
     }
 
-    public static EqualityConfig defaultConfig() {
-        return (DefaultEqualityConfig) () -> CaseInsensitiveEqualityStrategy.NAME;
+    public static EqualityConfigIface defaultConfig() {
+        return (DefaultEqualityConfigIface) () -> CaseInsensitiveEqualityStrategy.NAME;
     }
 
     @Override

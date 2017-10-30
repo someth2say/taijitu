@@ -5,7 +5,6 @@ import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.tuple.ComparableTuple;
-import org.someth2say.taijitu.config.PluginConfig;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.tuple.FieldDescription;
 import org.someth2say.taijitu.util.Pair;
@@ -23,9 +22,9 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
     private static final String TARGET_LABEL = "TARGET";
     private static final Logger logger = Logger.getLogger(AbstractWriterPlugin.class);
     private File outputFolder;
-    private WritterPluginConfig config;
+    private WritterPluginConfigIface config;
 
-    private String[][] printDifferent(final ComparisonResult comparisonResult, final ComparisonContext taijituData, final WritterPluginConfig config) {
+    private String[][] printDifferent(final ComparisonResult comparisonResult, final ComparisonContext taijituData, final WritterPluginConfigIface config) {
 //        this.config = config;
 //        final Collection<Pair<ComparableTuple, ComparableTuple>> different = comparisonResult.getDifferent();
 //        final String[][] result = new String[different.size() * 2 + 1][];
@@ -179,12 +178,12 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //    }
 
     @Override
-    public void start(final PluginConfig config) throws TaijituException {
+    public void start(final PluginConfigIface config) throws TaijituException {
         // Do nothing
     }
 
     @Override
-    public void end(final PluginConfig config) throws TaijituException {
+    public void end(final PluginConfigIface config) throws TaijituException {
         // Do nothing
     }
 

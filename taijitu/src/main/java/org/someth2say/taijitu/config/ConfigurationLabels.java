@@ -34,6 +34,7 @@ public final class ConfigurationLabels {
         public static final String FILE_PATH = "file";
         public static final String SOURCE_TYPE = "type";
         public static final String SOURCES = "sources";
+        public static final String SOURCE_PROPERTIES = "properties";
 
         private Comparison() {
         }

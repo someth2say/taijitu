@@ -2,7 +2,6 @@ package org.someth2say.taijitu.plugins.reporting;
 
 import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.TaijituException;
-import org.someth2say.taijitu.config.PluginConfig;
 
 /**
  * @author Jordi Sola
@@ -20,12 +19,12 @@ public class CSVWriterPlugin extends AbstractWriterPlugin {
     }
 
     @Override
-    public void preComparison(ComparisonContext taijituData, PluginConfig comparisonConfig) throws TaijituException {
+    public void preComparison(ComparisonContext taijituData, PluginConfigIface comparisonConfig) throws TaijituException {
 
     }
 
     @Override
-    public void postComparison(ComparisonContext taijituData, PluginConfig comparisonConfig) throws TaijituException {
+    public void postComparison(ComparisonContext taijituData, PluginConfigIface comparisonConfig) throws TaijituException {
 
     }
 }

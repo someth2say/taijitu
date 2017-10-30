@@ -15,8 +15,8 @@ import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.equality.ValueThresholdEqualityStrategy;
 import org.someth2say.taijitu.compare.equality.TimestampThresholdEqualityStrategy;
 import org.someth2say.taijitu.config.ConfigurationLabels;
-import org.someth2say.taijitu.config.DatabaseConfig;
-import org.someth2say.taijitu.config.impl.DatabaseConfigImpl;
+import org.someth2say.taijitu.config.delegating.DatabaseConfigIface;
+import org.someth2say.taijitu.config.apache.ApacheDatabaseConfig;
 import org.someth2say.taijitu.database.ConnectionManager;
 import org.someth2say.taijitu.source.ResultSetSource;
 import org.someth2say.taijitu.strategy.mapping.MappingStrategy;
@@ -62,15 +62,15 @@ public class TaijituTest {
     }
 
     private static Connection getConnection(Properties databaseProps) throws SQLException, ConfigurationException {
-        DatabaseConfig databaseConfig = getDatabaseConfig(databaseProps);
-        return ConnectionManager.getConnection(databaseConfig);
+        DatabaseConfigIface databaseConfigIface = getDatabaseConfig(databaseProps);
+        return ConnectionManager.getConnection(databaseConfigIface);
     }
 
-    private static DatabaseConfig getDatabaseConfig(Properties databaseProps) throws ConfigurationException {
+    private static DatabaseConfigIface getDatabaseConfig(Properties databaseProps) throws ConfigurationException {
         final PropertiesConfiguration configuration = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).getConfiguration();
         putAll(configuration, databaseProps, "");
         ImmutableHierarchicalConfiguration immutableHierarchicalConfiguration = ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(configuration));
-        return new DatabaseConfigImpl(immutableHierarchicalConfiguration);
+        return new ApacheDatabaseConfig(immutableHierarchicalConfiguration);
     }
 
     @After

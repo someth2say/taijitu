@@ -1,8 +1,8 @@
 package org.someth2say.taijitu.plugins.reporting;
 
-import org.someth2say.taijitu.config.PluginConfig;
+import org.someth2say.taijitu.config.delegate.PluginConfigDelegate;
 
-public class WritterPluginConfig implements PluginConfig {
+public class WritterPluginConfigIface implements PluginConfigDelegate {
     public static final String NAME = "writter";
 
     @Override

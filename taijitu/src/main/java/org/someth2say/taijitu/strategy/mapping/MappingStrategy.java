@@ -5,9 +5,6 @@ import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.ComparisonResult.QueryAndTuple;
 import org.someth2say.taijitu.compare.SynchronizedComparisonResult;
-import org.someth2say.taijitu.config.ComparisonConfig;
-import org.someth2say.taijitu.config.SourceConfig;
-import org.someth2say.taijitu.config.StrategyConfig;
 import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.strategy.AbstractComparisonStrategy;
 import org.someth2say.taijitu.strategy.ComparisonStrategy;
@@ -34,10 +31,10 @@ public class MappingStrategy extends AbstractComparisonStrategy implements Compa
     }
 
     @Override
-    public ComparisonResult runComparison(Source source, Source target, ComparisonContext comparisonContext, ComparisonConfig comparisonConfig) {
-        final String comparisonName = comparisonConfig.getName();
+    public ComparisonResult runComparison(Source source, Source target, ComparisonContext comparisonContext, ComparisonConfigIface comparisonConfigIface) {
+        final String comparisonName = comparisonConfigIface.getName();
         logger.debug("Start mapping strategy comparison for " + comparisonName);
-        SynchronizedComparisonResult result = new SynchronizedComparisonResult(comparisonConfig);
+        SynchronizedComparisonResult result = new SynchronizedComparisonResult(comparisonConfigIface);
 
         //1.- Build/run mapping tasks
         //TODO: Another option is running queries/pages alternating, so we can "restrict" memory usage, but only using a single thread
@@ -73,7 +70,7 @@ public class MappingStrategy extends AbstractComparisonStrategy implements Compa
         }
     }
 
-    public static StrategyConfig defaultConfig() {
+    public static StrategyConfigIface defaultConfig() {
         return () -> MappingStrategy.NAME;
     }
 
@@ -81,20 +78,20 @@ public class MappingStrategy extends AbstractComparisonStrategy implements Compa
         private final Iterator<ComparableTuple> tupleIterator;
         private final Map<ComparableTuple, ComparisonResult.QueryAndTuple> sharedSet;
         private final SynchronizedComparisonResult result;
-        private final SourceConfig sourceConfig;
+        private final SourceConfigIface<SourceConfigIface> sourceConfigIface;
 
-        private TupleMapper(final Iterator<ComparableTuple> tupleIterator, final Map<ComparableTuple, QueryAndTuple> sharedMap, final SynchronizedComparisonResult result, SourceConfig sourceConfig) {
+        private TupleMapper(final Iterator<ComparableTuple> tupleIterator, final Map<ComparableTuple, QueryAndTuple> sharedMap, final SynchronizedComparisonResult result, SourceConfigIface<SourceConfigIface> sourceConfigIface) {
             this.tupleIterator = tupleIterator;
             this.sharedSet = sharedMap;
             this.result = result;
-            this.sourceConfig = sourceConfig;
+            this.sourceConfigIface = sourceConfigIface;
         }
 
         @Override
         public void run() {
             for (ComparableTuple thisRecord = getNextRecord(tupleIterator); thisRecord != null; thisRecord = getNextRecord(tupleIterator)) {
 
-                QueryAndTuple thisQueryAndTuple = new QueryAndTuple(sourceConfig, thisRecord);
+                QueryAndTuple thisQueryAndTuple = new QueryAndTuple(sourceConfigIface, thisRecord);
                 final QueryAndTuple otherQueryAndTuple = sharedSet.putIfAbsent(thisRecord, thisQueryAndTuple);
                 if (otherQueryAndTuple != null) {
                     //we have a key match ...

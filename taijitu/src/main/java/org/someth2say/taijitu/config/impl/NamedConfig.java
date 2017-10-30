@@ -6,8 +6,8 @@ import org.someth2say.taijitu.util.Named;
 public abstract class NamedConfig implements Named {
     public final String name;
 
-    protected NamedConfig(String name) {
-        this.name = name;
+    NamedConfig(Named delegate) {
+        this.name = delegate.getName();
     }
 
     @Override

@@ -1,6 +1,5 @@
 package org.someth2say.taijitu.source;
 
-import org.someth2say.taijitu.config.SourceConfig;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.tuple.FieldDescription;
 import org.someth2say.taijitu.util.Named;
@@ -15,5 +14,5 @@ public interface Source extends Named {
 
     Iterator<ComparableTuple> iterator();
 
-    SourceConfig getConfig();
+    SourceConfigIface<SourceConfigIface> getConfig();
 }

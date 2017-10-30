@@ -4,11 +4,8 @@ import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.SimpleComparisonResult;
-import org.someth2say.taijitu.config.SourceConfig;
 import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.tuple.ComparableTuple;
-import org.someth2say.taijitu.config.ComparisonConfig;
-import org.someth2say.taijitu.config.StrategyConfig;
 import org.someth2say.taijitu.strategy.AbstractComparisonStrategy;
 import org.someth2say.taijitu.strategy.ComparisonStrategy;
 
@@ -27,10 +24,10 @@ public class SortedStrategy extends AbstractComparisonStrategy implements Compar
     }
 
     @Override
-    public ComparisonResult runComparison(Source source, Source target, ComparisonContext comparisonContext, ComparisonConfig comparisonConfig) {
-        final String comparisonName = comparisonConfig.getName();
+    public ComparisonResult runComparison(Source source, Source target, ComparisonContext comparisonContext, ComparisonConfigIface comparisonConfigIface) {
+        final String comparisonName = comparisonConfigIface.getName();
         logger.debug("Start sorted strategy comparison for " + comparisonName);
-        SimpleComparisonResult result = new SimpleComparisonResult(comparisonConfig);
+        SimpleComparisonResult result = new SimpleComparisonResult(comparisonConfigIface);
 
 
         Iterator<ComparableTuple> sourceIterator = source.iterator();
@@ -38,19 +35,19 @@ public class SortedStrategy extends AbstractComparisonStrategy implements Compar
         ComparableTuple sourceRecord = getNextRecord(sourceIterator);
         ComparableTuple targetRecord = getNextRecord(targetIterator);
 
-        final SourceConfig targetQuerySourceConfig = target.getConfig();
-        final SourceConfig sourceQuerySourceConfig = source.getConfig();
+        final SourceConfigIface<SourceConfigIface> targetQuerySourceConfigIface = target.getConfig();
+        final SourceConfigIface<SourceConfigIface> sourceQuerySourceConfigIface = source.getConfig();
 
         while (sourceRecord != null && targetRecord != null) {
 
             int keyComparison = sourceRecord.compareKeysTo(targetRecord);
             if (keyComparison > 0) {
                 // Source is after target -> target record is not in source stream
-                result.addDisjoint(new ComparisonResult.QueryAndTuple(targetQuerySourceConfig, targetRecord));
+                result.addDisjoint(new ComparisonResult.QueryAndTuple(targetQuerySourceConfigIface, targetRecord));
                 targetRecord = getNextRecord(targetIterator);
             } else if (keyComparison < 0) {
                 // Source is before target -> source record is not in target stream
-                result.addDisjoint(new ComparisonResult.QueryAndTuple(sourceQuerySourceConfig, sourceRecord));
+                result.addDisjoint(new ComparisonResult.QueryAndTuple(sourceQuerySourceConfigIface, sourceRecord));
                 sourceRecord = getNextRecord(sourceIterator);
             } else {
                 // same Keys
@@ -58,8 +55,8 @@ public class SortedStrategy extends AbstractComparisonStrategy implements Compar
                 if (!sourceRecord.equalsNonKeys(targetRecord)) {
                     // Records are different
                     result.addDifference(
-                            new ComparisonResult.QueryAndTuple(sourceQuerySourceConfig, sourceRecord),
-                            new ComparisonResult.QueryAndTuple(targetQuerySourceConfig, targetRecord));
+                            new ComparisonResult.QueryAndTuple(sourceQuerySourceConfigIface, sourceRecord),
+                            new ComparisonResult.QueryAndTuple(targetQuerySourceConfigIface, targetRecord));
                 }
                 sourceRecord = getNextRecord(sourceIterator);
                 targetRecord = getNextRecord(targetIterator);
@@ -68,17 +65,17 @@ public class SortedStrategy extends AbstractComparisonStrategy implements Compar
 
         //At least, one stream is fully consumed, so add every other stream's element to "missing"
         while (sourceIterator.hasNext()) {
-            result.getDisjoint().add(new ComparisonResult.QueryAndTuple(sourceQuerySourceConfig, sourceIterator.next()));
+            result.getDisjoint().add(new ComparisonResult.QueryAndTuple(sourceQuerySourceConfigIface, sourceIterator.next()));
         }
         while (targetIterator.hasNext()) {
-            result.getDisjoint().add(new ComparisonResult.QueryAndTuple(targetQuerySourceConfig, targetIterator.next()));
+            result.getDisjoint().add(new ComparisonResult.QueryAndTuple(targetQuerySourceConfigIface, targetIterator.next()));
         }
 
         return result;
     }
 
 
-    public static StrategyConfig defaultConfig() {
+    public static StrategyConfigIface defaultConfig() {
         return () -> SortedStrategy.NAME;
     }
 }

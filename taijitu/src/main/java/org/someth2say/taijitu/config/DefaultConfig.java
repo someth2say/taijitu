@@ -3,6 +3,7 @@ package org.someth2say.taijitu.config;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.someth2say.taijitu.compare.equality.ToStringEqualityStrategy;
+import org.someth2say.taijitu.config.delegating.EqualityConfigIface;
 import org.someth2say.taijitu.matcher.NamingFieldMatcher;
 import org.someth2say.taijitu.plugins.logging.TimeLoggingPlugin;
 import org.someth2say.taijitu.strategy.mapping.MappingStrategy;
@@ -16,9 +17,9 @@ public class DefaultConfig {
     public static final int DEFAULT_THREADS = 1;
     public static final boolean DEFAULT_SCAN_CLASSPATH = false;
 
-    public static final StrategyConfig DEFAULT_STRATEGY_CONFIG = MappingStrategy.defaultConfig();
-    public static final EqualityConfig DEFAULT_EQUALITY_CONFIG = ToStringEqualityStrategy.defaultConfig();
-    public static final PluginConfig[] DEFAULT_PLUGINS_CONFIG = {TimeLoggingPlugin.defaultConfig()};
+    public static final StrategyConfigIface DEFAULT_STRATEGY_CONFIG = MappingStrategy.defaultConfig();
+    public static final EqualityConfigIface DEFAULT_EQUALITY_CONFIG = ToStringEqualityStrategy.defaultConfig();
+    public static final PluginConfigIface[] DEFAULT_PLUGINS_CONFIG = {TimeLoggingPlugin.defaultConfig()};
 
     public static final String DEFAULT_MATCHING_STRATEGY_NAME = NamingFieldMatcher.NAME;
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("yyyyMMdd");

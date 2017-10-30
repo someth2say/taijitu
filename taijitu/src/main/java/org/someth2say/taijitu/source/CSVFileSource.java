@@ -10,9 +10,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.someth2say.taijitu.ComparisonContext;
-import org.someth2say.taijitu.config.ComparisonConfig;
-import org.someth2say.taijitu.config.FileSourceConfig;
-import org.someth2say.taijitu.config.SourceConfig;
 import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.registry.MatcherRegistry;
 import org.someth2say.taijitu.tuple.ComparableTuple;
@@ -23,21 +20,21 @@ public class CSVFileSource implements Source {
     public static final String NAME = "csv";
 
     //TODO: Considering adding an the last exception raised, so we can check the status.
-    private final ComparisonConfig comparisonConfig;
+    private final ComparisonConfigIface comparisonConfigIface;
     private final ComparisonContext context;
 
     @Override
-    public SourceConfig getConfig() {
+    public SourceConfigIface<SourceConfigIface> getConfig() {
         return fileConfig;
     }
 
-    private final FileSourceConfig fileConfig;
+    private final FileSourceConfigIface fileConfig;
     private CSVTupleBuilder builder;
     private final Stream<String> lineStream;
 
-    public CSVFileSource(final FileSourceConfig fileConfig, final ComparisonConfig comparisonConfig, final ComparisonContext context) throws IOException {
+    public CSVFileSource(final FileSourceConfigIface fileConfig, final ComparisonConfigIface comparisonConfigIface, final ComparisonContext context) throws IOException {
         this.fileConfig = fileConfig;
-        this.comparisonConfig = comparisonConfig;
+        this.comparisonConfigIface = comparisonConfigIface;
         this.context = context;
         this.lineStream = Files.lines(Paths.get(fileConfig.getPath()));
     }
@@ -67,7 +64,7 @@ public class CSVFileSource implements Source {
 
     private CSVTupleBuilder getTupleBuilder() {
         if (builder == null) {
-            final FieldMatcher matcher = MatcherRegistry.getMatcher(comparisonConfig.getMatchingStrategyName());
+            final FieldMatcher matcher = MatcherRegistry.getMatcher(comparisonConfigIface.getMatchingStrategyName());
             builder = new CSVTupleBuilder(matcher, context, fileConfig.getName());
         }
         return builder;

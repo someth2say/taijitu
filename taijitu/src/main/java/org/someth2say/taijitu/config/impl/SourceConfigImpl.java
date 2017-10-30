@@ -1,40 +1,27 @@
 package org.someth2say.taijitu.config.impl;
 
-import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
-import org.someth2say.taijitu.config.ConfigurationLabels;
-import org.someth2say.taijitu.config.SourceConfig;
+import org.someth2say.taijitu.config.delegate.SourceConfigDelegate;
 
 import java.util.List;
+import java.util.Properties;
 
-public abstract class SourceConfigImpl extends NamedConfig implements SourceConfig {
-
-    private final ImmutableHierarchicalConfiguration configuration;
-    private final SourceConfig parent;
-
-    public SourceConfigImpl(final ImmutableHierarchicalConfiguration configuration,
-                            final SourceConfig parent) {
-        super(configuration.getRootElementName());
-        this.configuration = configuration;
-        this.parent = parent;
+public class SourceConfigImpl<P extends org.someth2say.taijitu.config.delegating.DelegatingConfigIface & SourceConfigDelegate, D extends SourceConfigDelegate> extends DelegatingNamedConfigImpl<P, D> implements org.someth2say.taijitu.config.delegating.DelegatingConfigIface<D>,SourceConfigDelegate, org.someth2say.taijitu.config.delegating.DelegatingConfigIface<D> {
+    public SourceConfigImpl(D delegate) {
+        super(delegate);
     }
 
-    public ImmutableHierarchicalConfiguration getConfiguration() {
-        return configuration;
-    }
-
-    public SourceConfig getParent() {
-        return parent;
-    }
-
-    @Override
-    public List<String> getKeyFields() {
-        List<String> keys = getConfiguration().getList(String.class, ConfigurationLabels.Comparison.Fields.KEYS, null);
-        return keys != null ? keys : getParent() != null ? getParent().getKeyFields() : null;
-    }
-
-    @Override
     public String getType() {
-        String statement = getConfiguration().getString(ConfigurationLabels.Comparison.SOURCE_TYPE);
-        return statement != null ? statement : getParent() != null ? getParent().getType() : null;
+        return getDelegate().getType();
+    }
+
+    public List<String> getKeyFields() {
+        List<String> keyFields = getDelegate().getKeyFields();
+        return keyFields != null ? keyFields : getParent() != null ? getParent().getKeyFields() : null;
+    }
+
+    public Properties getSourceProperties(){
+        Properties sourceProperties = getDelegate().getSourceProperties();
+        return sourceProperties != null ? sourceProperties : getParent() != null ? getParent().getSourceProperties() : null;
+
     }
 }

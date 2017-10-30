@@ -1,7 +1,6 @@
 package org.someth2say.taijitu.registry;
 
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.config.PluginConfig;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.plugins.logging.TimeLoggingPlugin;
 import org.someth2say.taijitu.util.ClassScanUtils;
@@ -27,14 +26,14 @@ public class PluginRegistry {
 		return instances.values();
 	}
 
-	public static Map<PluginConfig, TaijituPlugin> getPlugins(PluginConfig[] pluginConfigs) {
-		Map<PluginConfig, TaijituPlugin> result = new HashMap<>(pluginConfigs.length);
-		for (PluginConfig pluginConfig : pluginConfigs) {
-			final TaijituPlugin pluginInstance = instances.get(pluginConfig.getName());
+	public static Map<PluginConfigIface, TaijituPlugin> getPlugins(PluginConfigIface[] pluginConfigIfaces) {
+		Map<PluginConfigIface, TaijituPlugin> result = new HashMap<>(pluginConfigIfaces.length);
+		for (PluginConfigIface pluginConfigIface : pluginConfigIfaces) {
+			final TaijituPlugin pluginInstance = instances.get(pluginConfigIface.getName());
 			if (pluginInstance == null) {
-				logger.warn("Plugin reference" + pluginConfig.getName() + " not available.");
+				logger.warn("Plugin reference" + pluginConfigIface.getName() + " not available.");
 			} else {
-				result.put(pluginConfig, pluginInstance);
+				result.put(pluginConfigIface, pluginInstance);
 			}
 		}
 		return result;

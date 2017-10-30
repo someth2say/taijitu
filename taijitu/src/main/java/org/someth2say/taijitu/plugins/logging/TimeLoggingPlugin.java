@@ -6,7 +6,6 @@ import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
 import org.joda.time.format.PeriodFormatter;
 import org.someth2say.taijitu.TaijituException;
-import org.someth2say.taijitu.config.PluginConfig;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.ComparisonContext;
 
@@ -29,25 +28,25 @@ public class TimeLoggingPlugin implements TaijituPlugin {
 
 
     @Override
-    public void preComparison(ComparisonContext taijituData, PluginConfig comparisonConfig) throws TaijituException {
+    public void preComparison(ComparisonContext taijituData, PluginConfigIface comparisonConfig) throws TaijituException {
         comparisonStart = System.currentTimeMillis();
     }
 
     @Override
-    public void postComparison(ComparisonContext taijituData, PluginConfig comparisonConfig) throws TaijituException {
+    public void postComparison(ComparisonContext taijituData, PluginConfigIface comparisonConfig) throws TaijituException {
         comparisonEnd = System.currentTimeMillis();
         logComparisonTimes(taijituData);
         comparisonCount++;
     }
 
     @Override
-    public void start(PluginConfig config) throws TaijituException {
+    public void start(PluginConfigIface config) throws TaijituException {
         start = System.currentTimeMillis();
 
     }
 
     @Override
-    public void end(PluginConfig config) throws TaijituException {
+    public void end(PluginConfigIface config) throws TaijituException {
         end = System.currentTimeMillis();
         logTotalTimes();
 
@@ -56,7 +55,7 @@ public class TimeLoggingPlugin implements TaijituPlugin {
     private void logComparisonTimes(ComparisonContext taijituData) {
         final PeriodFormatter formatter = ISOPeriodFormat.standard();
         final Period periodTotal = new Duration(comparisonStart, comparisonEnd).toPeriod();
-        logger.info("DONE comparison " + taijituData.getComparisonConfig().getName() + ":" + formatter.print(periodTotal));
+        logger.info("DONE comparison " + taijituData.getComparisonConfigIface().getName() + ":" + formatter.print(periodTotal));
     }
 
     private void logTotalTimes() {
@@ -65,7 +64,7 @@ public class TimeLoggingPlugin implements TaijituPlugin {
         logger.info("DONE " + comparisonCount + " comparisons:" + formatter.print(periodTotal));
     }
 
-    public static PluginConfig defaultConfig() {
+    public static PluginConfigIface defaultConfig() {
         return () -> TimeLoggingPlugin.NAME;
     }
 }

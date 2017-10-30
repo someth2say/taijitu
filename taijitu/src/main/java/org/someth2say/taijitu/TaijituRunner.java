@@ -3,9 +3,7 @@ package org.someth2say.taijitu;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.SimpleComparisonResult;
-import org.someth2say.taijitu.config.ComparisonConfig;
-import org.someth2say.taijitu.config.PluginConfig;
-import org.someth2say.taijitu.config.SourceConfig;
+import org.someth2say.taijitu.config.impl.ComparisonConfigImpl;
 import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.registry.ComparisonStrategyRegistry;
@@ -29,9 +27,9 @@ public class TaijituRunner implements Callable<ComparisonResult> {
 
     private static final Logger logger = Logger.getLogger(TaijituRunner.class);
 
-    private final ComparisonConfig config;
+    private final ComparisonConfigImpl config;
 
-    public TaijituRunner(final ComparisonConfig config) throws TaijituException {
+    public TaijituRunner(final ComparisonConfigImpl config) throws TaijituException {
         this.config = config;
     }
 
@@ -44,7 +42,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
     public ComparisonResult call() {
         ComparisonResult result = new SimpleComparisonResult(config);
         ComparisonContext context = new ComparisonContext(config);
-        Map<PluginConfig, TaijituPlugin> plugins = PluginRegistry.getPlugins(config.getComparisonPluginConfigs());
+        Map<PluginConfigIface, TaijituPlugin> plugins = PluginRegistry.getPlugins(config.getComparisonPluginConfigs());
 
         try {
 
@@ -62,40 +60,40 @@ public class TaijituRunner implements Callable<ComparisonResult> {
     }
 
     private void runPluginsPostComparison(final ComparisonContext comparison,
-                                          Map<PluginConfig, TaijituPlugin> plugins) throws TaijituException {
-        for (Entry<PluginConfig, TaijituPlugin> entry : plugins.entrySet()) {
+                                          Map<PluginConfigIface, TaijituPlugin> plugins) throws TaijituException {
+        for (Entry<PluginConfigIface, TaijituPlugin> entry : plugins.entrySet()) {
             entry.getValue().postComparison(comparison, entry.getKey());
         }
     }
 
     private void runPluginsPreComparison(final ComparisonContext comparison,
-                                         Map<PluginConfig, TaijituPlugin> plugins) throws TaijituException {
-        for (Entry<PluginConfig, TaijituPlugin> entry : plugins.entrySet()) {
+                                         Map<PluginConfigIface, TaijituPlugin> plugins) throws TaijituException {
+        for (Entry<PluginConfigIface, TaijituPlugin> entry : plugins.entrySet()) {
             entry.getValue().preComparison(comparison, entry.getKey());
         }
     }
 
-    private ComparisonResult runComparison(ComparisonContext context, ComparisonConfig comparisonConfig) {
+    private ComparisonResult runComparison(ComparisonContext context, ComparisonConfigImpl comparisonConfigIface) {
         // Show comparison description
-        final String strategyName = comparisonConfig.getStrategyConfig().getName();
-        logger.info("COMPARISON: " + comparisonConfig.getName() + "(strategy " + strategyName + ")");
+        final String strategyName = comparisonConfigIface.getStrategyConfig().getName();
+        logger.info("COMPARISON: " + comparisonConfigIface.getName() + "(strategy " + strategyName + ")");
         final ComparisonStrategy strategy = ComparisonStrategyRegistry.getStrategy(strategyName);
         if (strategy != null) {
-            return runComparisonWithStrategy(context, strategy, comparisonConfig);
+            return runComparisonWithStrategy(context, strategy, comparisonConfigIface);
         } else {
             logger.error("Unable to get comparison strategy " + strategyName);
         }
         return null;
     }
 
-    private ComparisonResult runComparisonWithStrategy(ComparisonContext context, ComparisonStrategy strategy, ComparisonConfig comparisonConfig) {
+    private ComparisonResult runComparisonWithStrategy(ComparisonContext context, ComparisonStrategy strategy, ComparisonConfigImpl comparisonConfigIface) {
         //Shall we use the same matcher for canonical source? No, we should use identity matcher....
         final FieldMatcher matcher = MatcherRegistry.getMatcher(config.getMatchingStrategyName());
         if (matcher != null) {
-            List<SourceConfig> sourceConfigs = comparisonConfig.getSourceConfigs();
-            List<Source> sources = sourceConfigs.stream().map(sourceConfig -> buildSource(sourceConfig, context, config)).collect(Collectors.toList());
+            List<SourceConfigIface<SourceConfigIface>> sourceConfigIfaces = comparisonConfigIface.getSourceConfigs();
+            List<Source> sources = sourceConfigIfaces.stream().map(sourceConfig -> buildSource(sourceConfig, context, config)).collect(Collectors.toList());
             if (!sources.contains(null)) {
-                return runComparisonForSources(context, strategy, comparisonConfig, matcher, sources);
+                return runComparisonForSources(context, strategy, comparisonConfigIface, matcher, sources);
             } else {
                 //Some source failed creation
                 return null;
@@ -106,7 +104,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         }
     }
 
-    private ComparisonResult runComparisonForSources(ComparisonContext context, ComparisonStrategy strategy, ComparisonConfig comparisonConfig, FieldMatcher matcher, List<Source> sources) {
+    private ComparisonResult runComparisonForSources(ComparisonContext context, ComparisonStrategy strategy, ComparisonConfigIface comparisonConfigIface, FieldMatcher matcher, List<Source> sources) {
         if (sources.size() >= 2) {
             boolean anyRegisterFailure = sources.stream().map(source -> registerSourceFieldsToContext(matcher, context, source)).anyMatch(Boolean.FALSE::equals);
             if (!anyRegisterFailure) {
@@ -116,24 +114,24 @@ public class TaijituRunner implements Callable<ComparisonResult> {
                 return null;
             }
         } else {
-            logger.error("There should be at least 2 sources available in comparison " + comparisonConfig.getName() + " but " + sources.size() + " available");
+            logger.error("There should be at least 2 sources available in comparison " + comparisonConfigIface.getName() + " but " + sources.size() + " available");
             return null;
         }
     }
 
-    private Source buildSource(final SourceConfig sourceConfig, ComparisonContext context, ComparisonConfig comparisonConfig) {
+    private Source buildSource(final SourceConfigIface<SourceConfigIface> sourceConfigIface, ComparisonContext context, ComparisonConfigIface comparisonConfigIface) {
 
         //TODO: Decide the type for the source based on the config! Maybe delegating to a Source type...
-        Class<? extends Source> sourceType = SourceTypeRegistry.getSourceType(sourceConfig.getType());
+        Class<? extends Source> sourceType = SourceTypeRegistry.getSourceType(sourceConfigIface.getType());
 
         try {
-            Expression constructorExpression = new Expression(sourceType, "new", new Object[]{sourceConfig, comparisonConfig, context});
+            Expression constructorExpression = new Expression(sourceType, "new", new Object[]{sourceConfigIface, comparisonConfigIface, context});
             Source source = (Source) constructorExpression.getValue();
             //if (registerSourceFieldsToContext(matcher, context, source)) {
             return source;
             //}
         } catch (Exception e) {
-            logger.error("Unable to create source for " + sourceConfig.getName(), e);
+            logger.error("Unable to create source for " + sourceConfigIface.getName(), e);
         }
         return null;
     }

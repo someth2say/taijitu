@@ -1,17 +1,11 @@
 package org.someth2say.taijitu.config.impl;
 
-import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
-import org.someth2say.taijitu.config.StrategyConfig;
 
-public class StrategyConfigImpl extends NamedConfig implements StrategyConfig {
-    private final ImmutableHierarchicalConfiguration configuration;
+import org.someth2say.taijitu.config.delegate.SourceConfigDelegate;
+import org.someth2say.taijitu.config.delegate.StrategyConfigDelegate;
 
-    public StrategyConfigImpl(final ImmutableHierarchicalConfiguration configuration) {
-        super(configuration.getString("")); // Strategy name is directly a value in the configuration root!
-        this.configuration = configuration;
-    }
-
-    public ImmutableHierarchicalConfiguration getConfiguration() {
-        return configuration;
+public class StrategyConfigImpl extends DelegatingNamedConfigImpl<StrategyConfigIface, SourceConfigDelegate> implements StrategyConfigDelegate {
+    public StrategyConfigImpl(StrategyConfigIface parent, SourceConfigDelegate delegate) {
+        super(delegate);
     }
 }
