@@ -5,6 +5,7 @@ import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.YAMLConfiguration;
 import org.apache.commons.configuration2.builder.BasicConfigurationBuilder;
+import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.junit.After;
 import org.junit.Test;
@@ -15,10 +16,9 @@ import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.equality.ValueThresholdEqualityStrategy;
 import org.someth2say.taijitu.compare.equality.TimestampThresholdEqualityStrategy;
 import org.someth2say.taijitu.config.ConfigurationLabels;
-import org.someth2say.taijitu.config.delegating.DatabaseConfigIface;
-import org.someth2say.taijitu.config.apache.ApacheDatabaseConfig;
-import org.someth2say.taijitu.database.ConnectionManager;
-import org.someth2say.taijitu.source.ResultSetSource;
+import org.someth2say.taijitu.config.DefaultConfig;
+import org.someth2say.taijitu.source.query.ConnectionManager;
+import org.someth2say.taijitu.source.query.ResultSetSource;
 import org.someth2say.taijitu.strategy.mapping.MappingStrategy;
 import org.someth2say.taijitu.strategy.sorted.SortedStrategy;
 
@@ -30,6 +30,7 @@ import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.someth2say.taijitu.config.ConfigurationLabels.Comparison.*;
@@ -61,21 +62,16 @@ public class TaijituTest {
         );
     }
 
-    private static Connection getConnection(Properties databaseProps) throws SQLException, ConfigurationException {
-        DatabaseConfigIface databaseConfigIface = getDatabaseConfig(databaseProps);
-        return ConnectionManager.getConnection(databaseConfigIface);
-    }
-
-    private static DatabaseConfigIface getDatabaseConfig(Properties databaseProps) throws ConfigurationException {
-        final PropertiesConfiguration configuration = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).getConfiguration();
-        putAll(configuration, databaseProps, "");
-        ImmutableHierarchicalConfiguration immutableHierarchicalConfiguration = ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(configuration));
-        return new ApacheDatabaseConfig(immutableHierarchicalConfiguration);
-    }
+    //    private static DatabaseConfigIface getDatabaseConfig(Properties databaseProps) throws ConfigurationException {
+//        final PropertiesConfiguration configuration = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).getConfiguration();
+//        putAll(configuration, databaseProps, "");
+//        ImmutableHierarchicalConfiguration immutableHierarchicalConfiguration = ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(configuration));
+//        return new ApacheDatabase(immutableHierarchicalConfiguration);
+//    }
 
     @After
     public void dropTables() throws SQLException, ConfigurationException {
-        Connection conn = getConnection(TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD));
+        Connection conn = ConnectionManager.getConnection(TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD));
         TestUtils.dropRegisteredTables(conn);
     }
 
@@ -84,7 +80,7 @@ public class TaijituTest {
         // Create the tables and test data
 
         final Properties databaseProps = TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD);
-        Connection conn = getConnection(databaseProps); // This generate the DB in H2
+        Connection conn = ConnectionManager.getConnection(databaseProps); // This generate the DB in H2
 
         String[] commonSchema = {
                 "key INTEGER(5) PRIMARY KEY",
@@ -118,13 +114,14 @@ public class TaijituTest {
         conn.close();
 
         final PropertiesConfiguration properties = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).getConfiguration();
+        properties.setListDelimiterHandler(new DefaultListDelimiterHandler(DefaultConfig.DEFAULT_LIST_DELIMITER));
         //Databases
-        putAll(properties, databaseProps, DATABASE + ".");
+        //putAll(properties, databaseProps, DATABASE + ".");
         // Comparisons
-        Properties properties1 = makeQueryProps("select * from test");
-        Properties properties2 = makeQueryProps("select * from test2");
-        putAll(properties, makeComparisonProps("test1", "KEY", properties1, properties1, null), "");
-        putAll(properties, makeComparisonProps("test2", "KEY", properties1, properties2, null), "");
+        Properties sourceProps1 = makeQueryProps("select * from test", databaseProps);
+        Properties sourceProps2 = makeQueryProps("select * from test2", databaseProps);
+        putAll(properties, makeComparisonProps("test1", "KEY", sourceProps1, sourceProps1, null), "");
+        putAll(properties, makeComparisonProps("test2", "KEY", sourceProps1, sourceProps2, null), "");
 
         // Disable plugins, 'cause we need to write nothing.
         commonPropertiesSetup(properties);
@@ -199,7 +196,7 @@ public class TaijituTest {
 //        testProperties.putAll(makeComparisonProps("test", "KEY, VALUE", "KEY, VALUE", "KEY,VALUE", "select * from test", "select * from test2", "test"));
 //
 //        testProperties.put("setup.strategy", "missing");
-//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new TaijituCfg().compare(testProperties.getDelegate());
 //        assertEquals(0, comparisonResults.length);
 //    }
 //
@@ -232,7 +229,7 @@ public class TaijituTest {
 //
 //        // Disable plugins, 'cause we need to write nothing.
 //        commonPropertiesSetup(testProperties);
-//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new TaijituCfg().compare(testProperties.getDelegate());
 //        assertEquals(1, comparisonResults.length);
 //        final SimpleComparisonResult comparisonResult = comparisonResults[0];
 //        assertEquals(SimpleComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
@@ -276,7 +273,7 @@ public class TaijituTest {
 //        // Disable plugins, 'cause we need to write nothing.
 //        commonPropertiesSetup(testProperties);
 //
-//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new TaijituCfg().compare(testProperties.getDelegate());
 //        assertEquals(1, comparisonResults.length);
 //
 //        final SimpleComparisonResult comparisonResult = comparisonResults[0];
@@ -319,7 +316,7 @@ public class TaijituTest {
 //        // Disable plugins, 'cause we need to write nothing.
 //        commonPropertiesSetup(testProperties);
 //
-//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new TaijituCfg().compare(testProperties.getDelegate());
 //        assertEquals(1, comparisonResults.length);
 //
 //        final SimpleComparisonResult comparisonResult = comparisonResults[0];
@@ -362,7 +359,7 @@ public class TaijituTest {
 //        // Disable plugins, 'cause we need to write nothing.
 //        commonPropertiesSetup(testProperties);
 //
-//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new TaijituCfg().compare(testProperties.getDelegate());
 //        assertEquals(1, comparisonResults.length);
 //
 //        final SimpleComparisonResult comparisonResult = comparisonResults[0];
@@ -405,7 +402,7 @@ public class TaijituTest {
 //        // Disable plugins, 'cause we need to write nothing.
 //        commonPropertiesSetup(testProperties);
 //
-//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new TaijituCfg().compare(testProperties.getDelegate());
 //        assertEquals(1, comparisonResults.length);
 //
 //        final SimpleComparisonResult comparisonResult = comparisonResults[0];
@@ -447,7 +444,7 @@ public class TaijituTest {
 //        testProperties.put("comparison.test.target.query", "select * from target");
 //        testProperties.put("comparison.test.database", "test");
 //
-//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new TaijituCfg().compare(testProperties.getDelegate());
 //        assertEquals(1, comparisonResults.length);
 //        assertEquals(SimpleComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResults[0].getStatus());
 //
@@ -484,7 +481,7 @@ public class TaijituTest {
 //        testProperties.put("comparison.test.target.query", "select * from target");
 //        testProperties.put("comparison.test.database", "test");
 //
-//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new TaijituCfg().compare(testProperties.getDelegate());
 //        assertEquals(1, comparisonResults.length);
 //        final SimpleComparisonResult comparisonResult = comparisonResults[0];
 //        assertEquals(SimpleComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
@@ -520,14 +517,14 @@ public class TaijituTest {
 //
 //        // Parameters
 //        //1.- Parameters in global section
-//        testProperties.put(databaseProps.joinSections(Sections.SETUP, Comparison.PARAMETERS, "globalParam"), "2");
+//        testProperties.put(databaseProps.joinSections(Sections.SETUP, ComparisonCfg.PARAMETERS, "globalParam"), "2");
 //        //2.- Parameters in comparison
-//        testProperties.put(databaseProps.joinSections(Sections.COMPARISON, "test", Comparison.PARAMETERS, "localParam"), "2");
+//        testProperties.put(databaseProps.joinSections(Sections.COMPARISON, "test", ComparisonCfg.PARAMETERS, "localParam"), "2");
 //
 //        // Disable plugins, 'cause we need to write nothing.
 //        testProperties.put(databaseProps.joinSections(Sections.SETUP, Setup.PLUGINS), "");
 //
-//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new TaijituCfg().compare(testProperties.getDelegate());
 //        assertEquals(1, comparisonResults.length);
 //        final SimpleComparisonResult comparisonResult = comparisonResults[0];
 //        assertEquals(SimpleComparisonResult.ComparisonResultStatus.SUCCESS, comparisonResult.getStatus());
@@ -581,7 +578,7 @@ public class TaijituTest {
 //        testProperties.put("setup.scanClasspath", "true");
 //        testProperties.put("setup.plugins", "csv,xls,timeLog");
 //
-//        final SimpleComparisonResult[] comparisonResults = new Taijitu().compare(testProperties.getDelegate());
+//        final SimpleComparisonResult[] comparisonResults = new TaijituCfg().compare(testProperties.getDelegate());
 //        assertEquals(2, comparisonResults.length);
 //        final SimpleComparisonResult firstResult = comparisonResults[0];
 //        assertEquals(SimpleComparisonResult.ComparisonResultStatus.SUCCESS, firstResult.getStatus());
@@ -595,23 +592,16 @@ public class TaijituTest {
 
 
     private Properties makeComparisonProps(String name, String keys, Properties sourceSource, Properties targetSource, Properties database) {
-//    private Properties makeComparisonProps(String name, String keys, String sourceQuery, String targetQuery, Properties database) {
         String comparisonPrefix = COMPARISON + "." + name + ".";
         Properties result = new Properties();
         if (keys != null)
             result.setProperty(comparisonPrefix + KEYS, keys);
 
         if (sourceSource != null) {
-//            Properties sourceProps = new Properties();
-//            sourceProps.put(STATEMENT, sourceQuery);
-//            sourceProps.put(SOURCE_TYPE, ResultSetSource.NAME);
             putAll(result, sourceSource, comparisonPrefix + SOURCES + "." + SOURCE + ".");
         }
 
         if (targetSource != null) {
-//            Properties sourceProps = new Properties();
-//            sourceProps.put(STATEMENT, targetQuery);
-//            sourceProps.put(SOURCE_TYPE, ResultSetSource.NAME);
             putAll(result, targetSource, comparisonPrefix + SOURCES + "." + TARGET + ".");
         }
 
@@ -623,11 +613,24 @@ public class TaijituTest {
     }
 
 
-    private Properties makeQueryProps(String query) {
+    private Properties makeQueryProps(String query, Properties databaseProperties) {
         Properties result = new Properties();
-        result.put(STATEMENT, query);
         result.put(SOURCE_TYPE, ResultSetSource.NAME);
+
+        Properties fetchProperties = new Properties();
+        fetchProperties.put(STATEMENT, query);
+
+        result.put(ConfigurationLabels.Comparison.SOURCE_FETCH_PROPERTIES, linearizeProperties(fetchProperties));
+
+        if (databaseProperties != null) {
+            result.put(ConfigurationLabels.Comparison.SOURCE_BUILD_PROPERTIES, linearizeProperties(databaseProperties));
+        }
+
         return result;
+    }
+
+    private String linearizeProperties(Properties properties) {
+        return properties.entrySet().stream().map(entry -> entry.getKey().toString() + "=" + entry.getValue().toString()).collect(Collectors.joining(", "));
     }
 
 

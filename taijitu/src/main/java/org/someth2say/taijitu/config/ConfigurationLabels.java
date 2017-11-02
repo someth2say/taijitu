@@ -8,6 +8,9 @@ public final class ConfigurationLabels {
     public static final String DATE_PARAMETER_KEYWORD = "Date";
     public static final String DATABASE_SECTION = "database";
 
+    // CSV Properties
+    public final static String PATH = "path";
+
     private ConfigurationLabels() {
     }
 
@@ -34,7 +37,8 @@ public final class ConfigurationLabels {
         public static final String FILE_PATH = "file";
         public static final String SOURCE_TYPE = "type";
         public static final String SOURCES = "sources";
-        public static final String SOURCE_PROPERTIES = "properties";
+        public static final String SOURCE_FETCH_PROPERTIES = "fetchProperties";
+        public static final String SOURCE_BUILD_PROPERTIES = "buildProperties";
 
         private Comparison() {
         }

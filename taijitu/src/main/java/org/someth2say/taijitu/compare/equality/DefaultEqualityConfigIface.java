@@ -1,8 +1,8 @@
 package org.someth2say.taijitu.compare.equality;
 
-import org.someth2say.taijitu.config.delegating.EqualityConfigIface;
+import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
-public interface DefaultEqualityConfigIface extends EqualityConfigIface {
+public interface DefaultEqualityConfigIface extends IEqualityCfg {
     @Override
     default String getFieldName() {
         return null;

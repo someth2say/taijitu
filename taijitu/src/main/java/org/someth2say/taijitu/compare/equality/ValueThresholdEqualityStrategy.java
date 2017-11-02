@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.compare.equality;
 
-import org.someth2say.taijitu.config.delegating.EqualityConfigIface;
+import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -48,7 +48,7 @@ public class ValueThresholdEqualityStrategy implements EqualityStrategy<Number> 
         return Math.abs(diff) < scaleRange ? 0 : diff < 0 ? -1 : 1;
     }
 
-    public static EqualityConfigIface defaultConfig() {
+    public static IEqualityCfg defaultConfig() {
         return (DefaultEqualityConfigIface) () -> ValueThresholdEqualityStrategy.NAME;
     }
 

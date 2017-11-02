@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.compare.ComparisonResult;
+import org.someth2say.taijitu.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.tuple.FieldDescription;
@@ -178,12 +179,12 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //    }
 
     @Override
-    public void start(final PluginConfigIface config) throws TaijituException {
+    public void start(final IPluginCfg config) throws TaijituException {
         // Do nothing
     }
 
     @Override
-    public void end(final PluginConfigIface config) throws TaijituException {
+    public void end(final IPluginCfg config) throws TaijituException {
         // Do nothing
     }
 

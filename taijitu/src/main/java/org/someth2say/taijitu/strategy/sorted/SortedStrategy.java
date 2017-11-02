@@ -4,6 +4,9 @@ import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.SimpleComparisonResult;
+import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
+import org.someth2say.taijitu.config.interfaces.ISourceCfg;
+import org.someth2say.taijitu.config.interfaces.IStrategyCfg;
 import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.strategy.AbstractComparisonStrategy;
@@ -24,10 +27,10 @@ public class SortedStrategy extends AbstractComparisonStrategy implements Compar
     }
 
     @Override
-    public ComparisonResult runComparison(Source source, Source target, ComparisonContext comparisonContext, ComparisonConfigIface comparisonConfigIface) {
-        final String comparisonName = comparisonConfigIface.getName();
+    public ComparisonResult runComparison(Source source, Source target, ComparisonContext comparisonContext, IComparisonCfg comparisonConfig) {
+        final String comparisonName = comparisonConfig.getName();
         logger.debug("Start sorted strategy comparison for " + comparisonName);
-        SimpleComparisonResult result = new SimpleComparisonResult(comparisonConfigIface);
+        SimpleComparisonResult result = new SimpleComparisonResult(comparisonConfig);
 
 
         Iterator<ComparableTuple> sourceIterator = source.iterator();
@@ -35,18 +38,18 @@ public class SortedStrategy extends AbstractComparisonStrategy implements Compar
         ComparableTuple sourceRecord = getNextRecord(sourceIterator);
         ComparableTuple targetRecord = getNextRecord(targetIterator);
 
-        final SourceConfigIface<SourceConfigIface> targetQuerySourceConfigIface = target.getConfig();
-        final SourceConfigIface<SourceConfigIface> sourceQuerySourceConfigIface = source.getConfig();
+        final ISourceCfg targetQuerySourceConfigIface = target.getConfig();
+        final ISourceCfg sourceQuerySourceConfigIface = source.getConfig();
 
         while (sourceRecord != null && targetRecord != null) {
 
             int keyComparison = sourceRecord.compareKeysTo(targetRecord);
             if (keyComparison > 0) {
-                // Source is after target -> target record is not in source stream
+                // SourceCfg is after target -> target record is not in source stream
                 result.addDisjoint(new ComparisonResult.QueryAndTuple(targetQuerySourceConfigIface, targetRecord));
                 targetRecord = getNextRecord(targetIterator);
             } else if (keyComparison < 0) {
-                // Source is before target -> source record is not in target stream
+                // SourceCfg is before target -> source record is not in target stream
                 result.addDisjoint(new ComparisonResult.QueryAndTuple(sourceQuerySourceConfigIface, sourceRecord));
                 sourceRecord = getNextRecord(sourceIterator);
             } else {
@@ -75,7 +78,7 @@ public class SortedStrategy extends AbstractComparisonStrategy implements Compar
     }
 
 
-    public static StrategyConfigIface defaultConfig() {
+    public static IStrategyCfg defaultConfig() {
         return () -> SortedStrategy.NAME;
     }
 }

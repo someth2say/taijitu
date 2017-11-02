@@ -1,5 +1,7 @@
 package org.someth2say.taijitu.compare;
 
+import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
+import org.someth2say.taijitu.config.interfaces.ISourceCfg;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.util.ImmutablePair;
 import org.someth2say.taijitu.util.Pair;
@@ -7,19 +9,19 @@ import org.someth2say.taijitu.util.Pair;
 import java.util.Collection;
 
 public abstract class ComparisonResult {
-    protected final ComparisonConfigIface comparisonConfigIface;
+    protected final IComparisonCfg comparisonConfigIface;
     // TODO: Moving forward to stream API will require a single difference class, covering both different and disjoint.
     // TODO: Work out the structure for this kind of items. I.E. Disjoint, may be a Map<Query->Collection<Tuple>>, and Different may be a Collection<Map<Query->Tuple>>
     final private Collection<Pair<QueryAndTuple, QueryAndTuple>> different;
     final private Collection<QueryAndTuple> disjoint;
 
-    ComparisonResult(final ComparisonConfigIface comparisonConfigIface, final Collection<Pair<QueryAndTuple, QueryAndTuple>> different, Collection<QueryAndTuple> disjoint) {
+    ComparisonResult(final IComparisonCfg comparisonConfigIface, final Collection<Pair<QueryAndTuple, QueryAndTuple>> different, Collection<QueryAndTuple> disjoint) {
         this.comparisonConfigIface = comparisonConfigIface;
         this.different = different;
         this.disjoint = disjoint;
     }
 
-    public ComparisonConfigIface getComparisonConfigIface() {
+    public IComparisonCfg getComparisonConfig() {
         return comparisonConfigIface;
     }
 
@@ -32,9 +34,9 @@ public abstract class ComparisonResult {
     }
 
 
-    public static class QueryAndTuple extends ImmutablePair<SourceConfigIface<SourceConfigIface>, ComparableTuple> {
-        public QueryAndTuple(SourceConfigIface<SourceConfigIface> querySourceConfigIface, ComparableTuple tuple) {
-            super(querySourceConfigIface, tuple);
+    public static class QueryAndTuple extends ImmutablePair<ISourceCfg, ComparableTuple> {
+        public QueryAndTuple(ISourceCfg iSource, ComparableTuple tuple) {
+            super(iSource, tuple);
         }
     }
 

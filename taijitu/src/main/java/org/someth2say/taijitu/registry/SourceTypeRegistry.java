@@ -2,8 +2,8 @@ package org.someth2say.taijitu.registry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.source.CSVFileSource;
-import org.someth2say.taijitu.source.ResultSetSource;
+import org.someth2say.taijitu.source.csv.CSVFileSource;
+import org.someth2say.taijitu.source.query.ResultSetSource;
 import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.util.ClassScanUtils;
 

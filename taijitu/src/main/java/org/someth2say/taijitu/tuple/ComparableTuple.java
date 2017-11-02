@@ -3,7 +3,7 @@ package org.someth2say.taijitu.tuple;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.compare.equality.EqualityStrategy;
-import org.someth2say.taijitu.config.delegating.EqualityConfigIface;
+import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 import org.someth2say.taijitu.registry.EqualityStrategyRegistry;
 
 import java.util.ArrayList;
@@ -25,8 +25,8 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
     }
 
     //TODO: Consider passing those three fields (or a data class containing them) instead of the ComparisonContext
-    private List<EqualityConfigIface> getEqualityConfigs() {
-        return context.getEqualityConfigIfaces();
+    private List<IEqualityCfg> getEqualityConfigs() {
+        return context.getIEqualitys();
     }
 
     private List<FieldDescription> getCanonicalFields() {
@@ -49,11 +49,11 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
 
     @Override
     public int hashCode() {
-        List<EqualityConfigIface> equalityConfigIfaces = getEqualityConfigs();
+        List<IEqualityCfg> equalityConfigIfaces = getEqualityConfigs();
         int result = 1;
         for (int keyFieldIdx : getKeyFieldIdxs()) {
             Object keyValue = getValue(keyFieldIdx);
-            final EqualityConfigIface equalityConfigIface = equalityConfigIfaces.get(keyFieldIdx);
+            final IEqualityCfg equalityConfigIface = equalityConfigIfaces.get(keyFieldIdx);
             @SuppressWarnings("rawtypes")
 			final EqualityStrategy equalityStrategy = getEqualityStrategy(equalityConfigIface);
             @SuppressWarnings("unchecked")
@@ -78,12 +78,12 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
 
     @SuppressWarnings("unchecked")
 	private boolean equalFields(ComparableTuple other, int[] fieldIdxs) {
-        List<EqualityConfigIface> equalityConfigIfaces = getEqualityConfigs();
+        List<IEqualityCfg> equalityConfigIfaces = getEqualityConfigs();
         for (int fieldIdx : fieldIdxs) {
             Object keyValue = getValue(fieldIdx);
             Object otherKeyValue = other.getValue(fieldIdx);
             FieldDescription fieldDescription = getCanonicalFields().get(fieldIdx);
-            final EqualityConfigIface equalityConfigIface = equalityConfigIfaces.get(fieldIdx);
+            final IEqualityCfg equalityConfigIface = equalityConfigIfaces.get(fieldIdx);
             @SuppressWarnings("rawtypes")
 			final EqualityStrategy equalityStrategy = getEqualityStrategy(equalityConfigIface);
             //TODO: Lazy logging
@@ -98,12 +98,12 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
 
 	@Override
     public int compareTo(ComparableTuple other) {
-        List<EqualityConfigIface> equalityConfigIfaces = getEqualityConfigs();
+        List<IEqualityCfg> equalityConfigIfaces = getEqualityConfigs();
         int[] fieldIdxs = getKeyFieldIdxs();
         for (int fieldIdx : fieldIdxs) {
             Object keyValue = getValue(fieldIdx);
             Object otherKeyValue = other.getValue(fieldIdx);
-            final EqualityConfigIface equalityConfigIface = equalityConfigIfaces.get(fieldIdx);
+            final IEqualityCfg equalityConfigIface = equalityConfigIfaces.get(fieldIdx);
             @SuppressWarnings("rawtypes")
 			final EqualityStrategy equalityStrategy = getEqualityStrategy(equalityConfigIface);
             @SuppressWarnings("unchecked")
@@ -116,7 +116,7 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
     }
 
 
-    private EqualityStrategy<?> getEqualityStrategy(final EqualityConfigIface equalityConfigIface) {
+    private EqualityStrategy<?> getEqualityStrategy(final IEqualityCfg equalityConfigIface) {
         final String equalityName = equalityConfigIface.getName();
         return EqualityStrategyRegistry.getEqualityStrategy(equalityName);
     }

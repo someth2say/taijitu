@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.compare.equality;
 
-import org.someth2say.taijitu.config.delegating.EqualityConfigIface;
+import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
 public class ToStringEqualityStrategy implements EqualityStrategy<Object> {
 
@@ -21,7 +21,7 @@ public class ToStringEqualityStrategy implements EqualityStrategy<Object> {
         return object1.toString().compareTo(object2.toString());
     }
 
-    public static EqualityConfigIface defaultConfig() {
+    public static IEqualityCfg defaultConfig() {
         return (DefaultEqualityConfigIface) () -> ToStringEqualityStrategy.NAME;
     }
 

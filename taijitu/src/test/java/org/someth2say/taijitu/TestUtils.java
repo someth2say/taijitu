@@ -13,13 +13,12 @@ import org.someth2say.taijitu.util.StringUtil;
  */
 public class TestUtils {
 
-    public static final String PROPERTIES_ROOT = "database";
     private static final Set<String> tableRegister = new HashSet<>();
 
     private TestUtils() {
     }
 
-    public static Properties makeH2DatabaseProps(String dbName, String dbUser, String dbPwd) {
+    static Properties makeH2DatabaseProps(String dbName, String dbUser, String dbPwd) {
         Properties result = new Properties();
         result.setProperty("dataSource.user", dbUser);
         result.setProperty("dataSource.password", dbPwd);
@@ -31,7 +30,7 @@ public class TestUtils {
         return result;
     }
 
-    public static void createTable(Connection conn, String tableName, String[] fieldDefs, String[][] fieldValues) throws SQLException {
+    static void createTable(Connection conn, String tableName, String[] fieldDefs, String[][] fieldValues) throws SQLException {
         //Create the table
         conn.createStatement().executeUpdate("CREATE TABLE " + tableName + " (" + StringUtil.join(fieldDefs) + ");");
 
@@ -47,7 +46,7 @@ public class TestUtils {
         tableRegister.add(tableName);
     }
 
-    public static void dropRegisteredTables(Connection conn) throws SQLException {
+    static void dropRegisteredTables(Connection conn) throws SQLException {
         for (String table : tableRegister) {
             conn.createStatement().executeUpdate("DROP TABLE IF EXISTS " + table + ";");
         }

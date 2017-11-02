@@ -1,12 +1,14 @@
 package org.someth2say.taijitu.registry;
 
 import org.apache.log4j.Logger;
+import org.someth2say.taijitu.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.plugins.logging.TimeLoggingPlugin;
 import org.someth2say.taijitu.util.ClassScanUtils;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -26,12 +28,12 @@ public class PluginRegistry {
 		return instances.values();
 	}
 
-	public static Map<PluginConfigIface, TaijituPlugin> getPlugins(PluginConfigIface[] pluginConfigIfaces) {
-		Map<PluginConfigIface, TaijituPlugin> result = new HashMap<>(pluginConfigIfaces.length);
-		for (PluginConfigIface pluginConfigIface : pluginConfigIfaces) {
+	public static Map<IPluginCfg, TaijituPlugin> getPlugins(List<IPluginCfg> pluginConfigIfaces) {
+		Map<IPluginCfg, TaijituPlugin> result = new HashMap<>(pluginConfigIfaces.size());
+		for (IPluginCfg pluginConfigIface : pluginConfigIfaces) {
 			final TaijituPlugin pluginInstance = instances.get(pluginConfigIface.getName());
 			if (pluginInstance == null) {
-				logger.warn("Plugin reference" + pluginConfigIface.getName() + " not available.");
+				logger.warn("PluginCfg reference" + pluginConfigIface.getName() + " not available.");
 			} else {
 				result.put(pluginConfigIface, pluginInstance);
 			}
