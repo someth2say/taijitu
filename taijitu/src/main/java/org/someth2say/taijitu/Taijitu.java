@@ -4,7 +4,6 @@ import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.ComparisonResult;
-import org.someth2say.taijitu.config.apache.ApacheTaijitu;
 import org.someth2say.taijitu.config.impl.TaijituCfg;
 import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.config.interfaces.IPluginCfg;
@@ -31,23 +30,13 @@ public final class Taijitu {
 
     private static final Logger logger = Logger.getLogger(Taijitu.class);
 
-    public Taijitu() {
+    private ITaijituCfg configFromApache(final ImmutableHierarchicalConfiguration properties) throws TaijituException {
+        return TaijituCfg.fromApacheConfig(properties);
     }
 
 
-    private ITaijituCfg initialise(final ImmutableHierarchicalConfiguration properties) throws TaijituException {
-        ApacheTaijitu delegate = ApacheTaijitu.fromApacheConfig(properties);
-        TaijituCfg itaijitu = new TaijituCfg(delegate);
-        performSetup(itaijitu);
-        return itaijitu;
-    }
-
-
-    private ITaijituCfg initialise(final String configProperties) throws TaijituException {
-        ITaijituCfg delegate = ApacheTaijitu.fromFile(configProperties);
-        TaijituCfg itaijitu = new TaijituCfg(delegate);
-        performSetup(itaijitu);
-        return itaijitu;
+    private ITaijituCfg configFromFile(final String fileName) throws TaijituException {
+        return TaijituCfg.fromFile(fileName);
     }
 
     private void performSetup(final ITaijituCfg config) {
@@ -90,24 +79,21 @@ public final class Taijitu {
         return compare(DEFAULT_CONFIG_FILE);
     }
 
-    public ComparisonResult[] compare(final String configProperties) throws TaijituException {
-        ITaijituCfg config = initialise(configProperties);
-        return performComparisons(config);
+    public ComparisonResult[] compare(final String fileName) throws TaijituException {
+        return compare(configFromFile(fileName));
     }
 
 
     public ComparisonResult[] compare(final ImmutableHierarchicalConfiguration properties) throws TaijituException {
-        ITaijituCfg config = initialise(properties);
-        return performComparisons(config);
+        return compare(configFromApache(properties));
     }
 
 
-    private ComparisonResult[] performComparisons(final ITaijituCfg config) throws TaijituException {
+    public ComparisonResult[] compare(final ITaijituCfg config) throws TaijituException {
         logger.info("Start comparisons.");
+        performSetup(config);
 
-        IComparisonCfg[] comparisons = config.getComparisons();
-
-//        startDataSources(config);
+        List<IComparisonCfg> comparisons = config.getComparisons();
 
         startPlugins(config);
 
@@ -149,16 +135,16 @@ public final class Taijitu {
 
     private void startPlugins(ITaijituCfg config) throws TaijituException {
         List<IPluginCfg> allPluginsConfig = config.getComparisonPluginConfigs();
-        for (IPluginCfg pluginConfigIface : allPluginsConfig) {
-            TaijituPlugin plugin = PluginRegistry.getPlugin(pluginConfigIface.getName());
-            plugin.start(pluginConfigIface);
+        for (IPluginCfg pluginCfg : allPluginsConfig) {
+            TaijituPlugin plugin = PluginRegistry.getPlugin(pluginCfg.getName());
+            plugin.start(pluginCfg);
         }
     }
 
     private ComparisonResult[] getComparisonResults(CompletionService<ComparisonResult> completionService,
-                                                    IComparisonCfg[] comparisonConfigIfaces) {
-        final ComparisonResult[] result = new ComparisonResult[comparisonConfigIfaces.length];
-        for (int i = 0; i < comparisonConfigIfaces.length; i++) {
+                                                    List<IComparisonCfg> iComparisonCfgs) {
+        final ComparisonResult[] result = new ComparisonResult[iComparisonCfgs.size()];
+        for (int i = 0; i < iComparisonCfgs.size(); i++) {
             try {
                 Future<ComparisonResult> future = completionService.take();
                 try {
@@ -182,11 +168,10 @@ public final class Taijitu {
     private Collection<Future<ComparisonResult>> runComparisonThreads(
             final CompletionService<ComparisonResult> completionService, final ITaijituCfg config) {
 
-        final IComparisonCfg[] comparisons = config.getComparisons();
-        final Collection<Future<ComparisonResult>> result = new ArrayList<>(comparisons.length);
+        final List<IComparisonCfg> comparisons = config.getComparisons();
+        final Collection<Future<ComparisonResult>> result = new ArrayList<>(comparisons.size());
 
-        for (IComparisonCfg comparison : comparisons) {
-
+        comparisons.forEach(comparison -> {
             try {
                 final TaijituRunner taijituRunner = new TaijituRunner(comparison);
 
@@ -197,7 +182,7 @@ public final class Taijitu {
             } catch (final TaijituException e) {
                 logger.error("Error while creating comparison: " + comparison + "\n Please review config.", e);
             }
-        }
+        });
 
         return result;
     }

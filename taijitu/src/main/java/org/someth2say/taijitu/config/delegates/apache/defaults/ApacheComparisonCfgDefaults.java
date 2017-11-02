@@ -1,19 +1,19 @@
-package org.someth2say.taijitu.config.apache.defaults;
+package org.someth2say.taijitu.config.delegates.apache.defaults;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.commons.configuration2.ex.ConfigurationRuntimeException;
 import org.someth2say.taijitu.config.ConfigurationLabels;
-import org.someth2say.taijitu.config.apache.ApacheEquality;
-import org.someth2say.taijitu.config.apache.ApachePlugin;
-import org.someth2say.taijitu.config.apache.ApacheSource;
-import org.someth2say.taijitu.config.apache.ApacheStrategy;
+import org.someth2say.taijitu.config.delegates.apache.ApacheEquality;
+import org.someth2say.taijitu.config.delegates.apache.ApachePlugin;
+import org.someth2say.taijitu.config.delegates.apache.ApacheSource;
+import org.someth2say.taijitu.config.delegates.apache.ApacheStrategy;
 import org.someth2say.taijitu.config.interfaces.*;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public interface ApacheComparisonConfig extends ApacheNamedConfig, IComparisonCfg, ApacheEqualityConfig, ApacheSourceConfig, ApacheStrategyConfig, ApachePluginConfig {
+public interface ApacheComparisonCfgDefaults extends ApacheNamedCfgDefaults, IComparisonCfg, ApacheEqualityCfgDefaults, ApacheSourceCfgDefaults, ApacheStrategyCfgDefaults, ApachePluginCfgDefaults {
 
     @Override
     default IStrategyCfg getStrategyConfig() {

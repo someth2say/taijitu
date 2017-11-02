@@ -1,8 +1,8 @@
-package org.someth2say.taijitu.config.apache.defaults;
+package org.someth2say.taijitu.config.delegates.apache.defaults;
 
 import org.someth2say.taijitu.util.Named;
 
-public interface ApacheNamedConfig extends ApacheConfig, Named {
+public interface ApacheNamedCfgDefaults extends ApacheCfgDefaults, Named {
 
     @Override
     default String getName() {

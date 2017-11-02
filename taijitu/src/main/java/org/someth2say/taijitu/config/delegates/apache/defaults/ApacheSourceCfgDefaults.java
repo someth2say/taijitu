@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.config.apache.defaults;
+package org.someth2say.taijitu.config.delegates.apache.defaults;
 
 import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
@@ -6,7 +6,7 @@ import org.someth2say.taijitu.config.interfaces.ISourceCfg;
 import java.util.List;
 import java.util.Properties;
 
-public interface ApacheSourceConfig extends ApacheConfig, ISourceCfg {
+public interface ApacheSourceCfgDefaults extends ApacheCfgDefaults, ISourceCfg {
 
     @Override
     default String getType() {

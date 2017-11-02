@@ -1,8 +1,8 @@
-package org.someth2say.taijitu.config.apache.defaults;
+package org.someth2say.taijitu.config.delegates.apache.defaults;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.someth2say.taijitu.config.ConfigurationLabels;
-import org.someth2say.taijitu.config.apache.ApacheComparison;
+import org.someth2say.taijitu.config.delegates.apache.ApacheComparison;
 import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.config.interfaces.ITaijituCfg;
 
@@ -12,14 +12,16 @@ import java.util.stream.Collectors;
 import static org.someth2say.taijitu.config.DefaultConfig.*;
 import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_SCAN_CLASSPATH;
 
-public interface ApacheTaijituConfig extends ApacheConfig, ITaijituCfg, ApacheComparisonConfig, ApachePluginConfig {
+public interface ApacheTaijituCfgDefaults extends ApacheCfgDefaults, ITaijituCfg, ApacheComparisonCfgDefaults, ApachePluginCfgDefaults {
 
     //TODO: Migrate to lists
     @Override
-    default IComparisonCfg[] getComparisons() {
+    default List<IComparisonCfg> getComparisons() {
         final List<ImmutableHierarchicalConfiguration> comparisonConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.Sections.COMPARISON);
-        List<ApacheComparison> impls = comparisonConfigs.stream().map(cs -> new ApacheComparison(cs, this)).collect(Collectors.toList());
-        return impls.toArray(new IComparisonCfg[0]);
+        if (comparisonConfigs != null) {
+            return comparisonConfigs.stream().map(cs -> new ApacheComparison(cs, this)).collect(Collectors.toList());
+        }
+        return null;
     }
 
     @Override

@@ -24,7 +24,7 @@ public class DefaultConfig {
     public static final boolean DEFAULT_SCAN_CLASSPATH = false;
 
     public static final IStrategyCfg DEFAULT_STRATEGY_CONFIG = MappingStrategy.defaultConfig();
-    public static final IEqualityCfg DEFAULT_EQUALITY_CONFIG = ToStringEqualityStrategy.defaultConfig();
+    public static final List<IEqualityCfg> DEFAULT_EQUALITY_CONFIG = List.of(ToStringEqualityStrategy.defaultConfig());
     public static final List<IPluginCfg> DEFAULT_PLUGINS_CONFIG = List.of(TimeLoggingPlugin.defaultConfig());
 
     public static final String DEFAULT_MATCHING_STRATEGY_NAME = NamingFieldMatcher.NAME;
@@ -35,4 +35,5 @@ public class DefaultConfig {
     public static final String DEFAULT_CONFIG_FILE = "taijitu.properties";
 
     public static final boolean DEFAULT_FIELD_CLASS_STRICT = false;
+    public static List<String> DEFAULT_KEY_FIELDS = List.of("*");
 }

@@ -1,9 +1,9 @@
-package org.someth2say.taijitu.config.apache;
+package org.someth2say.taijitu.config.delegates.apache;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
-import org.someth2say.taijitu.config.apache.defaults.ApacheConfig;
+import org.someth2say.taijitu.config.delegates.apache.defaults.ApacheCfgDefaults;
 
-public abstract class Apache<P extends ApacheConfig> implements ApacheConfig {
+public abstract class Apache<P extends ApacheCfgDefaults> implements ApacheCfgDefaults {
     private final ImmutableHierarchicalConfiguration configuration;
 //    private final P parent;
 

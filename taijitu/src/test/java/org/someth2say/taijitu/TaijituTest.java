@@ -17,6 +17,9 @@ import org.someth2say.taijitu.compare.equality.ValueThresholdEqualityStrategy;
 import org.someth2say.taijitu.compare.equality.TimestampThresholdEqualityStrategy;
 import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.config.DefaultConfig;
+import org.someth2say.taijitu.config.delegates.simple.*;
+import org.someth2say.taijitu.config.impl.TaijituCfg;
+import org.someth2say.taijitu.config.interfaces.*;
 import org.someth2say.taijitu.source.query.ConnectionManager;
 import org.someth2say.taijitu.source.query.ResultSetSource;
 import org.someth2say.taijitu.strategy.mapping.MappingStrategy;
@@ -27,9 +30,7 @@ import java.io.OutputStreamWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Properties;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -80,6 +81,94 @@ public class TaijituTest {
         // Create the tables and test data
 
         final Properties databaseProps = TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD);
+        buildDBs(databaseProps);
+
+        //final ImmutableHierarchicalConfiguration configuration = getApacheConfiguration();
+        final ITaijituCfg configuration = getTaijituConfig(databaseProps);
+
+        final ComparisonResult[] comparisonResults = new Taijitu().compare(configuration);
+
+        assertEquals(2, comparisonResults.length);
+        final ComparisonResult firstResult = comparisonResults[0];
+        assertEquals(0, firstResult.getDisjoint().size());
+        assertEquals(0, firstResult.getDifferent().size());
+        final ComparisonResult secondResult = comparisonResults[1];
+        assertEquals(0, secondResult.getDisjoint().size());
+        assertEquals(1, secondResult.getDifferent().size());
+    }
+
+    private ITaijituCfg getTaijituConfig(Properties databaseProps) throws SQLException, ConfigurationException {
+        BasicTaijituCfg basicTaijituCfg = new BasicTaijituCfg("");
+
+        // Databases
+        // Nothing, will add to sources
+
+        // Comparisons
+
+        Properties query1Props = new Properties();
+        query1Props.setProperty(ConfigurationLabels.Comparison.STATEMENT, "select * from test");
+
+        Properties query2Props = new Properties();
+        query2Props.setProperty(ConfigurationLabels.Comparison.STATEMENT, "select * from test2");
+
+        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", databaseProps, query1Props, ResultSetSource.NAME);
+        BasicSourceCfg targetSrc = new BasicSourceCfg("source", databaseProps, query2Props, ResultSetSource.NAME);
+
+        BasicComparisonCfg comp1 = new BasicComparisonCfg("test1", List.of("KEY"), List.of(sourceSrc, sourceSrc));
+        BasicComparisonCfg comp2 = new BasicComparisonCfg("test2", List.of("KEY"), List.of(sourceSrc, targetSrc));
+        basicTaijituCfg.setComparisons(List.of(comp1, comp2));
+
+        //Strategy
+        basicTaijituCfg.setStrategyConfig(new BasicStrategyCfg(strategyName));
+
+        // Equality
+        BasicEqualityCfg stringEq = new BasicEqualityCfg(CaseInsensitiveEqualityStrategy.NAME, String.class.getName(), null);
+        BasicEqualityCfg numberEq = new BasicEqualityCfg(ValueThresholdEqualityStrategy.NAME, Number.class.getName(), null, "2");
+        IEqualityCfg timestampEq = new BasicEqualityCfg(TimestampThresholdEqualityStrategy.NAME, Timestamp.class.getName(), null, "100");
+        basicTaijituCfg.setEqualityConfigs(List.of(stringEq, numberEq, timestampEq));
+
+        return new TaijituCfg(basicTaijituCfg);
+    }
+
+
+    private ImmutableHierarchicalConfiguration getApacheConfiguration(Properties databaseProps) throws SQLException, ConfigurationException {
+
+        final PropertiesConfiguration properties = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).getConfiguration();
+
+        properties.setListDelimiterHandler(new DefaultListDelimiterHandler(DefaultConfig.DEFAULT_LIST_DELIMITER));
+        //Databases
+        //putAll(properties, databaseProps, DATABASE + ".");
+
+        // Comparisons
+        Properties sourceProps1 = makeQueryProps("select * from test", databaseProps);
+        Properties sourceProps2 = makeQueryProps("select * from test2", databaseProps);
+        putAll(properties, makeComparisonProps("test1", "KEY", sourceProps1, sourceProps1, null), "");
+        putAll(properties, makeComparisonProps("test2", "KEY", sourceProps1, sourceProps2, null), "");
+
+        // Disable plugins, 'cause we need to write nothing.
+        commonPropertiesSetup(properties);
+
+        //Add comparators
+        //Case insensitive strings
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + CaseInsensitiveEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, String.class.getName());
+        //Decimal places for Numbers
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Number.class.getName());
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "2");
+        //Threshold 100ms for Timestamps.
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Timestamp.class.getName());
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "100");
+
+        final ImmutableHierarchicalConfiguration configuration = ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(properties));
+
+        dumpConfig(configuration);
+
+        // Setup
+
+
+        return configuration;
+    }
+
+    private void buildDBs(Properties databaseProps) throws SQLException {
         Connection conn = ConnectionManager.getConnection(databaseProps); // This generate the DB in H2
 
         String[] commonSchema = {
@@ -112,49 +201,10 @@ public class TaijituTest {
         TestUtils.createTable(conn, "test2", commonSchema, commonValues);
 
         conn.close();
-
-        final PropertiesConfiguration properties = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).getConfiguration();
-        properties.setListDelimiterHandler(new DefaultListDelimiterHandler(DefaultConfig.DEFAULT_LIST_DELIMITER));
-        //Databases
-        //putAll(properties, databaseProps, DATABASE + ".");
-        // Comparisons
-        Properties sourceProps1 = makeQueryProps("select * from test", databaseProps);
-        Properties sourceProps2 = makeQueryProps("select * from test2", databaseProps);
-        putAll(properties, makeComparisonProps("test1", "KEY", sourceProps1, sourceProps1, null), "");
-        putAll(properties, makeComparisonProps("test2", "KEY", sourceProps1, sourceProps2, null), "");
-
-        // Disable plugins, 'cause we need to write nothing.
-        commonPropertiesSetup(properties);
-
-        //Add comparators
-        //Case insensitive strings
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + CaseInsensitiveEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, String.class.getName());
-        //Decimal places for Numbers
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Number.class.getName());
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "2");
-        //Threshold 100ms for Timestamps.
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Timestamp.class.getName());
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "100");
-
-        final ImmutableHierarchicalConfiguration configuration = ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(properties));
-
-        dumpConfig(configuration);
-
-        final ComparisonResult[] comparisonResults = new Taijitu().compare(configuration);
-
-        assertEquals(2, comparisonResults.length);
-        final ComparisonResult firstResult = comparisonResults[0];
-        assertEquals(0, firstResult.getDisjoint().size());
-        assertEquals(0, firstResult.getDifferent().size());
-        final ComparisonResult secondResult = comparisonResults[1];
-        assertEquals(0, secondResult.getDisjoint().size());
-        assertEquals(1, secondResult.getDifferent().size());
     }
 
 
     private void dumpConfig(ImmutableHierarchicalConfiguration configuration) throws ConfigurationException {
-        // Dump config, just for testing.
-        // as YAML
         try {
             YAMLConfiguration yamlConfiguration = new BasicConfigurationBuilder<>(YAMLConfiguration.class).getConfiguration();
             ConfigurationUtils.copy(configuration, yamlConfiguration);
@@ -162,8 +212,7 @@ public class TaijituTest {
         } catch (IOException e) {
             // Do nothing, this is just for test.
         }
-        // as Properties
-//        System.out.println(ConfigurationUtils.toString(configuration));
+
     }
 
     private void commonPropertiesSetup(PropertiesConfiguration testProperties) {

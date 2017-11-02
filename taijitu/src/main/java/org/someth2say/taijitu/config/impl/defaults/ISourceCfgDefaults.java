@@ -1,5 +1,6 @@
 package org.someth2say.taijitu.config.impl.defaults;
 
+import org.someth2say.taijitu.config.DefaultConfig;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
 
 import java.util.List;
@@ -15,7 +16,7 @@ public interface ISourceCfgDefaults<T extends ISourceCfg> extends ISourceCfg, IC
     @Override
     default List<String> getKeyFields() {
         List<String> keyFields = getDelegate().getKeyFields();
-        return keyFields != null ? keyFields : getParent() != null ? getParent().getKeyFields() : null;
+        return keyFields != null ? keyFields : getParent() != null ? getParent().getKeyFields() : DefaultConfig.DEFAULT_KEY_FIELDS;
     }
 
     @Override

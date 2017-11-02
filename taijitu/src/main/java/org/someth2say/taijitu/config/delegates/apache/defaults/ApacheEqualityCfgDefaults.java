@@ -1,10 +1,10 @@
-package org.someth2say.taijitu.config.apache.defaults;
+package org.someth2say.taijitu.config.delegates.apache.defaults;
 
 import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.config.DefaultConfig;
 import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
-public interface ApacheEqualityConfig extends ApacheConfig, IEqualityCfg {
+public interface ApacheEqualityCfgDefaults extends ApacheCfgDefaults, IEqualityCfg {
 
     @Override
     default String getFieldName() {
@@ -18,7 +18,7 @@ public interface ApacheEqualityConfig extends ApacheConfig, IEqualityCfg {
 
     @Override
     default Boolean isFieldClassStrict() {
-        return getConfiguration().getBoolean(ConfigurationLabels.Comparison.FIELD_CLASS_STRICT, DefaultConfig.DEFAULT_FIELD_CLASS_STRICT);
+        return getConfiguration().getBoolean(ConfigurationLabels.Comparison.FIELD_CLASS_STRICT);
     }
 
     @Override

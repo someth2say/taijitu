@@ -1,5 +1,6 @@
 package org.someth2say.taijitu.config.impl.defaults;
 
+import org.someth2say.taijitu.config.DefaultConfig;
 import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
 public interface IEqualityCfgDefaults<T extends IEqualityCfg> extends IEqualityCfg, ICfgDefaults<T> {
@@ -15,7 +16,8 @@ public interface IEqualityCfgDefaults<T extends IEqualityCfg> extends IEqualityC
 
     @Override
     default Boolean isFieldClassStrict() {
-        return getDelegate().isFieldClassStrict();
+        Boolean fieldClassStrict = getDelegate().isFieldClassStrict();
+        return fieldClassStrict !=null ? fieldClassStrict: DefaultConfig.DEFAULT_FIELD_CLASS_STRICT;
     }
 
     @Override

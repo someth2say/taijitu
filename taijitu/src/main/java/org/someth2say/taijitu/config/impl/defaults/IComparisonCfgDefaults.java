@@ -1,34 +1,46 @@
 package org.someth2say.taijitu.config.impl.defaults;
 
+import org.apache.commons.collections4.ListUtils;
 import org.someth2say.taijitu.config.DefaultConfig;
 import org.someth2say.taijitu.config.impl.EqualityCfg;
 import org.someth2say.taijitu.config.impl.PluginCfg;
 import org.someth2say.taijitu.config.impl.SourceCfg;
 import org.someth2say.taijitu.config.impl.StrategyCfg;
 import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
+import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
+import org.someth2say.taijitu.config.interfaces.IPluginCfg;
+import org.someth2say.taijitu.config.interfaces.ISourceCfg;
+import org.someth2say.taijitu.config.interfaces.IStrategyCfg;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.someth2say.taijitu.util.ListUtil.safeUnion;
 
 public interface IComparisonCfgDefaults<T extends IComparisonCfg> extends IComparisonCfg, INamedCfgDefaults<T>, IEqualityCfgDefaults<T>, ISourceCfgDefaults<T>, IStrategyCfgDefaults<T>, IPluginCfgDefaults<T> {
 
     @Override
-    default org.someth2say.taijitu.config.interfaces.IStrategyCfg getStrategyConfig() {
-        org.someth2say.taijitu.config.interfaces.IStrategyCfg delegate = getDelegate().getStrategyConfig();
+    default IStrategyCfg getStrategyConfig() {
+        IStrategyCfg delegate = getDelegate().getStrategyConfig();
         return delegate != null ? new StrategyCfg(delegate, this) : getParent() != null ? getParent().getStrategyConfig() : DefaultConfig.DEFAULT_STRATEGY_CONFIG;
     }
 
     // Warning: Sources are additive, not failback-ing
     @Override
-    default List<org.someth2say.taijitu.config.interfaces.ISourceCfg> getSourceConfigs() {
-        List<org.someth2say.taijitu.config.interfaces.ISourceCfg> delegates = getDelegate().getSourceConfigs();
-        List<org.someth2say.taijitu.config.interfaces.ISourceCfg> localSources = delegates.stream().map(dele -> new SourceCfg(dele, this)).collect(Collectors.toList());
-        if (getParent() != null) {
-            localSources.addAll(getParent().getSourceConfigs());
-        } else {
-            //TODO: May be there is any default sources?
+    default List<ISourceCfg> getSourceConfigs() {
+        List<ISourceCfg> delegates = getDelegate().getSourceConfigs();
+        List<ISourceCfg> localSources = null;
+        if (delegates != null) {
+            localSources = delegates.stream().map(dele -> new SourceCfg(dele, this)).collect(Collectors.toList());
         }
-        return localSources;
+        List<ISourceCfg> parentSources = null;
+        if (getParent() != null) {
+            parentSources = getParent().getSourceConfigs();
+        }
+        //TODO: No default source config?
+        return safeUnion(localSources, parentSources);
     }
 
     @Override
@@ -39,28 +51,37 @@ public interface IComparisonCfgDefaults<T extends IComparisonCfg> extends ICompa
 
     // Warning: equalities are additive, not failback-ing
     @Override
-    default List<org.someth2say.taijitu.config.interfaces.IEqualityCfg> getEqualityConfigs() {
-        List<org.someth2say.taijitu.config.interfaces.IEqualityCfg> equalityConfigs = getDelegate().getEqualityConfigs();
-
-        List<org.someth2say.taijitu.config.interfaces.IEqualityCfg> equalities = equalityConfigs.stream().map(dele -> new EqualityCfg(dele, this)).collect(Collectors.toList());
-        if (getParent() != null) {
-            equalities.addAll(getParent().getEqualityConfigs());
-        } else {
-            equalities.add(DefaultConfig.DEFAULT_EQUALITY_CONFIG);
+    default List<IEqualityCfg> getEqualityConfigs() {
+        List<IEqualityCfg> delegates = getDelegate().getEqualityConfigs();
+        List<IEqualityCfg> equalityCfgs = null;
+        if (delegates != null) {
+            equalityCfgs = delegates.stream().map(dele -> new EqualityCfg(dele, this)).collect(Collectors.toList());
         }
 
-        return equalities;
+        List<IEqualityCfg> parentCfgs = null;
+        if (getParent() != null) {
+            parentCfgs = getParent().getEqualityConfigs();
+        }
+
+        return safeUnion(equalityCfgs, parentCfgs, DefaultConfig.DEFAULT_EQUALITY_CONFIG);
+
     }
 
     @Override
-    default List<org.someth2say.taijitu.config.interfaces.IPluginCfg> getComparisonPluginConfigs() {
-        List<org.someth2say.taijitu.config.interfaces.IPluginCfg> delegates = getDelegate().getComparisonPluginConfigs();
-        List<org.someth2say.taijitu.config.interfaces.IPluginCfg> plugins = delegates.stream().map(dele -> new PluginCfg(dele, this)).collect(Collectors.toList());
-        if (getParent()!=null){
-            plugins.addAll(getParent().getComparisonPluginConfigs());
-        } else {
-            plugins.addAll(DefaultConfig.DEFAULT_PLUGINS_CONFIG);
+    default List<IPluginCfg> getComparisonPluginConfigs() {
+        List<IPluginCfg> delegates = getDelegate().getComparisonPluginConfigs();
+        List<IPluginCfg> plugins = null;
+        if (delegates != null) {
+            plugins = delegates.stream().map(dele -> new PluginCfg(dele, this)).collect(Collectors.toList());
         }
-        return plugins;
+        List<IPluginCfg> parentPlugins = null;
+        if (getParent() != null) {
+            parentPlugins = getParent().getComparisonPluginConfigs();
+        }
+
+        return safeUnion(plugins, parentPlugins, DefaultConfig.DEFAULT_PLUGINS_CONFIG);
+
+
     }
+
 }
