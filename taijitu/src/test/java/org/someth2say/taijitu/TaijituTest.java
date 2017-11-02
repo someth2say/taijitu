@@ -1,9 +1,6 @@
 package org.someth2say.taijitu;
 
-import org.apache.commons.configuration2.ConfigurationUtils;
-import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
-import org.apache.commons.configuration2.PropertiesConfiguration;
-import org.apache.commons.configuration2.YAMLConfiguration;
+import org.apache.commons.configuration2.*;
 import org.apache.commons.configuration2.builder.BasicConfigurationBuilder;
 import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
 import org.apache.commons.configuration2.ex.ConfigurationException;
@@ -20,6 +17,7 @@ import org.someth2say.taijitu.config.DefaultConfig;
 import org.someth2say.taijitu.config.delegates.simple.*;
 import org.someth2say.taijitu.config.impl.TaijituCfg;
 import org.someth2say.taijitu.config.interfaces.*;
+import org.someth2say.taijitu.source.csv.CSVFileSource;
 import org.someth2say.taijitu.source.query.ConnectionManager;
 import org.someth2say.taijitu.source.query.ResultSetSource;
 import org.someth2say.taijitu.strategy.mapping.MappingStrategy;
@@ -63,13 +61,6 @@ public class TaijituTest {
         );
     }
 
-    //    private static DatabaseConfigIface getDatabaseConfig(Properties databaseProps) throws ConfigurationException {
-//        final PropertiesConfiguration configuration = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).getConfiguration();
-//        putAll(configuration, databaseProps, "");
-//        ImmutableHierarchicalConfiguration immutableHierarchicalConfiguration = ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(configuration));
-//        return new ApacheDatabase(immutableHierarchicalConfiguration);
-//    }
-
     @After
     public void dropTables() throws SQLException, ConfigurationException {
         Connection conn = ConnectionManager.getConnection(TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD));
@@ -77,16 +68,13 @@ public class TaijituTest {
     }
 
     @Test
-    public void genericTest() throws TaijituException, SQLException, ConfigurationException, InterruptedException {
+    public void basicDBTest() throws TaijituException, SQLException, ConfigurationException, InterruptedException {
         // Create the tables and test data
+        final Properties databaseProps = buildDbSampleData();
 
-        final Properties databaseProps = TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD);
-        buildDBs(databaseProps);
-
-        //final ImmutableHierarchicalConfiguration configuration = getApacheConfiguration();
         final ITaijituCfg configuration = getTaijituConfig(databaseProps);
 
-        final ComparisonResult[] comparisonResults = new Taijitu().compare(configuration);
+        final ComparisonResult[] comparisonResults = Taijitu.compare(configuration);
 
         assertEquals(2, comparisonResults.length);
         final ComparisonResult firstResult = comparisonResults[0];
@@ -97,22 +85,86 @@ public class TaijituTest {
         assertEquals(1, secondResult.getDifferent().size());
     }
 
-    private ITaijituCfg getTaijituConfig(Properties databaseProps) throws SQLException, ConfigurationException {
+    @Test
+    public void apacheDBTest() throws TaijituException, SQLException, ConfigurationException, InterruptedException {
+        // Create the tables and test data
+        final Properties sourceBuildProperties = buildDbSampleData();
+
+        final ImmutableHierarchicalConfiguration configuration = getApacheConfiguration(sourceBuildProperties);
+
+        final ComparisonResult[] comparisonResults = Taijitu.compare(configuration);
+
+        assertEquals(2, comparisonResults.length);
+        final ComparisonResult firstResult = comparisonResults[0];
+        assertEquals(0, firstResult.getDisjoint().size());
+        assertEquals(0, firstResult.getDifferent().size());
+        final ComparisonResult secondResult = comparisonResults[1];
+        assertEquals(0, secondResult.getDisjoint().size());
+        assertEquals(1, secondResult.getDifferent().size());
+    }
+
+    @Test
+    public void CSVTest() throws TaijituException, SQLException, ConfigurationException, InterruptedException {
+        // Create the tables and test data
+        final TaijituCfg configuration = getCSVConfiguration();
+
+        final ComparisonResult[] comparisonResults = Taijitu.compare(configuration);
+
+        assertEquals(2, comparisonResults.length);
+        final ComparisonResult firstResult = comparisonResults[0];
+        assertEquals(0, firstResult.getDisjoint().size());
+        assertEquals(0, firstResult.getDifferent().size());
+        final ComparisonResult secondResult = comparisonResults[1];
+        assertEquals(0, secondResult.getDisjoint().size());
+        assertEquals(1, secondResult.getDifferent().size());
+    }
+
+    private TaijituCfg getCSVConfiguration() {
+        BasicTaijituCfg basicTaijituCfg = new BasicTaijituCfg("");
+
+        // Comparisons
+
+        Properties s1buildProperties = new Properties();
+        s1buildProperties.setProperty(ConfigurationLabels.Comparison.FILE_PATH, "file://junit1.csv");
+
+        Properties s2buildProperties = new Properties();
+        s2buildProperties.setProperty(ConfigurationLabels.Comparison.FILE_PATH, "file://junit2.csv");
+
+        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", CSVFileSource.NAME, null, s1buildProperties);
+        BasicSourceCfg targetSrc = new BasicSourceCfg("target", CSVFileSource.NAME, null, s2buildProperties);
+
+        BasicComparisonCfg comp1 = new BasicComparisonCfg("csv", List.of("KEY"), List.of(sourceSrc, targetSrc));
+        basicTaijituCfg.setComparisons(List.of(comp1));
+
+        //Strategy
+        basicTaijituCfg.setStrategyConfig(new BasicStrategyCfg(strategyName));
+
+        // Equality
+        BasicEqualityCfg stringEq = new BasicEqualityCfg(CaseInsensitiveEqualityStrategy.NAME, String.class.getName(), null);
+        BasicEqualityCfg numberEq = new BasicEqualityCfg(ValueThresholdEqualityStrategy.NAME, Number.class.getName(), null, "2");
+        IEqualityCfg timestampEq = new BasicEqualityCfg(TimestampThresholdEqualityStrategy.NAME, Timestamp.class.getName(), null, "100");
+        basicTaijituCfg.setEqualityConfigs(List.of(stringEq, numberEq, timestampEq));
+
+        return new TaijituCfg(basicTaijituCfg);
+    }
+
+
+    private ITaijituCfg getTaijituConfig(Properties sourceBuildProperties) throws SQLException, ConfigurationException {
         BasicTaijituCfg basicTaijituCfg = new BasicTaijituCfg("");
 
         // Databases
         // Nothing, will add to sources
-
+        basicTaijituCfg.setBuildProperties(sourceBuildProperties);
         // Comparisons
 
-        Properties query1Props = new Properties();
-        query1Props.setProperty(ConfigurationLabels.Comparison.STATEMENT, "select * from test");
+        Properties s1fetchProperties = new Properties();
+        s1fetchProperties.setProperty(ConfigurationLabels.Comparison.STATEMENT, "select * from test");
 
-        Properties query2Props = new Properties();
-        query2Props.setProperty(ConfigurationLabels.Comparison.STATEMENT, "select * from test2");
+        Properties s2fetchProperties = new Properties();
+        s2fetchProperties.setProperty(ConfigurationLabels.Comparison.STATEMENT, "select * from test2");
 
-        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", databaseProps, query1Props, ResultSetSource.NAME);
-        BasicSourceCfg targetSrc = new BasicSourceCfg("source", databaseProps, query2Props, ResultSetSource.NAME);
+        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", ResultSetSource.NAME, s1fetchProperties, null);
+        BasicSourceCfg targetSrc = new BasicSourceCfg("target", ResultSetSource.NAME, s2fetchProperties, null);
 
         BasicComparisonCfg comp1 = new BasicComparisonCfg("test1", List.of("KEY"), List.of(sourceSrc, sourceSrc));
         BasicComparisonCfg comp2 = new BasicComparisonCfg("test2", List.of("KEY"), List.of(sourceSrc, targetSrc));
@@ -130,18 +182,17 @@ public class TaijituTest {
         return new TaijituCfg(basicTaijituCfg);
     }
 
-
-    private ImmutableHierarchicalConfiguration getApacheConfiguration(Properties databaseProps) throws SQLException, ConfigurationException {
+    private ImmutableHierarchicalConfiguration getApacheConfiguration(Properties sourceBuildProperties) throws SQLException, ConfigurationException {
 
         final PropertiesConfiguration properties = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).getConfiguration();
 
         properties.setListDelimiterHandler(new DefaultListDelimiterHandler(DefaultConfig.DEFAULT_LIST_DELIMITER));
         //Databases
-        //putAll(properties, databaseProps, DATABASE + ".");
+        //putAll(properties, sourceBuildProperties, DATABASE + ".");
 
         // Comparisons
-        Properties sourceProps1 = makeQueryProps("select * from test", databaseProps);
-        Properties sourceProps2 = makeQueryProps("select * from test2", databaseProps);
+        Properties sourceProps1 = makeQueryProps("select * from test", sourceBuildProperties);
+        Properties sourceProps2 = makeQueryProps("select * from test2", sourceBuildProperties);
         putAll(properties, makeComparisonProps("test1", "KEY", sourceProps1, sourceProps1, null), "");
         putAll(properties, makeComparisonProps("test2", "KEY", sourceProps1, sourceProps2, null), "");
 
@@ -162,13 +213,12 @@ public class TaijituTest {
 
         dumpConfig(configuration);
 
-        // Setup
-
 
         return configuration;
     }
 
-    private void buildDBs(Properties databaseProps) throws SQLException {
+    private Properties buildDbSampleData() throws SQLException {
+        final Properties databaseProps = TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD);
         Connection conn = ConnectionManager.getConnection(databaseProps); // This generate the DB in H2
 
         String[] commonSchema = {
@@ -201,6 +251,7 @@ public class TaijituTest {
         TestUtils.createTable(conn, "test2", commonSchema, commonValues);
 
         conn.close();
+        return databaseProps;
     }
 
 

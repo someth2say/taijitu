@@ -4,6 +4,8 @@ import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.config.DefaultConfig;
 import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
+import java.util.NoSuchElementException;
+
 public interface ApacheEqualityCfgDefaults extends ApacheCfgDefaults, IEqualityCfg {
 
     @Override
@@ -18,7 +20,11 @@ public interface ApacheEqualityCfgDefaults extends ApacheCfgDefaults, IEqualityC
 
     @Override
     default Boolean isFieldClassStrict() {
-        return getConfiguration().getBoolean(ConfigurationLabels.Comparison.FIELD_CLASS_STRICT);
+        try {
+            return getConfiguration().getBoolean(ConfigurationLabels.Comparison.FIELD_CLASS_STRICT);
+        } catch (NoSuchElementException e){
+            return null;
+        }
     }
 
     @Override

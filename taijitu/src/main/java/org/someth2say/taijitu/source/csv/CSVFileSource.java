@@ -1,7 +1,11 @@
 package org.someth2say.taijitu.source.csv;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
@@ -22,8 +26,9 @@ public class CSVFileSource implements Source {
 
     private static class BuildProperties {
         final String path;
-        BuildProperties(Properties properties){
-            this.path = properties.getProperty(ConfigurationLabels.PATH);
+
+        BuildProperties(Properties properties) {
+            this.path = properties.getProperty(ConfigurationLabels.Comparison.FILE_PATH);
         }
     }
 
@@ -40,14 +45,16 @@ public class CSVFileSource implements Source {
     private CSVTupleBuilder builder;
     private final Stream<String> lineStream;
 
-    public CSVFileSource(final ISourceCfg iSource, final IComparisonCfg comparisonConfigIface, final ComparisonContext context) throws IOException {
+    public CSVFileSource(final ISourceCfg iSource, final IComparisonCfg comparisonConfigIface, final ComparisonContext context) throws IOException, URISyntaxException {
         this.fileConfig = iSource;
         this.comparisonConfigIface = comparisonConfigIface;
         this.context = context;
 
         BuildProperties buildProperties = new BuildProperties(iSource.getBuildProperties());
 
-        this.lineStream = Files.lines(Paths.get(buildProperties.path));
+        URL resource = CSVFileSource.class.getResource(buildProperties.path);
+        File file = new File(resource.toURI());
+        this.lineStream = Files.lines(file.toPath());
     }
 
 

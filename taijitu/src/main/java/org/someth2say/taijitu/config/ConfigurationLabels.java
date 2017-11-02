@@ -8,9 +8,6 @@ public final class ConfigurationLabels {
     public static final String DATE_PARAMETER_KEYWORD = "Date";
     public static final String DATABASE_SECTION = "database";
 
-    // CSV Properties
-    public final static String PATH = "path";
-
     private ConfigurationLabels() {
     }
 

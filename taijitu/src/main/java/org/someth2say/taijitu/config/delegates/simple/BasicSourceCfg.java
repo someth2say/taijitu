@@ -13,7 +13,7 @@ public class BasicSourceCfg implements ISourceCfg {
     private Properties fetchProperties;
     private Properties buildProperties;
 
-    public BasicSourceCfg(String name, Properties buildProperties, Properties fetchProperties, String type) {
+    public BasicSourceCfg(String name, String type, Properties fetchProperties, Properties buildProperties) {
         this.type = type;
         this.name = name;
         this.buildProperties = buildProperties;
