@@ -3,7 +3,7 @@ package org.someth2say.taijitu.strategy.mapping;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.compare.ComparisonResult;
-import org.someth2say.taijitu.compare.ComparisonResult.QueryAndTuple;
+import org.someth2say.taijitu.compare.ComparisonResult.SourceAndTuple;
 import org.someth2say.taijitu.compare.SynchronizedComparisonResult;
 import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
@@ -42,7 +42,7 @@ public class MappingStrategy extends AbstractComparisonStrategy implements Compa
         //1.- Build/run mapping tasks
         //TODO: Another option is running queries/pages alternating, so we can "restrict" memory usage, but only using a single thread
         final ExecutorService executorService = Executors.newFixedThreadPool(2);
-        Map<ComparableTuple, QueryAndTuple> sharedMap = new ConcurrentHashMap<>();
+        Map<ComparableTuple, SourceAndTuple> sharedMap = new ConcurrentHashMap<>();
         Runnable sourceMapper = new TupleMapper(source.iterator(), sharedMap, result, source.getConfig());
         Runnable targetMapper = new TupleMapper(target.iterator(), sharedMap, result, target.getConfig());
 
@@ -52,7 +52,7 @@ public class MappingStrategy extends AbstractComparisonStrategy implements Compa
         shutdownAndAwaitTermination(executorService);
 
         //2.- When both mapping tasks are completed, remaining data are source/target only
-        final Collection<QueryAndTuple> entries = sharedMap.values();
+        final Collection<SourceAndTuple> entries = sharedMap.values();
         result.addAllDisjoint(entries);
 
         return result;
@@ -79,11 +79,11 @@ public class MappingStrategy extends AbstractComparisonStrategy implements Compa
 
     private class TupleMapper implements Runnable {
         private final Iterator<ComparableTuple> tupleIterator;
-        private final Map<ComparableTuple, ComparisonResult.QueryAndTuple> sharedSet;
+        private final Map<ComparableTuple, ComparisonResult.SourceAndTuple> sharedSet;
         private final SynchronizedComparisonResult result;
         private final ISourceCfg iSource;
 
-        private TupleMapper(final Iterator<ComparableTuple> tupleIterator, final Map<ComparableTuple, QueryAndTuple> sharedMap, final SynchronizedComparisonResult result, ISourceCfg iSource) {
+        private TupleMapper(final Iterator<ComparableTuple> tupleIterator, final Map<ComparableTuple, SourceAndTuple> sharedMap, final SynchronizedComparisonResult result, ISourceCfg iSource) {
             this.tupleIterator = tupleIterator;
             this.sharedSet = sharedMap;
             this.result = result;
@@ -94,8 +94,8 @@ public class MappingStrategy extends AbstractComparisonStrategy implements Compa
         public void run() {
             for (ComparableTuple thisRecord = getNextRecord(tupleIterator); thisRecord != null; thisRecord = getNextRecord(tupleIterator)) {
 
-                QueryAndTuple thisQueryAndTuple = new QueryAndTuple(iSource, thisRecord);
-                final QueryAndTuple otherQueryAndTuple = sharedSet.putIfAbsent(thisRecord, thisQueryAndTuple);
+                SourceAndTuple thisQueryAndTuple = new SourceAndTuple(iSource, thisRecord);
+                final SourceAndTuple otherQueryAndTuple = sharedSet.putIfAbsent(thisRecord, thisQueryAndTuple);
                 if (otherQueryAndTuple != null) {
                     //we have a key match ...
                     sharedSet.remove(otherQueryAndTuple.getValue());

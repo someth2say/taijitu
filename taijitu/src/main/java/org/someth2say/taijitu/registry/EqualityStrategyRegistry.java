@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @SuppressWarnings("rawtypes")
 public class EqualityStrategyRegistry {
     private static final Logger logger = Logger.getLogger(EqualityStrategyRegistry.class);
-	private static Map<String, EqualityStrategy> instances = new ConcurrentHashMap<>();
+	private static Map<String, EqualityStrategy<?>> instances = new ConcurrentHashMap<>();
 
     private EqualityStrategyRegistry() {
     }

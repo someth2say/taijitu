@@ -77,11 +77,9 @@ public class TaijituTest {
 
         assertEquals(2, comparisonResults.length);
         final ComparisonResult firstResult = comparisonResults[0];
-        assertEquals(0, firstResult.getDisjoint().size());
-        assertEquals(0, firstResult.getDifferent().size());
+        assertEquals(0, firstResult.getMismatches().size());
         final ComparisonResult secondResult = comparisonResults[1];
-        assertEquals(0, secondResult.getDisjoint().size());
-        assertEquals(1, secondResult.getDifferent().size());
+        assertEquals(1, secondResult.getMismatches().size());
     }
 
     @Test
@@ -95,11 +93,9 @@ public class TaijituTest {
 
         assertEquals(2, comparisonResults.length);
         final ComparisonResult firstResult = comparisonResults[0];
-        assertEquals(0, firstResult.getDisjoint().size());
-        assertEquals(0, firstResult.getDifferent().size());
+        assertEquals(0, firstResult.getMismatches().size());
         final ComparisonResult secondResult = comparisonResults[1];
-        assertEquals(0, secondResult.getDisjoint().size());
-        assertEquals(1, secondResult.getDifferent().size());
+        assertEquals(1, secondResult.getMismatches().size());
 
         //TODO: Define exactly the expected difference!
 //        Collection<Pair<ComparisonResult.QueryAndTuple, ComparisonResult.QueryAndTuple>> different = secondResult.getDifferent();
@@ -116,8 +112,7 @@ public class TaijituTest {
 
         assertEquals(1, comparisonResults.length);
         final ComparisonResult firstResult = comparisonResults[0];
-        assertEquals(0, firstResult.getDisjoint().size());
-        assertEquals(0, firstResult.getDifferent().size());
+        assertEquals(0, firstResult.getMismatches().size());
     }
 
     private TaijituCfg getCSVConfiguration() {

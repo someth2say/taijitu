@@ -118,7 +118,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
     }
 
     private boolean isReportable(final ComparisonResult comparisonResult) {
-        return !comparisonResult.getDifferent().isEmpty() || !comparisonResult.getDisjoint().isEmpty();
+        return !comparisonResult.getMismatches().isEmpty();
     }
 //
 //    private File createOutputFolder() throws TaijituException {
