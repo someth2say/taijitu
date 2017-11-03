@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.tuple.builder;
+package org.someth2say.taijitu.source.query;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonContext;

@@ -114,10 +114,18 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         if (sources.size() >= 2) {
             boolean anyRegisterFailure = sources.stream().map(source -> registerSourceFieldsToContext(matcher, context, source)).anyMatch(Boolean.FALSE::equals);
             if (!anyRegisterFailure) {
-                //TODO: Generify
-                logger.info("Comparison "+ iComparisonCfg.getName() +" ready to run. Fields: " + StringUtils.join(context.getCanonicalFields(), ",") + " Keys: " + StringUtils.join(context.getCanonicalKeys(), ","));
-                return strategy.runComparison(sources.get(0), sources.get(1), context, config);
+                logger.info("Comparison " + iComparisonCfg.getName() + " ready to run. Fields: " + StringUtils.join(context.getCanonicalFields(), ",") + " Keys: " + StringUtils.join(context.getCanonicalKeys(), ","));
 
+                Source source = sources.get(0);
+                Source target = sources.get(1);
+                ComparisonResult comparisonResult = null;
+                try (source; target) {
+                    comparisonResult = strategy.runComparison(source, target, context, config);
+                    return comparisonResult;
+                } catch (Exception e) {
+                    logger.warn("Unable to close sources.", e);
+                    return comparisonResult;
+                }
             } else {
                 return null;
             }
@@ -129,15 +137,10 @@ public class TaijituRunner implements Callable<ComparisonResult> {
 
     private Source buildSource(final ISourceCfg sourceConfig, ComparisonContext context, IComparisonCfg comparisonConfig) {
 
-        //TODO: Decide the type for the source based on the config! Maybe delegating to a SourceCfg type...
         Class<? extends Source> sourceType = SourceTypeRegistry.getSourceType(sourceConfig.getType());
-
         try {
             Expression constructorExpression = new Expression(sourceType, "new", new Object[]{sourceConfig, comparisonConfig, context});
-            Source source = (Source) constructorExpression.getValue();
-            //if (registerSourceFieldsToContext(matcher, context, source)) {
-            return source;
-            //}
+            return (Source) constructorExpression.getValue();
         } catch (Exception e) {
             logger.error("Unable to create source for " + sourceConfig.getName(), e);
         }

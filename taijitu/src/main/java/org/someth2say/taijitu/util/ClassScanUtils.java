@@ -48,14 +48,15 @@ public class ClassScanUtils {
         final List<String> classNames = scanResult.getNamesOfClassesImplementing(implementedInterface);
         final List<Class<?>> clazzes = scanResult.classNamesToClassRefs(classNames);
         for (Class<?> clazz : clazzes) {
-            @SuppressWarnings("unchecked")
-			Class<? extends T> named = (Class<? extends T>) clazz;
             if (!Modifier.isAbstract(clazz.getModifiers())) {
                 try {
                     //TODO: Find a type-safer way...
                     Method getName = clazz.getDeclaredMethod("getName");
                     if (getName != null) {
                         Object getNameResult = getName.invoke(null);
+
+                        @SuppressWarnings("unchecked")
+                        Class<? extends T> named = (Class<? extends T>) clazz;
                         result.put(getNameResult.toString(), named);
                     }
                 } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {

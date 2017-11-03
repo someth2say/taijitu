@@ -1,7 +1,6 @@
 package org.someth2say.taijitu.source.csv;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -19,11 +18,16 @@ import org.someth2say.taijitu.registry.MatcherRegistry;
 import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.tuple.FieldDescription;
-import org.someth2say.taijitu.tuple.builder.CSVTupleBuilder;
 
 public class CSVResourceSource implements Source {
     public static final String NAME = "csv";
     public static final String FIELD_SEPARATOR = ",";
+    private Stream<String> lines;
+
+    @Override
+    public void close() throws Exception {
+        if (lines != null) lines.close();
+    }
 
     private static class BuildProperties {
         final String path;
@@ -53,22 +57,28 @@ public class CSVResourceSource implements Source {
         this.buildProperties = new BuildProperties(iSource.getBuildProperties());
     }
 
-    private Stream<String> getLines() {//throws IOException, URISyntaxException {
+    private Stream<String> getLines() {
         //TODO Close the file! (need Source to be AutoCloseable!)
         try {
             URL resource = new URL(buildProperties.path);
-            return new BufferedReader(new InputStreamReader(resource.openStream())).lines();
+            InputStream in = resource.openStream();
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
+            return bufferedReader.lines();
         } catch (IOException e) {
             // Try as file
             try {
                 URL resource = CSVResourceSource.class.getResource(buildProperties.path); //That will be null upon wrong file
-                return resource != null ? Files.lines(Paths.get(resource.toURI())) : null;
+                if (resource != null) {
+                    Path path = Paths.get(resource.toURI());
+                    return Files.lines(path);
+                } else {
+                    return null;
+                }
             } catch (IOException | URISyntaxException e2) {
                 return null;
             }
         }
     }
-
 
     @Override
     public List<FieldDescription> getFieldDescriptions() {
@@ -85,13 +95,14 @@ public class CSVResourceSource implements Source {
                 }
                 return result;
             }
+            lines.close();
         }
         return null;
     }
 
     @Override
     public Iterator<ComparableTuple> iterator() {
-        Stream<String> lines = getLines();
+        lines = getLines();
         if (lines != null) {
             return lines.skip(1).map(s -> getTupleBuilder().apply(s)).iterator();
         } else {

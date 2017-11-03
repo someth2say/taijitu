@@ -13,7 +13,6 @@ import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.tuple.FieldDescription;
 import org.someth2say.taijitu.tuple.TupleBuilder;
-import org.someth2say.taijitu.tuple.builder.ResultSetTupleBuilder;
 
 import java.sql.*;
 import java.sql.Date;
@@ -47,7 +46,6 @@ public class ResultSetSource implements Source {
 
         FetchProperties(Properties properties) {
             this.statement = properties.getProperty(ConfigurationLabels.Comparison.STATEMENT);
-            //TODO: Default and parse-safety
             String property = properties.getProperty(ConfigurationLabels.Setup.FETCH_SIZE);
 
             int fs;
@@ -60,7 +58,7 @@ public class ResultSetSource implements Source {
 
             String qp = properties.getProperty(ConfigurationLabels.Comparison.QUERY_PARAMETERS);
             if (qp != null) {
-                this.queryParameters = List.of(StringUtils.split(qp, ","));
+                this.queryParameters = List.of(StringUtils.split(qp, DefaultConfig.DEFAULT_LIST_DELIMITER));
             } else {
                 this.queryParameters = Collections.emptyList();
             }
@@ -122,7 +120,7 @@ public class ResultSetSource implements Source {
     }
 
 
-    private void close() {
+    public void close() {
         try {
             resultSet.close();
             try {

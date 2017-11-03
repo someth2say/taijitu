@@ -108,7 +108,6 @@ public class BasicTaijituCfg implements ITaijituCfg {
         this.fetchProperties = fetchProperties;
     }
 
-
     public BasicTaijituCfg(String name) {
         this.name = name;
     }

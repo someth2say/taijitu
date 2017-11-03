@@ -124,10 +124,10 @@ public class TaijituTest {
     private TaijituCfg getCSVConfiguration() {
         BasicTaijituCfg basicTaijituCfg = new BasicTaijituCfg("");
         //basicTaijituCfg.setConsoleLog("DEBUG");
+
         // Comparisons
 
         Properties s1buildProperties = new Properties();
-//        s1buildProperties.setProperty(ConfigurationLabels.Comparison.FILE_PATH, "/junit1.csv");
         //URL Scheme
         s1buildProperties.setProperty(ConfigurationLabels.Comparison.RESOUCE, "http://samplecsvs.s3.amazonaws.com/Sacramentorealestatetransactions.csv");
 
@@ -136,7 +136,6 @@ public class TaijituTest {
         s2buildProperties.setProperty(ConfigurationLabels.Comparison.RESOUCE, "/csv/Sacramentorealestatetransactions.csv");
         // File scheme (must be absolute)
 //        s2buildProperties.setProperty(ConfigurationLabels.Comparison.RESOUCE, "file:///"+ ClassLoader.getSystemResource(".").getPath() +"/csv/Sacramentorealestatetransactions.csv");
-
 
         BasicSourceCfg sourceSrc = new BasicSourceCfg("source", CSVResourceSource.NAME, null, s1buildProperties);
         BasicSourceCfg targetSrc = new BasicSourceCfg("target", CSVResourceSource.NAME, null, s2buildProperties);

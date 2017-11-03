@@ -19,10 +19,9 @@ public class ComparisonContext {
 
     private final IComparisonCfg comparisonConfigIface;
 
-    //TODO: This hurts! should be final...
     private List<FieldDescription> canonicalFields;
     private List<FieldDescription> canonicalKeys;
-    private List<IEqualityCfg> equalityConfigIfaces;
+    private List<IEqualityCfg> iEqualityCfgs;
 
     private Map<String, List<FieldDescription>> providedFieldsMap = new HashMap<>();
 
@@ -49,13 +48,13 @@ public class ComparisonContext {
                 canonicalFields = providedFields;
                 canonicalKeys = providedKeyFields;
                 rebuildIndexes();
-                updateEqualityConfigs();
+                buildEqualityConfigs();
             } else {
                 // Already have canonical fields, so should shrink
                 if (shrinkCanonicalFieldsToProvided(fieldMatcher, providedFields)) {
                     rebuildIndexes();
-                    //TODO: Maybe equalityConfigIfaces can be shrink with fields...
-                    updateEqualityConfigs();
+                    //TODO: Maybe equality configs can be shrink with fields...
+                    buildEqualityConfigs();
                 }
             }
             return true;
@@ -81,10 +80,10 @@ public class ComparisonContext {
         return result;
     }
 
-    private void updateEqualityConfigs() {
-        equalityConfigIfaces = new ArrayList<>(canonicalFields.size());
+    private void buildEqualityConfigs() {
+        iEqualityCfgs = new ArrayList<>(canonicalFields.size());
         for (FieldDescription fieldDescription : canonicalFields) {
-            equalityConfigIfaces.add(getEqualityConfigFor(fieldDescription.getClazz(), fieldDescription.getName(), comparisonConfigIface.getEqualityConfigs()));
+            iEqualityCfgs.add(getEqualityConfigFor(fieldDescription.getClazz(), fieldDescription.getName(), comparisonConfigIface.getEqualityConfigs()));
         }
     }
 
@@ -172,6 +171,6 @@ public class ComparisonContext {
     }
 
     public List<IEqualityCfg> getIEqualitys() {
-        return equalityConfigIfaces;
+        return iEqualityCfgs;
     }
 }
