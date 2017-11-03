@@ -158,7 +158,7 @@ public class ResultSetSource implements Source {
 
     @Override
     public Iterator<ComparableTuple> iterator() {
-        return new Iterator<>() {
+        return new Iterator<ComparableTuple>() {
 
             @Override
             public boolean hasNext() {

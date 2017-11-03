@@ -116,10 +116,8 @@ public class TaijituRunner implements Callable<ComparisonResult> {
             if (!anyRegisterFailure) {
                 logger.info("Comparison " + iComparisonCfg.getName() + " ready to run. Fields: " + StringUtils.join(context.getCanonicalFields(), ",") + " Keys: " + StringUtils.join(context.getCanonicalKeys(), ","));
 
-                Source source = sources.get(0);
-                Source target = sources.get(1);
                 ComparisonResult comparisonResult = null;
-                try (source; target) {
+                try (Source source = sources.get(0); Source target = sources.get(1);) {
                     comparisonResult = strategy.runComparison(source, target, context, config);
                     return comparisonResult;
                 } catch (Exception e) {
