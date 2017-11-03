@@ -2,7 +2,7 @@ package org.someth2say.taijitu.registry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.source.csv.CSVFileSource;
+import org.someth2say.taijitu.source.csv.CSVResourceSource;
 import org.someth2say.taijitu.source.query.ResultSetSource;
 import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.util.ClassScanUtils;
@@ -29,7 +29,7 @@ public class SourceTypeRegistry {
 
     public static void useDefaults() {
         addSourceType(ResultSetSource.NAME, ResultSetSource.class);
-        addSourceType(CSVFileSource.NAME, CSVFileSource.class);
+        addSourceType(CSVResourceSource.NAME, CSVResourceSource.class);
     }
 
     private static <T extends Source> void addSourceType(String name, Class<T> clazz) {

@@ -5,8 +5,8 @@ import org.someth2say.taijitu.config.delegates.apache.defaults.ApacheComparisonC
 
 public class ApacheComparison extends Apache<ApacheComparisonCfgDefaults> implements ApacheComparisonCfgDefaults {
 
-    public ApacheComparison(ImmutableHierarchicalConfiguration configuration, ApacheComparisonCfgDefaults parent) {
-        super(configuration, parent);
+    public ApacheComparison(ImmutableHierarchicalConfiguration configuration) {
+        super(configuration);
     }
 
 }

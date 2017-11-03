@@ -5,8 +5,8 @@ import org.someth2say.taijitu.config.delegates.apache.defaults.ApacheEqualityCfg
 
 public class ApacheEquality extends ApacheNamed<ApacheEqualityCfgDefaults> implements ApacheEqualityCfgDefaults {
 
-    public ApacheEquality(ImmutableHierarchicalConfiguration configuration, ApacheEqualityCfgDefaults parent) {
-        super(configuration, parent);
+    public ApacheEquality(ImmutableHierarchicalConfiguration configuration) {
+        super(configuration);
     }
 
 }

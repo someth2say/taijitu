@@ -7,7 +7,7 @@ import org.someth2say.taijitu.config.interfaces.ITaijituCfg;
 public class ApacheTaijitu extends ApacheComparison implements ApacheTaijituCfgDefaults {
 
     public ApacheTaijitu(ImmutableHierarchicalConfiguration configuration) {
-        super(configuration, null);
+        super(configuration);
     }
 
     public static ApacheTaijitu fromConfig(ITaijituCfg other){

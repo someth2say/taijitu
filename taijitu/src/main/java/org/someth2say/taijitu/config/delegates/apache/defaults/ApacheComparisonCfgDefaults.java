@@ -19,7 +19,7 @@ public interface ApacheComparisonCfgDefaults extends ApacheNamedCfgDefaults, ICo
     default IStrategyCfg getStrategyConfig() {
         try {
             ImmutableHierarchicalConfiguration strategyConfiguration = getConfiguration().immutableConfigurationAt(ConfigurationLabels.Comparison.STRATEGY);
-            return new ApacheStrategy(strategyConfiguration, this);
+            return new ApacheStrategy(strategyConfiguration);
         } catch (ConfigurationRuntimeException e){
             return null;
         }
@@ -38,19 +38,19 @@ public interface ApacheComparisonCfgDefaults extends ApacheNamedCfgDefaults, ICo
         } catch (ConfigurationRuntimeException e) {
             thisEqConfigs = Collections.emptyList();
         }
-        return thisEqConfigs.stream().map(ec -> new ApacheEquality(ec, this)).collect(Collectors.toList());
+        return thisEqConfigs.stream().map(ec -> new ApacheEquality(ec)).collect(Collectors.toList());
     }
 
     @Override
     default List<ISourceCfg> getSourceConfigs() {
         final List<ImmutableHierarchicalConfiguration> sourceConfigs = this.getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.Comparison.SOURCES);
-        return sourceConfigs.stream().map(configuration -> new ApacheSource(configuration, this)).collect(Collectors.toList());
+        return sourceConfigs.stream().map(configuration -> new ApacheSource(configuration)).collect(Collectors.toList());
     }
 
     @Override
     default List<IPluginCfg> getComparisonPluginConfigs() {
         final List<ImmutableHierarchicalConfiguration> pluginConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.Sections.PLUGINS);
-        return pluginConfigs.stream().map(pc -> new ApachePlugin(pc, this)).collect(Collectors.toList());
+        return pluginConfigs.stream().map(pc -> new ApachePlugin(pc)).collect(Collectors.toList());
     }
 
 }

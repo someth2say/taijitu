@@ -6,8 +6,8 @@ import org.someth2say.taijitu.config.delegates.apache.defaults.ApacheSourceCfgDe
 public class ApacheSource extends ApacheNamed<ApacheSourceCfgDefaults> implements ApacheSourceCfgDefaults {
 
 
-    public ApacheSource(ImmutableHierarchicalConfiguration configuration, ApacheSourceCfgDefaults parent) {
-        super(configuration, parent);
+    public ApacheSource(ImmutableHierarchicalConfiguration configuration) {
+        super(configuration);
     }
 
 

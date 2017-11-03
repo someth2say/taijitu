@@ -6,7 +6,7 @@ import org.someth2say.taijitu.config.delegates.apache.defaults.ApacheNamedCfgDef
 
 public abstract class ApacheNamed<P extends ApacheCfgDefaults> extends Apache<P> implements ApacheNamedCfgDefaults {
 
-    public ApacheNamed(ImmutableHierarchicalConfiguration configuration, P parent) {
-        super(configuration, parent);
+    public ApacheNamed(ImmutableHierarchicalConfiguration configuration) {
+        super(configuration);
     }
 }

@@ -1,5 +1,6 @@
 package org.someth2say.taijitu;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.SimpleComparisonResult;
@@ -109,17 +110,19 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         }
     }
 
-    private ComparisonResult runComparisonForSources(ComparisonContext context, ComparisonStrategy strategy, IComparisonCfg comparisonConfigIface, FieldMatcher matcher, List<Source> sources) {
+    private ComparisonResult runComparisonForSources(ComparisonContext context, ComparisonStrategy strategy, IComparisonCfg iComparisonCfg, FieldMatcher matcher, List<Source> sources) {
         if (sources.size() >= 2) {
             boolean anyRegisterFailure = sources.stream().map(source -> registerSourceFieldsToContext(matcher, context, source)).anyMatch(Boolean.FALSE::equals);
             if (!anyRegisterFailure) {
                 //TODO: Generify
+                logger.info("Comparison "+ iComparisonCfg.getName() +" ready to run. Fields: " + StringUtils.join(context.getCanonicalFields(), ",") + " Keys: " + StringUtils.join(context.getCanonicalKeys(), ","));
                 return strategy.runComparison(sources.get(0), sources.get(1), context, config);
+
             } else {
                 return null;
             }
         } else {
-            logger.error("There should be at least 2 sources available in comparison " + comparisonConfigIface.getName() + " but " + sources.size() + " available");
+            logger.error("There should be at least 2 sources available in comparison " + iComparisonCfg.getName() + " but " + sources.size() + " available");
             return null;
         }
     }

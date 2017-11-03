@@ -5,12 +5,10 @@ import org.someth2say.taijitu.config.delegates.apache.defaults.ApacheCfgDefaults
 
 public abstract class Apache<P extends ApacheCfgDefaults> implements ApacheCfgDefaults {
     private final ImmutableHierarchicalConfiguration configuration;
-//    private final P parent;
 
 
-    public Apache(final ImmutableHierarchicalConfiguration configuration, P parent) {
+    public Apache(final ImmutableHierarchicalConfiguration configuration) {
         this.configuration = configuration;
-//        this.parent = parent;
     }
 
 
@@ -18,7 +16,19 @@ public abstract class Apache<P extends ApacheCfgDefaults> implements ApacheCfgDe
         return configuration;
     }
 
-//    public P getParent() {
-//        return parent;
-//    }
+    //TODO: Woho! Apache Configuration does not defines equals/hashcode! :'(
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Apache)) return false;
+
+        Apache<?> other = (Apache<?>) o;
+
+        return getConfiguration().equals(other.getConfiguration());
+    }
+
+    @Override
+    public int hashCode() {
+        return getConfiguration().hashCode();
+    }
 }

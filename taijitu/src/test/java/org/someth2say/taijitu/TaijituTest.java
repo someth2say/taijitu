@@ -17,7 +17,7 @@ import org.someth2say.taijitu.config.DefaultConfig;
 import org.someth2say.taijitu.config.delegates.simple.*;
 import org.someth2say.taijitu.config.impl.TaijituCfg;
 import org.someth2say.taijitu.config.interfaces.*;
-import org.someth2say.taijitu.source.csv.CSVFileSource;
+import org.someth2say.taijitu.source.csv.CSVResourceSource;
 import org.someth2say.taijitu.source.query.ConnectionManager;
 import org.someth2say.taijitu.source.query.ResultSetSource;
 import org.someth2say.taijitu.strategy.mapping.MappingStrategy;
@@ -101,6 +101,11 @@ public class TaijituTest {
         final ComparisonResult secondResult = comparisonResults[1];
         assertEquals(0, secondResult.getDisjoint().size());
         assertEquals(1, secondResult.getDifferent().size());
+
+        //TODO: Define exactly the expected difference!
+//        Collection<Pair<ComparisonResult.QueryAndTuple, ComparisonResult.QueryAndTuple>> different = secondResult.getDifferent();
+//        Pair<ComparisonResult.QueryAndTuple, ComparisonResult.QueryAndTuple> dif = different.iterator().next();
+//        dif.equals(new ImmutablePair<>(new ComparisonResult.QueryAndTuple(sourceCfg,sourceTuple), new ComparisonResult.QueryAndTuple(targetCfg,targetTuple)));
     }
 
     @Test
@@ -110,30 +115,33 @@ public class TaijituTest {
 
         final ComparisonResult[] comparisonResults = Taijitu.compare(configuration);
 
-        assertEquals(2, comparisonResults.length);
+        assertEquals(1, comparisonResults.length);
         final ComparisonResult firstResult = comparisonResults[0];
         assertEquals(0, firstResult.getDisjoint().size());
         assertEquals(0, firstResult.getDifferent().size());
-        final ComparisonResult secondResult = comparisonResults[1];
-        assertEquals(0, secondResult.getDisjoint().size());
-        assertEquals(1, secondResult.getDifferent().size());
     }
 
     private TaijituCfg getCSVConfiguration() {
         BasicTaijituCfg basicTaijituCfg = new BasicTaijituCfg("");
-
+        //basicTaijituCfg.setConsoleLog("DEBUG");
         // Comparisons
 
         Properties s1buildProperties = new Properties();
-        s1buildProperties.setProperty(ConfigurationLabels.Comparison.FILE_PATH, "file://junit1.csv");
+//        s1buildProperties.setProperty(ConfigurationLabels.Comparison.FILE_PATH, "/junit1.csv");
+        //URL Scheme
+        s1buildProperties.setProperty(ConfigurationLabels.Comparison.RESOUCE, "http://samplecsvs.s3.amazonaws.com/Sacramentorealestatetransactions.csv");
 
         Properties s2buildProperties = new Properties();
-        s2buildProperties.setProperty(ConfigurationLabels.Comparison.FILE_PATH, "file://junit2.csv");
+        // No scheme: File source (should be in classpath)
+        s2buildProperties.setProperty(ConfigurationLabels.Comparison.RESOUCE, "/csv/Sacramentorealestatetransactions.csv");
+        // File scheme (must be absolute)
+//        s2buildProperties.setProperty(ConfigurationLabels.Comparison.RESOUCE, "file:///"+ ClassLoader.getSystemResource(".").getPath() +"/csv/Sacramentorealestatetransactions.csv");
 
-        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", CSVFileSource.NAME, null, s1buildProperties);
-        BasicSourceCfg targetSrc = new BasicSourceCfg("target", CSVFileSource.NAME, null, s2buildProperties);
 
-        BasicComparisonCfg comp1 = new BasicComparisonCfg("csv", List.of("KEY"), List.of(sourceSrc, targetSrc));
+        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", CSVResourceSource.NAME, null, s1buildProperties);
+        BasicSourceCfg targetSrc = new BasicSourceCfg("target", CSVResourceSource.NAME, null, s2buildProperties);
+
+        BasicComparisonCfg comp1 = new BasicComparisonCfg("csv", List.of("street","price","latitude","longitude"), List.of(sourceSrc, targetSrc));
         basicTaijituCfg.setComparisons(List.of(comp1));
 
         //Strategy
@@ -151,6 +159,7 @@ public class TaijituTest {
 
     private ITaijituCfg getTaijituConfig(Properties sourceBuildProperties) throws SQLException, ConfigurationException {
         BasicTaijituCfg basicTaijituCfg = new BasicTaijituCfg("");
+        basicTaijituCfg.setConsoleLog("DEBUG");
 
         // Databases
         // Nothing, will add to sources
@@ -197,7 +206,8 @@ public class TaijituTest {
         putAll(properties, makeComparisonProps("test2", "KEY", sourceProps1, sourceProps2, null), "");
 
         // Disable plugins, 'cause we need to write nothing.
-        commonPropertiesSetup(properties);
+        properties.setProperty(ConfigurationLabels.Comparison.STRATEGY, strategyName);
+        properties.setProperty(ConfigurationLabels.Setup.CONSOLE_LOG, "DEBUG");
 
         //Add comparators
         //Case insensitive strings
@@ -266,13 +276,7 @@ public class TaijituTest {
 
     }
 
-    private void commonPropertiesSetup(PropertiesConfiguration testProperties) {
-        testProperties.setProperty(ConfigurationLabels.Comparison.STRATEGY, strategyName);
-        testProperties.setProperty(ConfigurationLabels.Sections.SETUP + "." + ConfigurationLabels.Setup.CONSOLE_LOG, "DEBUG");
-
-    }
-
-//
+    //
 //    @Test
 //    public void missingStrategyTest() throws TaijituException, QueryUtilsException, SQLException {
 //

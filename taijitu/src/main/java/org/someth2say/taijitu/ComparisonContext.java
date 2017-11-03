@@ -104,6 +104,7 @@ public class ComparisonContext {
     }
 
     private boolean fieldClassMatch(String fieldClassName, IEqualityCfg eq) {
+        if (fieldClassName == null) return false;
         String configClassName = eq.getFieldClass();
         if (configClassName == null) return false;
         if (eq.isFieldClassStrict()) {

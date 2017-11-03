@@ -6,7 +6,7 @@ import org.someth2say.taijitu.config.delegates.apache.defaults.ApacheStrategyCfg
 
 public class ApacheStrategy extends ApacheNamed<ApacheStrategyCfgDefaults> implements ApacheStrategyCfgDefaults {
 
-    public ApacheStrategy(ImmutableHierarchicalConfiguration configuration, ApacheStrategyCfgDefaults parent) {
-        super(configuration, parent);
+    public ApacheStrategy(ImmutableHierarchicalConfiguration configuration) {
+        super(configuration);
     }
 }

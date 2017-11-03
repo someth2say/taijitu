@@ -19,7 +19,7 @@ public interface ApacheTaijituCfgDefaults extends ApacheCfgDefaults, ITaijituCfg
     default List<IComparisonCfg> getComparisons() {
         final List<ImmutableHierarchicalConfiguration> comparisonConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.Sections.COMPARISON);
         if (comparisonConfigs != null) {
-            return comparisonConfigs.stream().map(cs -> new ApacheComparison(cs, this)).collect(Collectors.toList());
+            return comparisonConfigs.stream().map(cs -> new ApacheComparison(cs)).collect(Collectors.toList());
         }
         return null;
     }

@@ -5,7 +5,7 @@ import org.someth2say.taijitu.config.delegates.apache.defaults.ApachePluginCfgDe
 
 public class ApachePlugin extends ApacheNamed<ApachePluginCfgDefaults> implements ApachePluginCfgDefaults {
 
-    public ApachePlugin(ImmutableHierarchicalConfiguration configuration, ApachePluginCfgDefaults parent) {
-        super(configuration, parent);
+    public ApachePlugin(ImmutableHierarchicalConfiguration configuration) {
+        super(configuration);
     }
 }

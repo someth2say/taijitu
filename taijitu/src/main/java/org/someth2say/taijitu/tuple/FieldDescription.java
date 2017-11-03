@@ -35,6 +35,6 @@ public class FieldDescription {
 
     @Override
     public String toString() {
-        return name;
+        return name+"("+clazz+")";
     }
 }
