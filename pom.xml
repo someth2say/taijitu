@@ -8,7 +8,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-		<java.version>1.9</java.version>
+		<java.version>9</java.version>
 		<junit.version>4.12</junit.version>
 		<h2.version>1.4.193</h2.version>
 		<log4j.version>1.2.17</log4j.version>
@@ -94,9 +94,9 @@
 					</configuration>
 				</plugin>
 
-				<plugin>
+<!-- 				<plugin>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.6.0</version>
+					<version>3.7.0</version>
 					<configuration>
 						<source>${java.version}</source>
 						<target>${java.version}</target>
@@ -104,7 +104,20 @@
 							<arg>-Xlint:all,-options,-path</arg>
 						</compilerArgs>
 					</configuration>
+				</plugin> -->
+				
+	            <plugin>
+	                <groupId>org.apache.maven.plugins</groupId>
+	                <artifactId>maven-compiler-plugin</artifactId>
+	                <version>3.7.0</version>
+	                <configuration>
+	                    <source>${java.version}</source>
+	                    <target>${java.version}</target>
+	                    <showWarnings>true</showWarnings>
+	                    <showDeprecation>true</showDeprecation>
+	                </configuration>
 				</plugin>
+				
 			</plugins>
 		</pluginManagement>
 		<plugins>

@@ -57,6 +57,36 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+		 <!-- Still not available for Java 9
+		     <plugin>
+		       <groupId>org.apache.maven.plugins</groupId>
+		       <artifactId>maven-checkstyle-plugin</artifactId>
+		       <version>2.17</version>
+		       <executions>
+		         <execution>
+		           <id>validate</id>
+		           <phase>validate</phase>
+		           <configuration>
+		             <configLocation>checkstyle.xml</configLocation>
+		             <encoding>UTF-8</encoding>
+		             <consoleOutput>true</consoleOutput>
+		             <failsOnError>true</failsOnError>
+		             <linkXRef>false</linkXRef>
+		           </configuration>
+		           <goals>
+		             <goal>check</goal>
+		           </goals>
+		         </execution>
+		       </executions>
+		     </plugin>			
+ -->			
+	      <plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-pmd-plugin</artifactId>
+	        <version>3.8</version>
+	      </plugin>
+	       
 		</plugins>
 	</build>
 
@@ -76,12 +106,10 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-configuration2</artifactId>
-			<version>2.2</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
-			<version>1.9.3</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>
@@ -124,5 +152,5 @@
 			<artifactId>snakeyaml</artifactId>
 		</dependency>
 	</dependencies>
-
+  
 </project>
