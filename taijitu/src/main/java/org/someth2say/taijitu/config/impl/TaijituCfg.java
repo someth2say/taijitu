@@ -51,7 +51,6 @@ public class TaijituCfg
     private static ImmutableHierarchicalConfiguration buildConfiguration(String configFile, FileBasedConfigurationBuilder<PropertiesConfiguration> builder) throws TaijituException {
         try {
             final PropertiesConfiguration pConfig = builder.getConfiguration();
-            //TODO: This may be configurable...
             pConfig.setListDelimiterHandler(new DefaultListDelimiterHandler(DEFAULT_LIST_DELIMITER));
             final HierarchicalConfiguration<?> hConfig = ConfigurationUtils.convertToHierarchical(pConfig);
             return ConfigurationUtils.unmodifiableConfiguration(hConfig);

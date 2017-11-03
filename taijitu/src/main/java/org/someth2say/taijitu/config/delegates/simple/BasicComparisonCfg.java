@@ -1,6 +1,5 @@
 package org.someth2say.taijitu.config.delegates.simple;
 
-import org.someth2say.taijitu.config.DefaultConfig;
 import org.someth2say.taijitu.config.interfaces.*;
 
 import java.util.List;
@@ -23,7 +22,7 @@ public class BasicComparisonCfg implements IComparisonCfg {
     private Boolean isFieldClassStrict;
     private Object equalityParameters;
 
-    //TODO: Some for sourceCfg...
+    //TODO: Same for sourceCfg...
     private String type;
     private List<String> keyFields;
     private Properties buildProperties;

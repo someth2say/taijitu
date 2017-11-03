@@ -10,8 +10,4 @@ public class ApacheTaijitu extends ApacheComparison implements ApacheTaijituCfgD
         super(configuration);
     }
 
-    public static ApacheTaijitu fromConfig(ITaijituCfg other){
-        //TODO
-        return null;
-    }
 }

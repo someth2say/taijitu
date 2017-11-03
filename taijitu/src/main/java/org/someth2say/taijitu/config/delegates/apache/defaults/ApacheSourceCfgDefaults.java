@@ -21,13 +21,11 @@ public interface ApacheSourceCfgDefaults extends ApacheCfgDefaults, ISourceCfg {
 
     @Override
     default Properties getFetchProperties() {
-        //TODO: Investigate how to structure source properties (i.e. databaseProperties) so they can provided by parents
         return getConfiguration().getProperties(ConfigurationLabels.Comparison.SOURCE_FETCH_PROPERTIES);
     }
 
     @Override
     default Properties getBuildProperties() {
-        //TODO: Investigate how to structure source properties (i.e. databaseProperties) so they can provided by parents
         return getConfiguration().getProperties(ConfigurationLabels.Comparison.SOURCE_BUILD_PROPERTIES);
     }
 

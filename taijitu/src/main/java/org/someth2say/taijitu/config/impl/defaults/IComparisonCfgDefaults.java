@@ -39,7 +39,6 @@ public interface IComparisonCfgDefaults<T extends IComparisonCfg> extends ICompa
         if (getParent() != null) {
             parentSources = getParent().getSourceConfigs();
         }
-        //TODO: No default source config?
         return safeUnion(localSources, parentSources);
     }
 

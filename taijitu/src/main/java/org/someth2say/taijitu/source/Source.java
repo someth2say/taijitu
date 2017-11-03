@@ -8,7 +8,6 @@ import org.someth2say.taijitu.util.Named;
 import java.util.Iterator;
 import java.util.List;
 
-//TODO: Consider SourceCfg as a {@link AutoCloseable}
 public interface Source extends Named, AutoCloseable {
 
     List<FieldDescription> getFieldDescriptions();

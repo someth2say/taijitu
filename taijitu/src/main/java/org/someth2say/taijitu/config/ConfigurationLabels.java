@@ -5,16 +5,15 @@ package org.someth2say.taijitu.config;
  */
 //TODO: Deep cleanup
 public final class ConfigurationLabels {
-    public static final String DATE_PARAMETER_KEYWORD = "Date";
-    public static final String DATABASE_SECTION = "database";
-
     private ConfigurationLabels() {
+
+
+
+
     }
 
     public static final class Sections {
-        public static final String SETUP = "setup";
         public static final String COMPARISON = "comparison";
-        public static final String DATABASE = "database";
         public static final String PLUGINS = "plugin";
 
         private Sections() {
@@ -31,7 +30,7 @@ public final class ConfigurationLabels {
         public static final String QUERY_PARAMETERS = "queryParameters";
         public static final String EQUALITY_PARAMS = "parameters";
         public static final String FIELD_CLASS_STRICT = "exactClass";
-        public static final String RESOUCE = "resouce";
+        public static final String RESOURCE = "resouce";
         public static final String SOURCE_TYPE = "type";
         public static final String SOURCES = "sources";
         public static final String SOURCE_FETCH_PROPERTIES = "fetchProperties";

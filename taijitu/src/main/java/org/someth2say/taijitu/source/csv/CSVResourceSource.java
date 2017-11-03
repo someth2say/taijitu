@@ -33,12 +33,11 @@ public class CSVResourceSource implements Source {
         final String path;
 
         BuildProperties(Properties properties) {
-            this.path = properties.getProperty(ConfigurationLabels.Comparison.RESOUCE);
+            this.path = properties.getProperty(ConfigurationLabels.Comparison.RESOURCE);
         }
     }
 
-    //TODO: Considering adding an the last exception raised, so we can check the status.
-    private final IComparisonCfg comparisonConfigIface;
+    private final IComparisonCfg iComparisonCfg;
     private final ComparisonContext context;
 
     @Override
@@ -50,15 +49,14 @@ public class CSVResourceSource implements Source {
     private CSVTupleBuilder builder;
     private final BuildProperties buildProperties;
 
-    public CSVResourceSource(final ISourceCfg iSource, final IComparisonCfg comparisonConfigIface, final ComparisonContext context) throws IOException, URISyntaxException {
+    public CSVResourceSource(final ISourceCfg iSource, final IComparisonCfg iComparisonCfg, final ComparisonContext context) throws IOException, URISyntaxException {
         this.fileConfig = iSource;
-        this.comparisonConfigIface = comparisonConfigIface;
+        this.iComparisonCfg = iComparisonCfg;
         this.context = context;
         this.buildProperties = new BuildProperties(iSource.getBuildProperties());
     }
 
     private Stream<String> getLines() {
-        //TODO Close the file! (need Source to be AutoCloseable!)
         try {
             URL resource = new URL(buildProperties.path);
             InputStream in = resource.openStream();
@@ -113,7 +111,7 @@ public class CSVResourceSource implements Source {
 
     private CSVTupleBuilder getTupleBuilder() {
         if (builder == null) {
-            final FieldMatcher matcher = MatcherRegistry.getMatcher(comparisonConfigIface.getMatchingStrategyName());
+            final FieldMatcher matcher = MatcherRegistry.getMatcher(iComparisonCfg.getMatchingStrategyName());
             builder = new CSVTupleBuilder(matcher, context, fileConfig.getName());
         }
         return builder;

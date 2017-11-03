@@ -22,7 +22,6 @@ public class ResultSetSource implements Source {
     private static final Logger logger = Logger.getLogger(ResultSetSource.class);
     public static final String NAME = "query";
 
-    //TODO: Considering adding an the last exception raised, so we can check the status.
     private ResultSet resultSet;
     private PreparedStatement preparedStatement;
     private Connection connection;

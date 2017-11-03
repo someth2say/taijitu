@@ -35,7 +35,6 @@ import static org.junit.Assert.assertEquals;
 import static org.someth2say.taijitu.config.ConfigurationLabels.Comparison.*;
 import static org.someth2say.taijitu.config.ConfigurationLabels.Comparison.Fields.KEYS;
 import static org.someth2say.taijitu.config.ConfigurationLabels.Sections.COMPARISON;
-import static org.someth2say.taijitu.config.ConfigurationLabels.Sections.DATABASE;
 
 
 /**
@@ -129,18 +128,18 @@ public class TaijituTest {
 
         Properties s1buildProperties = new Properties();
         //URL Scheme
-        s1buildProperties.setProperty(ConfigurationLabels.Comparison.RESOUCE, "http://samplecsvs.s3.amazonaws.com/Sacramentorealestatetransactions.csv");
+        s1buildProperties.setProperty(ConfigurationLabels.Comparison.RESOURCE, "http://samplecsvs.s3.amazonaws.com/Sacramentorealestatetransactions.csv");
 
         Properties s2buildProperties = new Properties();
         // No scheme: File source (should be in classpath)
-        s2buildProperties.setProperty(ConfigurationLabels.Comparison.RESOUCE, "/csv/Sacramentorealestatetransactions.csv");
+        s2buildProperties.setProperty(ConfigurationLabels.Comparison.RESOURCE, "/csv/Sacramentorealestatetransactions.csv");
         // File scheme (must be absolute)
 //        s2buildProperties.setProperty(ConfigurationLabels.Comparison.RESOUCE, "file:///"+ ClassLoader.getSystemResource(".").getPath() +"/csv/Sacramentorealestatetransactions.csv");
 
         BasicSourceCfg sourceSrc = new BasicSourceCfg("source", CSVResourceSource.NAME, null, s1buildProperties);
         BasicSourceCfg targetSrc = new BasicSourceCfg("target", CSVResourceSource.NAME, null, s2buildProperties);
 
-        BasicComparisonCfg comp1 = new BasicComparisonCfg("csv", List.of("street","price","latitude","longitude"), List.of(sourceSrc, targetSrc));
+        BasicComparisonCfg comp1 = new BasicComparisonCfg("csv", List.of("street", "price", "latitude", "longitude"), List.of(sourceSrc, targetSrc));
         basicTaijituCfg.setComparisons(List.of(comp1));
 
         //Strategy
@@ -709,7 +708,7 @@ public class TaijituTest {
         }
 
         if (database != null) {
-            database.forEach((k, v) -> result.setProperty(comparisonPrefix + "." + DATABASE + "." + k, v.toString()));
+            result.setProperty(comparisonPrefix + ConfigurationLabels.Comparison.SOURCE_BUILD_PROPERTIES, linearizeProperties(database));
         }
 
         return result;

@@ -14,7 +14,6 @@ import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_SCAN_CLASSPATH
 
 public interface ApacheTaijituCfgDefaults extends ApacheCfgDefaults, ITaijituCfg, ApacheComparisonCfgDefaults, ApachePluginCfgDefaults {
 
-    //TODO: Migrate to lists
     @Override
     default List<IComparisonCfg> getComparisons() {
         final List<ImmutableHierarchicalConfiguration> comparisonConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.Sections.COMPARISON);

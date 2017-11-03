@@ -16,6 +16,7 @@ public class BasicTaijituCfg implements ITaijituCfg {
     private Boolean isUseScanClassPath;
     private IStrategyCfg strategyConfig;
     private String matchingStrategyName;
+
     private List<IEqualityCfg> equalityConfigs;
     private List<ISourceCfg> sourceConfigs;
     private List<IPluginCfg> comparisonPluginConfigs;
@@ -26,7 +27,7 @@ public class BasicTaijituCfg implements ITaijituCfg {
     private Boolean isFieldClassStrict;
     private Object equalityParameters;
 
-    //TODO: Some for sourceCfg...
+    //TODO: Same for sourceCfg...
     private String type;
     private List<String> keyFields;
     private Properties buildProperties;
