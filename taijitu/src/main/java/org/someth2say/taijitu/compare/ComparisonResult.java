@@ -1,9 +1,6 @@
 package org.someth2say.taijitu.compare;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
@@ -39,47 +36,21 @@ public abstract class ComparisonResult {
 		}
 	}
 
-	protected final IComparisonCfg comparisonConfigIface;
-
-	// final private Collection<Pair<QueryAndTuple, QueryAndTuple>> different;
-	// final private Collection<QueryAndTuple> disjoint;
-
 	private final Collection<Mismatch> mismatches;
 
-	ComparisonResult(final IComparisonCfg comparisonConfigIface, final Collection<Mismatch> mismatches) {
-		this.comparisonConfigIface = comparisonConfigIface;
+	ComparisonResult(final Collection<Mismatch> mismatches) {
 		this.mismatches = mismatches;
-		// this.different = different;
-		// this.disjoint = disjoint;
 	}
-
-	public IComparisonCfg getComparisonConfig() {
-		return comparisonConfigIface;
-	}
-
-	// public Collection<Pair<QueryAndTuple, QueryAndTuple>> getDifferent() {
-	// return different;
-	// }
-	//
-	// public Collection<QueryAndTuple> getDisjoint() {
-	// return disjoint;
-	// }
 
 	public void addDifference(final SourceAndTuple first, final SourceAndTuple second) {
-		// different.add(new ImmutablePair<>(first, second));
-
-		getMismatches().add(new Difference(List.of(first, second)));
+		getMismatches().add(new Difference(Arrays.asList(first, second)));
 	}
 
 	public void addDisjoint(final SourceAndTuple element) {
-		// disjoint.add(element);
-
-		getMismatches().add(new Missing(List.of(element)));
+		getMismatches().add(new Missing(Arrays.asList(element)));
 	}
 
 	public void addAllDisjoint(Collection<SourceAndTuple> entries) {
-		// disjoint.addAll(entries);
-
 		entries.forEach(this::addDisjoint);
 	}
 

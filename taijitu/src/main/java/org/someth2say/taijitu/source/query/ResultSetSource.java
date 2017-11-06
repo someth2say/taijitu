@@ -57,7 +57,7 @@ public class ResultSetSource implements Source {
 
             String qp = properties.getProperty(ConfigurationLabels.Comparison.QUERY_PARAMETERS);
             if (qp != null) {
-                this.queryParameters = List.of(StringUtils.split(qp, DefaultConfig.DEFAULT_LIST_DELIMITER));
+                this.queryParameters = Arrays.asList(StringUtils.split(qp, DefaultConfig.DEFAULT_LIST_DELIMITER));
             } else {
                 this.queryParameters = Collections.emptyList();
             }

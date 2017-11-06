@@ -134,8 +134,8 @@ public class TaijituTest {
         BasicSourceCfg sourceSrc = new BasicSourceCfg("source", CSVResourceSource.NAME, null, s1buildProperties);
         BasicSourceCfg targetSrc = new BasicSourceCfg("target", CSVResourceSource.NAME, null, s2buildProperties);
 
-        BasicComparisonCfg comp1 = new BasicComparisonCfg("csv", List.of("street", "price", "latitude", "longitude"), List.of(sourceSrc, targetSrc));
-        basicTaijituCfg.setComparisons(List.of(comp1));
+        BasicComparisonCfg comp1 = new BasicComparisonCfg("csv", Arrays.asList("street", "price", "latitude", "longitude"), Arrays.asList(sourceSrc, targetSrc));
+        basicTaijituCfg.setComparisons(Arrays.asList(comp1));
 
         //Strategy
         basicTaijituCfg.setStrategyConfig(new BasicStrategyCfg(strategyName));
@@ -144,7 +144,7 @@ public class TaijituTest {
         BasicEqualityCfg stringEq = new BasicEqualityCfg(CaseInsensitiveEqualityStrategy.NAME, String.class.getName(), null);
         BasicEqualityCfg numberEq = new BasicEqualityCfg(ValueThresholdEqualityStrategy.NAME, Number.class.getName(), null, "2");
         IEqualityCfg timestampEq = new BasicEqualityCfg(TimestampThresholdEqualityStrategy.NAME, Timestamp.class.getName(), null, "100");
-        basicTaijituCfg.setEqualityConfigs(List.of(stringEq, numberEq, timestampEq));
+        basicTaijituCfg.setEqualityConfigs(Arrays.asList(stringEq, numberEq, timestampEq));
 
         return new TaijituCfg(basicTaijituCfg);
     }
@@ -168,9 +168,9 @@ public class TaijituTest {
         BasicSourceCfg sourceSrc = new BasicSourceCfg("source", ResultSetSource.NAME, s1fetchProperties, null);
         BasicSourceCfg targetSrc = new BasicSourceCfg("target", ResultSetSource.NAME, s2fetchProperties, null);
 
-        BasicComparisonCfg comp1 = new BasicComparisonCfg("test1", List.of("KEY"), List.of(sourceSrc, sourceSrc));
-        BasicComparisonCfg comp2 = new BasicComparisonCfg("test2", List.of("KEY"), List.of(sourceSrc, targetSrc));
-        basicTaijituCfg.setComparisons(List.of(comp1, comp2));
+        BasicComparisonCfg comp1 = new BasicComparisonCfg("test1", Arrays.asList("KEY"), Arrays.asList(sourceSrc, sourceSrc));
+        BasicComparisonCfg comp2 = new BasicComparisonCfg("test2", Arrays.asList("KEY"), Arrays.asList(sourceSrc, targetSrc));
+        basicTaijituCfg.setComparisons(Arrays.asList(comp1, comp2));
 
         //Strategy
         basicTaijituCfg.setStrategyConfig(new BasicStrategyCfg(strategyName));
@@ -179,7 +179,7 @@ public class TaijituTest {
         BasicEqualityCfg stringEq = new BasicEqualityCfg(CaseInsensitiveEqualityStrategy.NAME, String.class.getName(), null);
         BasicEqualityCfg numberEq = new BasicEqualityCfg(ValueThresholdEqualityStrategy.NAME, Number.class.getName(), null, "2");
         IEqualityCfg timestampEq = new BasicEqualityCfg(TimestampThresholdEqualityStrategy.NAME, Timestamp.class.getName(), null, "100");
-        basicTaijituCfg.setEqualityConfigs(List.of(stringEq, numberEq, timestampEq));
+        basicTaijituCfg.setEqualityConfigs(Arrays.asList(stringEq, numberEq, timestampEq));
 
         return new TaijituCfg(basicTaijituCfg);
     }

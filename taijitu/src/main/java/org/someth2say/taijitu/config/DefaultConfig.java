@@ -10,6 +10,7 @@ import org.someth2say.taijitu.matcher.NamingFieldMatcher;
 import org.someth2say.taijitu.plugins.logging.TimeLoggingPlugin;
 import org.someth2say.taijitu.strategy.mapping.MappingStrategy;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class DefaultConfig {
@@ -24,8 +25,8 @@ public class DefaultConfig {
     public static final boolean DEFAULT_SCAN_CLASSPATH = false;
 
     public static final IStrategyCfg DEFAULT_STRATEGY_CONFIG = MappingStrategy.defaultConfig();
-    public static final List<IEqualityCfg> DEFAULT_EQUALITY_CONFIG = List.of(ToStringEqualityStrategy.defaultConfig());
-    public static final List<IPluginCfg> DEFAULT_PLUGINS_CONFIG = List.of(TimeLoggingPlugin.defaultConfig());
+    public static final List<IEqualityCfg> DEFAULT_EQUALITY_CONFIG = Arrays.asList(ToStringEqualityStrategy.defaultConfig());
+    public static final List<IPluginCfg> DEFAULT_PLUGINS_CONFIG = Arrays.asList(TimeLoggingPlugin.defaultConfig());
 
     public static final String DEFAULT_MATCHING_STRATEGY_NAME = NamingFieldMatcher.NAME;
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("yyyyMMdd");
@@ -35,5 +36,5 @@ public class DefaultConfig {
     public static final String DEFAULT_CONFIG_FILE = "taijitu.properties";
 
     public static final boolean DEFAULT_FIELD_CLASS_STRICT = false;
-    public static List<String> DEFAULT_KEY_FIELDS = List.of("*");
+    public static List<String> DEFAULT_KEY_FIELDS = Arrays.asList("*");
 }
