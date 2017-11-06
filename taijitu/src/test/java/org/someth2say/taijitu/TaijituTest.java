@@ -8,10 +8,10 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.someth2say.taijitu.compare.equality.CaseInsensitiveEqualityStrategy;
 import org.someth2say.taijitu.compare.ComparisonResult;
-import org.someth2say.taijitu.compare.equality.ValueThresholdEqualityStrategy;
-import org.someth2say.taijitu.compare.equality.TimestampThresholdEqualityStrategy;
+import org.someth2say.taijitu.compare.equality.value.CaseInsensitiveValueEquality;
+import org.someth2say.taijitu.compare.equality.value.TimestampThresholdValueEquality;
+import org.someth2say.taijitu.compare.equality.value.NumberThresholdValueEquality;
 import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.config.DefaultConfig;
 import org.someth2say.taijitu.config.delegates.simple.*;
@@ -141,9 +141,9 @@ public class TaijituTest {
         basicTaijituCfg.setStrategyConfig(new BasicStrategyCfg(strategyName));
 
         // Equality
-        BasicEqualityCfg stringEq = new BasicEqualityCfg(CaseInsensitiveEqualityStrategy.NAME, String.class.getName(), null);
-        BasicEqualityCfg numberEq = new BasicEqualityCfg(ValueThresholdEqualityStrategy.NAME, Number.class.getName(), null, "2");
-        IEqualityCfg timestampEq = new BasicEqualityCfg(TimestampThresholdEqualityStrategy.NAME, Timestamp.class.getName(), null, "100");
+        BasicEqualityCfg stringEq = new BasicEqualityCfg(CaseInsensitiveValueEquality.NAME, String.class.getName(), null);
+        BasicEqualityCfg numberEq = new BasicEqualityCfg(NumberThresholdValueEquality.NAME, Number.class.getName(), null, "2");
+        IEqualityCfg timestampEq = new BasicEqualityCfg(TimestampThresholdValueEquality.NAME, Timestamp.class.getName(), null, "100");
         basicTaijituCfg.setEqualityConfigs(Arrays.asList(stringEq, numberEq, timestampEq));
 
         return new TaijituCfg(basicTaijituCfg);
@@ -176,9 +176,9 @@ public class TaijituTest {
         basicTaijituCfg.setStrategyConfig(new BasicStrategyCfg(strategyName));
 
         // Equality
-        BasicEqualityCfg stringEq = new BasicEqualityCfg(CaseInsensitiveEqualityStrategy.NAME, String.class.getName(), null);
-        BasicEqualityCfg numberEq = new BasicEqualityCfg(ValueThresholdEqualityStrategy.NAME, Number.class.getName(), null, "2");
-        IEqualityCfg timestampEq = new BasicEqualityCfg(TimestampThresholdEqualityStrategy.NAME, Timestamp.class.getName(), null, "100");
+        BasicEqualityCfg stringEq = new BasicEqualityCfg(CaseInsensitiveValueEquality.NAME, String.class.getName(), null);
+        BasicEqualityCfg numberEq = new BasicEqualityCfg(NumberThresholdValueEquality.NAME, Number.class.getName(), null, "2");
+        IEqualityCfg timestampEq = new BasicEqualityCfg(TimestampThresholdValueEquality.NAME, Timestamp.class.getName(), null, "100");
         basicTaijituCfg.setEqualityConfigs(Arrays.asList(stringEq, numberEq, timestampEq));
 
         return new TaijituCfg(basicTaijituCfg);
@@ -204,13 +204,13 @@ public class TaijituTest {
 
         //Add comparators
         //Case insensitive strings
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + CaseInsensitiveEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, String.class.getName());
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + CaseInsensitiveValueEquality.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, String.class.getName());
         //Decimal places for Numbers
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Number.class.getName());
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + ValueThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "2");
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + NumberThresholdValueEquality.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Number.class.getName());
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + NumberThresholdValueEquality.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "2");
         //Threshold 100ms for Timestamps.
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Timestamp.class.getName());
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdEqualityStrategy.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "100");
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdValueEquality.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Timestamp.class.getName());
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdValueEquality.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "100");
 
         final ImmutableHierarchicalConfiguration configuration = ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(properties));
 

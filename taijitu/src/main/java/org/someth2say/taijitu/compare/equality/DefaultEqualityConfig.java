@@ -2,7 +2,7 @@ package org.someth2say.taijitu.compare.equality;
 
 import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
-public interface DefaultEqualityConfigIface extends IEqualityCfg {
+public interface DefaultEqualityConfig extends IEqualityCfg {
     @Override
     default String getFieldName() {
         return null;

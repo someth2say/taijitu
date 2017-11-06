@@ -33,11 +33,10 @@ public class ResultSetTupleBuilder implements TupleBuilder<ResultSet> {
     }
 
     private static Object[] extract(FieldMatcher matcher, ResultSet rs, List<FieldDescription> canonicalFields, List<FieldDescription> providedFields) {
-        //TODO: Worth having a pool of objects, that can be reused (even a pool of Tuple objects, if external comparison in place)
         Object[] fieldValues = new Object[canonicalFields.size()];
         int fieldIdx = 0;
         for (FieldDescription canonicalField : canonicalFields) {
-            FieldDescription field = matcher.getFieldFromCanonical(canonicalField, canonicalFields, providedFields);
+            FieldDescription field = matcher.getProvidedField(canonicalField, canonicalFields, providedFields);
             try {
                 //TODO: check if rs.getObject(position) is faster, including field position in FieldDescription
                 fieldValues[fieldIdx++] = rs.getObject(field.getName());

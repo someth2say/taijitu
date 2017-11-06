@@ -1,8 +1,9 @@
-package org.someth2say.taijitu.compare.equality;
+package org.someth2say.taijitu.compare.equality.value;
 
+import org.someth2say.taijitu.compare.equality.DefaultEqualityConfig;
 import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
-public class CaseInsensitiveEqualityStrategy implements EqualityStrategy<String> {
+public class CaseInsensitiveValueEquality implements ValueEquality<String> {
 
     public static String NAME = "caseInsensitive";
 
@@ -22,7 +23,7 @@ public class CaseInsensitiveEqualityStrategy implements EqualityStrategy<String>
     }
 
     public static IEqualityCfg defaultConfig() {
-        return (DefaultEqualityConfigIface) () -> CaseInsensitiveEqualityStrategy.NAME;
+        return (DefaultEqualityConfig) () -> CaseInsensitiveValueEquality.NAME;
     }
 
     @Override

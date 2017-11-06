@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * @author Jordi Sola
  */
 public class SimpleComparisonResult extends ComparisonResult {
-    public SimpleComparisonResult(final IComparisonCfg comparisonConfigIface) {
+    public SimpleComparisonResult() {
         super(new ArrayList<>());
     }
 }

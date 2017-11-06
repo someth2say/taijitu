@@ -5,7 +5,8 @@ import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.compare.ComparisonResult;
 import org.someth2say.taijitu.compare.ComparisonResult.SourceAndTuple;
 import org.someth2say.taijitu.compare.SynchronizedComparisonResult;
-import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
+import org.someth2say.taijitu.compare.equality.external.EqualityWrapper;
+import org.someth2say.taijitu.compare.equality.external.ExternalEquality;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
 import org.someth2say.taijitu.config.interfaces.IStrategyCfg;
 import org.someth2say.taijitu.source.Source;
@@ -34,17 +35,15 @@ public class MappingStrategy extends AbstractComparisonStrategy implements Compa
     }
 
     @Override
-    public ComparisonResult runComparison(Source source, Source target, ComparisonContext comparisonContext, IComparisonCfg comparisonConfig) {
-        final String comparisonName = comparisonConfig.getName();
-        logger.debug("Start mapping strategy comparison for " + comparisonName);
-        SynchronizedComparisonResult result = new SynchronizedComparisonResult(comparisonConfig);
+    public <T extends ComparableTuple> ComparisonResult runComparison(Source<T> source, Source<T> target, ComparisonContext comparisonContext){
+        SynchronizedComparisonResult<T> result = new SynchronizedComparisonResult<>();
 
         //1.- Build/run mapping tasks
         //TODO: Another option is running queries/pages alternating, so we can "restrict" memory usage, but only using a single thread
         final ExecutorService executorService = Executors.newFixedThreadPool(2);
-        Map<ComparableTuple, SourceAndTuple> sharedMap = new ConcurrentHashMap<>();
-        Runnable sourceMapper = new TupleMapper(source.iterator(), sharedMap, result, source.getConfig());
-        Runnable targetMapper = new TupleMapper(target.iterator(), sharedMap, result, target.getConfig());
+        Map<T, SourceAndTuple<T>> sharedMap = new ConcurrentHashMap<>();
+        Runnable sourceMapper = new TupleMapper<>(source.iterator(), sharedMap, result, source.getConfig());
+        Runnable targetMapper = new TupleMapper<>(target.iterator(), sharedMap, result, target.getConfig());
 
         executorService.submit(sourceMapper);// Map source
         executorService.submit(targetMapper);// Map target
@@ -52,7 +51,29 @@ public class MappingStrategy extends AbstractComparisonStrategy implements Compa
         shutdownAndAwaitTermination(executorService);
 
         //2.- When both mapping tasks are completed, remaining data are source/target only
-        final Collection<SourceAndTuple> entries = sharedMap.values();
+        final Collection<SourceAndTuple<T>> entries = sharedMap.values();
+        result.addAllDisjoint(entries);
+
+        return result;
+    }
+
+    @Override
+    public <T> ComparisonResult runExternalComparison(Source<T> source, Source<T> target, ExternalEquality<T> externalCategorizer, ExternalEquality<T> externalEquality) {
+        SynchronizedComparisonResult<T> result = new SynchronizedComparisonResult<>();
+
+        //1.- Build/run mapping tasks
+        //TODO: Another option is running queries/pages alternating, so we can "restrict" memory usage, but only using a single thread
+        final ExecutorService executorService = Executors.newFixedThreadPool(2);
+        Map<EqualityWrapper<T>, SourceAndTuple<T>> sharedMap = new ConcurrentHashMap<>();
+        Runnable sourceMapper = new TupleMapperExt<>(source.iterator(), sharedMap, result, source.getConfig(), externalCategorizer, externalEquality);
+        Runnable targetMapper = new TupleMapperExt<>(target.iterator(), sharedMap, result, target.getConfig(), externalCategorizer, externalEquality);
+        executorService.submit(sourceMapper);// Map source
+        executorService.submit(targetMapper);// Map target
+
+        shutdownAndAwaitTermination(executorService);
+
+        //2.- When both mapping tasks are completed, remaining data are source/target only
+        final Collection<SourceAndTuple<T>> entries = sharedMap.values();
         result.addAllDisjoint(entries);
 
         return result;
@@ -77,13 +98,13 @@ public class MappingStrategy extends AbstractComparisonStrategy implements Compa
         return () -> MappingStrategy.NAME;
     }
 
-    private class TupleMapper implements Runnable {
-        private final Iterator<ComparableTuple> tupleIterator;
-        private final Map<ComparableTuple, ComparisonResult.SourceAndTuple> sharedSet;
-        private final SynchronizedComparisonResult result;
+    private class TupleMapper<T extends ComparableTuple>  implements Runnable {
+        private final Iterator<T> tupleIterator;
+        private final Map<T, SourceAndTuple<T>> sharedSet;
+        private final SynchronizedComparisonResult<T> result;
         private final ISourceCfg iSource;
 
-        private TupleMapper(final Iterator<ComparableTuple> tupleIterator, final Map<ComparableTuple, SourceAndTuple> sharedMap, final SynchronizedComparisonResult result, ISourceCfg iSource) {
+        private TupleMapper(final Iterator<T> tupleIterator, final Map<T, SourceAndTuple<T>> sharedMap, final SynchronizedComparisonResult<T> result, ISourceCfg iSource) {
             this.tupleIterator = tupleIterator;
             this.sharedSet = sharedMap;
             this.result = result;
@@ -92,23 +113,56 @@ public class MappingStrategy extends AbstractComparisonStrategy implements Compa
 
         @Override
         public void run() {
-            for (ComparableTuple thisRecord = getNextRecord(tupleIterator); thisRecord != null; thisRecord = getNextRecord(tupleIterator)) {
+            for (T thisRecord = getNextRecord(tupleIterator); thisRecord != null; thisRecord = getNextRecord(tupleIterator)) {
 
-                SourceAndTuple thisQueryAndTuple = new SourceAndTuple(iSource, thisRecord);
-                final SourceAndTuple otherQueryAndTuple = sharedSet.putIfAbsent(thisRecord, thisQueryAndTuple);
+                SourceAndTuple<T> thisQueryAndTuple = new SourceAndTuple<>(iSource, thisRecord);
+                final SourceAndTuple<T> otherQueryAndTuple = sharedSet.putIfAbsent(thisRecord, thisQueryAndTuple);
                 if (otherQueryAndTuple != null) {
                     //we have a key match ...
                     sharedSet.remove(otherQueryAndTuple.getValue());
-                    final ComparableTuple otherRecord = otherQueryAndTuple.getValue();
+                    final T otherRecord = otherQueryAndTuple.getValue();
                     if (!thisRecord.equalsNonKeys(otherRecord)) {
                         // ...and contents differ
                         result.addDifference(thisQueryAndTuple, otherQueryAndTuple);
                     }
                 }
-
-
             }
         }
     }
 
+    private class TupleMapperExt<T>  implements Runnable {
+        private final Iterator<T> tupleIterator;
+        private final Map<EqualityWrapper<T>, SourceAndTuple<T>> sharedMap;
+        private final SynchronizedComparisonResult<T> result;
+        private final ISourceCfg iSource;
+        private final ExternalEquality<T> categorizer;
+        private final ExternalEquality<T> equality;
+
+        private TupleMapperExt(final Iterator<T> tupleIterator, final Map<EqualityWrapper<T>, SourceAndTuple<T>> sharedMap, final SynchronizedComparisonResult<T> result, ISourceCfg iSource, ExternalEquality<T> categorizer, ExternalEquality<T> equality) {
+            this.tupleIterator = tupleIterator;
+            this.sharedMap = sharedMap;
+            this.result = result;
+            this.iSource = iSource;
+            this.categorizer = categorizer;
+            this.equality = equality;
+        }
+
+        @Override
+        public void run() {
+            for (T thisRecord = getNextRecord(tupleIterator); thisRecord != null; thisRecord = getNextRecord(tupleIterator)) {
+                SourceAndTuple<T> thisQueryAndTuple = new SourceAndTuple<>(iSource, thisRecord);
+                EqualityWrapper<T> wrap = categorizer.wrap(thisRecord);
+                SourceAndTuple<T> otherQueryAndTuple = sharedMap.putIfAbsent(wrap, thisQueryAndTuple);
+                if (otherQueryAndTuple != null) {
+                    //we have a key match ...
+                    sharedMap.remove(wrap);
+                    final T otherRecord = otherQueryAndTuple.getValue();
+                    if (!equality.equals(thisRecord,otherRecord)) {
+                        // ...and contents differ
+                        result.addDifference(thisQueryAndTuple, otherQueryAndTuple);
+                    }
+                }
+            }
+        }
+    }
 }

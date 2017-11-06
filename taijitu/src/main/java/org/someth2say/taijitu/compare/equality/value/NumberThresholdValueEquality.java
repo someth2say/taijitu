@@ -1,11 +1,12 @@
-package org.someth2say.taijitu.compare.equality;
+package org.someth2say.taijitu.compare.equality.value;
 
+import org.someth2say.taijitu.compare.equality.DefaultEqualityConfig;
 import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class ValueThresholdEqualityStrategy implements EqualityStrategy<Number> {
+public class NumberThresholdValueEquality implements ValueEquality<Number> {
 
     public static String NAME = "threshold";
 
@@ -49,7 +50,7 @@ public class ValueThresholdEqualityStrategy implements EqualityStrategy<Number> 
     }
 
     public static IEqualityCfg defaultConfig() {
-        return (DefaultEqualityConfigIface) () -> ValueThresholdEqualityStrategy.NAME;
+        return (DefaultEqualityConfig) () -> NumberThresholdValueEquality.NAME;
     }
 
 

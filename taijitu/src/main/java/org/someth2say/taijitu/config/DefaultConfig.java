@@ -2,7 +2,7 @@ package org.someth2say.taijitu.config;
 
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.someth2say.taijitu.compare.equality.ToStringEqualityStrategy;
+import org.someth2say.taijitu.compare.equality.value.ToStringValueEquality;
 import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 import org.someth2say.taijitu.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.config.interfaces.IStrategyCfg;
@@ -25,7 +25,7 @@ public class DefaultConfig {
     public static final boolean DEFAULT_SCAN_CLASSPATH = false;
 
     public static final IStrategyCfg DEFAULT_STRATEGY_CONFIG = MappingStrategy.defaultConfig();
-    public static final List<IEqualityCfg> DEFAULT_EQUALITY_CONFIG = Arrays.asList(ToStringEqualityStrategy.defaultConfig());
+    public static final List<IEqualityCfg> DEFAULT_EQUALITY_CONFIG = Arrays.asList(ToStringValueEquality.defaultConfig());
     public static final List<IPluginCfg> DEFAULT_PLUGINS_CONFIG = Arrays.asList(TimeLoggingPlugin.defaultConfig());
 
     public static final String DEFAULT_MATCHING_STRATEGY_NAME = NamingFieldMatcher.NAME;

@@ -1,10 +1,11 @@
-package org.someth2say.taijitu.compare.equality;
+package org.someth2say.taijitu.compare.equality.value;
 
+import org.someth2say.taijitu.compare.equality.DefaultEqualityConfig;
 import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
 import java.sql.Timestamp;
 
-public class TimestampThresholdEqualityStrategy implements EqualityStrategy<Timestamp> {
+public class TimestampThresholdValueEquality implements ValueEquality<Timestamp> {
 
     public static String NAME = "timestamp";
 
@@ -28,7 +29,7 @@ public class TimestampThresholdEqualityStrategy implements EqualityStrategy<Time
 
 
     public static IEqualityCfg defaultConfig() {
-        return (DefaultEqualityConfigIface) () -> TimestampThresholdEqualityStrategy.NAME;
+        return (DefaultEqualityConfig) () -> TimestampThresholdValueEquality.NAME;
     }
 
 

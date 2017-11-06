@@ -8,8 +8,8 @@ import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 /**
  * @author Jordi Sola
  */
-public class SynchronizedComparisonResult extends ComparisonResult {
-   public SynchronizedComparisonResult(final IComparisonCfg comparison) {
+public class SynchronizedComparisonResult<T> extends ComparisonResult<T> {
+   public SynchronizedComparisonResult() {
         super(Collections.synchronizedCollection(new ArrayList<>()));
     }
 }

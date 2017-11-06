@@ -34,38 +34,38 @@ public class ComparisonContext {
     }
 
 
-    boolean registerFields(final List<FieldDescription> providedFields, final ISourceCfg querySourceConfigIface, final FieldMatcher fieldMatcher) {
-        if (providedFields == null) {
-            return false;
-        }
+//    boolean registerFields(final List<FieldDescription> providedFields, final ISourceCfg querySourceConfigIface, final FieldMatcher fieldMatcher) {
+//        if (providedFields == null) {
+//            return false;
+//        }
+//
+//        providedFieldsMap.put(querySourceConfigIface.getName(), providedFields);
+//
+//        List<FieldDescription> providedKeyFields = getProvidedKeyFields(querySourceConfigIface, providedFields);
+//        if (providedKeyFields != null) {
+//            if (canonicalFields == null) {
+//                // Have no canonical fields -> First source, interpreted as canonical.
+//                canonicalFields = providedFields;
+//                canonicalKeys = providedKeyFields;
+//                rebuildIndexes();
+//                buildEqualityConfigs();
+//            } else {
+//                // Already have canonical fields, so should shrink
+//                if (shrinkCanonicalFieldsToProvided(fieldMatcher, providedFields)) {
+//                    rebuildIndexes();
+//                    //TODO: Maybe equality configs can be shrink with fields...
+//                    buildEqualityConfigs();
+//                }
+//            }
+//            return true;
+//        } else {
+//            // Null provided key fields means that some key field have not been provided.
+//            logger.error("Not all key fields have been provided in " + querySourceConfigIface.getName() + " Provided: " + StringUtils.join(providedFields, ",") + " Keys: " + StringUtils.join(querySourceConfigIface.getKeyFields(), ","));
+//            return false;
+//        }
+//    }
 
-        providedFieldsMap.put(querySourceConfigIface.getName(), providedFields);
-
-        List<FieldDescription> providedKeyFields = getKeyFieldsFromConfig(querySourceConfigIface, providedFields);
-        if (providedKeyFields != null) {
-            if (canonicalFields == null) {
-                // Have no canonical fields -> First source, interpreted as canonical.
-                canonicalFields = providedFields;
-                canonicalKeys = providedKeyFields;
-                rebuildIndexes();
-                buildEqualityConfigs();
-            } else {
-                // Already have canonical fields, so should shrink
-                if (shrinkCanonicalFieldsToProvided(fieldMatcher, providedFields)) {
-                    rebuildIndexes();
-                    //TODO: Maybe equality configs can be shrink with fields...
-                    buildEqualityConfigs();
-                }
-            }
-            return true;
-        } else {
-            // Null provided key fields means that some key field have not been provided.
-            logger.error("Not all key fields have been provided in " + querySourceConfigIface.getName() + " Provided: " + StringUtils.join(providedFields, ",") + " Keys: " + StringUtils.join(querySourceConfigIface.getKeyFields(), ","));
-            return false;
-        }
-    }
-
-    private List<FieldDescription> getKeyFieldsFromConfig(ISourceCfg querySourceConfigIface, List<FieldDescription> providedFields) {
+    private List<FieldDescription> getProvidedKeyFields(ISourceCfg querySourceConfigIface, List<FieldDescription> providedFields) {
         List<String> configKeyFields = querySourceConfigIface.getKeyFields();
         List<FieldDescription> result = new ArrayList<>(configKeyFields.size());
         for (String configKeyField : configKeyFields) {
@@ -80,45 +80,45 @@ public class ComparisonContext {
         return result;
     }
 
-    private void buildEqualityConfigs() {
-        iEqualityCfgs = new ArrayList<>(canonicalFields.size());
-        for (FieldDescription fieldDescription : canonicalFields) {
-            iEqualityCfgs.add(getEqualityConfigFor(fieldDescription.getClazz(), fieldDescription.getName(), comparisonConfigIface.getEqualityConfigs()));
-        }
-    }
-
-    private IEqualityCfg getEqualityConfigFor(final String fieldClass, final String fieldName, final List<IEqualityCfg> equalityConfigIfaces) {
-
-        Optional<IEqualityCfg> perfectMatches = equalityConfigIfaces.stream().filter(eq -> fieldNameMatch(fieldName, eq) && fieldClassMatch(fieldClass, eq)).findFirst();
-        Optional<IEqualityCfg> nameMatches = equalityConfigIfaces.stream().filter(eq -> fieldNameMatch(fieldName, eq) && eq.getFieldClass() == null).findFirst();
-        Optional<IEqualityCfg> classMathes = equalityConfigIfaces.stream().filter(eq -> eq.getFieldName() == null && fieldClassMatch(fieldClass, eq)).findFirst();
-        Optional<IEqualityCfg> allMathes = equalityConfigIfaces.stream().filter(eq -> eq.getFieldName() == null && eq.getFieldClass() == null).findFirst();
-
-        return perfectMatches.orElse(nameMatches.orElse(classMathes.orElse(allMathes.orElse(null))));
-
-    }
-
-    private boolean fieldNameMatch(String fieldName, IEqualityCfg eq) {
-        return eq.getFieldName() != null && fieldName.equals(eq.getFieldName());
-    }
-
-    private boolean fieldClassMatch(String fieldClassName, IEqualityCfg eq) {
-        if (fieldClassName == null) return false;
-        String configClassName = eq.getFieldClass();
-        if (configClassName == null) return false;
-        if (eq.isFieldClassStrict()) {
-            return fieldClassName.equals(configClassName);
-        } else {
-            try {
-                Class<?> configClass = Class.forName(configClassName);
-                Class<?> fieldClass = Class.forName(fieldClassName);
-                return configClass.isAssignableFrom(fieldClass);
-            } catch (ClassNotFoundException e) {
-                logger.error("Class defined in equality config not found: " + configClassName);
-                return false;
-            }
-        }
-    }
+//    private void buildEqualityConfigs() {
+//        iEqualityCfgs = new ArrayList<>(canonicalFields.size());
+//        for (FieldDescription fieldDescription : canonicalFields) {
+//            iEqualityCfgs.add(getEqualityConfigFor(fieldDescription.getClazz(), fieldDescription.getName(), comparisonConfigIface.getEqualityConfigs()));
+//        }
+//    }
+//
+//    private IEqualityCfg getEqualityConfigFor(final String fieldClass, final String fieldName, final List<IEqualityCfg> equalityConfigIfaces) {
+//
+//        Optional<IEqualityCfg> perfectMatches = equalityConfigIfaces.stream().filter(eq -> fieldNameMatch(fieldName, eq) && fieldClassMatch(fieldClass, eq)).findFirst();
+//        Optional<IEqualityCfg> nameMatches = equalityConfigIfaces.stream().filter(eq -> fieldNameMatch(fieldName, eq) && eq.getFieldClass() == null).findFirst();
+//        Optional<IEqualityCfg> classMathes = equalityConfigIfaces.stream().filter(eq -> eq.getFieldName() == null && fieldClassMatch(fieldClass, eq)).findFirst();
+//        Optional<IEqualityCfg> allMathes = equalityConfigIfaces.stream().filter(eq -> eq.getFieldName() == null && eq.getFieldClass() == null).findFirst();
+//
+//        return perfectMatches.orElse(nameMatches.orElse(classMathes.orElse(allMathes.orElse(null))));
+//
+//    }
+//
+//    private boolean fieldNameMatch(String fieldName, IEqualityCfg eq) {
+//        return eq.getFieldName() != null && fieldName.equals(eq.getFieldName());
+//    }
+//
+//    private boolean fieldClassMatch(String fieldClassName, IEqualityCfg eq) {
+//        if (fieldClassName == null) return false;
+//        String configClassName = eq.getFieldClass();
+//        if (configClassName == null) return false;
+//        if (eq.isFieldClassStrict()) {
+//            return fieldClassName.equals(configClassName);
+//        } else {
+//            try {
+//                Class<?> configClass = Class.forName(configClassName);
+//                Class<?> fieldClass = Class.forName(fieldClassName);
+//                return configClass.isAssignableFrom(fieldClass);
+//            } catch (ClassNotFoundException e) {
+//                logger.error("Class defined in equality config not found: " + configClassName);
+//                return false;
+//            }
+//        }
+//    }
 
 
     private int[] keyFieldIdxs;
@@ -152,7 +152,7 @@ public class ComparisonContext {
         // .- Canonical fields not provided are removed from comparison
         List<FieldDescription> canonicalProvidedFieldsList = new ArrayList<>(providedFieldsList.size());
         for (FieldDescription providedColumn : providedFieldsList) {
-            FieldDescription canonicalProvidedField = fieldMatcher.getCanonicalFromField(providedColumn, canonicalFields, providedFieldsList);
+            FieldDescription canonicalProvidedField = fieldMatcher.getCanonicalField(providedColumn, canonicalFields, providedFieldsList);
             canonicalProvidedFieldsList.add(canonicalProvidedField);
         }
         return canonicalFields.retainAll(canonicalProvidedFieldsList);

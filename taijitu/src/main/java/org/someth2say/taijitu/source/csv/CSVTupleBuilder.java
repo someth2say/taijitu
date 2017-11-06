@@ -34,7 +34,7 @@ public class CSVTupleBuilder implements TupleBuilder<String> {
         String[] providedValues = line.split(",");
         int canonicalFieldIdx = 0;
         for (FieldDescription canonicalField : canonicalFields) {
-            FieldDescription providedField = matcher.getFieldFromCanonical(canonicalField, canonicalFields,
+            FieldDescription providedField = matcher.getProvidedField(canonicalField, canonicalFields,
                     providedFields);
             int providedFieldPos = providedFields.indexOf(providedField);
             String providedValue = providedValues[providedFieldPos];

@@ -16,12 +16,12 @@ public class PositionalFieldMatcher implements FieldMatcher {
     }
 
     @Override
-    public FieldDescription getCanonicalFromField(FieldDescription field, List<FieldDescription> canonicalFields, List<FieldDescription> fields) {
-        return canonicalFields.get(fields.indexOf(field));
+    public FieldDescription getCanonicalField(FieldDescription providedField, List<FieldDescription> canonicalFields, List<FieldDescription> providedFields) {
+        return canonicalFields.get(providedFields.indexOf(providedField));
     }
 
     @Override
-    public FieldDescription getFieldFromCanonical(FieldDescription canonicalField, List<FieldDescription> canonicalFields, List<FieldDescription> providedFields) {
+    public FieldDescription getProvidedField(FieldDescription canonicalField, List<FieldDescription> canonicalFields, List<FieldDescription> providedFields) {
         return providedFields.get(canonicalFields.indexOf(canonicalField));
     }
 }

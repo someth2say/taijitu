@@ -13,12 +13,12 @@ public class IdentityFieldMatcher implements FieldMatcher {
     public static final String NAME = "identity";
 
     @Override
-    public FieldDescription getCanonicalFromField(FieldDescription field, List<FieldDescription> canonicalFields, List<FieldDescription> fields) {
-        return canonicalFields.contains(field) ? field : null;
+    public FieldDescription getCanonicalField(FieldDescription providedField, List<FieldDescription> canonicalFields, List<FieldDescription> providedFields) {
+        return canonicalFields.contains(providedField) ? providedField : null;
     }
 
     @Override
-    public FieldDescription getFieldFromCanonical(FieldDescription canonicalField, List<FieldDescription> canonicalFields, List<FieldDescription> providedFields) {
+    public FieldDescription getProvidedField(FieldDescription canonicalField, List<FieldDescription> canonicalFields, List<FieldDescription> providedFields) {
         return providedFields.contains(canonicalField) ? canonicalField : null;
     }
 

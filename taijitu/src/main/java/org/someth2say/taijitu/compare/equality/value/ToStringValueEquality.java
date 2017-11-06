@@ -1,8 +1,9 @@
-package org.someth2say.taijitu.compare.equality;
+package org.someth2say.taijitu.compare.equality.value;
 
+import org.someth2say.taijitu.compare.equality.DefaultEqualityConfig;
 import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
-public class ToStringEqualityStrategy implements EqualityStrategy<Object> {
+public class ToStringValueEquality implements ValueEquality<Object> {
 
     public static String NAME = "toString";
 
@@ -22,7 +23,7 @@ public class ToStringEqualityStrategy implements EqualityStrategy<Object> {
     }
 
     public static IEqualityCfg defaultConfig() {
-        return (DefaultEqualityConfigIface) () -> ToStringEqualityStrategy.NAME;
+        return (DefaultEqualityConfig) () -> ToStringValueEquality.NAME;
     }
 
 
