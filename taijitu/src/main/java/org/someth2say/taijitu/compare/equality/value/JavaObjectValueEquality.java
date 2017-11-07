@@ -3,31 +3,26 @@ package org.someth2say.taijitu.compare.equality.value;
 import org.someth2say.taijitu.compare.equality.DefaultEqualityConfig;
 import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
-public class ToStringValueEquality extends AbstractSortedValueEquality<Object> {
+public class JavaObjectValueEquality extends AbstractValueEquality<Object> {
 
-    public static String NAME = "toString";
+    public static String NAME = "object";
 
-    public ToStringValueEquality(Object equalityConfig) {
+    public JavaObjectValueEquality(Object equalityConfig) {
         super(equalityConfig);
     }
 
     @Override
     public int computeHashCode(Object object) {
-        return object.toString().hashCode();
+        return object.hashCode();
     }
 
     @Override
     public boolean equals(Object object1, Object object2) {
-        return object1.toString().equals(object2.toString());
-    }
-
-    @Override
-    public int compare(Object object1, Object object2) {
-        return object1.toString().compareTo(object2.toString());
+        return object1.equals(object2);
     }
 
     public static IEqualityCfg defaultConfig() {
-        return (DefaultEqualityConfig) () -> ToStringValueEquality.NAME;
+        return (DefaultEqualityConfig) () -> JavaObjectValueEquality.NAME;
     }
 
     @Override

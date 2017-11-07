@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.compare;
+package org.someth2say.taijitu.compare.result;
 
 import java.util.*;
 

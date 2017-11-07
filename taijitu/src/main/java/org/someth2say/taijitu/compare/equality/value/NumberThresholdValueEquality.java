@@ -6,20 +6,26 @@ import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class NumberThresholdValueEquality implements ValueEquality<Number> {
+public class NumberThresholdValueEquality extends AbstractSortedValueEquality<Number> {
 
     public static String NAME = "threshold";
+    public static final int DEFAULT_SCALE = 2;
+
+    public NumberThresholdValueEquality(Object equalityConfig) {
+        super(equalityConfig);
+    }
 
     @Override
-    public int computeHashCode(Number object, Object equalityConfig) {
-        int scale = getScale(equalityConfig);
+    public int computeHashCode(Number object) {
+        int scale = getScale();
         double doubleValue = object.doubleValue();
         double rounded = round(doubleValue, scale);
         return Double.valueOf(rounded).hashCode();
     }
 
-    private int getScale(Object equalityConfig) {
-        return Integer.parseInt(equalityConfig.toString());
+    private int getScale() {
+        Object equalityConfig = getEqualityConfig();
+        return equalityConfig != null ? Integer.parseInt(equalityConfig.toString()) : DEFAULT_SCALE;
     }
 
     private static double round(double value, int places) {
@@ -30,8 +36,8 @@ public class NumberThresholdValueEquality implements ValueEquality<Number> {
     }
 
     @Override
-    public boolean equals(Number object1, Number object2, Object equalityConfig) {
-        int scale = getScale(equalityConfig);
+    public boolean equals(Number object1, Number object2) {
+        int scale = getScale();
         double diff = object1.doubleValue() - object2.doubleValue();
         double scaleRange = getScaleRange(scale);
         return (Math.abs(diff) < scaleRange);
@@ -42,8 +48,8 @@ public class NumberThresholdValueEquality implements ValueEquality<Number> {
     }
 
     @Override
-    public int compare(Number object1, Number object2, Object equalityConfig) {
-        int scale = getScale(equalityConfig);
+    public int compare(Number object1, Number object2) {
+        int scale = getScale();
         double diff = object1.doubleValue() - object2.doubleValue();
         double scaleRange = getScaleRange(scale);
         return Math.abs(diff) < scaleRange ? 0 : diff < 0 ? -1 : 1;
@@ -52,7 +58,6 @@ public class NumberThresholdValueEquality implements ValueEquality<Number> {
     public static IEqualityCfg defaultConfig() {
         return (DefaultEqualityConfig) () -> NumberThresholdValueEquality.NAME;
     }
-
 
     @Override
     public String getName() {

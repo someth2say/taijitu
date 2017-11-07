@@ -1,9 +1,7 @@
-package org.someth2say.taijitu.compare;
+package org.someth2say.taijitu.compare.result;
 
 import java.util.ArrayList;
 import java.util.Collections;
-
-import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 
 /**
  * @author Jordi Sola

@@ -8,7 +8,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.someth2say.taijitu.compare.ComparisonResult;
+import org.someth2say.taijitu.compare.result.ComparisonResult;
 import org.someth2say.taijitu.compare.equality.value.CaseInsensitiveValueEquality;
 import org.someth2say.taijitu.compare.equality.value.TimestampThresholdValueEquality;
 import org.someth2say.taijitu.compare.equality.value.NumberThresholdValueEquality;
@@ -20,8 +20,8 @@ import org.someth2say.taijitu.config.interfaces.*;
 import org.someth2say.taijitu.source.csv.CSVResourceSource;
 import org.someth2say.taijitu.source.query.ConnectionManager;
 import org.someth2say.taijitu.source.query.ResultSetSource;
-import org.someth2say.taijitu.strategy.mapping.MappingStrategy;
-import org.someth2say.taijitu.strategy.sorted.SortedStrategy;
+import org.someth2say.taijitu.compare.equality.stream.mapping.MappingStreamEquality;
+import org.someth2say.taijitu.compare.equality.stream.sorted.SortedStreamEquality;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -55,8 +55,8 @@ public class TaijituTest {
     @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection<String> strategies() {
         return Arrays.asList(
-                SortedStrategy.NAME,
-                MappingStrategy.NAME
+                SortedStreamEquality.NAME,
+                MappingStreamEquality.NAME
         );
     }
 
@@ -292,7 +292,7 @@ public class TaijituTest {
 //        // Comparisons
 //        testProperties.putAll(makeComparisonProps("test", "KEY, VALUE", "KEY, VALUE", "KEY,VALUE", "select * from test", "select * from test2", "test"));
 //
-//        testProperties.put("setup.strategy", "missing");
+//        testProperties.put("setup.stream", "missing");
 //        final SimpleComparisonResult[] comparisonResults = new TaijituCfg().compare(testProperties.getDelegate());
 //        assertEquals(0, comparisonResults.length);
 //    }

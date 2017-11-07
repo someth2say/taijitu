@@ -1,24 +1,19 @@
 package org.someth2say.taijitu.tuple;
 
 import org.apache.log4j.Logger;
+import org.someth2say.taijitu.compare.equality.tuple.AbstractStructureEquality;
+import org.someth2say.taijitu.compare.equality.tuple.StructureEquality;
+import org.someth2say.taijitu.compare.equality.tuple.StructureEqualityWrapper;
 import org.someth2say.taijitu.compare.equality.value.ValueEquality;
-import org.someth2say.taijitu.compare.equality.external.EqualityWrapper;
-import org.someth2say.taijitu.compare.equality.external.ExternalEquality;
 
-import java.util.List;
+import java.util.Map;
 
-public class TupleExternalEquality implements ExternalEquality<Tuple> {
+public class TupleExternalEquality extends AbstractStructureEquality<Tuple> implements StructureEquality<Tuple> {
     private static final Logger logger = Logger.getLogger(TupleExternalEquality.class);
 
-    private final List<ValueEquality<?>> fieldEqualities;
-    private final List<Object> equalityParams;
-    private final int[] compareIdx;
 
-    //TODO All three collections should have matching elements, so maybe we can wrapp all into a single object...
-    public TupleExternalEquality(List<ValueEquality<?>> fieldEqualities, List<Object> equalityParams, int[] compareIdx) {
-        this.fieldEqualities = fieldEqualities;
-        this.equalityParams = equalityParams;
-        this.compareIdx = compareIdx;
+    public TupleExternalEquality(Map<FieldDescription, ValueEquality<?>> valueEqualitiesMap) {
+        super(valueEqualitiesMap);
     }
 
     @Override
@@ -28,21 +23,20 @@ public class TupleExternalEquality implements ExternalEquality<Tuple> {
 
     private boolean equalFields(Tuple canonical, Tuple provided) {
 
-        for (int fieldIdx = 0; fieldIdx < compareIdx.length; fieldIdx++) {
+        for (Map.Entry<FieldDescription, ValueEquality<?>> mapEntry : getValueEqualitiesMap().entrySet()) {
+            FieldDescription fieldDescription = mapEntry.getKey();
+            Object keyValue = extractFieldValue(canonical, fieldDescription);
+            Object otherKeyValue = extractFieldValue(provided, fieldDescription);
 
-            Object keyValue = canonical.getValue(compareIdx[fieldIdx]);
-            Object otherKeyValue = provided.getValue(compareIdx[fieldIdx]);
-
-            ValueEquality valueEquality = fieldEqualities.get(fieldIdx);
-            Object equalityParameters = equalityParams.get(fieldIdx);
+            ValueEquality equality = mapEntry.getValue();
             @SuppressWarnings("unchecked")
-            boolean equals = valueEquality.equals(keyValue, otherKeyValue, equalityParameters);
+            boolean equals = equality.equals(keyValue, otherKeyValue);
             if (logger.isDebugEnabled()) {
-                logger.debug(keyValue + "<=>" + otherKeyValue + "(" + otherKeyValue.getClass().getName() + ") strategy: " + valueEquality.getName() + " config: " + equalityParameters + " result: " + equals);
+                logger.debug(keyValue + "<=>" + otherKeyValue + "(" + otherKeyValue.getClass().getName() + ") stream: " + equality.getName() + " result: " + equals);
             }
             if (!equals) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Difference found: Field Idx" + compareIdx[fieldIdx] + " Values: " + keyValue + "<=>" + otherKeyValue);
+                    logger.debug("Difference found: Field:" + fieldDescription + " Values: " + keyValue + "<=>" + otherKeyValue);
                 }
                 return false;
             }
@@ -50,16 +44,20 @@ public class TupleExternalEquality implements ExternalEquality<Tuple> {
         return true;
     }
 
+    @Override
+    public Object extractFieldValue(Tuple tuple, FieldDescription fieldDescription) {
+        return tuple.getValue(fieldDescription.getPosition());
+    }
+
 
     @Override
     public int hashCode(Tuple obj) {
-        return 0;
+        //TODO:
     }
 
     @Override
-    public EqualityWrapper<Tuple> wrap(Tuple obj) {
-        return null;
+    public StructureEqualityWrapper<Tuple> wrap(Tuple obj) {
+        //TODO;
     }
 
-}
 }

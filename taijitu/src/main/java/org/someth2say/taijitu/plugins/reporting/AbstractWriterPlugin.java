@@ -3,7 +3,7 @@ package org.someth2say.taijitu.plugins.reporting;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.TaijituException;
-import org.someth2say.taijitu.compare.ComparisonResult;
+import org.someth2say.taijitu.compare.result.ComparisonResult;
 import org.someth2say.taijitu.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.plugins.TaijituPlugin;

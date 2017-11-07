@@ -3,7 +3,7 @@ package org.someth2say.taijitu;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.compare.ComparisonResult;
+import org.someth2say.taijitu.compare.result.ComparisonResult;
 import org.someth2say.taijitu.config.impl.TaijituCfg;
 import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.config.interfaces.IPluginCfg;
@@ -49,16 +49,16 @@ public final class Taijitu {
     private static void setupRegistries(final ITaijituCfg config) {
         if (config.isUseScanClassPath()) {
             PluginRegistry.scanClassPath();
-            ComparisonStrategyRegistry.scanClassPath();
+            StreamEqualityRegistry.scanClassPath();
             MatcherRegistry.scanClassPath();
-            EqualityStrategyRegistry.scanClassPath();
-            SourceTypeRegistry.scanClassPath();
+            ValueEqualityRegistry.scanClassPath();
+            SourceRegistry.scanClassPath();
         } else {
             PluginRegistry.useDefaults();
-            ComparisonStrategyRegistry.useDefaults();
+            StreamEqualityRegistry.useDefaults();
             MatcherRegistry.useDefaults();
-            EqualityStrategyRegistry.useDefaults();
-            SourceTypeRegistry.useDefaults();
+            ValueEqualityRegistry.useDefaults();
+            SourceRegistry.useDefaults();
         }
     }
 

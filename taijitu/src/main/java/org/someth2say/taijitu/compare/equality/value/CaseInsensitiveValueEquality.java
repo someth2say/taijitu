@@ -1,25 +1,34 @@
 package org.someth2say.taijitu.compare.equality.value;
 
+import org.apache.commons.lang3.StringUtils;
 import org.someth2say.taijitu.compare.equality.DefaultEqualityConfig;
 import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
-public class CaseInsensitiveValueEquality implements ValueEquality<String> {
+import java.util.Locale;
+
+public class CaseInsensitiveValueEquality extends AbstractSortedValueEquality<String> {
 
     public static String NAME = "caseInsensitive";
+    private Locale locale;
 
-    @Override
-    public int computeHashCode(String object, Object equalityConfig) {
-        return object.toUpperCase().hashCode();
+    public CaseInsensitiveValueEquality(Object equalityConfig) {
+        super(equalityConfig);
+        locale = equalityConfig != null && !StringUtils.isBlank(equalityConfig.toString()) ? Locale.forLanguageTag(equalityConfig.toString()) : Locale.getDefault();
     }
 
     @Override
-    public boolean equals(String object1, String object2, Object equalityConfig) {
-        return object1.toUpperCase().equals(object2.toUpperCase());
+    public int computeHashCode(String object) {
+        return object.toUpperCase(locale).hashCode();
     }
 
     @Override
-    public int compare(String object1, String object2, Object equalityConfig) {
-        return object1.toUpperCase().compareTo(object2.toUpperCase());
+    public boolean equals(String object1, String object2) {
+        return object1.toUpperCase().equals(object2.toUpperCase(locale));
+    }
+
+    @Override
+    public int compare(String object1, String object2) {
+        return object1.toUpperCase(locale).compareTo(object2.toUpperCase(locale));
     }
 
     public static IEqualityCfg defaultConfig() {

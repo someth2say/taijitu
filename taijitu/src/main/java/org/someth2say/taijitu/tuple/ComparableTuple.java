@@ -2,15 +2,15 @@ package org.someth2say.taijitu.tuple;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.ComparisonContext;
-import org.someth2say.taijitu.compare.equality.value.ValueEquality;
+import org.someth2say.taijitu.compare.equality.value.SortedValueEquality;
 import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
-import org.someth2say.taijitu.registry.EqualityStrategyRegistry;
+import org.someth2say.taijitu.registry.ValueEqualityRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class represents a {@link Tuple}, but delegating capabilities to compare itself with other tuples to  {@link ValueEquality} objects.
+ * This class represents a {@link Tuple}, but delegating capabilities to compare itself with other tuples to  {@link SortedValueEquality} objects.
  *
  * @author Jordi Sola
  */
@@ -24,7 +24,7 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
         this.context = context;
     }
 
-    //TODO: Consider passing those three fields (or a data class containing them) instead of the ComparisonContext. In other words, create an external stateful Comparator object.
+    //TODO: Consider passing those three fields (or a data class containing them) instead of the ComparisonContext. In other words, create an tuple stateful Comparator object.
     private List<IEqualityCfg> getEqualityConfigs() {
         return context.getIEqualitys();
     }
@@ -54,9 +54,9 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
         for (int keyFieldIdx : getKeyFieldIdxs()) {
             Object keyValue = getValue(keyFieldIdx);
             final IEqualityCfg equalityConfigIface = equalityConfigIfaces.get(keyFieldIdx);
-            @SuppressWarnings("rawtypes") final ValueEquality valueEquality = getEqualityStrategy(equalityConfigIface);
+            @SuppressWarnings("rawtypes") final SortedValueEquality sortedValueEquality = getEqualityStrategy(equalityConfigIface);
             @SuppressWarnings("unchecked")
-            int keyHashCode = valueEquality.computeHashCode(keyValue, equalityConfigIface.getEqualityParameters());
+            int keyHashCode = sortedValueEquality.computeHashCode(keyValue, equalityConfigIface.getEqualityParameters());
             result = 31 * result + keyHashCode;
         }
         return result;
@@ -82,12 +82,12 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
             Object otherKeyValue = other.getValue(fieldIdx);
             FieldDescription fieldDescription = getCanonicalFields().get(fieldIdx);
             final IEqualityCfg equalityConfigIface = equalityConfigIfaces.get(fieldIdx);
-            @SuppressWarnings("rawtypes") final ValueEquality valueEquality = getEqualityStrategy(equalityConfigIface);
+            @SuppressWarnings("rawtypes") final SortedValueEquality sortedValueEquality = getEqualityStrategy(equalityConfigIface);
             if (logger.isDebugEnabled()) {
-                logger.debug(fieldDescription + ":" + keyValue + "<=>" + otherKeyValue + "(" + otherKeyValue.getClass().getName() + ") strategy: " + valueEquality.getName() + " config: " + equalityConfigIface.getEqualityParameters());
+                logger.debug(fieldDescription + ":" + keyValue + "<=>" + otherKeyValue + "(" + otherKeyValue.getClass().getName() + ") stream: " + sortedValueEquality.getName() + " config: " + equalityConfigIface.getEqualityParameters());
             }
             @SuppressWarnings("unchecked")
-            boolean equals = valueEquality.equals(keyValue, otherKeyValue, equalityConfigIface.getEqualityParameters());
+            boolean equals = sortedValueEquality.equals(keyValue, otherKeyValue, equalityConfigIface.getEqualityParameters());
             if (!equals) {
                 if (logger.isDebugEnabled()) {
                     logger.debug("Difference found: Field " + fieldDescription.getName() + " Values: " + keyValue + "<=>" + otherKeyValue);
@@ -106,8 +106,8 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
             Object keyValue = getValue(fieldIdx);
             Object otherKeyValue = other.getValue(fieldIdx);
             final IEqualityCfg equalityConfigIface = equalityConfigIfaces.get(fieldIdx);
-            @SuppressWarnings("rawtypes") final ValueEquality valueEquality = getEqualityStrategy(equalityConfigIface);
-            @SuppressWarnings("unchecked") final int keyComparison = valueEquality.compare(keyValue, otherKeyValue, equalityConfigIface.getEqualityParameters());
+            @SuppressWarnings("rawtypes") final SortedValueEquality sortedValueEquality = getEqualityStrategy(equalityConfigIface);
+            @SuppressWarnings("unchecked") final int keyComparison = sortedValueEquality.compare(keyValue, otherKeyValue, equalityConfigIface.getEqualityParameters());
             if (keyComparison != 0) {
                 return keyComparison;
             }
@@ -116,9 +116,9 @@ public class ComparableTuple extends Tuple implements Comparable<ComparableTuple
     }
 
 
-    private ValueEquality<?> getEqualityStrategy(final IEqualityCfg equalityConfigIface) {
+    private SortedValueEquality<?> getEqualityStrategy(final IEqualityCfg equalityConfigIface) {
         final String equalityName = equalityConfigIface.getName();
-        return EqualityStrategyRegistry.getEqualityStrategy(equalityName);
+        return ValueEqualityRegistry.getValueEqualityType(equalityName);
     }
 
     public int compareKeysTo(ComparableTuple other) {

@@ -9,6 +9,7 @@ import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
 import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.registry.MatcherRegistry;
+import org.someth2say.taijitu.source.AbstractSource;
 import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.tuple.FieldDescription;
@@ -18,25 +19,16 @@ import java.sql.*;
 import java.sql.Date;
 import java.util.*;
 
-public class ResultSetSource implements Source {
+public class ResultSetSource extends AbstractSource implements Source {
     private static final Logger logger = Logger.getLogger(ResultSetSource.class);
     public static final String NAME = "query";
 
     private ResultSet resultSet;
     private PreparedStatement preparedStatement;
     private Connection connection;
-    private final IComparisonCfg iComparison;
-    private final ComparisonContext context;
     private final FetchProperties fetchProperties;
-    private final ISourceCfg iSource;
-
-    @Override
-    public ISourceCfg getConfig() {
-        return iSource;
-    }
 
     private ResultSetTupleBuilder builder;
-
 
     private static class FetchProperties {
         private final String statement;
@@ -79,9 +71,7 @@ public class ResultSetSource implements Source {
 
 
     public ResultSetSource(final ISourceCfg iSource, final IComparisonCfg iComparison, final ComparisonContext context) throws SQLException {
-        this.iComparison = iComparison;
-        this.context = context;
-        this.iSource = iSource;
+        super(iSource, iComparison, context);
         this.fetchProperties = new FetchProperties(iSource.getFetchProperties());
         this.connection = ConnectionManager.getConnection(iSource.getBuildProperties());
         assert connection != null;
@@ -146,7 +136,7 @@ public class ResultSetSource implements Source {
                 String columnName = resultSetMetaData.getColumnName(columnIdx);
                 final String columnClassName = resultSetMetaData.getColumnClassName(columnIdx);
 
-                result.add(new FieldDescription(columnName, columnClassName));
+                result.add(new FieldDescription(position, columnName, columnClassName));
 
             }
             return result;
@@ -192,7 +182,7 @@ public class ResultSetSource implements Source {
 
     private TupleBuilder<ResultSet> getTupleBuilder() {
         if (builder == null) {
-            final FieldMatcher matcher = MatcherRegistry.getMatcher(iComparison.getMatchingStrategyName());
+            final FieldMatcher matcher = MatcherRegistry.getMatcher(iComparisonCfg.getMatchingStrategyName());
             builder = new ResultSetTupleBuilder(matcher, context, iSource.getName());
         }
         return builder;

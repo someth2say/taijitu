@@ -15,17 +15,17 @@ import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
 import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.registry.MatcherRegistry;
-import org.someth2say.taijitu.source.Source;
+import org.someth2say.taijitu.source.AbstractSource;
 import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.tuple.FieldDescription;
 
-public class CSVResourceSource implements Source {
+public class CSVResourceSource extends AbstractSource {
     public static final String NAME = "csv";
     public static final String FIELD_SEPARATOR = ",";
     private Stream<String> lines;
 
     @Override
-    public void close() throws Exception {
+    public void close() throws ClosingException {
         if (lines != null) lines.close();
     }
 
@@ -37,22 +37,16 @@ public class CSVResourceSource implements Source {
         }
     }
 
-    private final IComparisonCfg iComparisonCfg;
-    private final ComparisonContext context;
-
     @Override
     public ISourceCfg getConfig() {
-        return fileConfig;
+        return iSource;
     }
 
-    private final ISourceCfg fileConfig;
     private CSVTupleBuilder builder;
     private final BuildProperties buildProperties;
 
     public CSVResourceSource(final ISourceCfg iSource, final IComparisonCfg iComparisonCfg, final ComparisonContext context) throws IOException, URISyntaxException {
-        this.fileConfig = iSource;
-        this.iComparisonCfg = iComparisonCfg;
-        this.context = context;
+        super(iSource, iComparisonCfg, context);
         this.buildProperties = new BuildProperties(iSource.getBuildProperties());
     }
 
@@ -89,7 +83,7 @@ public class CSVResourceSource implements Source {
                 List<FieldDescription> result = new ArrayList<>(split.length);
                 for (String s : split) {
                     //TODO: Maybe we can try somehow to provide a class (i.e. by parsing the header...)
-                    result.add(new FieldDescription(s, null));
+                    result.add(new FieldDescription(position, s, null));
                 }
                 return result;
             }
@@ -112,7 +106,7 @@ public class CSVResourceSource implements Source {
     private CSVTupleBuilder getTupleBuilder() {
         if (builder == null) {
             final FieldMatcher matcher = MatcherRegistry.getMatcher(iComparisonCfg.getMatchingStrategyName());
-            builder = new CSVTupleBuilder(matcher, context, fileConfig.getName());
+            builder = new CSVTupleBuilder(matcher, context, iSource.getName());
         }
         return builder;
     }

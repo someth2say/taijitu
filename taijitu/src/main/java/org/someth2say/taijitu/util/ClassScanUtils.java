@@ -41,11 +41,13 @@ public class ClassScanUtils {
     }
 
 
-    public static <T extends Named> Map<String, Class<? extends T>> getClassesImplementing(Class<? extends T> implementedInterface) {
+    public static <T extends Named> Map<String, Class<? extends T>> getClassesImplementing(Class<? extends T> clazzOrInterface) {
         Map<String, Class<? extends T>> result = new ConcurrentHashMap<>();
         final FastClasspathScanner fcs = new FastClasspathScanner();
         final ScanResult scanResult = fcs.scan();
-        final List<String> classNames = scanResult.getNamesOfClassesImplementing(implementedInterface);
+
+
+        final List<String> classNames = clazzOrInterface.isInterface() ? scanResult.getNamesOfClassesImplementing(clazzOrInterface) : scanResult.getNamesOfSubclassesOf(clazzOrInterface);
         final List<Class<?>> clazzes = scanResult.classNamesToClassRefs(classNames);
         for (Class<?> clazz : clazzes) {
             if (!Modifier.isAbstract(clazz.getModifiers())) {
