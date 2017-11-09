@@ -27,7 +27,7 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
     public static final String NAME = "mapping";
     private static final Logger logger = Logger.getLogger(MappingStreamEquality.class);
 
-    protected MappingStreamEquality(StructureEquality<T> equality, StructureEquality<T> categorizer) {
+    public MappingStreamEquality(StructureEquality<T> equality, StructureEquality<T> categorizer) {
         super(equality, categorizer);
     }
 

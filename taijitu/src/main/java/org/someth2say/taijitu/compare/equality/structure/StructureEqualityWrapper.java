@@ -16,14 +16,14 @@ public class StructureEqualityWrapper<T> {
 
     @Override
     public boolean equals(Object obj) {
-        if (wrapped==null){
-            return obj==null;
+        if (wrapped == null) {
+            return obj == null;
         }
-
-        if (wrapped.getClass().isAssignableFrom(obj.getClass())) {
-            return structureEquality.equals(wrapped,(T)obj);
+        if (obj instanceof StructureEqualityWrapper) {
+            StructureEqualityWrapper<T> otherWrapper = (StructureEqualityWrapper<T>) obj;
+            T otherWrapped = otherWrapper.getWrapped();
+            return structureEquality.equals(wrapped, otherWrapped);
         }
-
         return false;
     }
 

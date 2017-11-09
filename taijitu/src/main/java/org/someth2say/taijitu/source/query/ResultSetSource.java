@@ -2,7 +2,6 @@ package org.someth2say.taijitu.source.query;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.config.DefaultConfig;
 import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
@@ -31,13 +30,15 @@ public class ResultSetSource extends AbstractSource<Tuple> {
     private final List<FieldDescription> providedFields;
 
 
-    public ResultSetSource(final ISourceCfg iSource, final IComparisonCfg iComparison, final ComparisonContext context, FieldMatcher matcher) throws SQLException {
-        super(iSource, iComparison, context, matcher);
+    public ResultSetSource(final ISourceCfg iSource, final IComparisonCfg iComparison, FieldMatcher matcher) throws SQLException {
+        super(iSource, iComparison, matcher);
         this.fetchProperties = new FetchProperties(iSource.getFetchProperties());
         this.connection = ConnectionManager.getConnection(iSource.getBuildProperties());
-        this.providedFields = buildFieldDescriptions();
+        // init
         this.preparedStatement = getPreparedStatement();
         this.resultSet = preparedStatement.executeQuery();
+
+        this.providedFields = buildFieldDescriptions();
     }
 
 

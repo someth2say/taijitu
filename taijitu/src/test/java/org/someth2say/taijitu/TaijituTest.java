@@ -55,8 +55,7 @@ public class TaijituTest {
     @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection<String> strategies() {
         return Arrays.asList(
-                ComparableStreamEquality.NAME,
-                MappingStreamEquality.NAME
+                MappingStreamEquality.NAME, ComparableStreamEquality.NAME
         );
     }
 
@@ -117,7 +116,7 @@ public class TaijituTest {
 
     private TaijituCfg getCSVConfiguration() {
         BasicTaijituCfg basicTaijituCfg = new BasicTaijituCfg("");
-        //basicTaijituCfg.setConsoleLog("DEBUG");
+        basicTaijituCfg.setConsoleLog("DEBUG");
 
         // Comparisons
 

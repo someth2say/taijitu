@@ -1,7 +1,6 @@
 package org.someth2say.taijitu.plugins.reporting;
 
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
 import org.someth2say.taijitu.config.interfaces.IPluginCfg;
@@ -11,12 +10,7 @@ import org.someth2say.taijitu.tuple.Tuple;
 import org.someth2say.taijitu.util.Pair;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * Created by Jordi Sola on 22/02/2017.
@@ -28,7 +22,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
     private File outputFolder;
     private WritterPluginConfigIface config;
 
-    private String[][] printDifferent(final ComparisonResult comparisonResult, final ComparisonContext taijituData, final WritterPluginConfigIface config) {
+//    private String[][] printDifferent(final ComparisonResult comparisonResult, final ComparisonContext taijituData, final WritterPluginConfigIface config) {
 //        this.config = config;
 //        final Collection<Pair<Tuple, Tuple>> different = comparisonResult.getDifferent();
 //        final String[][] result = new String[different.size() * 2 + 1][];
@@ -57,8 +51,8 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //                copyDifferencesAndKeys(difference, result[sourceRowIdx], result[targetRowIdx], sourceFieldToColumnsMap, targetFieldToColumnsMap, keyFieldsMap, compareFieldsMap);
 //            }
 //        }
-        return null;
-    }
+//        return null;
+//    }
 
     private void highLightKeyFields(List<String> header, List<FieldDescription> keyFields) {
         for (int fieldIdx = 0; fieldIdx < header.size(); fieldIdx++) {

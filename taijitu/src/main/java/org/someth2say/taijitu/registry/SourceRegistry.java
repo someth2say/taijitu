@@ -2,21 +2,17 @@ package org.someth2say.taijitu.registry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
+import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.source.AbstractSource;
 import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.source.csv.CSVResourceSource;
 import org.someth2say.taijitu.source.query.ResultSetSource;
-import org.someth2say.taijitu.tuple.FieldDescription;
-import org.someth2say.taijitu.tuple.TupleBuilder;
 import org.someth2say.taijitu.util.ClassScanUtils;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiFunction;
 
 /**
  * Created by Jordi Sola on 16/02/2017.
@@ -48,13 +44,13 @@ public class SourceRegistry {
         return classes.get(type);
     }
 
-    public static <T> Source<T> getInstance(String type, ISourceCfg sourceConfig, IComparisonCfg comparisonConfig, ComparisonContext context, TupleBuilder<?> builder) {
+    public static <T> Source<T> getInstance(String type, ISourceCfg sourceConfig, IComparisonCfg comparisonConfig, FieldMatcher matcher) {
         Class<? extends AbstractSource> sourceClass = getSourceType(type);
-        Object[] arguments = {sourceConfig, comparisonConfig, context};
         try {
             //TODO: Fix this unckecked assignment
-            return sourceClass.getDeclaredConstructor(ISourceCfg.class, IComparisonCfg.class, ComparisonContext.class, BiFunction.class).newInstance(sourceConfig, comparisonConfig, context, builder);
+            return sourceClass.getDeclaredConstructor(ISourceCfg.class, IComparisonCfg.class, FieldMatcher.class).newInstance(sourceConfig, comparisonConfig, matcher);
         } catch (Exception e) {
+            Object[] arguments = {sourceConfig, comparisonConfig};
             logger.error("Unable to create source. Type: " + type + " Arguments: " + StringUtils.join(arguments, ","), e);
         }
         return null;

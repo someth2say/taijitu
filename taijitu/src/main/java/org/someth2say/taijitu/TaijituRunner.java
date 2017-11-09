@@ -14,7 +14,6 @@ import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.registry.*;
 import org.someth2say.taijitu.source.Source;
-import org.someth2say.taijitu.source.query.ResultSetTupleBuilder;
 import org.someth2say.taijitu.tuple.*;
 
 import java.util.List;
@@ -22,7 +21,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 /**
@@ -46,16 +44,15 @@ public class TaijituRunner implements Callable<ComparisonResult> {
     @Override
     public ComparisonResult call() {
         ComparisonResult result = new SimpleComparisonResult();
-        ComparisonContext context = new ComparisonContext(config);
         Map<IPluginCfg, TaijituPlugin> plugins = PluginRegistry.getPlugins(config.getComparisonPluginConfigs());
 
         try {
 
-            runPluginsPreComparison(context, plugins);
+            runPluginsPreComparison(plugins);
 
-            result = runComparison(context, config);
+            result = runComparison(config);
 
-            runPluginsPostComparison(context, plugins);
+            runPluginsPostComparison(plugins);
 
         } catch (final TaijituException e) {
             logger.error(e.getMessage(), e);
@@ -64,21 +61,19 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         return result;
     }
 
-    private void runPluginsPostComparison(final ComparisonContext comparison,
-                                          Map<IPluginCfg, TaijituPlugin> plugins) throws TaijituException {
+    private void runPluginsPostComparison(Map<IPluginCfg, TaijituPlugin> plugins) throws TaijituException {
         for (Entry<IPluginCfg, TaijituPlugin> entry : plugins.entrySet()) {
-            entry.getValue().postComparison(comparison, entry.getKey());
+            entry.getValue().postComparison(entry.getKey());
         }
     }
 
-    private void runPluginsPreComparison(final ComparisonContext comparison,
-                                         Map<IPluginCfg, TaijituPlugin> plugins) throws TaijituException {
+    private void runPluginsPreComparison(Map<IPluginCfg, TaijituPlugin> plugins) throws TaijituException {
         for (Entry<IPluginCfg, TaijituPlugin> entry : plugins.entrySet()) {
-            entry.getValue().preComparison(comparison, entry.getKey());
+            entry.getValue().preComparison(entry.getKey());
         }
     }
 
-    private <T> ComparisonResult<T> runComparison(ComparisonContext context, IComparisonCfg iComparisonCfg) {
+    private <T> ComparisonResult<T> runComparison(IComparisonCfg iComparisonCfg) {
 
         IStrategyCfg strategyConfig = iComparisonCfg.getStrategyConfig();
         final String strategyName = strategyConfig.getName();
@@ -88,9 +83,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         if (matcher == null) return null;
 
         // TODO: Again restricting to tuple...
-        ResultSetTupleBuilder builder = new ResultSetTupleBuilder(matcher, null);
-
-        List<Source<T>> sources = iComparisonCfg.getSourceConfigs().stream().map(sourceConfig -> this.<T>buildSource(sourceConfig, context, iComparisonCfg, builder)).collect(Collectors.toList());
+        List<Source<T>> sources = iComparisonCfg.getSourceConfigs().stream().map(sourceConfig -> this.<T>buildSource(sourceConfig, iComparisonCfg, matcher)).collect(Collectors.toList());
         if (sources.contains(null)) {
             logger.error("There was a problem building sources. Aborting.");
             return null;
@@ -262,9 +255,9 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         return matcher;
     }
 
-    private <T> Source<T> buildSource(final ISourceCfg sourceConfig, ComparisonContext context, IComparisonCfg comparisonConfig, TupleBuilder<?> builder) {
+    private <T> Source<T> buildSource(final ISourceCfg sourceConfig, IComparisonCfg comparisonConfig, FieldMatcher matcher) {
         //TODO: Somehow make <T> explicit (extracting the class from the sourceConfig)
-        return SourceRegistry.getInstance(sourceConfig.getType(), sourceConfig, comparisonConfig, context, builder);
+        return SourceRegistry.getInstance(sourceConfig.getType(), sourceConfig, comparisonConfig, matcher);
     }
 
 

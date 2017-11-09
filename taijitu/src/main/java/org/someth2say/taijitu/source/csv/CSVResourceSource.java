@@ -9,12 +9,10 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
 
-import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
 import org.someth2say.taijitu.matcher.FieldMatcher;
-import org.someth2say.taijitu.registry.MatcherRegistry;
 import org.someth2say.taijitu.source.AbstractSource;
 import org.someth2say.taijitu.tuple.FieldDescription;
 import org.someth2say.taijitu.tuple.Tuple;
@@ -24,6 +22,7 @@ public class CSVResourceSource extends AbstractSource<Tuple> {
     public static final String NAME = "csv";
     public static final String FIELD_SEPARATOR = ",";
     private Stream<String> lines;
+    private List<FieldDescription> providedFields;
 
     @Override
     public void close() throws ClosingException {
@@ -46,8 +45,8 @@ public class CSVResourceSource extends AbstractSource<Tuple> {
     private CSVTupleBuilder builder;
     private final BuildProperties buildProperties;
 
-    public CSVResourceSource(final ISourceCfg iSource, final IComparisonCfg iComparisonCfg, final ComparisonContext context, FieldMatcher matcher) throws IOException, URISyntaxException {
-        super(iSource, iComparisonCfg, context, matcher);
+    public CSVResourceSource(final ISourceCfg iSource, final IComparisonCfg iComparisonCfg, FieldMatcher matcher) throws IOException, URISyntaxException {
+        super(iSource, iComparisonCfg, matcher);
         this.buildProperties = new BuildProperties(iSource.getBuildProperties());
     }
 
@@ -81,22 +80,27 @@ public class CSVResourceSource extends AbstractSource<Tuple> {
 
     @Override
     public List<FieldDescription> getProvidedFields() {
-        Stream<String> lines = getLines();
-        if (lines != null) {
-            Optional<String> headerOpt = lines.findFirst();
-            if (headerOpt.isPresent()) {
-                String header = headerOpt.get();
-                String[] split = header.split(FIELD_SEPARATOR);
-                List<FieldDescription> result = new ArrayList<>(split.length);
-                for (String s : split) {
-                    //TODO: Maybe we can try somehow to provide a class (i.e. by parsing the header...)
-                    result.add(new FieldDescription(s, null));
+        if (this.providedFields == null) {
+            try (Stream<String> lines = getLines()) {
+                if (lines != null) {
+                    Optional<String> headerOpt = lines.findFirst();
+                    if (headerOpt.isPresent()) {
+                        String header = headerOpt.get();
+                        String[] split = header.split(FIELD_SEPARATOR);
+                        this.providedFields = new ArrayList<>(split.length);
+                        for (String s : split) {
+                            //TODO: Maybe we can try somehow to provide a class (i.e. by parsing the header...)
+                            this.providedFields.add(new FieldDescription(s, null));
+                        }
+                        return this.providedFields;
+                    }
+                } else { // Can't get lines... but this can drive the iterator to enter here for each entry!!!
+                    return null;
                 }
-                return result;
             }
-            lines.close();
         }
-        return null;
+        return this.providedFields;
+
     }
 
 

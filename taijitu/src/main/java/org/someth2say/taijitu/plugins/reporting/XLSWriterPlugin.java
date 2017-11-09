@@ -1,6 +1,5 @@
 package org.someth2say.taijitu.plugins.reporting;
 
-import org.someth2say.taijitu.ComparisonContext;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.config.interfaces.IPluginCfg;
 
@@ -20,12 +19,12 @@ public class XLSWriterPlugin extends AbstractWriterPlugin {
 //    }
 
     @Override
-    public void preComparison(ComparisonContext taijituData, IPluginCfg comparisonConfig) throws TaijituException {
+    public void preComparison(IPluginCfg comparisonConfig) throws TaijituException {
 
     }
 
     @Override
-    public void postComparison(ComparisonContext taijituData, IPluginCfg comparisonConfig) throws TaijituException {
+    public void postComparison(IPluginCfg comparisonConfig) throws TaijituException {
 
     }
 }

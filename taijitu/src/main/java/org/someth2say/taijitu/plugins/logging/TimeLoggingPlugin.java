@@ -8,7 +8,6 @@ import org.joda.time.format.PeriodFormatter;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
-import org.someth2say.taijitu.ComparisonContext;
 
 /**
  * Created by Jordi Sola on 24/02/2017.
@@ -29,12 +28,12 @@ public class TimeLoggingPlugin implements TaijituPlugin {
 
 
     @Override
-    public void preComparison(ComparisonContext taijituData, IPluginCfg comparisonConfig) throws TaijituException {
+    public void preComparison(IPluginCfg comparisonConfig) throws TaijituException {
         comparisonStart = System.currentTimeMillis();
     }
 
     @Override
-    public void postComparison(ComparisonContext taijituData, IPluginCfg comparisonConfig) throws TaijituException {
+    public void postComparison(IPluginCfg comparisonConfig) throws TaijituException {
         comparisonEnd = System.currentTimeMillis();
         logComparisonTimes();
         comparisonCount++;

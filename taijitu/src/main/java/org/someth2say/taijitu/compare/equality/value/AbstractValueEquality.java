@@ -10,4 +10,9 @@ public abstract class AbstractValueEquality<T> implements ValueEquality<T> {
     public Object getEqualityConfig() {
         return equalityConfig;
     }
+
+    @Override
+    public String toString() {
+        return getName() + "[" + (getEqualityConfig() != null ? getEqualityConfig().toString() : "") + "]";
+    }
 }

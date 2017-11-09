@@ -44,7 +44,7 @@ public abstract class AbstractTupleEquality extends AbstractStructureEquality<Tu
             @SuppressWarnings("unchecked")
             boolean equals = equality.equals(firstValue, secondValue);
             if (logger.isDebugEnabled()) {
-                logger.debug(firstValue + "<=>" + secondValue + "(" + firstValue.getClass().getName() + ") equality: " + equality.getName() + " result: " + equals);
+                logger.debug(firstValue + "<=>" + secondValue + "(" + firstValue.getClass().getName() + ") equality: " + equality + " result: " + equals);
             }
             if (!equals) {
                 if (logger.isDebugEnabled()) {
