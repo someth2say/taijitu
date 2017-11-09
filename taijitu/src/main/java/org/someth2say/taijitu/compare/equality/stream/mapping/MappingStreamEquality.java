@@ -1,18 +1,16 @@
 package org.someth2say.taijitu.compare.equality.stream.mapping;
 
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.ComparisonContext;
-import org.someth2say.taijitu.compare.equality.tuple.StructureEquality;
+import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
+import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
+import org.someth2say.taijitu.compare.equality.structure.StructureEquality;
+import org.someth2say.taijitu.compare.equality.structure.StructureEqualityWrapper;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
 import org.someth2say.taijitu.compare.result.ComparisonResult.SourceAndTuple;
 import org.someth2say.taijitu.compare.result.SynchronizedComparisonResult;
-import org.someth2say.taijitu.compare.equality.tuple.StructureEqualityWrapper;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
 import org.someth2say.taijitu.config.interfaces.IStrategyCfg;
 import org.someth2say.taijitu.source.Source;
-import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
-import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
-import org.someth2say.taijitu.tuple.ComparableTuple;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -77,38 +75,6 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
 
     public static IStrategyCfg defaultConfig() {
         return () -> MappingStreamEquality.NAME;
-    }
-
-    private class TupleMapper<T extends ComparableTuple>  implements Runnable {
-        private final Iterator<T> tupleIterator;
-        private final Map<T, SourceAndTuple<T>> sharedSet;
-        private final SynchronizedComparisonResult<T> result;
-        private final ISourceCfg iSource;
-
-        private TupleMapper(final Iterator<T> tupleIterator, final Map<T, SourceAndTuple<T>> sharedMap, final SynchronizedComparisonResult<T> result, ISourceCfg iSource) {
-            this.tupleIterator = tupleIterator;
-            this.sharedSet = sharedMap;
-            this.result = result;
-            this.iSource = iSource;
-        }
-
-        @Override
-        public void run() {
-            for (T thisRecord = getNextRecord(tupleIterator); thisRecord != null; thisRecord = getNextRecord(tupleIterator)) {
-
-                SourceAndTuple<T> thisQueryAndTuple = new SourceAndTuple<>(iSource, thisRecord);
-                final SourceAndTuple<T> otherQueryAndTuple = sharedSet.putIfAbsent(thisRecord, thisQueryAndTuple);
-                if (otherQueryAndTuple != null) {
-                    //we have a key match ...
-                    sharedSet.remove(otherQueryAndTuple.getValue());
-                    final T otherRecord = otherQueryAndTuple.getValue();
-                    if (!thisRecord.equalsNonKeys(otherRecord)) {
-                        // ...and contents differ
-                        result.addDifference(thisQueryAndTuple, otherQueryAndTuple);
-                    }
-                }
-            }
-        }
     }
 
     private class TupleMapperExt<T>  implements Runnable {

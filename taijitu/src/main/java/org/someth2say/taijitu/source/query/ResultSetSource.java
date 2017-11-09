@@ -8,27 +8,38 @@ import org.someth2say.taijitu.config.DefaultConfig;
 import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
 import org.someth2say.taijitu.matcher.FieldMatcher;
-import org.someth2say.taijitu.registry.MatcherRegistry;
 import org.someth2say.taijitu.source.AbstractSource;
-import org.someth2say.taijitu.source.Source;
-import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.tuple.FieldDescription;
+import org.someth2say.taijitu.tuple.Tuple;
 import org.someth2say.taijitu.tuple.TupleBuilder;
 
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
 
-public class ResultSetSource extends AbstractSource implements Source {
+public class ResultSetSource extends AbstractSource<Tuple> {
     private static final Logger logger = Logger.getLogger(ResultSetSource.class);
     public static final String NAME = "query";
 
-    private ResultSet resultSet;
-    private PreparedStatement preparedStatement;
-    private Connection connection;
+    private final ResultSet resultSet;
+    private final PreparedStatement preparedStatement;
+    private final Connection connection;
     private final FetchProperties fetchProperties;
 
+    //TODO: Ew... mutable...
     private ResultSetTupleBuilder builder;
+    private final List<FieldDescription> providedFields;
+
+
+    public ResultSetSource(final ISourceCfg iSource, final IComparisonCfg iComparison, final ComparisonContext context, FieldMatcher matcher) throws SQLException {
+        super(iSource, iComparison, context, matcher);
+        this.fetchProperties = new FetchProperties(iSource.getFetchProperties());
+        this.connection = ConnectionManager.getConnection(iSource.getBuildProperties());
+        this.providedFields = buildFieldDescriptions();
+        this.preparedStatement = getPreparedStatement();
+        this.resultSet = preparedStatement.executeQuery();
+    }
+
 
     private static class FetchProperties {
         private final String statement;
@@ -69,14 +80,11 @@ public class ResultSetSource extends AbstractSource implements Source {
 
     }
 
-
-    public ResultSetSource(final ISourceCfg iSource, final IComparisonCfg iComparison, final ComparisonContext context) throws SQLException {
-        super(iSource, iComparison, context);
-        this.fetchProperties = new FetchProperties(iSource.getFetchProperties());
-        this.connection = ConnectionManager.getConnection(iSource.getBuildProperties());
-        assert connection != null;
+    @Override
+    public TupleBuilder<ResultSet> setCanonicalFields(List<FieldDescription> canonicalFields) {
+        builder = new ResultSetTupleBuilder(getMatcher(), canonicalFields);
+        return builder;
     }
-
 
     private PreparedStatement getPreparedStatement() throws SQLException {
         PreparedStatement preparedStatement;
@@ -99,14 +107,14 @@ public class ResultSetSource extends AbstractSource implements Source {
         }
     }
 
-    private void init() {
-        try {
-            preparedStatement = getPreparedStatement();
-            resultSet = preparedStatement.executeQuery();
-        } catch (SQLException e) {
-            close();
-        }
-    }
+//    private void init() {
+//        try {
+//            preparedStatement = getPreparedStatement();
+//            resultSet = preparedStatement.executeQuery();
+//        } catch (SQLException e) {
+//            close();
+//        }
+//    }
 
 
     public void close() {
@@ -123,11 +131,11 @@ public class ResultSetSource extends AbstractSource implements Source {
     }
 
     @Override
-    public List<FieldDescription> getFieldDescriptions() {
-        if (preparedStatement == null) {
-            init();
-        }
+    public List<FieldDescription> getProvidedFields() {
+        return providedFields;
+    }
 
+    private ArrayList<FieldDescription> buildFieldDescriptions() {
         try {
             ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
             int rsColumnCount = resultSetMetaData.getColumnCount();
@@ -135,9 +143,7 @@ public class ResultSetSource extends AbstractSource implements Source {
             for (int columnIdx = 1; columnIdx <= rsColumnCount; ++columnIdx) {
                 String columnName = resultSetMetaData.getColumnName(columnIdx);
                 final String columnClassName = resultSetMetaData.getColumnClassName(columnIdx);
-
-                result.add(new FieldDescription(position, columnName, columnClassName));
-
+                result.add(new FieldDescription(columnName, columnClassName));
             }
             return result;
         } catch (SQLException e) {
@@ -147,14 +153,14 @@ public class ResultSetSource extends AbstractSource implements Source {
     }
 
     @Override
-    public Iterator<ComparableTuple> iterator() {
-        return new Iterator<ComparableTuple>() {
+    public Iterator<Tuple> iterator() {
+        return new Iterator<Tuple>() {
 
             @Override
             public boolean hasNext() {
-                if (preparedStatement == null) {
-                    init();
-                }
+//                if (preparedStatement == null) {
+//                    init();
+//                }
                 try {
                     boolean hasMore = resultSet.next();
                     if (!hasMore) {
@@ -169,9 +175,9 @@ public class ResultSetSource extends AbstractSource implements Source {
 
 
             @Override
-            public ComparableTuple next() {
+            public Tuple next() {
                 try {
-                    return getTupleBuilder().apply(resultSet);
+                    return builder.apply(resultSet, getProvidedFields());
                 } catch (Exception e) {
                     close();
                     throw e;
@@ -180,13 +186,6 @@ public class ResultSetSource extends AbstractSource implements Source {
         };
     }
 
-    private TupleBuilder<ResultSet> getTupleBuilder() {
-        if (builder == null) {
-            final FieldMatcher matcher = MatcherRegistry.getMatcher(iComparisonCfg.getMatchingStrategyName());
-            builder = new ResultSetTupleBuilder(matcher, context, iSource.getName());
-        }
-        return builder;
-    }
 
     @Override
     public String getName() {

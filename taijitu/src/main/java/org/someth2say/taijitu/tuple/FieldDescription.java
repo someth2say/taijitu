@@ -4,12 +4,10 @@ import java.util.Objects;
 
 //TODO: Make FieldDescription generic, so can match types on compile time
 public class FieldDescription {
-    private final int position;
     private final String name;
     private final String clazz;
 
-    public FieldDescription(int position, String name, String clazz) {
-        this.position = position;
+    public FieldDescription(String name, String clazz) {
         this.name = name;
         this.clazz = clazz;
     }
@@ -19,14 +17,13 @@ public class FieldDescription {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FieldDescription that = (FieldDescription) o;
-        return Objects.equals(position, that.position) &&
-                Objects.equals(name, that.name) &&
+        return Objects.equals(name, that.name) &&
                 Objects.equals(clazz, that.clazz);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(position, name, clazz);
+        return Objects.hash(name, clazz);
     }
 
     public String getName() {
@@ -39,10 +36,7 @@ public class FieldDescription {
 
     @Override
     public String toString() {
-        return position + ":" + name + "(" + clazz + ")";
+        return name + "(" + clazz + ")";
     }
 
-    public int getPosition() {
-        return position;
-    }
 }

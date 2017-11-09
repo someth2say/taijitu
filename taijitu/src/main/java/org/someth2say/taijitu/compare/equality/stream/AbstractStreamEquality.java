@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.compare.equality.stream;
 
-import org.someth2say.taijitu.compare.equality.tuple.StructureEquality;
+import org.someth2say.taijitu.compare.equality.structure.StructureEquality;
 
 import java.util.Iterator;
 

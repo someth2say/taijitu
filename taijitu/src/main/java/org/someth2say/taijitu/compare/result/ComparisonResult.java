@@ -2,9 +2,7 @@ package org.someth2say.taijitu.compare.result;
 
 import java.util.*;
 
-import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
-import org.someth2say.taijitu.tuple.ComparableTuple;
 import org.someth2say.taijitu.util.ImmutablePair;
 
 public abstract class ComparisonResult<T> {

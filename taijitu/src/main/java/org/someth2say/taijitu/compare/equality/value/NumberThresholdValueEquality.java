@@ -6,7 +6,7 @@ import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class NumberThresholdValueEquality extends AbstractSortedValueEquality<Number> {
+public class NumberThresholdValueEquality extends AbstractComparableValueEquality<Number> {
 
     public static String NAME = "threshold";
     public static final int DEFAULT_SCALE = 2;

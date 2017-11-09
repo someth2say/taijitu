@@ -5,7 +5,7 @@ import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
 import java.sql.Timestamp;
 
-public class TimestampThresholdValueEquality extends AbstractSortedValueEquality<Timestamp> {
+public class TimestampThresholdValueEquality extends AbstractComparableValueEquality<Timestamp> {
 
     public static String NAME = "timestamp";
     public static final int DEFAULT_THRESHOLD = 1000;

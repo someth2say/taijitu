@@ -6,7 +6,7 @@ import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
 import java.util.Locale;
 
-public class CaseInsensitiveValueEquality extends AbstractSortedValueEquality<String> {
+public class CaseInsensitiveValueEquality extends AbstractComparableValueEquality<String> {
 
     public static String NAME = "caseInsensitive";
     private Locale locale;

@@ -4,8 +4,8 @@ import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
 import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
 import org.someth2say.taijitu.compare.equality.stream.mapping.MappingStreamEquality;
-import org.someth2say.taijitu.compare.equality.stream.sorted.SortedStreamEquality;
-import org.someth2say.taijitu.compare.equality.tuple.StructureEquality;
+import org.someth2say.taijitu.compare.equality.stream.sorted.ComparableStreamEquality;
+import org.someth2say.taijitu.compare.equality.structure.StructureEquality;
 import org.someth2say.taijitu.util.ClassScanUtils;
 
 import java.util.Map;
@@ -16,12 +16,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class StreamEqualityRegistry {
     private static final Logger logger = Logger.getLogger(StreamEqualityRegistry.class);
-    private static Map<String, Class<? extends AbstractStreamEquality<?>>> classes = new ConcurrentHashMap<>();
+    private static Map<String, Class<? extends AbstractStreamEquality>> classes = new ConcurrentHashMap<>();
 
     private StreamEqualityRegistry() {
     }
 
-    private static Class<? extends AbstractStreamEquality<?>> getStrategyType(final String type) {
+    private static Class<? extends AbstractStreamEquality> getStrategyType(final String type) {
         return classes.get(type);
     }
 
@@ -38,7 +38,7 @@ public class StreamEqualityRegistry {
 
     public static void useDefaults() {
         addStreamEqualityType(MappingStreamEquality.NAME, MappingStreamEquality.class);
-        addStreamEqualityType(SortedStreamEquality.NAME, SortedStreamEquality.class);
+        addStreamEqualityType(ComparableStreamEquality.NAME, ComparableStreamEquality.class);
     }
 
     private static <T extends AbstractStreamEquality<?>> void addStreamEqualityType(String name, Class<T> clazz) {

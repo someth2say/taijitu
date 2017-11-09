@@ -3,7 +3,7 @@ package org.someth2say.taijitu.compare.equality.value;
 import org.someth2say.taijitu.compare.equality.DefaultEqualityConfig;
 import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
-public class JavaComparableValueEquality<T extends Comparable<T>> extends AbstractSortedValueEquality<T> {
+public class JavaComparableValueEquality<T extends Comparable<T>> extends AbstractComparableValueEquality<T> {
 
     public static String NAME = "comparable";
 

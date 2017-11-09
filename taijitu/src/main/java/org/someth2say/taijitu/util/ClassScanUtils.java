@@ -41,7 +41,7 @@ public class ClassScanUtils {
     }
 
 
-    public static <T extends Named> Map<String, Class<? extends T>> getClassesImplementing(Class<? extends T> clazzOrInterface) {
+    public static <T extends Named> Map<String, Class<? extends T>> getClassesImplementing(Class<T> clazzOrInterface) {
         Map<String, Class<? extends T>> result = new ConcurrentHashMap<>();
         final FastClasspathScanner fcs = new FastClasspathScanner();
         final ScanResult scanResult = fcs.scan();

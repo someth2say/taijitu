@@ -8,7 +8,7 @@ import java.util.Iterator;
  *
  * @author Jordi Sola
  */
-public abstract class Tuple {
+public class Tuple {
     private final Object[] fieldValues;
 
     public Tuple(Object[] fieldValues) {

@@ -9,10 +9,14 @@ import org.someth2say.taijitu.source.AbstractSource;
 import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.source.csv.CSVResourceSource;
 import org.someth2say.taijitu.source.query.ResultSetSource;
+import org.someth2say.taijitu.tuple.FieldDescription;
+import org.someth2say.taijitu.tuple.TupleBuilder;
 import org.someth2say.taijitu.util.ClassScanUtils;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 
 /**
  * Created by Jordi Sola on 16/02/2017.
@@ -44,12 +48,12 @@ public class SourceRegistry {
         return classes.get(type);
     }
 
-    public static <T> Source<T> getInstance(String type, ISourceCfg sourceConfig, IComparisonCfg comparisonConfig, ComparisonContext context) {
+    public static <T> Source<T> getInstance(String type, ISourceCfg sourceConfig, IComparisonCfg comparisonConfig, ComparisonContext context, TupleBuilder<?> builder) {
         Class<? extends AbstractSource> sourceClass = getSourceType(type);
         Object[] arguments = {sourceConfig, comparisonConfig, context};
         try {
             //TODO: Fix this unckecked assignment
-            return sourceClass.getDeclaredConstructor(ISourceCfg.class,IComparisonCfg.class,ComparisonContext.class).newInstance(sourceConfig,comparisonConfig,context);
+            return sourceClass.getDeclaredConstructor(ISourceCfg.class, IComparisonCfg.class, ComparisonContext.class, BiFunction.class).newInstance(sourceConfig, comparisonConfig, context, builder);
         } catch (Exception e) {
             logger.error("Unable to create source. Type: " + type + " Arguments: " + StringUtils.join(arguments, ","), e);
         }

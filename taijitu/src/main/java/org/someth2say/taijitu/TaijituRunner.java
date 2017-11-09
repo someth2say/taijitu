@@ -2,7 +2,10 @@ package org.someth2say.taijitu;
 
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
-import org.someth2say.taijitu.compare.equality.tuple.StructureEquality;
+import org.someth2say.taijitu.compare.equality.stream.mapping.MappingStreamEquality;
+import org.someth2say.taijitu.compare.equality.stream.sorted.ComparableStreamEquality;
+import org.someth2say.taijitu.compare.equality.structure.StructureEquality;
+import org.someth2say.taijitu.compare.equality.value.ComparableValueEquality;
 import org.someth2say.taijitu.compare.equality.value.ValueEquality;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
 import org.someth2say.taijitu.compare.result.SimpleComparisonResult;
@@ -11,14 +14,15 @@ import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.registry.*;
 import org.someth2say.taijitu.source.Source;
-import org.someth2say.taijitu.tuple.FieldDescription;
-import org.someth2say.taijitu.tuple.TupleExternalEquality;
+import org.someth2say.taijitu.source.query.ResultSetTupleBuilder;
+import org.someth2say.taijitu.tuple.*;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 /**
@@ -75,12 +79,18 @@ public class TaijituRunner implements Callable<ComparisonResult> {
     }
 
     private <T> ComparisonResult<T> runComparison(ComparisonContext context, IComparisonCfg iComparisonCfg) {
-        // Show comparison description
+
         IStrategyCfg strategyConfig = iComparisonCfg.getStrategyConfig();
         final String strategyName = strategyConfig.getName();
         logger.info("COMPARISON: " + iComparisonCfg.getName() + "(stream " + strategyName + ")");
 
-        List<Source<T>> sources = iComparisonCfg.getSourceConfigs().stream().map(sourceConfig -> this.<T>buildSource(sourceConfig, context, iComparisonCfg)).collect(Collectors.toList());
+        final FieldMatcher matcher = buildFieldMatcher(iComparisonCfg);
+        if (matcher == null) return null;
+
+        // TODO: Again restricting to tuple...
+        ResultSetTupleBuilder builder = new ResultSetTupleBuilder(matcher, null);
+
+        List<Source<T>> sources = iComparisonCfg.getSourceConfigs().stream().map(sourceConfig -> this.<T>buildSource(sourceConfig, context, iComparisonCfg, builder)).collect(Collectors.toList());
         if (sources.contains(null)) {
             logger.error("There was a problem building sources. Aborting.");
             return null;
@@ -90,18 +100,10 @@ public class TaijituRunner implements Callable<ComparisonResult> {
             return null;
         }
 
-        final StreamEquality<T> streamEquality = buildStreamEquality(strategyName, iComparisonCfg, sources);
-        if (streamEquality == null) {
-            return null;
-        }
+        List<FieldDescription> canonicalFields = getCanonicalFields(sources, matcher);
 
-        //Shall we use the same matcher for canonical source? No, we should use identity matcher....
-        return runComparisonForSources(streamEquality, iComparisonCfg, sources);
-    }
-
-    private <T> StreamEquality<T> buildStreamEquality(String strategyName, IComparisonCfg iComparisonCfg, List<Source<T>> sources) {
-
-        List<FieldDescription> canonicalFields = getCanonicalFields(sources, iComparisonCfg);
+        // Update sources, so they know the actual fields we want to be returned
+        sources.forEach(s -> s.setCanonicalFields(canonicalFields));
 
         List<FieldDescription> keyFields = getKeyFields(iComparisonCfg, canonicalFields);
         if (keyFields == null) {
@@ -109,16 +111,40 @@ public class TaijituRunner implements Callable<ComparisonResult> {
             logger.error("Some keys are not provided by sources!");
             return null;
         }
-        Map<FieldDescription, ValueEquality<?>> keyFieldsEqualities = getEqualityStrategies(keyFields, iComparisonCfg);
+
+        //TODO: Find a better way to validate stream equality requirements...
+        // Sorted->ComparableValueEquality, Mapping->ValueEquality
+        final StructureEquality<T> categorizer;
+        Map<FieldDescription, ? extends ValueEquality<?>> equalities = getEqualities(keyFields, iComparisonCfg);
+        switch (strategyName) {
+            case ComparableStreamEquality.NAME:
+                if (equalities.values().stream().allMatch(ve -> ve instanceof ComparableValueEquality<?>)) {
+                    Map<FieldDescription, ComparableValueEquality<?>> comparableEqualities = (Map<FieldDescription, ComparableValueEquality<?>>) equalities;
+                    categorizer = (StructureEquality<T>) new ComparableTupleEquality(comparableEqualities, canonicalFields);
+                } else {
+                    return null;
+                }
+                break;
+            case MappingStreamEquality.NAME:
+            default:
+                categorizer = (StructureEquality<T>) new TupleEquality(equalities, canonicalFields);
+        }
 
         List<FieldDescription> nonKeyFields = getNonKeyFields(canonicalFields, keyFields);
-        Map<FieldDescription, ValueEquality<?>> nonKeyFieldsEqualities = getEqualityStrategies(nonKeyFields, iComparisonCfg);
+        Map<FieldDescription, ValueEquality<?>> nonKeyFieldsEqualities = getEqualities(nonKeyFields, iComparisonCfg);
 
-        //TODO: Decide the type of external equality based on the type of structure.
-        final StructureEquality<T> equality = (StructureEquality<T>) new TupleExternalEquality(nonKeyFieldsEqualities);
-        final StructureEquality<T> categorizer = (StructureEquality<T>) new TupleExternalEquality(keyFieldsEqualities);
+        //TODO: Decide the type of structure equality based on the type of structure (tuple, here).
+        final StructureEquality<T> equality = (StructureEquality<T>) new TupleEquality(nonKeyFieldsEqualities, canonicalFields);
 
-        return StreamEqualityRegistry.getInstance(strategyName, equality, categorizer);
+        final StreamEquality<T> streamEquality = StreamEqualityRegistry.getInstance(strategyName, equality, categorizer);
+
+
+        if (streamEquality == null) {
+            return null;
+        }
+
+        //Shall we use the same matcher for canonical source? No, we should use identity matcher....
+        return runComparisonForSources(streamEquality, iComparisonCfg, sources);
     }
 
 
@@ -133,6 +159,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
                 return comparisonResult;
             } catch (Source.ClosingException e) {
                 logger.warn("Unable to close sources.", e);
+                // Misleading warning. See https://youtrack.jetbrains.com/issue/IDEA-181860
                 return comparisonResult;
             }
 
@@ -142,12 +169,28 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         }
     }
 
-    private Map<FieldDescription, ValueEquality<?>> getEqualityStrategies(List<FieldDescription> fieldDescriptions, IComparisonCfg iComparisonCfg) {
-        return fieldDescriptions.stream().collect(Collectors.toMap(fd -> fd, fd -> getEqualityStrategy(fd, iComparisonCfg)));
-
+    private Map<FieldDescription, ValueEquality<?>> getEqualities(List<FieldDescription> fieldDescriptions, IComparisonCfg iComparisonCfg) {
+        return fieldDescriptions.stream().collect(Collectors.toMap(fd -> fd, fd -> getEquality(fd, iComparisonCfg)));
     }
+//
+//    private Map<FieldDescription, ComparableValueEquality<?>> getCategorizingEqualites(List<FieldDescription> fieldDescriptions, IComparisonCfg iComparisonCfg) {
+//        return fieldDescriptions.stream().collect(Collectors.toMap(fd -> fd, fd -> getCategorizingEquality(fd, iComparisonCfg)));
+//    }
+//
+//
+//    private ComparableValueEquality<?> getCategorizingEquality(FieldDescription fieldDescription, IComparisonCfg iComparisonCfg) {
+//        IEqualityCfg iEqualityCfg = getEqualityConfigFor(fieldDescription.getClazz(), fieldDescription.getName(), iComparisonCfg.getEqualityConfigs());
+//        AbstractValueEquality<?> valueEquality = ValueEqualityRegistry.getInstance(iEqualityCfg.getName(), iEqualityCfg.getEqualityParameters());
+//        if (valueEquality instanceof ComparableValueEquality) {
+//            return (ComparableValueEquality<?>) valueEquality;
+//        } else {
+//            logger.error("Equality for key " + fieldDescription.getName() + " is " + valueEquality.getName() + ", but key fields require a comparable equality.");
+//            return null;
+//        }
+//    }
 
-    private ValueEquality<?> getEqualityStrategy(FieldDescription fieldDescription, IComparisonCfg iComparisonCfg) {
+
+    private ValueEquality<?> getEquality(FieldDescription fieldDescription, IComparisonCfg iComparisonCfg) {
         IEqualityCfg iEqualityCfg = getEqualityConfigFor(fieldDescription.getClazz(), fieldDescription.getName(), iComparisonCfg.getEqualityConfigs());
         return ValueEqualityRegistry.getInstance(iEqualityCfg.getName(), iEqualityCfg.getEqualityParameters());
     }
@@ -198,24 +241,30 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         return keyDescriptions;
     }
 
-    private <T> List<FieldDescription> getCanonicalFields(List<Source<T>> sources, IComparisonCfg iComparisonCfg) {
+    private <T> List<FieldDescription> getCanonicalFields(List<Source<T>> sources, FieldMatcher matcher) {
+        List<FieldDescription> canonicalFDs = sources.iterator().next().getProvidedFields();
+        // Retain only canonicalFields that are also provided by other streams.
+        for (Source<?> source : sources.stream().skip(1).collect(Collectors.toList())) {
+            List<FieldDescription> sourceFDs = source.getProvidedFields();
+            sourceFDs.replaceAll(sourceFD -> matcher.getCanonicalField(sourceFD, canonicalFDs, sourceFDs));
+            canonicalFDs.retainAll(sourceFDs);
+        }
+        return canonicalFDs;
+    }
+
+    private FieldMatcher buildFieldMatcher(IComparisonCfg iComparisonCfg) {
         //Build the whole equality structure (tree?)
         final FieldMatcher matcher = MatcherRegistry.getMatcher(iComparisonCfg.getMatchingStrategyName());
         if (matcher == null) {
             logger.error("Unable to find matching stream '" + iComparisonCfg.getMatchingStrategyName() + "'");
             return null;
         }
-
-        List<FieldDescription> baseFDs = sources.iterator().next().getFieldDescriptions();
-        return sources.stream().skip(1).map(Source::getFieldDescriptions)
-                .map(fds -> fds.stream().map(fd -> matcher.getCanonicalField(fd, baseFDs, fds)))
-                .reduce(baseFDs.stream(), (fdStream1, fdStream2) -> fdStream2.filter(fd -> fd != null && fdStream1.anyMatch(fd::equals))
-                ).collect(Collectors.toList());
+        return matcher;
     }
 
-    private <T> Source<T> buildSource(final ISourceCfg sourceConfig, ComparisonContext context, IComparisonCfg comparisonConfig) {
-        //TODO: Somehow make T explicit (extracting the class from the sourceConfig)
-        return SourceRegistry.getInstance(sourceConfig.getType(), sourceConfig, comparisonConfig, context);
+    private <T> Source<T> buildSource(final ISourceCfg sourceConfig, ComparisonContext context, IComparisonCfg comparisonConfig, TupleBuilder<?> builder) {
+        //TODO: Somehow make <T> explicit (extracting the class from the sourceConfig)
+        return SourceRegistry.getInstance(sourceConfig.getType(), sourceConfig, comparisonConfig, context, builder);
     }
 
 

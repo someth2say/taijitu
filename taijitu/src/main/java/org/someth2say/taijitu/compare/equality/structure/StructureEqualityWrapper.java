@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.compare.equality.tuple;
+package org.someth2say.taijitu.compare.equality.structure;
 
 public class StructureEqualityWrapper<T> {
 

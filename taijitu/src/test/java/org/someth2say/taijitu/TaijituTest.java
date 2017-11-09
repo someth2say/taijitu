@@ -21,7 +21,7 @@ import org.someth2say.taijitu.source.csv.CSVResourceSource;
 import org.someth2say.taijitu.source.query.ConnectionManager;
 import org.someth2say.taijitu.source.query.ResultSetSource;
 import org.someth2say.taijitu.compare.equality.stream.mapping.MappingStreamEquality;
-import org.someth2say.taijitu.compare.equality.stream.sorted.SortedStreamEquality;
+import org.someth2say.taijitu.compare.equality.stream.sorted.ComparableStreamEquality;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -55,7 +55,7 @@ public class TaijituTest {
     @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection<String> strategies() {
         return Arrays.asList(
-                SortedStreamEquality.NAME,
+                ComparableStreamEquality.NAME,
                 MappingStreamEquality.NAME
         );
     }

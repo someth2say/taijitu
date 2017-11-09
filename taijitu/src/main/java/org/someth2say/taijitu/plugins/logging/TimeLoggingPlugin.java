@@ -36,7 +36,7 @@ public class TimeLoggingPlugin implements TaijituPlugin {
     @Override
     public void postComparison(ComparisonContext taijituData, IPluginCfg comparisonConfig) throws TaijituException {
         comparisonEnd = System.currentTimeMillis();
-        logComparisonTimes(taijituData);
+        logComparisonTimes();
         comparisonCount++;
     }
 
@@ -53,10 +53,10 @@ public class TimeLoggingPlugin implements TaijituPlugin {
 
     }
 
-    private void logComparisonTimes(ComparisonContext context) {
+    private void logComparisonTimes() {
         final PeriodFormatter formatter = ISOPeriodFormat.standard();
         final Period periodTotal = new Duration(comparisonStart, comparisonEnd).toPeriod();
-        logger.info("DONE comparison " + context.getComparison().getName() + ":" + formatter.print(periodTotal));
+        logger.info("DONE comparison:" + formatter.print(periodTotal));
     }
 
     private void logTotalTimes() {
