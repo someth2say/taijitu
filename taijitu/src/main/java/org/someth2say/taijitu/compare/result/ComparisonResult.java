@@ -1,35 +1,37 @@
 package org.someth2say.taijitu.compare.result;
 
-import java.util.*;
-
-import org.someth2say.taijitu.config.interfaces.ISourceCfg;
 import org.someth2say.taijitu.util.ImmutablePair;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class ComparisonResult<T> {
 
-	public static class SourceAndTuple<T> extends ImmutablePair<ISourceCfg, T> {
-		public SourceAndTuple(ISourceCfg iSource, T tuple) {
+	public static class SourceIdAndStructure<T> extends ImmutablePair<Object, T> {
+		public SourceIdAndStructure(Object iSource, T tuple) {
 			super(iSource, tuple);
 		}
 	}
 
 	public abstract class Mismatch<T> {
-		final Map<ISourceCfg, T> entries;
+		final Map<Object, T> entries;
 
-		public Mismatch(Collection<SourceAndTuple<T>> existing) {
+		public Mismatch(Collection<SourceIdAndStructure<T>> existing) {
 			entries = new HashMap<>(existing.size());
 			existing.forEach(qat -> entries.put(qat.getKey(), qat.getValue()));
 		}
 	}
 
 	public class Difference<T> extends Mismatch<T> {
-		public Difference(Collection<SourceAndTuple<T>> different) {
+		public Difference(Collection<SourceIdAndStructure<T>> different) {
 			super(different);
 		}
 	}
 
 	public class Missing<T> extends Mismatch<T> {
-		public Missing(Collection<SourceAndTuple<T>> existing) {
+		public Missing(Collection<SourceIdAndStructure<T>> existing) {
 			super(existing);
 		}
 	}
@@ -40,15 +42,15 @@ public abstract class ComparisonResult<T> {
 		this.mismatches = mismatches;
 	}
 
-	public void addDifference(final SourceAndTuple<T> first, final SourceAndTuple<T> second) {
+	public void addDifference(final SourceIdAndStructure<T> first, final SourceIdAndStructure<T> second) {
 		getMismatches().add(new Difference<>(Arrays.asList(first, second)));
 	}
 
-	public void addDisjoint(final SourceAndTuple<T> element) {
+	public void addDisjoint(final SourceIdAndStructure<T> element) {
 		getMismatches().add(new Missing<>(Arrays.asList(element)));
 	}
 
-	public void addAllDisjoint(Collection<SourceAndTuple<T>> entries) {
+	public void addAllDisjoint(Collection<SourceIdAndStructure<T>> entries) {
 		entries.forEach(this::addDisjoint);
 	}
 

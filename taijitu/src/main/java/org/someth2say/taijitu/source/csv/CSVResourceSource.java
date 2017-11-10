@@ -1,24 +1,26 @@
 package org.someth2say.taijitu.source.csv;
 
-import java.io.*;
+import org.someth2say.taijitu.config.ConfigurationLabels;
+import org.someth2say.taijitu.config.interfaces.ISourceCfg;
+import org.someth2say.taijitu.source.AbstractSource;
+import org.someth2say.taijitu.tuple.FieldDescription;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Properties;
 import java.util.stream.Stream;
 
-import org.someth2say.taijitu.config.ConfigurationLabels;
-import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
-import org.someth2say.taijitu.config.interfaces.ISourceCfg;
-import org.someth2say.taijitu.matcher.FieldMatcher;
-import org.someth2say.taijitu.source.AbstractSource;
-import org.someth2say.taijitu.tuple.FieldDescription;
-import org.someth2say.taijitu.tuple.Tuple;
-import org.someth2say.taijitu.tuple.TupleBuilder;
-
-public class CSVResourceSource extends AbstractSource<Tuple> {
+public class CSVResourceSource extends AbstractSource<Object[]> {
     public static final String NAME = "csv";
     public static final String FIELD_SEPARATOR = ",";
     private Stream<String> lines;
@@ -37,23 +39,12 @@ public class CSVResourceSource extends AbstractSource<Tuple> {
         }
     }
 
-    @Override
-    public ISourceCfg getConfig() {
-        return iSource;
-    }
-
-    private CSVTupleBuilder builder;
+    //TODO: this properties should be created externally to the source
     private final BuildProperties buildProperties;
 
-    public CSVResourceSource(final ISourceCfg iSource, final IComparisonCfg iComparisonCfg, FieldMatcher matcher) throws IOException, URISyntaxException {
-        super(iSource, iComparisonCfg, matcher);
+    public CSVResourceSource(final ISourceCfg iSource) throws IOException, URISyntaxException {
+        super(iSource);
         this.buildProperties = new BuildProperties(iSource.getBuildProperties());
-    }
-
-    @Override
-    public TupleBuilder<String> setCanonicalFields(List<FieldDescription> canonicalFields) {
-        builder = new CSVTupleBuilder(getMatcher(), canonicalFields);
-        return builder;
     }
 
     private Stream<String> getLines() {
@@ -103,12 +94,11 @@ public class CSVResourceSource extends AbstractSource<Tuple> {
 
     }
 
-
     @Override
-    public Iterator<Tuple> iterator() {
+    public Stream<Object[]> stream() {
         lines = getLines();
         if (lines != null) {
-            return lines.skip(1).map(l -> builder.apply(l, getProvidedFields())).iterator();
+            return lines.skip(1).map(l -> l.split(FIELD_SEPARATOR));
         } else {
             return null;
         }

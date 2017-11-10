@@ -4,11 +4,16 @@ import org.someth2say.taijitu.compare.result.ComparisonResult;
 import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.util.Named;
 
+import java.util.stream.Stream;
+
 /**
  * Created by Jordi Sola on 16/02/2017.
  */
 public interface StreamEquality<T> extends Named {
 
-    ComparisonResult<T> runExternalComparison(Source<T> source, Source<T> target);
+        ComparisonResult<T> runComparison(Stream<T> source, Object sourceId, Stream<T> target, Object targetId);
+
+//        @Deprecated
+//        ComparisonResult<T> runExternalComparison(Source<T> source, Source<T> target);
 
 }

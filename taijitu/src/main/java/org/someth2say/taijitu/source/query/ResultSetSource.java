@@ -4,34 +4,30 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.config.DefaultConfig;
-import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
-import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.source.AbstractSource;
 import org.someth2say.taijitu.tuple.FieldDescription;
-import org.someth2say.taijitu.tuple.Tuple;
-import org.someth2say.taijitu.tuple.TupleBuilder;
 
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
+import java.util.stream.Stream;
 
-public class ResultSetSource extends AbstractSource<Tuple> {
+public class ResultSetSource extends AbstractSource<ResultSet> {
     private static final Logger logger = Logger.getLogger(ResultSetSource.class);
     public static final String NAME = "query";
 
     private final ResultSet resultSet;
     private final PreparedStatement preparedStatement;
     private final Connection connection;
+
+    //TODO: this properties should be created externally to the source
     private final FetchProperties fetchProperties;
 
-    //TODO: Ew... mutable...
-    private ResultSetTupleBuilder builder;
     private final List<FieldDescription> providedFields;
 
-
-    public ResultSetSource(final ISourceCfg iSource, final IComparisonCfg iComparison, FieldMatcher matcher) throws SQLException {
-        super(iSource, iComparison, matcher);
+    public ResultSetSource(final ISourceCfg iSource) throws SQLException {
+        super(iSource);
         this.fetchProperties = new FetchProperties(iSource.getFetchProperties());
         this.connection = ConnectionManager.getConnection(iSource.getBuildProperties());
         // init
@@ -40,7 +36,6 @@ public class ResultSetSource extends AbstractSource<Tuple> {
 
         this.providedFields = buildFieldDescriptions();
     }
-
 
     private static class FetchProperties {
         private final String statement;
@@ -81,12 +76,6 @@ public class ResultSetSource extends AbstractSource<Tuple> {
 
     }
 
-    @Override
-    public TupleBuilder<ResultSet> setCanonicalFields(List<FieldDescription> canonicalFields) {
-        builder = new ResultSetTupleBuilder(getMatcher(), canonicalFields);
-        return builder;
-    }
-
     private PreparedStatement getPreparedStatement() throws SQLException {
         PreparedStatement preparedStatement;
         preparedStatement = connection.prepareStatement(fetchProperties.getStatement());
@@ -108,16 +97,6 @@ public class ResultSetSource extends AbstractSource<Tuple> {
         }
     }
 
-//    private void init() {
-//        try {
-//            preparedStatement = getPreparedStatement();
-//            resultSet = preparedStatement.executeQuery();
-//        } catch (SQLException e) {
-//            close();
-//        }
-//    }
-
-
     public void close() {
         try {
             resultSet.close();
@@ -135,6 +114,7 @@ public class ResultSetSource extends AbstractSource<Tuple> {
     public List<FieldDescription> getProvidedFields() {
         return providedFields;
     }
+
 
     private ArrayList<FieldDescription> buildFieldDescriptions() {
         try {
@@ -154,39 +134,39 @@ public class ResultSetSource extends AbstractSource<Tuple> {
     }
 
     @Override
-    public Iterator<Tuple> iterator() {
-        return new Iterator<Tuple>() {
-
-            @Override
-            public boolean hasNext() {
-//                if (preparedStatement == null) {
-//                    init();
-//                }
-                try {
-                    boolean hasMore = resultSet.next();
-                    if (!hasMore) {
-                        close();
-                    }
-                    return hasMore;
-                } catch (SQLException e) {
-                    close();
-                    return false;
-                }
-            }
-
-
-            @Override
-            public Tuple next() {
-                try {
-                    return builder.apply(resultSet, getProvidedFields());
-                } catch (Exception e) {
-                    close();
-                    throw e;
-                }
-            }
-        };
+    public Stream<ResultSet> stream() {
+        Iterator<ResultSet> iterator = buildIterator();
+        return Stream.generate(iterator::next);
     }
 
+    private Iterator<ResultSet> buildIterator() {
+        return new Iterator<ResultSet>() {
+
+                @Override
+                public boolean hasNext() {
+                    try {
+                        boolean hasMore = resultSet.next();
+                        if (!hasMore) {
+                            close();
+                        }
+                        return hasMore;
+                    } catch (SQLException e) {
+                        close();
+                        return false;
+                    }
+                }
+
+                @Override
+                public ResultSet next() {
+                    try {
+                        return resultSet;
+                    } catch (Exception e) {
+                        close();
+                        throw e;
+                    }
+                }
+            };
+    }
 
     @Override
     public String getName() {

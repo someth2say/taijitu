@@ -44,13 +44,13 @@ public class SourceRegistry {
         return classes.get(type);
     }
 
-    public static <T> Source<T> getInstance(String type, ISourceCfg sourceConfig, IComparisonCfg comparisonConfig, FieldMatcher matcher) {
+    public static <T> Source<T> getInstance(String type, ISourceCfg sourceConfig) {
         Class<? extends AbstractSource> sourceClass = getSourceType(type);
         try {
             //TODO: Fix this unckecked assignment
-            return sourceClass.getDeclaredConstructor(ISourceCfg.class, IComparisonCfg.class, FieldMatcher.class).newInstance(sourceConfig, comparisonConfig, matcher);
+            return sourceClass.getDeclaredConstructor(ISourceCfg.class).newInstance(sourceConfig);
         } catch (Exception e) {
-            Object[] arguments = {sourceConfig, comparisonConfig};
+            Object[] arguments = {sourceConfig};
             logger.error("Unable to create source. Type: " + type + " Arguments: " + StringUtils.join(arguments, ","), e);
         }
         return null;
