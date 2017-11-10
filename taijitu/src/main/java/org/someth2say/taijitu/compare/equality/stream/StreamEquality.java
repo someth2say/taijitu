@@ -1,7 +1,6 @@
 package org.someth2say.taijitu.compare.equality.stream;
 
 import org.someth2say.taijitu.compare.result.ComparisonResult;
-import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.util.Named;
 
 import java.util.stream.Stream;

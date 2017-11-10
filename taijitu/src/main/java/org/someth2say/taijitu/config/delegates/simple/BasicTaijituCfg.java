@@ -32,6 +32,7 @@ public class BasicTaijituCfg implements ITaijituCfg {
     private List<String> keyFields;
     private Properties buildProperties;
     private Properties fetchProperties;
+    private String mapper;
 
     public void setComparisons(List<IComparisonCfg> comparisons) {
         this.comparisons = comparisons;
@@ -113,6 +114,11 @@ public class BasicTaijituCfg implements ITaijituCfg {
         this.name = name;
     }
 
+	public void setMapper(String mapper) {
+		this.mapper = mapper;
+	}
+
+	
     @Override
     public List<IComparisonCfg> getComparisons() {
         return this.comparisons;
@@ -212,4 +218,9 @@ public class BasicTaijituCfg implements ITaijituCfg {
     public String getName() {
         return this.name;
     }
+    
+    @Override
+	public String getMapper() {
+		return mapper;
+	}
 }

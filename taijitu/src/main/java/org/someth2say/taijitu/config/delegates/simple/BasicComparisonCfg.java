@@ -27,6 +27,7 @@ public class BasicComparisonCfg implements IComparisonCfg {
     private List<String> keyFields;
     private Properties buildProperties;
     private Properties fetchProperties;
+    private String mapper;
 
     public BasicComparisonCfg(String name) {
         this.name = name;
@@ -108,6 +109,11 @@ public class BasicComparisonCfg implements IComparisonCfg {
         return this.name;
     }
 
+    @Override
+	public String getMapper() {
+		return mapper;
+	}
+
     public void setFieldName(String fieldName) {
         this.fieldName = fieldName;
     }
@@ -159,4 +165,8 @@ public class BasicComparisonCfg implements IComparisonCfg {
     public void setComparisonPluginConfigs(List<IPluginCfg> comparisonPluginConfigs) {
         this.comparisonPluginConfigs = comparisonPluginConfigs;
     }
+
+	public void setMapper(String mapper) {
+		this.mapper = mapper;
+	}
 }

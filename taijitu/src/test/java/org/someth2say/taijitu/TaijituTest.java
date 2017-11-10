@@ -18,6 +18,8 @@ import org.someth2say.taijitu.config.delegates.simple.*;
 import org.someth2say.taijitu.config.impl.TaijituCfg;
 import org.someth2say.taijitu.config.interfaces.*;
 import org.someth2say.taijitu.source.csv.CSVResourceSource;
+import org.someth2say.taijitu.source.mapper.CSVTupleMapper;
+import org.someth2say.taijitu.source.mapper.ResultSetTupleMapper;
 import org.someth2say.taijitu.source.query.ConnectionManager;
 import org.someth2say.taijitu.source.query.ResultSetSource;
 import org.someth2say.taijitu.compare.equality.stream.mapping.MappingStreamEquality;
@@ -130,8 +132,8 @@ public class TaijituTest {
         // File scheme (must be absolute)
 //        s2buildProperties.setProperty(ConfigurationLabels.Comparison.RESOUCE, "file:///"+ ClassLoader.getSystemResource(".").getPath() +"/csv/Sacramentorealestatetransactions.csv");
 
-        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", CSVResourceSource.NAME, null, s1buildProperties);
-        BasicSourceCfg targetSrc = new BasicSourceCfg("target", CSVResourceSource.NAME, null, s2buildProperties);
+        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", CSVResourceSource.NAME, null, s1buildProperties, CSVTupleMapper.NAME);
+        BasicSourceCfg targetSrc = new BasicSourceCfg("target", CSVResourceSource.NAME, null, s2buildProperties, CSVTupleMapper.NAME);
 
         BasicComparisonCfg comp1 = new BasicComparisonCfg("csv", Arrays.asList("street", "price", "latitude", "longitude"), Arrays.asList(sourceSrc, targetSrc));
         basicTaijituCfg.setComparisons(Arrays.asList(comp1));
@@ -164,8 +166,8 @@ public class TaijituTest {
         Properties s2fetchProperties = new Properties();
         s2fetchProperties.setProperty(ConfigurationLabels.Comparison.STATEMENT, "select * from test2");
 
-        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", ResultSetSource.NAME, s1fetchProperties, null);
-        BasicSourceCfg targetSrc = new BasicSourceCfg("target", ResultSetSource.NAME, s2fetchProperties, null);
+        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", ResultSetSource.NAME, s1fetchProperties, null, ResultSetTupleMapper.NAME);
+        BasicSourceCfg targetSrc = new BasicSourceCfg("target", ResultSetSource.NAME, s2fetchProperties, null, ResultSetTupleMapper.NAME);
 
         BasicComparisonCfg comp1 = new BasicComparisonCfg("test1", Arrays.asList("KEY"), Arrays.asList(sourceSrc, sourceSrc));
         BasicComparisonCfg comp2 = new BasicComparisonCfg("test2", Arrays.asList("KEY"), Arrays.asList(sourceSrc, targetSrc));

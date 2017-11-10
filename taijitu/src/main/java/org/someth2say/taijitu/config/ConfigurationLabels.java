@@ -50,6 +50,7 @@ public final class ConfigurationLabels {
         public static final String FIELD_CLASS = "class";
 
         public static final String EQUALITY ="equality";
+		public static final String MAPPER_TYPE = "mapper";
     }
 
     public static final class Setup {

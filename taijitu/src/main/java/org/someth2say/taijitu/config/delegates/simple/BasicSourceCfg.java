@@ -12,12 +12,14 @@ public class BasicSourceCfg implements ISourceCfg {
     private List<String> keyFields;
     private Properties fetchProperties;
     private Properties buildProperties;
+    private String mapper;
 
-    public BasicSourceCfg(String name, String type, Properties fetchProperties, Properties buildProperties) {
+    public BasicSourceCfg(String name, String type, Properties fetchProperties, Properties buildProperties, String mapper) {
         this.type = type;
         this.name = name;
         this.buildProperties = buildProperties;
         this.fetchProperties = fetchProperties;
+        this.mapper = mapper;
     }
 
     public String getType() {
@@ -56,4 +58,13 @@ public class BasicSourceCfg implements ISourceCfg {
     public String getName() {
         return name;
     }
+
+	@Override
+	public String getMapper() {
+		return this.mapper;
+	}
+
+	public void setMapper(String mapper) {
+		this.mapper = mapper;
+	}
 }

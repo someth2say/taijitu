@@ -14,6 +14,7 @@ import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.registry.*;
 import org.someth2say.taijitu.source.Source;
+import org.someth2say.taijitu.source.mapper.Mapper;
 import org.someth2say.taijitu.tuple.*;
 
 import java.util.ArrayList;
@@ -78,9 +79,6 @@ public class TaijituRunner implements Callable<ComparisonResult> {
 
     private <T> ComparisonResult<T> runComparison(IComparisonCfg iComparisonCfg) {
 
-        IStrategyCfg strategyConfig = iComparisonCfg.getStrategyConfig();
-        final String strategyName = strategyConfig.getName();
-        logger.info("COMPARISON: " + iComparisonCfg.getName() + "(strategy: " + strategyName + ")");
 
         final FieldMatcher matcher = buildFieldMatcher(iComparisonCfg);
         if (matcher == null) return null;
@@ -90,39 +88,44 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         List<FieldDescription> canonicalFields = getCanonicalFields(sources, matcher);
 
         //Mappers can't be done until all sources are done, 'cause they need canonical fields.
-        List<Stream<T>> mappedStreams = sources.stream().map(source -> buildMappedStream(source, canonicalFields, sourceConfigs.get(sources.indexOf(source)))).collect(Collectors.toList());
-
+        List<Stream<T>> mappedStreams = sources.stream().map(source -> buildMappedStream(source, matcher, canonicalFields, sourceConfigs.get(sources.indexOf(source)))).collect(Collectors.toList());
 
         if (sources.contains(null)) {
             logger.error("There was a problem building sources. Aborting.");
             return null;
         }
         if (sources.size() < 2) {
-            logger.error("Not enough sources available. There should be at least 2 (third and following will be ignored)");
+            logger.error("Not enough sources available. There should be at least 2 (following will be ignored)");
             return null;
         }
 
-        final StreamEquality<T> streamEquality = buildStreamEquality(iComparisonCfg, strategyName, matcher, mappedStreams);
+        final StreamEquality<T> streamEquality = buildStreamEquality(iComparisonCfg, canonicalFields);
 
         if (streamEquality == null) return null;
 
         //Shall we use the same matcher for canonical source? No, we should use identity matcher....
         logger.info("Comparison " + iComparisonCfg.getName() + " ready to run.");
-
-        return runComparisonForSources(streamEquality, mappedStreams);
+        return runComparisonForSources(streamEquality, mappedStreams, sources);
     }
 
-    private <R, T> Stream<T> buildMappedStream(Source<R> source, List<FieldDescription> canonicalFields, ISourceCfg iSourceCfg) {
-
+    private <R, T> Stream<T> buildMappedStream(Source<R> source, FieldMatcher matcher, List<FieldDescription> canonicalFields, ISourceCfg iSourceCfg) {
+        List<FieldDescription> providedFields = source.getProvidedFields();
+        
+        //TODO: Grrrr.... too many unchecked casts...
+        String mapperName = iSourceCfg.getMapper();
+        if (mapperName==null) { 
+        	return (Stream<T>) source.stream();
+        }
+		Mapper<R,T> mapper = MapperRegistry.getInstance(mapperName,matcher, canonicalFields, providedFields);
+    	if (mapper!=null) {
+    		return source.stream().map(mapper);
+    	}
+    	
+    	return null;
 
     }
 
-    private <T> StreamEquality<T> buildStreamEquality(IComparisonCfg iComparisonCfg, String strategyName, FieldMatcher matcher, List<Source<T>> sources) {
-        List<FieldDescription> canonicalFields = getCanonicalFields(sources, matcher);
-
-        // Update sources, so they know the actual fields we want to be returned
-        //sources.forEach(s -> s.setCanonicalFields(canonicalFields));
-
+    private <T> StreamEquality<T> buildStreamEquality(IComparisonCfg iComparisonCfg, List<FieldDescription> canonicalFields) {
 
         List<FieldDescription> keyFields = getKeyFields(iComparisonCfg, canonicalFields);
         if (keyFields == null) {
@@ -131,6 +134,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
             return null;
         }
 
+        String strategyName = iComparisonCfg.getStrategyConfig().getName();
         //TODO: Find a better way to validate stream equality requirements...
         // Sorted->ComparableValueEquality, Mapping->ValueEquality
         final StructureEquality<T> categorizer;
@@ -155,7 +159,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         //TODO: Decide the type of structure equality based on the type of structure (tuple, here).
         final StructureEquality<T> equality = (StructureEquality<T>) new TupleEquality(nonKeyFieldsEqualities, canonicalFields);
 
-        final StreamEquality<T> streamEquality = StreamEqualityRegistry.getInstance(strategyName, equality, categorizer);
+		final StreamEquality<T> streamEquality = StreamEqualityRegistry.getInstance(strategyName, equality, categorizer);
 
 
         if (streamEquality == null) {
@@ -164,11 +168,11 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         return streamEquality;
     }
 
-    private <T> ComparisonResult<T> runComparisonForSources(StreamEquality<T> streamEquality, List<Stream<T>> streams) {
+    private <T> ComparisonResult<T> runComparisonForSources(StreamEquality<T> streamEquality, List<Stream<T>> streams, List<Source> sources) {
         if (streams.size() >= 2) {
             ComparisonResult<T> comparisonResult = null;
-            try (Stream<T> source = streams.get(0); Stream<T> target = streams.get(1)) {
-                comparisonResult = streamEquality.runComparison(source, source.getName(), target, target.getName());
+            try (Stream<T> sourceStr = streams.get(0); Stream<T> targetStr = streams.get(1); Source sourceSrc = sources.get(0); Source targetSrc = sources.get(1)) {
+				comparisonResult = streamEquality.runComparison(sourceStr, sourceSrc.getName(), targetStr, targetSrc.getName());
                 return comparisonResult;
             } catch (Source.ClosingException e) {
                 //TODO: We are actually closing the stream, not the source!!!!!

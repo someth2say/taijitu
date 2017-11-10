@@ -46,7 +46,7 @@ public class ValueEqualityRegistry {
 
     public static <T> AbstractValueEquality<T> getInstance(String type, Object equalityConfig) {
         //TODO: Fix this unckecked cast
-        Class<? extends AbstractValueEquality<T>> equalityType = (Class<? extends AbstractValueEquality<T>>) getValueEqualityType(type);
+        Class<? extends AbstractValueEquality> equalityType = getValueEqualityType(type);
         try {
             return equalityType.getDeclaredConstructor(Object.class).newInstance(equalityConfig);
         } catch (Exception e) {

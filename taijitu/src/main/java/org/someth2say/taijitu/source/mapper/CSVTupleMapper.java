@@ -11,8 +11,10 @@ import org.someth2say.taijitu.tuple.Tuple;
  * The point here is that NOT ALL FIELDS are transformed, nor in the same order.
  * Mapping depends on the description for the CSVSource (providedFields) and the Tuple (canonicalFields);
  */
-public class CSVTupleMapper extends AbstractTupleMapper<Object[]> {
+public class CSVTupleMapper extends AbstractMapper<Object[],Tuple> {
 
+	public static final String NAME="csvToTuple";
+	
     public CSVTupleMapper(FieldMatcher matcher, List<FieldDescription> canonicalFields, List<FieldDescription> providedFields) {
         super(matcher, canonicalFields, providedFields);
     }
@@ -25,12 +27,18 @@ public class CSVTupleMapper extends AbstractTupleMapper<Object[]> {
         Object[] tupleValues = new Object[tupleFields.size()];
         int canonicalFieldIdx = 0;
         for (FieldDescription tupleField : tupleFields) {
+        	//TODO: Find a way to cache this work.
             FieldDescription csvField = matcher.getProvidedField(tupleField, tupleFields, csvFields);
             int csvFieldIdx = csvFields.indexOf(csvField);
             tupleValues[canonicalFieldIdx++] = csvEntry[csvFieldIdx];
         }
         return new Tuple(tupleValues);
     }
+
+	@Override
+	public String getName() {
+		return CSVTupleMapper.NAME;
+	}
 
 
 }

@@ -11,5 +11,4 @@ public class SourceCfg
         super(delegate, parent);
     }
 
-
 }

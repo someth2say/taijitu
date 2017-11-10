@@ -29,5 +29,8 @@ public interface ApacheSourceCfgDefaults extends ApacheCfgDefaults, ISourceCfg {
         return getConfiguration().getProperties(ConfigurationLabels.Comparison.SOURCE_BUILD_PROPERTIES);
     }
 
+    default String getMapper() {
+        return getConfiguration().getString(ConfigurationLabels.Comparison.MAPPER_TYPE);
+    }
 
 }

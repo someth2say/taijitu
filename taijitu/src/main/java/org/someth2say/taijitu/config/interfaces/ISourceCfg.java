@@ -15,4 +15,6 @@ public interface ISourceCfg extends ICfg, Named {
     Properties getFetchProperties();
 
     Properties getBuildProperties();
+
+	String getMapper();
 }

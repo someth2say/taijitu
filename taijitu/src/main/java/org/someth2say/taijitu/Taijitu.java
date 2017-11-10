@@ -53,12 +53,14 @@ public final class Taijitu {
             MatcherRegistry.scanClassPath();
             ValueEqualityRegistry.scanClassPath();
             SourceRegistry.scanClassPath();
+            MapperRegistry.scanClassPath();
         } else {
             PluginRegistry.useDefaults();
             StreamEqualityRegistry.useDefaults();
             MatcherRegistry.useDefaults();
             ValueEqualityRegistry.useDefaults();
             SourceRegistry.useDefaults();
+            MapperRegistry.useDefaults();
         }
     }
 
