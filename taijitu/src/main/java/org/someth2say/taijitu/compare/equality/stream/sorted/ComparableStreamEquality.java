@@ -1,13 +1,12 @@
 package org.someth2say.taijitu.compare.equality.stream.sorted;
 
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.compare.equality.structure.ComparableStructureEquality;
-import org.someth2say.taijitu.compare.equality.structure.StructureEquality;
+import org.someth2say.taijitu.compare.equality.structure.IComparableStructureEquality;
+import org.someth2say.taijitu.compare.equality.structure.IStructureEquality;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
 import org.someth2say.taijitu.compare.result.ComparisonResult.SourceIdAndStructure;
 import org.someth2say.taijitu.compare.result.SimpleComparisonResult;
 import org.someth2say.taijitu.config.interfaces.IStrategyCfg;
-import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
 
 import java.util.Iterator;
@@ -20,7 +19,7 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
     public static final String NAME = "sorted";
     private static final Logger logger = Logger.getLogger(ComparableStreamEquality.class);
 
-    public ComparableStreamEquality(StructureEquality equality, StructureEquality categorizer) {
+    public ComparableStreamEquality(IStructureEquality equality, IStructureEquality categorizer) {
         super(equality, categorizer);
     }
 
@@ -44,8 +43,8 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
 //    }
 
     private ComparisonResult<T> compare(Iterator<T> source, Object sourceId, Iterator<T> target, Object targetId) {
-        if (getCategorizer() instanceof ComparableStructureEquality) {
-            ComparableStructureEquality<T> categorizer = (ComparableStructureEquality<T>) getCategorizer();
+        if (getCategorizer() instanceof IComparableStructureEquality) {
+            IComparableStructureEquality<T> categorizer = (IComparableStructureEquality<T>) getCategorizer();
 
             SimpleComparisonResult<T> result = new SimpleComparisonResult<>();
 
@@ -90,7 +89,7 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
             return result;
 
         } else {
-            logger.error("Sorted stream requires an ComparableStructureEquality<T> categorizer (say, need to define category order)");
+            logger.error("Sorted stream requires an IComparableStructureEquality<T> categorizer (say, need to define category order)");
             return null;
         }
     }

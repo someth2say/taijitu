@@ -1,38 +1,18 @@
 package org.someth2say.taijitu.source.mapper;
 
-import java.util.List;
-
-import org.someth2say.taijitu.matcher.FieldMatcher;
+import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.tuple.FieldDescription;
 import org.someth2say.taijitu.tuple.Tuple;
 
-/**
- * Mapper that transforms a CSVSource (an Object[]) to a Tuple (also and Object[]).
- * The point here is that NOT ALL FIELDS are transformed, nor in the same order.
- * Mapping depends on the description for the CSVSource (providedFields) and the Tuple (canonicalFields);
- */
-public class CSVTupleMapper extends AbstractMapper<Object[],Tuple> {
+import java.util.List;
+import java.util.stream.Stream;
+
+public class CSVTupleMapper extends AbstractSourceMapper<Object[],Tuple> {
 
 	public static final String NAME="csvToTuple";
 	
-    public CSVTupleMapper(FieldMatcher matcher, List<FieldDescription> canonicalFields, List<FieldDescription> providedFields) {
-        super(matcher, canonicalFields, providedFields);
-    }
-
-    @Override
-    public Tuple apply(Object[] csvEntry) {
-        FieldMatcher matcher = getMatcher();
-        List<FieldDescription> tupleFields = getCanonicalFields();
-        List<FieldDescription> csvFields = getProvidedFields();
-        Object[] tupleValues = new Object[tupleFields.size()];
-        int canonicalFieldIdx = 0;
-        for (FieldDescription tupleField : tupleFields) {
-        	//TODO: Find a way to cache this work.
-            FieldDescription csvField = matcher.getProvidedField(tupleField, tupleFields, csvFields);
-            int csvFieldIdx = csvFields.indexOf(csvField);
-            tupleValues[canonicalFieldIdx++] = csvEntry[csvFieldIdx];
-        }
-        return new Tuple(tupleValues);
+    public CSVTupleMapper() {
+        super();
     }
 
 	@Override
@@ -40,5 +20,33 @@ public class CSVTupleMapper extends AbstractMapper<Object[],Tuple> {
 		return CSVTupleMapper.NAME;
 	}
 
+    private Tuple applyItem(Object[] csvEntry){
+        return new Tuple(csvEntry);
+    }
 
+    @Override
+    public Source<Tuple> apply(Source<Object[]> source) {
+        return new Source<Tuple>() {
+
+            @Override
+            public List<FieldDescription> getProvidedFields() {
+                return source.getProvidedFields();
+            }
+
+            @Override
+            public Stream<Tuple> stream() {
+                return source.stream().map(o -> applyItem(o));
+            }
+
+            @Override
+            public void close() throws ClosingException {
+                source.close();
+            }
+
+            @Override
+            public String getName() {
+                return source.getName();
+            }
+        };
+    }
 }

@@ -1,6 +1,4 @@
-package org.someth2say.taijitu.compare.equality;
-
-import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
+package org.someth2say.taijitu.config.interfaces;
 
 public interface DefaultEqualityConfig extends IEqualityCfg {
     @Override

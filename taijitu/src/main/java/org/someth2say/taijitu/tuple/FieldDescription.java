@@ -3,7 +3,7 @@ package org.someth2say.taijitu.tuple;
 import java.util.Objects;
 
 //TODO: Make FieldDescription generic, so can match types on compile time
-public class FieldDescription {
+public class FieldDescription<V> {
     private final String name;
     private final String clazz;
 

@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.tuple;
 
-import org.someth2say.taijitu.compare.equality.structure.ComparableStructureEquality;
+import org.someth2say.taijitu.compare.equality.structure.IComparableStructureEquality;
 import org.someth2say.taijitu.compare.equality.structure.ComparableStructureEqualityWrapper;
 import org.someth2say.taijitu.compare.equality.value.ComparableValueEquality;
 import org.someth2say.taijitu.compare.equality.value.ValueEquality;
@@ -9,7 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ComparableTupleEquality extends AbstractTupleEquality implements ComparableStructureEquality<Tuple> {
+public class ComparableTupleEquality extends AbstractTupleEquality implements IComparableStructureEquality<Tuple> {
 
     public ComparableTupleEquality(Map<FieldDescription, ? extends ComparableValueEquality<?>> valueEqualitiesMap, List<FieldDescription> tupleFields) {
         super(valueEqualitiesMap, tupleFields);

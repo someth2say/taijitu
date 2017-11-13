@@ -3,14 +3,12 @@ package org.someth2say.taijitu.compare.equality.stream.mapping;
 import org.apache.log4j.Logger;
 import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
 import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
-import org.someth2say.taijitu.compare.equality.structure.StructureEquality;
+import org.someth2say.taijitu.compare.equality.structure.IStructureEquality;
 import org.someth2say.taijitu.compare.equality.structure.StructureEqualityWrapper;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
 import org.someth2say.taijitu.compare.result.ComparisonResult.SourceIdAndStructure;
 import org.someth2say.taijitu.compare.result.SynchronizedComparisonResult;
-import org.someth2say.taijitu.config.interfaces.ISourceCfg;
 import org.someth2say.taijitu.config.interfaces.IStrategyCfg;
-import org.someth2say.taijitu.source.Source;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -28,7 +26,7 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
     public static final String NAME = "mapping";
     private static final Logger logger = Logger.getLogger(MappingStreamEquality.class);
 
-    public MappingStreamEquality(StructureEquality<T> equality, StructureEquality<T> categorizer) {
+    public MappingStreamEquality(IStructureEquality<T> equality, IStructureEquality<T> categorizer) {
         super(equality, categorizer);
     }
 
@@ -94,10 +92,10 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
         private final Map<StructureEqualityWrapper<T>, SourceIdAndStructure<T>> sharedMap;
         private final SynchronizedComparisonResult<T> result;
         private final Object sourceId;
-        private final StructureEquality<T> categorizer;
-        private final StructureEquality<T> equality;
+        private final IStructureEquality<T> categorizer;
+        private final IStructureEquality<T> equality;
 
-        private TupleMapperExt(final Iterator<T> source, final Map<StructureEqualityWrapper<T>, SourceIdAndStructure<T>> sharedMap, final SynchronizedComparisonResult<T> result, Object sourceId, StructureEquality<T> categorizer, StructureEquality<T> equality) {
+        private TupleMapperExt(final Iterator<T> source, final Map<StructureEqualityWrapper<T>, SourceIdAndStructure<T>> sharedMap, final SynchronizedComparisonResult<T> result, Object sourceId, IStructureEquality<T> categorizer, IStructureEquality<T> equality) {
             this.source = source;
             this.sharedMap = sharedMap;
             this.result = result;

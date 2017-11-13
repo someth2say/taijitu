@@ -1,12 +1,12 @@
 package org.someth2say.taijitu.tuple;
 
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.compare.equality.structure.AbstractStructureEquality;
+import org.someth2say.taijitu.compare.equality.structure.StructureEquality;
 import org.someth2say.taijitu.compare.equality.value.ValueEquality;
 
 import java.util.*;
-
-public abstract class AbstractTupleEquality extends AbstractStructureEquality<Tuple> {
+@Deprecated
+public abstract class AbstractTupleEquality extends StructureEquality<Tuple> {
     //This is the list of ALL fields that will come in the structure.
     private final LinkedHashMap<Integer, ValueEquality<?>> positionalEqualities;
     private static final Logger logger = Logger.getLogger(AbstractTupleEquality.class);

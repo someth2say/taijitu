@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.compare.equality.value;
 
-import org.someth2say.taijitu.compare.equality.DefaultEqualityConfig;
+import org.someth2say.taijitu.config.interfaces.DefaultEqualityConfig;
 import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
 import java.sql.Timestamp;

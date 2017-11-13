@@ -5,7 +5,7 @@ import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
 import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
 import org.someth2say.taijitu.compare.equality.stream.mapping.MappingStreamEquality;
 import org.someth2say.taijitu.compare.equality.stream.sorted.ComparableStreamEquality;
-import org.someth2say.taijitu.compare.equality.structure.StructureEquality;
+import org.someth2say.taijitu.compare.equality.structure.IStructureEquality;
 import org.someth2say.taijitu.util.ClassScanUtils;
 
 import java.util.Map;
@@ -45,11 +45,11 @@ public class StreamEqualityRegistry {
         classes.put(name, clazz);
     }
 
-    public static <T> StreamEquality<T> getInstance(String type, StructureEquality<T> equality, StructureEquality<T> categorizer) {
+    public static <T> StreamEquality<T> getInstance(String type, IStructureEquality<T> equality, IStructureEquality<T> categorizer) {
         //TODO: Fix this unchecked cast
         Class<? extends AbstractStreamEquality<T>> strategyType = (Class<? extends AbstractStreamEquality<T>>) getStrategyType(type);
         try {
-            return strategyType.getDeclaredConstructor(StructureEquality.class, StructureEquality.class).newInstance(equality, categorizer);
+            return strategyType.getDeclaredConstructor(IStructureEquality.class, IStructureEquality.class).newInstance(equality, categorizer);
         } catch (Exception e) {
             logger.error("Unable to create stream equality. Type: " + type + " Arguments: " + equality, e);
         }
