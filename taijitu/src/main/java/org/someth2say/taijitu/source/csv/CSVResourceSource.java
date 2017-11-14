@@ -3,7 +3,7 @@ package org.someth2say.taijitu.source.csv;
 import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
 import org.someth2say.taijitu.source.AbstractSource;
-import org.someth2say.taijitu.tuple.FieldDescription;
+import org.someth2say.taijitu.source.FieldDescription;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,17 +18,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class CSVResourceSource extends AbstractSource<Object[]> {
     public static final String NAME = "csv";
     public static final String FIELD_SEPARATOR = ",";
     private Stream<String> lines;
-    private List<FieldDescription> providedFields;
+    private List<FieldDescription<?>> providedFields;
 
     @Override
     public void close() throws ClosingException {
         if (lines != null) lines.close();
+    }
+
+    @Override
+    public Class<Object[]> getTypeParameter() {
+        return Object[].class;
     }
 
     private static class BuildProperties {
@@ -70,7 +76,7 @@ public class CSVResourceSource extends AbstractSource<Object[]> {
     }
 
     @Override
-    public List<FieldDescription> getProvidedFields() {
+    public List<FieldDescription<?>> getProvidedFields() {
         if (this.providedFields == null) {
             try (Stream<String> lines = getLines()) {
                 if (lines != null) {
@@ -80,7 +86,7 @@ public class CSVResourceSource extends AbstractSource<Object[]> {
                         String[] split = header.split(FIELD_SEPARATOR);
                         this.providedFields = new ArrayList<>(split.length);
                         for (String s : split) {
-                            //TODO: Maybe we can try somehow to provide a class (i.e. by parsing the header...)
+                            //TODO: Maybe we can try somehow to provide a class (i.e. by parsing the header...), or use String instead of null...
                             this.providedFields.add(new FieldDescription(s, null));
                         }
                         return this.providedFields;
@@ -92,6 +98,13 @@ public class CSVResourceSource extends AbstractSource<Object[]> {
         }
         return this.providedFields;
 
+    }
+
+    @Override
+    public <V> Function<Object[], V> getExtractor(FieldDescription<V> fd) {
+        int index = getProvidedFields().indexOf(fd);
+        if (index < 0) return null;
+        return (Object[] obj) -> (V)obj[index];
     }
 
     @Override

@@ -1,7 +1,6 @@
-package org.someth2say.taijitu.compare.equality.structure;
+package org.someth2say.taijitu.compare.equality.composite;
 
 import org.someth2say.taijitu.compare.equality.value.ValueEquality;
-import org.someth2say.taijitu.util.Pair;
 
 import java.util.List;
 import java.util.function.Function;
@@ -13,49 +12,48 @@ import java.util.function.Function;
  *
  * @param <T>
  */
-public class StructureEquality<T, Q> implements IStructureEquality<T, Q> {
+public class CompositeEquality<T> implements ICompositeEquality<T> {
 
-    final List<ExtractorsAndEquality<T, Q, ?>> extractorsAndEqualities;
+    final List<ExtractorAndEquality<T, ?>> extractorsAndEqualities;
 
-    public StructureEquality(List<ExtractorsAndEquality<T, Q, ?>> extractorsAndEqualities) {
+    public CompositeEquality(List<ExtractorAndEquality<T, ?>> extractorsAndEqualities) {
         this.extractorsAndEqualities = extractorsAndEqualities;
     }
-
 
     /**
      * Default equality is ordered given the list of extractors.
      */
     @Override
-    public boolean equals(T first, Q second) {
+    public boolean equals(T first, T second) {
         return extractorsAndEqualities.stream().allMatch(eae -> valueEquals(first, second, eae));
     }
 
-    private <V> boolean valueEquals(T first, Q second, ExtractorsAndEquality<T, Q, V> eae) {
-        Pair<Function<T, V>, Function<Q, V>> extractors = eae.getExtractors();
+    private <V> boolean valueEquals(T first, T second, ExtractorAndEquality<T, V> eae) {
+        Function<T, V> extractors = eae.getExtractor();
         ValueEquality<V> equality = eae.getEquality();
-        V firstValue = extractors.getLeft().apply(first);
-        V secondValue = extractors.getRight().apply(second);
+        V firstValue = extractors.apply(first);
+        V secondValue = extractors.apply(second);
         return equality.equals(firstValue, secondValue);
     }
 
     @Override
     public int hashCode(T obj) {
         int result = 1;
-        for (ExtractorsAndEquality<T, Q, ?> eae : extractorsAndEqualities) {
+        for (ExtractorAndEquality<T, ?> eae : extractorsAndEqualities) {
             result = 31 * result + valueHashCode(obj, eae);
         }
         return result;
 
     }
 
-    private <T, V> int valueHashCode(T obj, ExtractorsAndEquality<T, ?, V> eae) {
-        Function<T, V> key = eae.getExtractors().getKey();
+    private <T, V> int valueHashCode(T obj, ExtractorAndEquality<T, V> eae) {
+        Function<T, V> key = eae.getExtractor();
         V value = key.apply(obj);
         return eae.getEquality().computeHashCode(value);
     }
 
     @Override
-    public StructureEqualityWrapper<T> wrap(T obj) {
-        return new StructureEqualityWrapper<>(obj, this);
+    public CompositeEqualityWrapper<T> wrap(T obj) {
+        return new CompositeEqualityWrapper<>(obj, this);
     }
 }

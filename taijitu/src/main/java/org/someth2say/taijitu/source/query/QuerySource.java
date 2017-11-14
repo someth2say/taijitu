@@ -6,15 +6,16 @@ import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.config.DefaultConfig;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
 import org.someth2say.taijitu.source.AbstractSource;
-import org.someth2say.taijitu.tuple.FieldDescription;
+import org.someth2say.taijitu.source.FieldDescription;
 
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class ResultSetSource extends AbstractSource<ResultSet> {
-    private static final Logger logger = Logger.getLogger(ResultSetSource.class);
+public class QuerySource extends AbstractSource<ResultSet> {
+    private static final Logger logger = Logger.getLogger(QuerySource.class);
     public static final String NAME = "query";
 
     private final ResultSet resultSet;
@@ -24,9 +25,9 @@ public class ResultSetSource extends AbstractSource<ResultSet> {
     //TODO: this properties should be created externally to the source
     private final FetchProperties fetchProperties;
 
-    private final List<FieldDescription> providedFields;
+    private final List<FieldDescription<?>> providedFields;
 
-    public ResultSetSource(final ISourceCfg iSource) throws SQLException {
+    public QuerySource(final ISourceCfg iSource) throws SQLException {
         super(iSource);
         this.fetchProperties = new FetchProperties(iSource.getFetchProperties());
         this.connection = ConnectionManager.getConnection(iSource.getBuildProperties());
@@ -111,16 +112,31 @@ public class ResultSetSource extends AbstractSource<ResultSet> {
     }
 
     @Override
-    public List<FieldDescription> getProvidedFields() {
+    public Class<ResultSet> getTypeParameter() {
+        return ResultSet.class;
+    }
+
+    @Override
+    public List<FieldDescription<?>> getProvidedFields() {
         return providedFields;
     }
 
+    @Override
+    public <V> Function<ResultSet, V> getExtractor(FieldDescription<V> fd) {
+        return (ResultSet rs) -> {
+            try {
+                return (V) rs.getObject(fd.getName());
+            } catch (SQLException e) {
+                throw new RuntimeException("Can't get field " + fd + "from ResultSet", e);
+            }
+        };
+    }
 
-    private ArrayList<FieldDescription> buildFieldDescriptions() {
+    private ArrayList<FieldDescription<?>> buildFieldDescriptions() {
         try {
             ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
             int rsColumnCount = resultSetMetaData.getColumnCount();
-            ArrayList<FieldDescription> result = new ArrayList<>(rsColumnCount);
+            ArrayList<FieldDescription<?>> result = new ArrayList<>(rsColumnCount);
             for (int columnIdx = 1; columnIdx <= rsColumnCount; ++columnIdx) {
                 String columnName = resultSetMetaData.getColumnName(columnIdx);
                 final String columnClassName = resultSetMetaData.getColumnClassName(columnIdx);
@@ -142,34 +158,34 @@ public class ResultSetSource extends AbstractSource<ResultSet> {
     private Iterator<ResultSet> buildIterator() {
         return new Iterator<ResultSet>() {
 
-                @Override
-                public boolean hasNext() {
-                    try {
-                        boolean hasMore = resultSet.next();
-                        if (!hasMore) {
-                            close();
-                        }
-                        return hasMore;
-                    } catch (SQLException e) {
+            @Override
+            public boolean hasNext() {
+                try {
+                    boolean hasMore = resultSet.next();
+                    if (!hasMore) {
                         close();
-                        return false;
                     }
+                    return hasMore;
+                } catch (SQLException e) {
+                    close();
+                    return false;
                 }
+            }
 
-                @Override
-                public ResultSet next() {
-                    try {
-                        return resultSet;
-                    } catch (Exception e) {
-                        close();
-                        throw e;
-                    }
+            @Override
+            public ResultSet next() {
+                try {
+                    return resultSet;
+                } catch (Exception e) {
+                    close();
+                    throw e;
                 }
-            };
+            }
+        };
     }
 
     @Override
     public String getName() {
-        return ResultSetSource.NAME;
+        return QuerySource.NAME;
     }
 }

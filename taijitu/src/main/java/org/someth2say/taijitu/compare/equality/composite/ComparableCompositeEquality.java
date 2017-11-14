@@ -1,19 +1,19 @@
-package org.someth2say.taijitu.compare.equality.structure;
+package org.someth2say.taijitu.compare.equality.composite;
 
 import org.someth2say.taijitu.compare.equality.value.ComparableValueEquality;
 
 import java.util.List;
 import java.util.function.Function;
 
-public class ComparableStructureEquality<T> extends StructureEquality<T> implements IComparableStructureEquality<T> {
+public class ComparableCompositeEquality<T> extends CompositeEquality<T> implements IComparableCompositeEquality<T> {
 
-    protected ComparableStructureEquality(List<ExtractorsAndEquality<T, ?>> extractorsAndEqualities) {
+    public ComparableCompositeEquality(List<ExtractorAndEquality<T, ?>> extractorsAndEqualities) {
         super(extractorsAndEqualities);
     }
 
     @Override
     public int compareTo(T first, T second) {
-        for (ExtractorsAndEquality<T, ?> eae : this.extractorsAndEqualities) {
+        for (ExtractorAndEquality<T, ?> eae : this.extractorsAndEqualities) {
             int valueComparison = valueCompareTo(first, second, eae);
             if (valueComparison!=0){
                 return valueComparison;
@@ -22,8 +22,8 @@ public class ComparableStructureEquality<T> extends StructureEquality<T> impleme
         return 0;
     }
 
-    private <V> int valueCompareTo(T first, T second, ExtractorsAndEquality<T, V> eae) {
-        Function<T, V> extractor = eae.getExtractors();
+    private <V> int valueCompareTo(T first, T second, ExtractorAndEquality<T, V> eae) {
+        Function<T, V> extractor = eae.getExtractor();
         //TODO Cast! Nooooo.....
         ComparableValueEquality<V> equality = (ComparableValueEquality<V>) eae.getEquality();
         V firstValue = extractor.apply(first);
@@ -32,7 +32,7 @@ public class ComparableStructureEquality<T> extends StructureEquality<T> impleme
     }
 
     @Override
-    public ComparableStructureEqualityWrapper<T> wrap(T obj) {
-        return new ComparableStructureEqualityWrapper<>(obj, this);
+    public ComparableCompositeEqualityWrapper<T> wrap(T obj) {
+        return new ComparableCompositeEqualityWrapper<>(obj, this);
     }
 }

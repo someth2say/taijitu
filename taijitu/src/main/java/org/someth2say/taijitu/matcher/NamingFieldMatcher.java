@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.matcher;
 
-import org.someth2say.taijitu.tuple.FieldDescription;
+import org.someth2say.taijitu.source.FieldDescription;
 
 import java.util.List;
 

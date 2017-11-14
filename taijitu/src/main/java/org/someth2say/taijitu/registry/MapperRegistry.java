@@ -1,17 +1,13 @@
 package org.someth2say.taijitu.registry;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.matcher.FieldMatcher;
-import org.someth2say.taijitu.source.mapper.AbstractMapper;
 import org.someth2say.taijitu.source.mapper.CSVTupleMapper;
 import org.someth2say.taijitu.source.mapper.ResultSetTupleMapper;
 import org.someth2say.taijitu.source.mapper.SourceMapper;
-import org.someth2say.taijitu.tuple.FieldDescription;
 import org.someth2say.taijitu.util.ClassScanUtils;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by Jordi Sola on 16/02/2017.

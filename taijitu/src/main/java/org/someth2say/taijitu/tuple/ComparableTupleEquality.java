@@ -1,18 +1,21 @@
 package org.someth2say.taijitu.tuple;
 
-import org.someth2say.taijitu.compare.equality.structure.IComparableStructureEquality;
-import org.someth2say.taijitu.compare.equality.structure.ComparableStructureEqualityWrapper;
+import org.someth2say.taijitu.compare.equality.composite.IComparableCompositeEquality;
+import org.someth2say.taijitu.compare.equality.composite.ComparableCompositeEqualityWrapper;
 import org.someth2say.taijitu.compare.equality.value.ComparableValueEquality;
 import org.someth2say.taijitu.compare.equality.value.ValueEquality;
+import org.someth2say.taijitu.source.FieldDescription;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ComparableTupleEquality extends AbstractTupleEquality implements IComparableStructureEquality<Tuple> {
+@Deprecated
+public class ComparableTupleEquality extends AbstractTupleEquality implements IComparableCompositeEquality<Tuple> {
 
     public ComparableTupleEquality(Map<FieldDescription, ? extends ComparableValueEquality<?>> valueEqualitiesMap, List<FieldDescription> tupleFields) {
-        super(valueEqualitiesMap, tupleFields);
+        super(null);
+        // super(valueEqualitiesMap, tupleFields);
     }
 
     @Override
@@ -34,8 +37,8 @@ public class ComparableTupleEquality extends AbstractTupleEquality implements IC
     }
 
     @Override
-    public ComparableStructureEqualityWrapper<Tuple> wrap(Tuple obj) {
-        return new ComparableStructureEqualityWrapper<>(obj, this);
+    public ComparableCompositeEqualityWrapper<Tuple> wrap(Tuple obj) {
+        return new ComparableCompositeEqualityWrapper<>(obj, this);
     }
 }
 

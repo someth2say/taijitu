@@ -5,7 +5,7 @@ import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
 import org.someth2say.taijitu.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
-import org.someth2say.taijitu.tuple.FieldDescription;
+import org.someth2say.taijitu.source.FieldDescription;
 import org.someth2say.taijitu.tuple.Tuple;
 import org.someth2say.taijitu.util.Pair;
 

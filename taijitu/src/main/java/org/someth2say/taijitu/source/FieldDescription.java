@@ -1,8 +1,7 @@
-package org.someth2say.taijitu.tuple;
+package org.someth2say.taijitu.source;
 
 import java.util.Objects;
 
-//TODO: Make FieldDescription generic, so can match types on compile time
 public class FieldDescription<V> {
     private final String name;
     private final String clazz;

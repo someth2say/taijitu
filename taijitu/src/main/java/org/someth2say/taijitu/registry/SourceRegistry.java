@@ -2,13 +2,11 @@ package org.someth2say.taijitu.registry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
-import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.source.AbstractSource;
 import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.source.csv.CSVResourceSource;
-import org.someth2say.taijitu.source.query.ResultSetSource;
+import org.someth2say.taijitu.source.query.QuerySource;
 import org.someth2say.taijitu.util.ClassScanUtils;
 
 import java.util.Map;
@@ -32,7 +30,7 @@ public class SourceRegistry {
     }
 
     public static void useDefaults() {
-        addSourceType(ResultSetSource.NAME, ResultSetSource.class);
+        addSourceType(QuerySource.NAME, QuerySource.class);
         addSourceType(CSVResourceSource.NAME, CSVResourceSource.class);
     }
 

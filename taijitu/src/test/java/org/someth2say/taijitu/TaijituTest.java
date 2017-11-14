@@ -21,7 +21,7 @@ import org.someth2say.taijitu.source.csv.CSVResourceSource;
 import org.someth2say.taijitu.source.mapper.CSVTupleMapper;
 import org.someth2say.taijitu.source.mapper.ResultSetTupleMapper;
 import org.someth2say.taijitu.source.query.ConnectionManager;
-import org.someth2say.taijitu.source.query.ResultSetSource;
+import org.someth2say.taijitu.source.query.QuerySource;
 import org.someth2say.taijitu.compare.equality.stream.mapping.MappingStreamEquality;
 import org.someth2say.taijitu.compare.equality.stream.sorted.ComparableStreamEquality;
 
@@ -166,8 +166,8 @@ public class TaijituTest {
         Properties s2fetchProperties = new Properties();
         s2fetchProperties.setProperty(ConfigurationLabels.Comparison.STATEMENT, "select * from test2");
 
-        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", ResultSetSource.NAME, s1fetchProperties, null, ResultSetTupleMapper.NAME);
-        BasicSourceCfg targetSrc = new BasicSourceCfg("target", ResultSetSource.NAME, s2fetchProperties, null, ResultSetTupleMapper.NAME);
+        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", QuerySource.NAME, s1fetchProperties, null, ResultSetTupleMapper.NAME);
+        BasicSourceCfg targetSrc = new BasicSourceCfg("target", QuerySource.NAME, s2fetchProperties, null, ResultSetTupleMapper.NAME);
 
         BasicComparisonCfg comp1 = new BasicComparisonCfg("test1", Arrays.asList("KEY"), Arrays.asList(sourceSrc, sourceSrc));
         BasicComparisonCfg comp2 = new BasicComparisonCfg("test2", Arrays.asList("KEY"), Arrays.asList(sourceSrc, targetSrc));
@@ -713,7 +713,7 @@ public class TaijituTest {
 
     private Properties makeQueryProps(String query, Properties databaseProperties) {
         Properties result = new Properties();
-        result.put(SOURCE_TYPE, ResultSetSource.NAME);
+        result.put(SOURCE_TYPE, QuerySource.NAME);
 
         Properties fetchProperties = new Properties();
         fetchProperties.put(STATEMENT, query);

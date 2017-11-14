@@ -1,31 +1,35 @@
 package org.someth2say.taijitu.tuple;
 
 import org.apache.log4j.Logger;
-import org.someth2say.taijitu.compare.equality.structure.StructureEquality;
+import org.someth2say.taijitu.compare.equality.composite.CompositeEquality;
+import org.someth2say.taijitu.compare.equality.composite.ExtractorAndEquality;
 import org.someth2say.taijitu.compare.equality.value.ValueEquality;
+import org.someth2say.taijitu.source.FieldDescription;
 
 import java.util.*;
+
 @Deprecated
-public abstract class AbstractTupleEquality extends StructureEquality<Tuple> {
+public abstract class AbstractTupleEquality extends CompositeEquality<Tuple> {
     //This is the list of ALL fields that will come in the structure.
     private final LinkedHashMap<Integer, ValueEquality<?>> positionalEqualities;
     private static final Logger logger = Logger.getLogger(AbstractTupleEquality.class);
 
-    public AbstractTupleEquality(Map<FieldDescription, ? extends ValueEquality<?>> valueEqualitiesMap, List<FieldDescription> tupleFields) {
-        super(valueEqualitiesMap);
-        this.positionalEqualities = computeEqualityPositions(tupleFields);
+    public AbstractTupleEquality(List<ExtractorAndEquality<Tuple, ?>> extractorsAndEqualities) {
+        super(extractorsAndEqualities);
+        //this.positionalEqualities = computeEqualityPositions(tupleFields);
+        this.positionalEqualities = null;
     }
 
-    private LinkedHashMap<Integer, ValueEquality<?>> computeEqualityPositions(List<FieldDescription> tupleFields) {
-        Map<FieldDescription, ? extends ValueEquality<?>> valueEqualitiesMap = getValueEqualitiesMap();
-        LinkedHashMap<Integer, ValueEquality<?>> result = new LinkedHashMap<>(valueEqualitiesMap.size());
-        for (Map.Entry<FieldDescription, ? extends ValueEquality<?>> entry : valueEqualitiesMap.entrySet()) {
-            int fieldIdx = tupleFields.indexOf(entry.getKey());
-            ValueEquality<?> fieldEquality = entry.getValue();
-            result.put(fieldIdx, fieldEquality);
-        }
-        return result;
-    }
+//    private LinkedHashMap<Integer, ValueEquality<?>> computeEqualityPositions(List<FieldDescription> tupleFields) {
+//        Map<FieldDescription, ? extends ValueEquality<?>> valueEqualitiesMap = getValueEqualitiesMap();
+//        LinkedHashMap<Integer, ValueEquality<?>> result = new LinkedHashMap<>(valueEqualitiesMap.size());
+//        for (Map.Entry<FieldDescription, ? extends ValueEquality<?>> entry : valueEqualitiesMap.entrySet()) {
+//            int fieldIdx = tupleFields.indexOf(entry.getKey());
+//            ValueEquality<?> fieldEquality = entry.getValue();
+//            result.put(fieldIdx, fieldEquality);
+//        }
+//        return result;
+//    }
 
 
     protected LinkedHashMap<Integer, ValueEquality<?>> getPositionalEqualities() {

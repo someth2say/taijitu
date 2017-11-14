@@ -1,10 +1,10 @@
 package org.someth2say.taijitu.compare.equality.stream.mapping;
 
 import org.apache.log4j.Logger;
+import org.someth2say.taijitu.compare.equality.composite.ICompositeEquality;
 import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
 import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
-import org.someth2say.taijitu.compare.equality.structure.IStructureEquality;
-import org.someth2say.taijitu.compare.equality.structure.StructureEqualityWrapper;
+import org.someth2say.taijitu.compare.equality.composite.CompositeEqualityWrapper;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
 import org.someth2say.taijitu.compare.result.ComparisonResult.SourceIdAndStructure;
 import org.someth2say.taijitu.compare.result.SynchronizedComparisonResult;
@@ -26,7 +26,7 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
     public static final String NAME = "mapping";
     private static final Logger logger = Logger.getLogger(MappingStreamEquality.class);
 
-    public MappingStreamEquality(IStructureEquality<T> equality, IStructureEquality<T> categorizer) {
+    public MappingStreamEquality(ICompositeEquality<T> equality, ICompositeEquality<T> categorizer) {
         super(equality, categorizer);
     }
 
@@ -53,7 +53,7 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
         SynchronizedComparisonResult<T> result = new SynchronizedComparisonResult<>();
         //TODO: Another option is running queries/pages alternating, so we can "restrict" memory usage, but only using a single thread
         final ExecutorService executorService = Executors.newFixedThreadPool(2);
-        Map<StructureEqualityWrapper<T>, SourceIdAndStructure<T>> sharedMap = new ConcurrentHashMap<>();
+        Map<CompositeEqualityWrapper<T>, SourceIdAndStructure<T>> sharedMap = new ConcurrentHashMap<>();
         Runnable sourceMapper = new TupleMapperExt<>(source, sharedMap, result, sourceID, getCategorizer(), getEquality());
         Runnable targetMapper = new TupleMapperExt<>(target, sharedMap, result, targetId, getCategorizer(), getEquality());
         executorService.submit(sourceMapper);// Map source
@@ -89,13 +89,13 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
 
     private class TupleMapperExt<T>  implements Runnable {
         private final Iterator<T> source;
-        private final Map<StructureEqualityWrapper<T>, SourceIdAndStructure<T>> sharedMap;
+        private final Map<CompositeEqualityWrapper<T>, SourceIdAndStructure<T>> sharedMap;
         private final SynchronizedComparisonResult<T> result;
         private final Object sourceId;
-        private final IStructureEquality<T> categorizer;
-        private final IStructureEquality<T> equality;
+        private final ICompositeEquality<T> categorizer;
+        private final ICompositeEquality<T> equality;
 
-        private TupleMapperExt(final Iterator<T> source, final Map<StructureEqualityWrapper<T>, SourceIdAndStructure<T>> sharedMap, final SynchronizedComparisonResult<T> result, Object sourceId, IStructureEquality<T> categorizer, IStructureEquality<T> equality) {
+        private TupleMapperExt(final Iterator<T> source, final Map<CompositeEqualityWrapper<T>, SourceIdAndStructure<T>> sharedMap, final SynchronizedComparisonResult<T> result, Object sourceId, ICompositeEquality<T> categorizer, ICompositeEquality<T> equality) {
             this.source = source;
             this.sharedMap = sharedMap;
             this.result = result;
@@ -108,7 +108,7 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
         public void run() {
             for (T thisRecord = getNextRecord(source); thisRecord != null; thisRecord = getNextRecord(source)) {
                 SourceIdAndStructure<T> thisQueryAndTuple = new SourceIdAndStructure<>(sourceId, thisRecord);
-                StructureEqualityWrapper<T> wrap = categorizer.wrap(thisRecord);
+                CompositeEqualityWrapper<T> wrap = categorizer.wrap(thisRecord);
                 SourceIdAndStructure<T> otherQueryAndTuple = sharedMap.putIfAbsent(wrap, thisQueryAndTuple);
                 if (otherQueryAndTuple != null) {
                     //we have a key match ...
