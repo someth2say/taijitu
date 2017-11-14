@@ -11,8 +11,10 @@ import org.someth2say.taijitu.source.FieldDescription;
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class QuerySource extends AbstractSource<ResultSet> {
     private static final Logger logger = Logger.getLogger(QuerySource.class);
@@ -152,20 +154,21 @@ public class QuerySource extends AbstractSource<ResultSet> {
     @Override
     public Stream<ResultSet> stream() {
         Iterator<ResultSet> iterator = buildIterator();
-        return Stream.generate(iterator::next);
+//        return Stream.generate(iterator::next);
+       return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false);
     }
 
     private Iterator<ResultSet> buildIterator() {
-        return new Iterator<ResultSet>() {
+        Iterator<ResultSet> iterator = new Iterator<ResultSet>() {
 
             @Override
             public boolean hasNext() {
                 try {
-                    boolean hasMore = resultSet.next();
-                    if (!hasMore) {
+                    boolean isAfterLast = resultSet.isAfterLast();
+                    if (!isAfterLast) {
                         close();
                     }
-                    return hasMore;
+                    return !isAfterLast;
                 } catch (SQLException e) {
                     close();
                     return false;
@@ -175,13 +178,21 @@ public class QuerySource extends AbstractSource<ResultSet> {
             @Override
             public ResultSet next() {
                 try {
-                    return resultSet;
-                } catch (Exception e) {
+                    if (resultSet.next()) {
+                        return resultSet;
+                    } else {
+                        throw new RuntimeException("No more elements in ResultSet.");
+                    }
+                } catch (SQLException e) {
                     close();
+                    //throw new RuntimeException("Can't move beyond last element.");
+                    //return null;
                     throw e;
                 }
             }
         };
+
+        return iterator;
     }
 
     @Override
