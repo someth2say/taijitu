@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.compare.equality.stream.mapping;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.composite.ICompositeEquality;
 import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
 import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
@@ -24,7 +24,7 @@ import java.util.stream.Stream;
  */
 public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implements StreamEquality<T> {
     public static final String NAME = "mapping";
-    private static final Logger logger = Logger.getLogger(MappingStreamEquality.class);
+    private static final Logger logger = LoggerFactory.getLogger(MappingStreamEquality.class);
 
     public MappingStreamEquality(ICompositeEquality<T> equality, ICompositeEquality<T> categorizer) {
         super(equality, categorizer);

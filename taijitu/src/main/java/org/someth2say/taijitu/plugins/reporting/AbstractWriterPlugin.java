@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.plugins.reporting;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.TaijituException;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
 import org.someth2say.taijitu.config.interfaces.IPluginCfg;
@@ -18,7 +18,7 @@ import java.util.List;
 public abstract class AbstractWriterPlugin implements TaijituPlugin {
     private static final String SOURCE_LABEL = "SOURCE";
     private static final String TARGET_LABEL = "TARGET";
-    private static final Logger logger = Logger.getLogger(AbstractWriterPlugin.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractWriterPlugin.class);
     private File outputFolder;
     private WritterPluginConfigIface config;
 

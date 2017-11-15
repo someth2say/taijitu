@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.registry;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
 import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
 import org.someth2say.taijitu.compare.equality.stream.mapping.MappingStreamEquality;
@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by Jordi Sola on 16/02/2017.
  */
 public class StreamEqualityRegistry {
-    private static final Logger logger = Logger.getLogger(StreamEqualityRegistry.class);
+    private static final Logger logger = LoggerFactory.getLogger(StreamEqualityRegistry.class);
     private static Map<String, Class<? extends AbstractStreamEquality>> classes = new ConcurrentHashMap<>();
 
     private StreamEqualityRegistry() {
@@ -33,7 +33,7 @@ public class StreamEqualityRegistry {
 
         classes = ClassScanUtils.getClassesImplementing(implementedInterface);
 
-        logger.info("Registered strategies: " + classes.keySet().toString());
+        logger.info("Registered strategies: {}", classes.keySet().toString());
     }
 
     public static void useDefaults() {

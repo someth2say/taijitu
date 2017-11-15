@@ -1,7 +1,7 @@
 package org.someth2say.taijitu.registry;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
 import org.someth2say.taijitu.source.AbstractSource;
 import org.someth2say.taijitu.source.Source;
@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by Jordi Sola on 16/02/2017.
  */
 public class SourceRegistry {
-    private static final Logger logger = Logger.getLogger(SourceRegistry.class);
+    private static final Logger logger = LoggerFactory.getLogger(SourceRegistry.class);
     private static Map<String, Class<? extends AbstractSource>> classes = new ConcurrentHashMap<>();
 
     private SourceRegistry() {
@@ -26,7 +26,7 @@ public class SourceRegistry {
         // This seems fast enough for a one-shot initialization
         // If found slow, it can be changed to scan only sub-packages
         classes = ClassScanUtils.getClassesImplementing(AbstractSource.class);
-        logger.info("Registered source types: " + StringUtils.join(classes, ","));
+        logger.info("Registered source types: {}", StringUtils.join(classes, ","));
     }
 
     public static void useDefaults() {
@@ -49,7 +49,7 @@ public class SourceRegistry {
             return sourceClass.getDeclaredConstructor(ISourceCfg.class).newInstance(sourceConfig);
         } catch (Exception e) {
             Object[] arguments = {sourceConfig};
-            logger.error("Unable to create source. Type: " + type + " Arguments: " + StringUtils.join(arguments, ","), e);
+            logger.error("Unable to create source. Type: {}  Arguments: {}",type, StringUtils.join(arguments, ","), e);
         }
         return null;
     }

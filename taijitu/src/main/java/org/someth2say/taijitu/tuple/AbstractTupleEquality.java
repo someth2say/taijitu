@@ -1,6 +1,7 @@
 package org.someth2say.taijitu.tuple;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.composite.CompositeEquality;
 import org.someth2say.taijitu.compare.equality.composite.ExtractorAndEquality;
 import org.someth2say.taijitu.compare.equality.value.ValueEquality;
@@ -12,7 +13,7 @@ import java.util.*;
 public abstract class AbstractTupleEquality extends CompositeEquality<Tuple> {
     //This is the list of ALL fields that will come in the structure.
     private final LinkedHashMap<Integer, ValueEquality<?>> positionalEqualities;
-    private static final Logger logger = Logger.getLogger(AbstractTupleEquality.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractTupleEquality.class);
 
     public AbstractTupleEquality(List<ExtractorAndEquality<Tuple, ?>> extractorsAndEqualities) {
         super(extractorsAndEqualities);
@@ -47,12 +48,10 @@ public abstract class AbstractTupleEquality extends CompositeEquality<Tuple> {
 
             @SuppressWarnings("unchecked")
             boolean equals = equality.equals(firstValue, secondValue);
-            if (logger.isDebugEnabled()) {
-                logger.debug(firstValue + "<=>" + secondValue + "(" + firstValue.getClass().getName() + ") equality: " + equality + " result: " + equals);
-            }
+            logger.debug("{} <=> {} ({}) equality: {} result: {}", firstValue, secondValue, firstValue.getClass().getName(), equality, equals);
             if (!equals) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Difference found: Field#:" + fieldPosition + " Values: " + firstValue + "<=>" + secondValue);
+                    logger.debug("Difference found: Field#: {} Values: {}<=>{}", fieldPosition, firstValue, secondValue);
                 }
                 return false;
             }

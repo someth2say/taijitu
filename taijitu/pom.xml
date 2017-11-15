@@ -92,12 +92,17 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time</artifactId>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>

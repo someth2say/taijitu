@@ -1,6 +1,7 @@
 package org.someth2say.taijitu.registry;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.plugins.logging.TimeLoggingPlugin;
@@ -17,50 +18,50 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class PluginRegistry {
 
-	private static final Logger logger = Logger.getLogger(PluginRegistry.class);
-	private static Map<String, TaijituPlugin> instances;
+    private static final Logger logger = LoggerFactory.getLogger(PluginRegistry.class);
+    private static Map<String, TaijituPlugin> instances;
 
-	private PluginRegistry() {
-	}
+    private PluginRegistry() {
+    }
 
-	public static Collection<TaijituPlugin> getAllPlugins() {
-		// Do we actually need plugins to be in some order?
-		return instances.values();
-	}
+    public static Collection<TaijituPlugin> getAllPlugins() {
+        // Do we actually need plugins to be in some order?
+        return instances.values();
+    }
 
-	public static Map<IPluginCfg, TaijituPlugin> getPlugins(List<IPluginCfg> pluginConfigIfaces) {
-		Map<IPluginCfg, TaijituPlugin> result = new HashMap<>(pluginConfigIfaces.size());
-		for (IPluginCfg pluginConfigIface : pluginConfigIfaces) {
-			final TaijituPlugin pluginInstance = instances.get(pluginConfigIface.getName());
-			if (pluginInstance == null) {
-				logger.warn("PluginCfg reference" + pluginConfigIface.getName() + " not available.");
-			} else {
-				result.put(pluginConfigIface, pluginInstance);
-			}
-		}
-		return result;
-	}
+    public static Map<IPluginCfg, TaijituPlugin> getPlugins(List<IPluginCfg> pluginConfigIfaces) {
+        Map<IPluginCfg, TaijituPlugin> result = new HashMap<>(pluginConfigIfaces.size());
+        for (IPluginCfg pluginConfigIface : pluginConfigIfaces) {
+            final TaijituPlugin pluginInstance = instances.get(pluginConfigIface.getName());
+            if (pluginInstance == null) {
+                logger.warn("PluginCfg reference {} not available.", pluginConfigIface.getName());
+            } else {
+                result.put(pluginConfigIface, pluginInstance);
+            }
+        }
+        return result;
+    }
 
-	public static void scanClassPath() {
-		// This seems fast enough for a one-shot initialization
-		// If found slow, it can be changed to scan only sub-packages for taijitu
-		final Class<TaijituPlugin> implementedInterface = TaijituPlugin.class;
-		instances = ClassScanUtils.getInstancesForClassesImplementing(implementedInterface);
-		logger.info("Registered plugins: " + instances.keySet().toString());
-	}
+    public static void scanClassPath() {
+        // This seems fast enough for a one-shot initialization
+        // If found slow, it can be changed to scan only sub-packages for taijitu
+        final Class<TaijituPlugin> implementedInterface = TaijituPlugin.class;
+        instances = ClassScanUtils.getInstancesForClassesImplementing(implementedInterface);
+        logger.info("Registered plugins: {}", instances.keySet().toString());
+    }
 
-	public static void useDefaults() {
-		instances = new ConcurrentHashMap<>();
+    public static void useDefaults() {
+        instances = new ConcurrentHashMap<>();
 //		addPlugin(new XLSWriterPlugin());
 //		addPlugin(new CSVWriterPlugin());
-		addPlugin(new TimeLoggingPlugin());
-	}
+        addPlugin(new TimeLoggingPlugin());
+    }
 
-	private static TaijituPlugin addPlugin(TaijituPlugin plugin) {
-		return instances.put(plugin.getName(), plugin);
-	}
+    private static TaijituPlugin addPlugin(TaijituPlugin plugin) {
+        return instances.put(plugin.getName(), plugin);
+    }
 
-	public static TaijituPlugin getPlugin(String name) {
-		return instances.get(name);
-	}
+    public static TaijituPlugin getPlugin(String name) {
+        return instances.get(name);
+    }
 }

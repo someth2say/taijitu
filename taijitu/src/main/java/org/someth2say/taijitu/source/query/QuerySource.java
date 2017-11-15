@@ -1,7 +1,7 @@
 package org.someth2say.taijitu.source.query;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.config.ConfigurationLabels;
 import org.someth2say.taijitu.config.DefaultConfig;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class QuerySource extends AbstractSource<ResultSet> {
-    private static final Logger logger = Logger.getLogger(QuerySource.class);
+    private static final Logger logger = LoggerFactory.getLogger(QuerySource.class);
     public static final String NAME = "query";
 
     private final Connection connection;

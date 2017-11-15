@@ -1,6 +1,7 @@
 package org.someth2say.taijitu.registry;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.matcher.FieldMatcher;
 import org.someth2say.taijitu.matcher.IdentityFieldMatcher;
 import org.someth2say.taijitu.matcher.NamingFieldMatcher;
@@ -14,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by Jordi Sola on 16/02/2017.
  */
 public class MatcherRegistry {
-    private static final Logger logger = Logger.getLogger(MatcherRegistry.class);
+    private static final Logger logger = LoggerFactory.getLogger(MatcherRegistry.class);
     private static Map<String, FieldMatcher> instances = new ConcurrentHashMap<>();
 
     private MatcherRegistry() {
@@ -29,7 +30,7 @@ public class MatcherRegistry {
         // If found slow, it can be changed to scan only sub-packages
         final Class<FieldMatcher> implementedInterface = FieldMatcher.class;
         instances = ClassScanUtils.getInstancesForClassesImplementing(implementedInterface);
-        logger.info("Registered matchers: " + instances.keySet().toString());
+        logger.info("Registered matchers: {}", instances.keySet().toString());
     }
 
     public static void useDefaults() {

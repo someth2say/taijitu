@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.fileutil.xsl;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;import org.slf4j.LoggerFactory;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -16,7 +16,7 @@ import java.io.OutputStream;
  */
 public class XSLFileCommand extends FileCommand {
 
-    private static final Logger logger = Logger.getLogger(XSLFileCommand.class);
+    private static final Logger logger = LoggerFactory.getLogger(XSLFileCommand.class);
     private final String sheetName;
     private final Integer targetRow;
     private final Integer targetColumn;
@@ -157,7 +157,7 @@ public class XSLFileCommand extends FileCommand {
         Workbook wb;
         final File file = getFile();
         if (file.exists()) {
-            logger.info("File " + file.getName() + " already exist, and will be overwritten.");
+            logger.info("File {} already exist, and will be overwritten.",file.getName() );
         }
         if (file.getName().endsWith(".xls")) {
             wb = new HSSFWorkbook();

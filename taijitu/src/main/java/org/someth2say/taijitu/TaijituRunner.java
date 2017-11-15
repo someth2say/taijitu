@@ -1,15 +1,20 @@
 package org.someth2say.taijitu;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.composite.ComparableCompositeEquality;
 import org.someth2say.taijitu.compare.equality.composite.CompositeEquality;
+import org.someth2say.taijitu.compare.equality.composite.ExtractorAndEquality;
 import org.someth2say.taijitu.compare.equality.composite.ICompositeEquality;
 import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
-import org.someth2say.taijitu.compare.equality.composite.ExtractorAndEquality;
 import org.someth2say.taijitu.compare.equality.value.ValueEquality;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
 import org.someth2say.taijitu.compare.result.SimpleComparisonResult;
-import org.someth2say.taijitu.config.interfaces.*;
+import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
+import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
+import org.someth2say.taijitu.config.interfaces.IPluginCfg;
+import org.someth2say.taijitu.config.interfaces.ISourceCfg;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.registry.*;
 import org.someth2say.taijitu.source.FieldDescription;
@@ -30,7 +35,7 @@ import java.util.stream.Stream;
  */
 public class TaijituRunner implements Callable<ComparisonResult> {
 
-    private static final Logger logger = Logger.getLogger(TaijituRunner.class);
+    private static final Logger logger = LoggerFactory.getLogger(TaijituRunner.class);
 
     private final IComparisonCfg config;
 
@@ -96,7 +101,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
             throw new RuntimeException("There should be at least 2 sources configured, but only " + sourceConfigs.size() + " found");
         }
         if (sourceConfigs.size() > 2) {
-            logger.warn("More than 2 sources found (" + sourceConfigs.size() + "). Only first two will be considered!");
+            logger.warn("More than 2 sources found ({}}). Only first two will be considered!", sourceConfigs.size());
         }
 
         // XD SourceData<T,T>... T.T Hate type erasure...
@@ -131,7 +136,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         final StreamEquality<T> streamEquality = StreamEqualityRegistry.getInstance(strategyName, equality, categorizer);
 
         //Shall we use the same matcher for canonical source? No, we should use identity matcher....
-        logger.info("Comparison " + iComparisonCfg.getName() + " ready to run.");
+        logger.info("Comparison {} ready to run.", iComparisonCfg.getName());
         return runStreamEquality(streamEquality, sourceDatas);
     }
 
@@ -165,14 +170,14 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         if (mapper == null) {
             Class<R> sourceTypeParameter = sourceData.source.getTypeParameter();
             if (commonClass.isAssignableFrom(sourceTypeParameter)) {
-                logger.debug("Source " + sourceData.source.getName() + " have no mapper defined, so will directly generate composite type " + sourceTypeParameter.getName());
+                logger.debug("Source {} have no mapper defined, so will directly generate composite type {}", sourceData.source.getName(), sourceTypeParameter.getName());
                 //TODO: What should we do with this unchecked cast?
                 sourceData.mappedSource = (Source<T>) sourceData.source;
             } else {
                 throw new RuntimeException("Source " + sourceData.source.getName() + " generate incompatible class " + sourceTypeParameter.getName() + " (need " + commonClass.getName() + ")");
             }
         } else {
-            logger.debug("Applying mapper " + mapper.getName() + " to source " + sourceData.source.getName() + " to produce composite type " + mapper.getTypeParameter().getSimpleName());
+            logger.debug("Applying mapper {} to source {} to produce composite type {}", mapper.getName(), sourceData.source.getName(), mapper.getTypeParameter().getSimpleName());
             sourceData.mappedSource = mapper.apply(sourceData.source);
         }
     }
@@ -283,7 +288,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
                 Class<?> fieldClass = Class.forName(fieldClassName);
                 return configClass.isAssignableFrom(fieldClass);
             } catch (ClassNotFoundException e) {
-                logger.error("Class defined in equality config not found: " + configClassName);
+                logger.error("Class defined in equality config not found:" + configClassName, e);
                 return false;
             }
         }

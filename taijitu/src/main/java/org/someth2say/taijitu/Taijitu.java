@@ -1,35 +1,31 @@
 package org.someth2say.taijitu;
 
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
 import org.someth2say.taijitu.config.impl.TaijituCfg;
 import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.config.interfaces.ITaijituCfg;
-import org.someth2say.taijitu.source.query.ConnectionManager;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.registry.*;
+import org.someth2say.taijitu.source.query.ConnectionManager;
 import org.someth2say.taijitu.util.FileUtil;
-import org.someth2say.taijitu.util.LogUtils;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
 
 import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_CONFIG_FILE;
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_LOG_FILE;
 
 /**
  * @author Jordi Sola
  */
 public final class Taijitu {
 
-    private static final Logger logger = Logger.getLogger(Taijitu.class);
+    private static final Logger logger = LoggerFactory.getLogger(Taijitu.class);
 
     private static ITaijituCfg configFromApache(final ImmutableHierarchicalConfiguration properties) throws TaijituException {
         return TaijituCfg.fromApacheConfig(properties);
@@ -42,8 +38,6 @@ public final class Taijitu {
 
     private static void performSetup(final ITaijituCfg config) throws TaijituException {
         try {
-//            setupFolders(config);
-//            setupLogging(config);
             setupRegistries(config);
         } catch (Exception e) {
             throw new TaijituException("Unable to prepare Taijitu.", e);
@@ -77,7 +71,7 @@ public final class Taijitu {
             try {
                 Taijitu.compare(args[0]);
             } catch (TaijituException e) {
-                logger.fatal("Unable to start: ", e);
+                logger.error("Unable to start: ", e);
             }
         }
     }

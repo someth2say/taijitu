@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.compare.equality.stream.sorted;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.composite.IComparableCompositeEquality;
 import org.someth2say.taijitu.compare.equality.composite.ICompositeEquality;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
@@ -17,7 +17,7 @@ import java.util.stream.Stream;
  */
 public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
     public static final String NAME = "sorted";
-    private static final Logger logger = Logger.getLogger(ComparableStreamEquality.class);
+    private static final Logger logger = LoggerFactory.getLogger(ComparableStreamEquality.class);
 
     public ComparableStreamEquality(ICompositeEquality equality, ICompositeEquality categorizer) {
         super(equality, categorizer);
@@ -78,7 +78,7 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
             return result;
 
         } else {
-            logger.error("Sorted stream requires an IComparableCompositeEquality<T> categorizer (say, need to define category order)");
+            logger.error("Sorted stream requires an IComparableCompositeEquality (say, need to define category order)");
             return null;
         }
     }

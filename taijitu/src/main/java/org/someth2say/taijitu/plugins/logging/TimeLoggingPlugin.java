@@ -1,6 +1,7 @@
 package org.someth2say.taijitu.plugins.logging;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.joda.time.Duration;
 import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
@@ -14,7 +15,7 @@ import org.someth2say.taijitu.plugins.TaijituPlugin;
  */
 public class TimeLoggingPlugin implements TaijituPlugin {
     public static final String NAME = "timeLog";
-    private static final Logger logger = Logger.getLogger(TimeLoggingPlugin.class);
+    private static final Logger logger = LoggerFactory.getLogger(TimeLoggingPlugin.class);
     private long comparisonStart;
     private long comparisonEnd;
     private long start;
@@ -55,13 +56,13 @@ public class TimeLoggingPlugin implements TaijituPlugin {
     private void logComparisonTimes() {
         final PeriodFormatter formatter = ISOPeriodFormat.standard();
         final Period periodTotal = new Duration(comparisonStart, comparisonEnd).toPeriod();
-        logger.info("DONE comparison:" + formatter.print(periodTotal));
+        logger.info("DONE comparison: {}", formatter.print(periodTotal));
     }
 
     private void logTotalTimes() {
         final PeriodFormatter formatter = ISOPeriodFormat.standard();
         final Period periodTotal = new Duration(start, end).toPeriod();
-        logger.info("DONE " + comparisonCount + " comparisons:" + formatter.print(periodTotal));
+        logger.info("DONE {} comparisons: {} ", comparisonCount, formatter.print(periodTotal));
     }
 
     public static IPluginCfg defaultConfig() {

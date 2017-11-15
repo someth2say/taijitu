@@ -58,10 +58,6 @@ public class TaijituTest {
     public static Collection<String> strategies() {
         return Arrays.asList(
                 MappingStreamEquality.NAME, ComparableStreamEquality.NAME
-                , MappingStreamEquality.NAME, ComparableStreamEquality.NAME
-                , MappingStreamEquality.NAME, ComparableStreamEquality.NAME
-                , MappingStreamEquality.NAME, ComparableStreamEquality.NAME
-
         );
     }
 

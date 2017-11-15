@@ -2,7 +2,7 @@ package org.someth2say.taijitu.util;
 
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import io.github.lukehutch.fastclasspathscanner.scanner.ScanResult;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by Jordi Sola on 22/02/2017.
  */
 public class ClassScanUtils {
-    private static final Logger logger = Logger.getLogger(ClassScanUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClassScanUtils.class);
 
     private ClassScanUtils() {
     }
@@ -62,7 +62,7 @@ public class ClassScanUtils {
                         result.put(getNameResult.toString(), named);
                     }
                 } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                    logger.error("Unable to invoke `getName` from class " + clazz.getName());
+                    logger.error("Unable to invoke `getName` from class {}",clazz.getName());
                 }
             }
         }

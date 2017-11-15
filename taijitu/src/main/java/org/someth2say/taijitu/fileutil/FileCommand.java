@@ -1,7 +1,7 @@
 package org.someth2say.taijitu.fileutil;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 
@@ -9,7 +9,7 @@ import java.io.*;
  * @author Jordi Sola
  */
 public abstract class FileCommand implements Command {
-    private static final Logger logger = Logger.getLogger(FileCommand.class);
+    private static final Logger logger = LoggerFactory.getLogger(FileCommand.class);
     private File file;
     private boolean append = false;
 
@@ -21,10 +21,7 @@ public abstract class FileCommand implements Command {
         if (folder == null) {
             throw new CommandException("FolderName property cannot be null.");
         }
-        if (logger.isDebugEnabled()) {
-            logger.debug((new StringBuilder()).append("Folder: ").append(folder).append(" filename: ").append(fileName).toString());
-            logger.debug((new StringBuilder()).append("Write dir is ").append(folder.getPath()).toString());
-        }
+        logger.debug("Folder: {} filename: {} ", folder, fileName);
         if (!folder.exists()) {
             logger.debug("Write dir does not exist, creating...");
             if (!folder.mkdir()) {
@@ -33,23 +30,17 @@ public abstract class FileCommand implements Command {
             }
         }
         setFile(new File(folder, (new StringBuilder()).append(fileName).append(".").append(getFileExtension()).toString()));
-        if (logger.isDebugEnabled()) {
-            logger.debug((new StringBuilder()).append("Creating file ").append(getFile().getPath()).toString());
-        }
+        logger.debug("Creating file {}", getFile().getPath());
     }
 
     @Override
     public void rollback() throws CommandException {
         final File file = getFile();
-        if (logger.isDebugEnabled()) {
-            logger.debug((new StringBuilder()).append("rolling back error write command: ").append(file).toString());
-        }
+        logger.debug("Rolling back error write command: {}", file);
         if (file.exists()) {
-            if (logger.isTraceEnabled()) {
-                logger.trace((new StringBuilder()).append("file did exist, deleting ").append(file).toString());
-            }
+            logger.trace("file did exist, deleting {}", file);
             final boolean delete = file.delete();
-            if (!delete && logger.isEnabledFor(Level.ERROR)) {
+            if (!delete) {
                 throw new CommandException((new StringBuilder()).append("problems deleting file ").append(file).toString());
             }
         }
@@ -58,7 +49,7 @@ public abstract class FileCommand implements Command {
     @Override
     public void process(final Object payload) throws CommandException {
         final File file = getOrDeleteFile();
-        logger.info("Writing " + getFileExtension() + " workbook " + file.getName());
+        logger.info("Writing {} workbook {}", getFileExtension(), file.getName());
         try (final OutputStream os = getFileOutputStream(file)) {
             process(os, payload);
         } catch (final IOException e) {

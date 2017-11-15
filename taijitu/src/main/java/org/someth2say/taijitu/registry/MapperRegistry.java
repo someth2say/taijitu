@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.registry;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.source.mapper.CSVTupleMapper;
 import org.someth2say.taijitu.source.mapper.ResultSetTupleMapper;
 import org.someth2say.taijitu.source.mapper.SourceMapper;
@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by Jordi Sola on 16/02/2017.
  */
 public class MapperRegistry {
-	private static final Logger logger = Logger.getLogger(MapperRegistry.class);
+	private static final Logger logger = LoggerFactory.getLogger(MapperRegistry.class);
 	private static Map<String, Class<? extends SourceMapper>> classes = new ConcurrentHashMap<>();
 
 	private MapperRegistry() {
@@ -29,7 +29,7 @@ public class MapperRegistry {
 		final Class<SourceMapper> implementedInterface = SourceMapper.class;
 		classes = ClassScanUtils.getClassesImplementing(implementedInterface);
 
-		logger.info("Registered value equalities: " + classes.keySet().toString());
+		logger.info("Registered value equalities: {}", classes.keySet().toString());
 	}
 
 	public static void useDefaults() {
