@@ -106,7 +106,7 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
 
         @Override
         public void run() {
-            T thisRecord = getNextRecord(source);
+            T thisRecord = getNextRecordOrNull(source);
             while (thisRecord != null) {
                 SourceIdAndStructure<T> thisQueryAndTuple = new SourceIdAndStructure<>(sourceId, thisRecord);
                 CompositeEqualityWrapper<T> wrap = categorizer.wrap(thisRecord);
@@ -120,7 +120,7 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
                         result.addDifference(thisQueryAndTuple, otherQueryAndTuple);
                     }
                 }
-                thisRecord = getNextRecord(source);
+                thisRecord = getNextRecordOrNull(source);
             }
         }
     }

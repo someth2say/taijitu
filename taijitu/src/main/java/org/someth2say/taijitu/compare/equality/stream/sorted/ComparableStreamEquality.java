@@ -32,37 +32,26 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
         return compare(source.iterator(), sourceId, target.iterator(), targetId);
     }
 
-//    @Override
-//    public ComparisonResult<T> runExternalComparison(Source<T> source, Source<T> target) {
-//            Iterator<T> sourceIterator = source.iterator();
-//            Iterator<T> targetIterator = target.iterator();
-//            final Object sourceId = source.getConfig();
-//            final Object targetId = target.getConfig();
-//
-//        return compare(sourceIterator, sourceId, targetIterator, targetId);
-//    }
-
     private ComparisonResult<T> compare(Iterator<T> source, Object sourceId, Iterator<T> target, Object targetId) {
         if (getCategorizer() instanceof IComparableCompositeEquality) {
             IComparableCompositeEquality<T> categorizer = (IComparableCompositeEquality<T>) getCategorizer();
 
             SimpleComparisonResult<T> result = new SimpleComparisonResult<>();
 
-            T sourceRecord = getNextRecord(source);
-            T targetRecord = getNextRecord(target);
-
-
+            T sourceRecord = getNextRecordOrNull(source);
+            T targetRecord = getNextRecordOrNull(target);
+            
             while (sourceRecord != null && targetRecord != null) {
 
                 int keyComparison = categorizer.compareTo(sourceRecord, targetRecord);
                 if (keyComparison > 0) {
                     // SourceCfg is after target -> target record is not in source stream
                     result.addDisjoint(new SourceIdAndStructure<>(sourceId, targetRecord));
-                    targetRecord = getNextRecord(target);
+                    targetRecord = getNextRecordOrNull(target);
                 } else if (keyComparison < 0) {
                     // SourceCfg is before target -> source record is not in target stream
                     result.addDisjoint(new SourceIdAndStructure<>(targetId, sourceRecord));
-                    sourceRecord = getNextRecord(source);
+                    sourceRecord = getNextRecordOrNull(source);
                 } else {
                     // same Keys
                     // TODO Consider more fine-grained value comparison result than a simple boolean
@@ -72,8 +61,8 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
                         result.addDifference(new SourceIdAndStructure<>(sourceId, sourceRecord),
                                 new SourceIdAndStructure<>(targetId, targetRecord));
                     }
-                    sourceRecord = getNextRecord(source);
-                    targetRecord = getNextRecord(target);
+                    sourceRecord = getNextRecordOrNull(source);
+                    targetRecord = getNextRecordOrNull(target);
                 }
             }
 

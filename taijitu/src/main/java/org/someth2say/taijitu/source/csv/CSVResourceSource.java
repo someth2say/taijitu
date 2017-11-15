@@ -104,7 +104,7 @@ public class CSVResourceSource extends AbstractSource<Object[]> {
     public <V> Function<Object[], V> getExtractor(FieldDescription<V> fd) {
         int index = getProvidedFields().indexOf(fd);
         if (index < 0) return null;
-        return (Object[] obj) -> (V)obj[index];
+        return (Object[] obj) -> (V) obj[index];
     }
 
     @Override
@@ -117,8 +117,4 @@ public class CSVResourceSource extends AbstractSource<Object[]> {
         }
     }
 
-    @Override
-    public String getName() {
-        return CSVResourceSource.NAME;
-    }
 }

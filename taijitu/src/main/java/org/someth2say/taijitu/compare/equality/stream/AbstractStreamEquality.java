@@ -7,6 +7,7 @@ import java.util.Iterator;
 public abstract class AbstractStreamEquality<T> implements StreamEquality<T> {
 
     final private ICompositeEquality<T> equality;
+    //TODO: Generify this to a collection of Categorizers/Comparers
     final private ICompositeEquality<T> categorizer;
 
     protected AbstractStreamEquality(ICompositeEquality<T> equality, ICompositeEquality<T> categorizer) {
@@ -14,7 +15,7 @@ public abstract class AbstractStreamEquality<T> implements StreamEquality<T> {
         this.categorizer = categorizer;
     }
 
-    protected static <T> T getNextRecord(Iterator<T> resultSetSource) {
+    protected static <T> T getNextRecordOrNull(Iterator<T> resultSetSource) {
         return resultSetSource.hasNext() ? resultSetSource.next() : null;
     }
 

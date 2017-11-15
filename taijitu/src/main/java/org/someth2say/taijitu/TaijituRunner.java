@@ -81,9 +81,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         Source<R> source;
         Source<T> mappedSource;
         SourceMapper<R, T> mapper;
-        List<Function<T, ?>> identityExtractors;
         List<ExtractorAndEquality<T, ?>> identityEaEs;
-        List<Function<T, ?>> nonIdentityExtractors;
         List<ExtractorAndEquality<T, ?>> nonIdentityEaEs;
 
         private SourceData(ISourceCfg sourceCfg) {
@@ -102,7 +100,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         }
 
         // XD SourceData<T,T>... T.T Hate type erasure...
-        List<SourceData<?,T>> sourceDatas = sourceConfigs.stream().limit(2).map(SourceData<T,T>::new).collect(Collectors.toList());
+        List<SourceData<?, T>> sourceDatas = sourceConfigs.stream().limit(2).map(SourceData<T, T>::new).collect(Collectors.toList());
 
         //0. Build and map sources
         buildMappedSources(sourceDatas);
@@ -118,29 +116,29 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         List<FieldDescription<?>> nonIdentityFields = commonFields.stream().filter(fd -> !identityFields.contains(fd)).collect(Collectors.toList());
 
         //3. Obtain ValueExtractors and Equalities
-        sourceDatas.forEach((SourceData<?,T> sd) -> {
+        sourceDatas.forEach((SourceData<?, T> sd) -> {
             sd.identityEaEs = identityFields.stream().map(fd -> buildExtractorAndEquality(iComparisonCfg, sd, fd)).collect(Collectors.toList());
             sd.nonIdentityEaEs = nonIdentityFields.stream().map(fd -> buildExtractorAndEquality(iComparisonCfg, sd, fd)).collect(Collectors.toList());
         });
 
         //4. Build CompositeEqualities with ValueExtractors and ValueEqualities
         //TODO: This assumes all sources use the same extractors! Else, we need an "HybridCompositeEquality", providing, for each field on a) extractors for each source, and b) valueEqualities
-        ICompositeEquality<T> identityEquality = new CompositeEquality<>(sourceDatas.get(0).identityEaEs);
-        ICompositeEquality<T> nonIdentityEquality = new ComparableCompositeEquality<>(sourceDatas.get(0).nonIdentityEaEs);
+        ICompositeEquality<T> categorizer = new ComparableCompositeEquality<>(sourceDatas.get(0).identityEaEs);
+        ICompositeEquality<T> equality = new CompositeEquality<>(sourceDatas.get(0).nonIdentityEaEs);
 
         //6. Run SteamEquality given ICompositeEquality and MappedStreams
         String strategyName = iComparisonCfg.getStrategyConfig().getName();
-        final StreamEquality<T> streamEquality = StreamEqualityRegistry.getInstance(strategyName, identityEquality, nonIdentityEquality);
+        final StreamEquality<T> streamEquality = StreamEqualityRegistry.getInstance(strategyName, equality, categorizer);
 
         //Shall we use the same matcher for canonical source? No, we should use identity matcher....
         logger.info("Comparison " + iComparisonCfg.getName() + " ready to run.");
         return runStreamEquality(streamEquality, sourceDatas);
     }
 
-    private <T, V> ExtractorAndEquality<T, V> buildExtractorAndEquality(IComparisonCfg iComparisonCfg, SourceData<?,T> sd, FieldDescription<V> fd) {
+    private <T, V> ExtractorAndEquality<T, V> buildExtractorAndEquality(IComparisonCfg iComparisonCfg, SourceData<?, T> sd, FieldDescription<V> fd) {
         Function<T, V> extractor = sd.mappedSource.getExtractor(fd);
-        if (extractor==null){
-            throw new RuntimeException("Can't obtain extractor for field "+fd);
+        if (extractor == null) {
+            throw new RuntimeException("Can't obtain extractor for field " + fd);
         }
         ValueEquality<V> valueEquality = getEquality(fd, iComparisonCfg);
         return new ExtractorAndEquality<>(extractor, valueEquality);
@@ -165,13 +163,16 @@ public class TaijituRunner implements Callable<ComparisonResult> {
     private <R, T> void mapSource(SourceData<R, T> sourceData, Class<T> commonClass) {
         SourceMapper<R, T> mapper = sourceData.mapper;
         if (mapper == null) {
-            if (commonClass.isAssignableFrom(sourceData.source.getTypeParameter())) {
+            Class<R> sourceTypeParameter = sourceData.source.getTypeParameter();
+            if (commonClass.isAssignableFrom(sourceTypeParameter)) {
+                logger.debug("Source " + sourceData.source.getName() + " have no mapper defined, so will directly generate composite type " + sourceTypeParameter.getName());
                 //TODO: What should we do with this unchecked cast?
                 sourceData.mappedSource = (Source<T>) sourceData.source;
             } else {
-                throw new RuntimeException("Source " + sourceData.source.getName() + " generate incompatible class " + sourceData.source.getTypeParameter().getName() + " (need " + commonClass.getName() + ")");
+                throw new RuntimeException("Source " + sourceData.source.getName() + " generate incompatible class " + sourceTypeParameter.getName() + " (need " + commonClass.getName() + ")");
             }
         } else {
+            logger.debug("Applying mapper " + mapper.getName() + " to source " + sourceData.source.getName() + " to produce composite type " + mapper.getTypeParameter().getSimpleName());
             sourceData.mappedSource = mapper.apply(sourceData.source);
         }
     }
@@ -184,7 +185,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         return expectedClass;
     }
 
-    private <R,T> Class<T> checkGeneratedClass(Class<T> commonClass, SourceData<R, T> sd) {
+    private <R, T> Class<T> checkGeneratedClass(Class<T> commonClass, SourceData<R, T> sd) {
         SourceMapper<R, T> mapper = sd.mapper;
 
         Class<R> sourceTypeParameter = sd.source.getTypeParameter();
@@ -234,7 +235,7 @@ public class TaijituRunner implements Callable<ComparisonResult> {
         sourceData.source = source;
     }
 
-    private <T> ComparisonResult<T> runStreamEquality(StreamEquality<T> streamEquality, List<SourceData<?,T>> sourceDatas) {
+    private <T> ComparisonResult<T> runStreamEquality(StreamEquality<T> streamEquality, List<SourceData<?, T>> sourceDatas) {
         ComparisonResult<T> comparisonResult = null;
         try (Stream<T> sourceStr = sourceDatas.get(0).mappedSource.stream();
              Stream<T> targetStr = sourceDatas.get(1).mappedSource.stream();

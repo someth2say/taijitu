@@ -15,6 +15,7 @@ import org.someth2say.taijitu.util.FileUtil;
 import org.someth2say.taijitu.util.LogUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -39,10 +40,14 @@ public final class Taijitu {
         return TaijituCfg.fromFile(fileName);
     }
 
-    private static void performSetup(final ITaijituCfg config) {
-        setupFolders(config);
-        setupLogging(config);
-        setupRegistries(config);
+    private static void performSetup(final ITaijituCfg config) throws TaijituException {
+        try {
+//            setupFolders(config);
+//            setupLogging(config);
+            setupRegistries(config);
+        } catch (Exception e) {
+            throw new TaijituException("Unable to prepare Taijitu.", e);
+        }
     }
 
     //TODO: This registry stuff may be moved to a IC context (Weld?)
@@ -70,7 +75,7 @@ public final class Taijitu {
         } else {
             // run comparison with default values
             try {
-                new Taijitu().compare(args[0]);
+                Taijitu.compare(args[0]);
             } catch (TaijituException e) {
                 logger.fatal("Unable to start: ", e);
             }
@@ -189,32 +194,32 @@ public final class Taijitu {
         return result;
     }
 
-    private static void setupFolders(final ITaijituCfg config) {
-        final File outputFolder = new File(config.getOutputFolder());
-        if (!outputFolder.exists()) {
-            final boolean dirCreated = outputFolder.mkdirs();
-            if (!dirCreated) {
-                logger.error("Error while trying to create output folder: " + outputFolder.getAbsolutePath());
-            }
-        }
-    }
-
-    private static void setupLogging(final ITaijituCfg config) {
-        enableFileLog(config);
-        enableConsoleLog(config);
-    }
-
-    private static void enableFileLog(final ITaijituCfg config) {
-        final Level level = Level.toLevel(config.getFileLog(), Level.OFF);
-        if (level != Level.OFF) {
-            final String fileName = config.getOutputFolder() + File.separator + DEFAULT_LOG_FILE;
-            LogUtils.addFileAppenderToRootLogger(level, LogUtils.DEFAULT_PATTERN, fileName);
-        }
-    }
-
-    private static void enableConsoleLog(final ITaijituCfg config) {
-        final Level level = Level.toLevel(config.getConsoleLog(), Level.INFO);
-        LogUtils.addConsoleAppenderToRootLogger(level, LogUtils.DEFAULT_PATTERN);
-    }
+//    private static void setupFolders(final ITaijituCfg config) {
+//        final File outputFolder = new File(config.getOutputFolder());
+//        if (!outputFolder.exists()) {
+//            final boolean dirCreated = outputFolder.mkdirs();
+//            if (!dirCreated) {
+//                logger.error("Error while trying to create output folder: " + outputFolder.getAbsolutePath());
+//            }
+//        }
+//    }
+//
+//    private static void setupLogging(final ITaijituCfg config) throws IOException {
+//        enableFileLog(config);
+//        enableConsoleLog(config);
+//    }
+//
+//    private static void enableFileLog(final ITaijituCfg config) throws IOException {
+//        final Level level = Level.toLevel(config.getFileLog(), Level.OFF);
+//        if (level != Level.OFF) {
+//            final String fileName = config.getOutputFolder() + File.separator + DEFAULT_LOG_FILE;
+//            LogUtils.addFileAppenderToRootLogger(level, LogUtils.DEFAULT_PATTERN, fileName);
+//        }
+//    }
+//
+//    private static void enableConsoleLog(final ITaijituCfg config) {
+//        final Level level = Level.toLevel(config.getConsoleLog(), Level.INFO);
+//        LogUtils.addConsoleAppenderToRootLogger(level);
+//    }
 
 }

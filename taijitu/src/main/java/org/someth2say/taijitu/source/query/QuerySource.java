@@ -11,7 +11,6 @@ import org.someth2say.taijitu.source.FieldDescription;
 import java.sql.*;
 import java.sql.Date;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -20,24 +19,19 @@ public class QuerySource extends AbstractSource<ResultSet> {
     private static final Logger logger = Logger.getLogger(QuerySource.class);
     public static final String NAME = "query";
 
-    private final ResultSet resultSet;
-    private final PreparedStatement preparedStatement;
     private final Connection connection;
 
     //TODO: this properties should be created externally to the source
     private final FetchProperties fetchProperties;
 
-    private final List<FieldDescription<?>> providedFields;
+    private ResultSet resultSet;
+    private PreparedStatement preparedStatement;
+    private List<FieldDescription<?>> providedFields;
 
     public QuerySource(final ISourceCfg iSource) throws SQLException {
         super(iSource);
         this.fetchProperties = new FetchProperties(iSource.getFetchProperties());
         this.connection = ConnectionManager.getConnection(iSource.getBuildProperties());
-        // init
-        this.preparedStatement = getPreparedStatement();
-        this.resultSet = preparedStatement.executeQuery();
-
-        this.providedFields = buildFieldDescriptions();
     }
 
     private static class FetchProperties {
@@ -79,15 +73,22 @@ public class QuerySource extends AbstractSource<ResultSet> {
 
     }
 
+
+    private void init() {
+        try {
+            this.preparedStatement = getPreparedStatement();
+            this.resultSet = preparedStatement.executeQuery();
+            this.providedFields = buildFieldDescriptions();
+
+        } catch (SQLException e) {
+            close();
+        }
+    }
+
     private PreparedStatement getPreparedStatement() throws SQLException {
         PreparedStatement preparedStatement;
         preparedStatement = connection.prepareStatement(fetchProperties.getStatement());
         preparedStatement.setFetchSize(fetchProperties.getFetchSize());
-        assignSqlParameters(preparedStatement);
-        return preparedStatement;
-    }
-
-    private void assignSqlParameters(PreparedStatement preparedStatement) throws SQLException {
         //TODO: Here we lost type-safety because we went through Properties... consider using a `Map<String,Object>` instead.
         List<Object> sqlParameters = fetchProperties.getQueryParameters();
         for (int paramIdx = 0; paramIdx < sqlParameters.size(); paramIdx++) {
@@ -97,6 +98,24 @@ public class QuerySource extends AbstractSource<ResultSet> {
             } else {
                 preparedStatement.setObject(paramIdx + 1, object);
             }
+        }
+        return preparedStatement;
+    }
+
+    private ArrayList<FieldDescription<?>> buildFieldDescriptions() {
+        try {
+            ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+            int rsColumnCount = resultSetMetaData.getColumnCount();
+            ArrayList<FieldDescription<?>> result = new ArrayList<>(rsColumnCount);
+            for (int columnIdx = 1; columnIdx <= rsColumnCount; ++columnIdx) {
+                String columnName = resultSetMetaData.getColumnName(columnIdx);
+                final String columnClassName = resultSetMetaData.getColumnClassName(columnIdx);
+                result.add(new FieldDescription(columnName, columnClassName));
+            }
+            return result;
+        } catch (SQLException e) {
+            logger.error("Unable to extract columns from ResultSet metadata.", e);
+            return null;
         }
     }
 
@@ -120,6 +139,9 @@ public class QuerySource extends AbstractSource<ResultSet> {
 
     @Override
     public List<FieldDescription<?>> getProvidedFields() {
+        if (preparedStatement == null) {
+            init();
+        }
         return providedFields;
     }
 
@@ -134,41 +156,27 @@ public class QuerySource extends AbstractSource<ResultSet> {
         };
     }
 
-    private ArrayList<FieldDescription<?>> buildFieldDescriptions() {
-        try {
-            ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-            int rsColumnCount = resultSetMetaData.getColumnCount();
-            ArrayList<FieldDescription<?>> result = new ArrayList<>(rsColumnCount);
-            for (int columnIdx = 1; columnIdx <= rsColumnCount; ++columnIdx) {
-                String columnName = resultSetMetaData.getColumnName(columnIdx);
-                final String columnClassName = resultSetMetaData.getColumnClassName(columnIdx);
-                result.add(new FieldDescription(columnName, columnClassName));
-            }
-            return result;
-        } catch (SQLException e) {
-            logger.error("Unable to extract columns from ResultSet metadata.", e);
-            return null;
-        }
-    }
 
     @Override
     public Stream<ResultSet> stream() {
-        Iterator<ResultSet> iterator = buildIterator();
-//        return Stream.generate(iterator::next);
-       return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false);
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(buildIterator(), 0), false);
     }
 
     private Iterator<ResultSet> buildIterator() {
-        Iterator<ResultSet> iterator = new Iterator<ResultSet>() {
+
+        return new Iterator<ResultSet>() {
 
             @Override
             public boolean hasNext() {
+                if (preparedStatement == null) {
+                    init();
+                }
                 try {
-                    boolean isAfterLast = resultSet.isAfterLast();
-                    if (!isAfterLast) {
+                    boolean hasMore = resultSet.next();
+                    if (!hasMore) {
                         close();
                     }
-                    return !isAfterLast;
+                    return hasMore;
                 } catch (SQLException e) {
                     close();
                     return false;
@@ -178,25 +186,13 @@ public class QuerySource extends AbstractSource<ResultSet> {
             @Override
             public ResultSet next() {
                 try {
-                    if (resultSet.next()) {
-                        return resultSet;
-                    } else {
-                        throw new RuntimeException("No more elements in ResultSet.");
-                    }
-                } catch (SQLException e) {
+                    return resultSet;
+                } catch (Exception e) {
                     close();
-                    //throw new RuntimeException("Can't move beyond last element.");
-                    //return null;
                     throw e;
                 }
             }
         };
-
-        return iterator;
     }
 
-    @Override
-    public String getName() {
-        return QuerySource.NAME;
-    }
 }

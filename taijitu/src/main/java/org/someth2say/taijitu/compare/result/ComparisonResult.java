@@ -9,52 +9,62 @@ import java.util.Map;
 
 public abstract class ComparisonResult<T> {
 
-	public static class SourceIdAndStructure<T> extends ImmutablePair<Object, T> {
-		public SourceIdAndStructure(Object iSource, T tuple) {
-			super(iSource, tuple);
-		}
-	}
+    public static class SourceIdAndStructure<T> extends ImmutablePair<Object, T> {
+        public SourceIdAndStructure(Object iSource, T tuple) {
+            super(iSource, tuple);
+        }
 
-	public abstract class Mismatch<T> {
-		final Map<Object, T> entries;
+        @Override
+        public String toString() {
+            return "[SourceId: " + getKey() + "-> Composite: " + getValue() + "]";
+        }
+    }
 
-		public Mismatch(Collection<SourceIdAndStructure<T>> existing) {
-			entries = new HashMap<>(existing.size());
-			existing.forEach(qat -> entries.put(qat.getKey(), qat.getValue()));
-		}
-	}
+    public abstract class Mismatch<T> {
+        final Map<Object, T> entries;
 
-	public class Difference<T> extends Mismatch<T> {
-		public Difference(Collection<SourceIdAndStructure<T>> different) {
-			super(different);
-		}
-	}
+        public Mismatch(Collection<SourceIdAndStructure<T>> existing) {
+            entries = new HashMap<>(existing.size());
+            existing.forEach(qat -> entries.put(qat.getKey(), qat.getValue()));
+        }
 
-	public class Missing<T> extends Mismatch<T> {
-		public Missing(Collection<SourceIdAndStructure<T>> existing) {
-			super(existing);
-		}
-	}
+        @Override
+        public String toString() {
+            return this.getClass().getSimpleName()+": "+entries.toString();
+        }
+    }
 
-	private final Collection<Mismatch<T>> mismatches;
+    public class Difference<T> extends Mismatch<T> {
+        public Difference(Collection<SourceIdAndStructure<T>> different) {
+            super(different);
+        }
+    }
 
-	ComparisonResult(final Collection<Mismatch<T>> mismatches) {
-		this.mismatches = mismatches;
-	}
+    public class Missing<T> extends Mismatch<T> {
+        public Missing(Collection<SourceIdAndStructure<T>> existing) {
+            super(existing);
+        }
+    }
 
-	public void addDifference(final SourceIdAndStructure<T> first, final SourceIdAndStructure<T> second) {
-		getMismatches().add(new Difference<>(Arrays.asList(first, second)));
-	}
+    private final Collection<Mismatch<T>> mismatches;
 
-	public void addDisjoint(final SourceIdAndStructure<T> element) {
-		getMismatches().add(new Missing<>(Arrays.asList(element)));
-	}
+    ComparisonResult(final Collection<Mismatch<T>> mismatches) {
+        this.mismatches = mismatches;
+    }
 
-	public void addAllDisjoint(Collection<SourceIdAndStructure<T>> entries) {
-		entries.forEach(this::addDisjoint);
-	}
+    public void addDifference(final SourceIdAndStructure<T> first, final SourceIdAndStructure<T> second) {
+        getMismatches().add(new Difference<>(Arrays.asList(first, second)));
+    }
 
-	public Collection<Mismatch<T>> getMismatches() {
-		return mismatches;
-	}
+    public void addDisjoint(final SourceIdAndStructure<T> element) {
+        getMismatches().add(new Missing<>(Arrays.asList(element)));
+    }
+
+    public void addAllDisjoint(Collection<SourceIdAndStructure<T>> entries) {
+        entries.forEach(this::addDisjoint);
+    }
+
+    public Collection<Mismatch<T>> getMismatches() {
+        return mismatches;
+    }
 }

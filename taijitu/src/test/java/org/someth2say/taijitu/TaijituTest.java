@@ -58,6 +58,10 @@ public class TaijituTest {
     public static Collection<String> strategies() {
         return Arrays.asList(
                 MappingStreamEquality.NAME, ComparableStreamEquality.NAME
+                , MappingStreamEquality.NAME, ComparableStreamEquality.NAME
+                , MappingStreamEquality.NAME, ComparableStreamEquality.NAME
+                , MappingStreamEquality.NAME, ComparableStreamEquality.NAME
+
         );
     }
 
@@ -94,8 +98,10 @@ public class TaijituTest {
 
         assertEquals(2, comparisonResults.length);
         final ComparisonResult firstResult = comparisonResults[0];
+        System.out.println(firstResult.getMismatches());
         assertEquals(0, firstResult.getMismatches().size());
         final ComparisonResult secondResult = comparisonResults[1];
+        System.out.println(secondResult.getMismatches());
         assertEquals(1, secondResult.getMismatches().size());
 
         //TODO: Define exactly the expected difference!
@@ -132,8 +138,8 @@ public class TaijituTest {
         // File scheme (must be absolute)
 //        s2buildProperties.setProperty(ConfigurationLabels.Comparison.RESOUCE, "file:///"+ ClassLoader.getSystemResource(".").getPath() +"/csv/Sacramentorealestatetransactions.csv");
 
-        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", CSVResourceSource.NAME, null, s1buildProperties, CSVTupleMapper.NAME);
-        BasicSourceCfg targetSrc = new BasicSourceCfg("target", CSVResourceSource.NAME, null, s2buildProperties, CSVTupleMapper.NAME);
+        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", CSVResourceSource.NAME, null, s1buildProperties, null);//CSVTupleMapper.NAME);
+        BasicSourceCfg targetSrc = new BasicSourceCfg("target", CSVResourceSource.NAME, null, s2buildProperties, null); //CSVTupleMapper.NAME);
 
         BasicComparisonCfg comp1 = new BasicComparisonCfg("csv", Arrays.asList("street", "price", "latitude", "longitude"), Arrays.asList(sourceSrc, targetSrc));
         basicTaijituCfg.setComparisons(Arrays.asList(comp1));
@@ -167,9 +173,10 @@ public class TaijituTest {
         s2fetchProperties.setProperty(ConfigurationLabels.Comparison.STATEMENT, "select * from test2");
 
         BasicSourceCfg sourceSrc = new BasicSourceCfg("source", QuerySource.NAME, s1fetchProperties, null, ResultSetTupleMapper.NAME);
+        BasicSourceCfg source2Src = new BasicSourceCfg("source2", QuerySource.NAME, s1fetchProperties, null, ResultSetTupleMapper.NAME);
         BasicSourceCfg targetSrc = new BasicSourceCfg("target", QuerySource.NAME, s2fetchProperties, null, ResultSetTupleMapper.NAME);
 
-        BasicComparisonCfg comp1 = new BasicComparisonCfg("test1", Arrays.asList("KEY"), Arrays.asList(sourceSrc, sourceSrc));
+        BasicComparisonCfg comp1 = new BasicComparisonCfg("test1", Arrays.asList("KEY"), Arrays.asList(sourceSrc, source2Src));
         BasicComparisonCfg comp2 = new BasicComparisonCfg("test2", Arrays.asList("KEY"), Arrays.asList(sourceSrc, targetSrc));
         basicTaijituCfg.setComparisons(Arrays.asList(comp1, comp2));
 
@@ -194,8 +201,9 @@ public class TaijituTest {
         //putAll(properties, sourceBuildProperties, DATABASE + ".");
 
         // Comparisons
-        Properties sourceProps1 = makeQueryProps("select * from test", sourceBuildProperties);
-        Properties sourceProps2 = makeQueryProps("select * from test2", sourceBuildProperties);
+        //TODO: ResultSet are transient objects, so can not be used for mapping comparison! Mapper is a must. Should we detect it?
+        Properties sourceProps1 = makeQuerySourceProps("select * from test", sourceBuildProperties, ResultSetTupleMapper.NAME);
+        Properties sourceProps2 = makeQuerySourceProps("select * from test2", sourceBuildProperties, ResultSetTupleMapper.NAME);
         putAll(properties, makeComparisonProps("test1", "KEY", sourceProps1, sourceProps1, null), "");
         putAll(properties, makeComparisonProps("test2", "KEY", sourceProps1, sourceProps2, null), "");
 
@@ -711,7 +719,7 @@ public class TaijituTest {
     }
 
 
-    private Properties makeQueryProps(String query, Properties databaseProperties) {
+    private Properties makeQuerySourceProps(String query, Properties databaseProperties, String mapperName) {
         Properties result = new Properties();
         result.put(SOURCE_TYPE, QuerySource.NAME);
 
@@ -722,6 +730,10 @@ public class TaijituTest {
 
         if (databaseProperties != null) {
             result.put(ConfigurationLabels.Comparison.SOURCE_BUILD_PROPERTIES, linearizeProperties(databaseProperties));
+        }
+
+        if (mapperName != null) {
+            result.put(ConfigurationLabels.Comparison.MAPPER_TYPE, mapperName);
         }
 
         return result;
