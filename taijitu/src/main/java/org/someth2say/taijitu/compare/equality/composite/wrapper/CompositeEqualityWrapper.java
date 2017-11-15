@@ -1,9 +1,11 @@
-package org.someth2say.taijitu.compare.equality.composite;
+package org.someth2say.taijitu.compare.equality.composite.wrapper;
+
+import org.someth2say.taijitu.compare.equality.composite.ICompositeEquality;
 
 public class CompositeEqualityWrapper<T> {
 
     private final T wrapped;
-    private final ICompositeEquality<T> ICompositeEquality;
+    private final org.someth2say.taijitu.compare.equality.composite.ICompositeEquality<T> ICompositeEquality;
 
     public CompositeEqualityWrapper(T wrapped, ICompositeEquality<T> ICompositeEquality) {
         this.wrapped = wrapped;

@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.compare.equality.composite;
+package org.someth2say.taijitu.compare.equality.composite.eae;
 
 import org.someth2say.taijitu.compare.equality.value.ValueEquality;
 
@@ -13,11 +13,11 @@ public class ExtractorAndEquality<T, Y> {
         this.valueEquality = valueEquality;
     }
 
-    Function<T, Y> getExtractor() {
+    public Function<T, Y> getExtractor() {
         return this.extractor;
     }
 
-    ValueEquality<Y> getEquality() {
+    public ValueEquality<Y> getEquality() {
         return this.valueEquality;
     }
 }

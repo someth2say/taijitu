@@ -4,9 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.composite.ComparableCompositeEquality;
 import org.someth2say.taijitu.compare.equality.composite.CompositeEquality;
-import org.someth2say.taijitu.compare.equality.composite.ExtractorAndEquality;
+import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndComparableEquality;
+import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndEquality;
 import org.someth2say.taijitu.compare.equality.composite.ICompositeEquality;
 import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
+import org.someth2say.taijitu.compare.equality.value.AbstractValueEquality;
+import org.someth2say.taijitu.compare.equality.value.ComparableValueEquality;
 import org.someth2say.taijitu.compare.equality.value.ValueEquality;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
 import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
@@ -38,11 +41,6 @@ class TaijituRunner implements Callable<ComparisonResult> {
         this.comparisonCfg = comparisonCfg;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Runnable#run()
-     */
     @Override
     public ComparisonResult call() {
         List<IPluginCfg> pluginConfigs = comparisonCfg.getPluginConfigs();
@@ -73,8 +71,8 @@ class TaijituRunner implements Callable<ComparisonResult> {
         Source<R> source;
         Source<T> mappedSource;
         SourceMapper<R, T> mapper;
-        List<ExtractorAndEquality<T, ?>> identityEaEs;
-        List<ExtractorAndEquality<T, ?>> nonIdentityEaEs;
+        List<ExtractorAndComparableEquality<T, ?>> categoryEaEs;
+        List<ExtractorAndEquality<T, ?>> equalityEaEs;
 
         private SourceData(ISourceCfg sourceCfg) {
             this.sourceCfg = sourceCfg;
@@ -109,14 +107,14 @@ class TaijituRunner implements Callable<ComparisonResult> {
 
         //3. Obtain ValueExtractors and Equalities
         sourceDatas.forEach((SourceData<?, T> sd) -> {
-            sd.identityEaEs = identityFields.stream().map(fd -> buildExtractorAndEquality(iComparisonCfg, sd, fd)).collect(Collectors.toList());
-            sd.nonIdentityEaEs = nonIdentityFields.stream().map(fd -> buildExtractorAndEquality(iComparisonCfg, sd, fd)).collect(Collectors.toList());
+            sd.categoryEaEs = identityFields.stream().map(fd -> buildExtractorAndComparableEquality(iComparisonCfg, sd, fd)).collect(Collectors.toList());
+            sd.equalityEaEs = nonIdentityFields.stream().map(fd -> buildExtractorAndEquality(iComparisonCfg, sd, fd)).collect(Collectors.toList());
         });
 
         //4. Build CompositeEqualities with ValueExtractors and ValueEqualities
         //TODO: This assumes all sources use the same extractors! Else, we need an "HybridCompositeEquality", providing, for each field on a) extractors for each source, and b) valueEqualities
-        ICompositeEquality<T> categorizer = new ComparableCompositeEquality<>(sourceDatas.get(0).identityEaEs);
-        ICompositeEquality<T> equality = new CompositeEquality<>(sourceDatas.get(0).nonIdentityEaEs);
+        ICompositeEquality<T> categorizer = new ComparableCompositeEquality<>(sourceDatas.get(0).categoryEaEs);
+        ICompositeEquality<T> equality = new CompositeEquality<>(sourceDatas.get(0).equalityEaEs);
 
         //6. Run SteamEquality given ICompositeEquality and MappedStreams
         String strategyName = iComparisonCfg.getStrategyConfig().getName();
@@ -135,6 +133,16 @@ class TaijituRunner implements Callable<ComparisonResult> {
         ValueEquality<V> valueEquality = getEquality(fd, iComparisonCfg);
         return new ExtractorAndEquality<>(extractor, valueEquality);
     }
+
+    private <T, V> ExtractorAndComparableEquality<T, V> buildExtractorAndComparableEquality(IComparisonCfg iComparisonCfg, SourceData<?, T> sd, FieldDescription<V> fd) {
+        Function<T, V> extractor = sd.mappedSource.getExtractor(fd);
+        if (extractor == null) {
+            throw new RuntimeException("Can't obtain extractor for field " + fd);
+        }
+        ComparableValueEquality<V> valueEquality = getComparableEquality(fd, iComparisonCfg);
+        return new ExtractorAndComparableEquality<>(extractor, valueEquality);
+    }
+
 
     private <T> void buildMappedSources(List<SourceData<?, T>> sourceDatas) {
         buildSources(sourceDatas);
@@ -244,9 +252,17 @@ class TaijituRunner implements Callable<ComparisonResult> {
 
     }
 
-    private <V> ValueEquality<V> getEquality(FieldDescription<V> fieldDescription, IComparisonCfg iComparisonCfg) {
-        IEqualityCfg iEqualityCfg = getEqualityConfigFor(fieldDescription.getClazz(), fieldDescription.getName(), iComparisonCfg.getEqualityConfigs());
+    private <V> ValueEquality<V> getEquality(FieldDescription<V> fd, IComparisonCfg iComparisonCfg) {
+        IEqualityCfg iEqualityCfg = getEqualityConfigFor(fd.getClazz(), fd.getName(), iComparisonCfg.getEqualityConfigs());
         return ValueEqualityRegistry.getInstance(iEqualityCfg.getName(), iEqualityCfg.getEqualityParameters());
+    }
+
+
+    private <V> ComparableValueEquality<V> getComparableEquality(FieldDescription<V> fd, IComparisonCfg iComparisonCfg) {
+        IEqualityCfg iEqualityCfg = getEqualityConfigFor(fd.getClazz(), fd.getName(), iComparisonCfg.getEqualityConfigs());
+        AbstractValueEquality<V> abstractValueEquality = ValueEqualityRegistry.getInstance(iEqualityCfg.getName(), iEqualityCfg.getEqualityParameters());
+        //TODO: registry may be able to determine comparable equalities.
+        return (ComparableValueEquality<V>) abstractValueEquality;
     }
 
     private IEqualityCfg getEqualityConfigFor(final String fieldClass, final String fieldName, final List<IEqualityCfg> equalityConfigIfaces) {

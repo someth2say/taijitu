@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.composite.ICompositeEquality;
 import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
 import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
-import org.someth2say.taijitu.compare.equality.composite.CompositeEqualityWrapper;
+import org.someth2say.taijitu.compare.equality.composite.wrapper.CompositeEqualityWrapper;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
 import org.someth2say.taijitu.compare.result.ComparisonResult.SourceIdAndComposite;
 import org.someth2say.taijitu.compare.result.SynchronizedComparisonResult;
