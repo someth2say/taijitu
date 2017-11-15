@@ -18,6 +18,7 @@ import org.someth2say.taijitu.config.delegates.simple.*;
 import org.someth2say.taijitu.config.impl.TaijituCfg;
 import org.someth2say.taijitu.config.interfaces.*;
 import org.someth2say.taijitu.source.csv.CSVResourceSource;
+import org.someth2say.taijitu.source.mapper.CSVTupleMapper;
 import org.someth2say.taijitu.source.mapper.ResultSetTupleMapper;
 import org.someth2say.taijitu.source.query.ConnectionManager;
 import org.someth2say.taijitu.source.query.QuerySource;
@@ -136,7 +137,7 @@ public class TaijituTest {
 
         // We don't actually need a mapper here, we can compare directly the strings provided by the source.
         BasicSourceCfg sourceSrc = new BasicSourceCfg("source", CSVResourceSource.NAME, null, s1buildProperties, null);//CSVTupleMapper.NAME);
-        BasicSourceCfg targetSrc = new BasicSourceCfg("target", CSVResourceSource.NAME, null, s2buildProperties, null); //CSVTupleMapper.NAME);
+        BasicSourceCfg targetSrc = new BasicSourceCfg("target", CSVResourceSource.NAME, null, s2buildProperties, CSVTupleMapper.NAME);
 
         BasicComparisonCfg comp1 = new BasicComparisonCfg("csv", Arrays.asList("street", "price", "latitude", "longitude"), Arrays.asList(sourceSrc, targetSrc));
         basicTaijituCfg.setComparisons(Collections.singletonList(comp1));

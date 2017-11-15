@@ -143,7 +143,6 @@ class TaijituRunner implements Callable<ComparisonResult> {
         return new ExtractorAndComparableEquality<>(extractor, valueEquality);
     }
 
-
     private <T> void buildMappedSources(List<SourceData<?, T>> sourceDatas) {
         buildSources(sourceDatas);
 
@@ -165,7 +164,6 @@ class TaijituRunner implements Callable<ComparisonResult> {
         if (mapper == null) {
             Class<R> sourceTypeParameter = sourceData.source.getTypeParameter();
             if (commonClass.isAssignableFrom(sourceTypeParameter)) {
-                logger.debug("Source {} have no mapper defined, so will directly generate composite type {}", sourceData.source.getName(), sourceTypeParameter.getName());
                 //TODO: What should we do with this unchecked cast?
                 sourceData.mappedSource = (Source<T>) sourceData.source;
             } else {
@@ -193,12 +191,19 @@ class TaijituRunner implements Callable<ComparisonResult> {
         //TODO: What should we do with this unchecked cast?
         Class<T> sourceMappedClass = mapper != null ? mapper.getTypeParameter() : (Class<T>) sourceTypeParameter;
 
-        if ((commonClass == null) || sourceMappedClass.isAssignableFrom(commonClass)) {
-            commonClass = sourceMappedClass;
-        } else {
-            throw new RuntimeException("Unable to find a common class for all sources!");
-        }
+        if (commonClass != sourceMappedClass) {
+            if (commonClass == null) {
+                logger.debug("Setting sources common class to {} due to {} ", sourceMappedClass, sd.source.getName());
+                commonClass = sourceMappedClass;
 
+            } else if (sourceMappedClass.isAssignableFrom(commonClass)) {
+                logger.debug("Upcasting sources common class to {} due to {}", sourceMappedClass, sd.source.getName());
+                commonClass = sourceMappedClass;
+            } else {
+                logger.error("Unable to find a common class for all sources! Was {}, but source {} generates {}", commonClass, sd.source.getName(), sourceMappedClass);
+                throw new RuntimeException("Unable to find a common class for all sources!");
+            }
+        }
         return commonClass;
     }
 
@@ -210,13 +215,15 @@ class TaijituRunner implements Callable<ComparisonResult> {
 
     private <R, T> void buildMapper(SourceData<R, T> sourceData) {
         String mapperName = sourceData.sourceCfg.getMapper();
+        Source<R> source = sourceData.source;
         if (mapperName != null) {
             SourceMapper<R, T> mapper = MapperRegistry.getInstance(mapperName);
             if (mapper == null) {
-                throw new RuntimeException("Can't find mapper instance: " + mapperName + " for source " + sourceData.source.getName());
+                throw new RuntimeException("Can't find mapper instance: " + mapperName + " for source " + source.getName());
             }
             sourceData.mapper = mapper;
         } else {
+            logger.trace("Source {} have no mapper defined, so will directly generate composite type {}", source.getName(), source.getTypeParameter().getName());
             sourceData.mapper = null;
         }
     }

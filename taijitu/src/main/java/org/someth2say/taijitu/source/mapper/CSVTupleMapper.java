@@ -6,8 +6,8 @@ import org.someth2say.taijitu.source.Source;
 import java.util.List;
 import java.util.stream.Stream;
 
-//TODO: Maybe this is the point to add some semantics to CSV: Parse provided fields names, try to cast values to the appropiate object
-public class CSVTupleMapper extends AbstractSourceMapper<Object[], Object[]> {
+//TODO: Maybe this is the point to add some semantics to CSV: Parse provided fields names, try to cast values to the right object
+public class CSVTupleMapper extends AbstractSourceMapper<String[], Object[]> {
 
     public static final String NAME = "csvToTuple";
 
@@ -20,18 +20,16 @@ public class CSVTupleMapper extends AbstractSourceMapper<Object[], Object[]> {
         return CSVTupleMapper.NAME;
     }
 
-
     @Override
     public Class<Object[]> getTypeParameter() {
         return Object[].class;
     }
 
     @Override
-    public Source<Object[]> apply(Source<Object[]> source) {
+    public Source<Object[]> apply(Source<String[]> source) {
         return new AbstractMappedTupleSource(source) {
 
-            Object[] mapItem(Object[] csvEntry) {
-                //TODO: Maybe we can get rid of the items not actually needed?
+            Object[] mapItem(String[] csvEntry) {
                 return csvEntry;
             }
 
