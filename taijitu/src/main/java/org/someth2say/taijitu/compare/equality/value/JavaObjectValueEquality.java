@@ -5,7 +5,7 @@ import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
 public class JavaObjectValueEquality extends AbstractValueEquality<Object> {
 
-    public static String NAME = "object";
+    public static final String NAME = "object";
 
     public JavaObjectValueEquality(Object equalityConfig) {
         super(equalityConfig);

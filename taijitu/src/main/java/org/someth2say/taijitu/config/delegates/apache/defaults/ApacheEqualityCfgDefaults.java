@@ -1,7 +1,6 @@
 package org.someth2say.taijitu.config.delegates.apache.defaults;
 
 import org.someth2say.taijitu.config.ConfigurationLabels;
-import org.someth2say.taijitu.config.DefaultConfig;
 import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
 import java.util.NoSuchElementException;

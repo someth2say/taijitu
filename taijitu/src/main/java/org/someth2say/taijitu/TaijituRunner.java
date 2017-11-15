@@ -2,7 +2,6 @@ package org.someth2say.taijitu;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.composite.ComparableCompositeEquality;
 import org.someth2say.taijitu.compare.equality.composite.CompositeEquality;
 import org.someth2say.taijitu.compare.equality.composite.ExtractorAndEquality;
@@ -10,20 +9,16 @@ import org.someth2say.taijitu.compare.equality.composite.ICompositeEquality;
 import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
 import org.someth2say.taijitu.compare.equality.value.ValueEquality;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
-import org.someth2say.taijitu.compare.result.SimpleComparisonResult;
 import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 import org.someth2say.taijitu.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
-import org.someth2say.taijitu.plugins.TaijituPlugin;
 import org.someth2say.taijitu.registry.*;
 import org.someth2say.taijitu.source.FieldDescription;
 import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.source.mapper.SourceMapper;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
@@ -33,14 +28,14 @@ import java.util.stream.Stream;
 /**
  * @author Jordi Sola
  */
-public class TaijituRunner implements Callable<ComparisonResult> {
+class TaijituRunner implements Callable<ComparisonResult> {
 
     private static final Logger logger = LoggerFactory.getLogger(TaijituRunner.class);
 
-    private final IComparisonCfg config;
+    private final IComparisonCfg comparisonCfg;
 
-    public TaijituRunner(final IComparisonCfg config) throws TaijituException {
-        this.config = config;
+    public TaijituRunner(final IComparisonCfg comparisonCfg) {
+        this.comparisonCfg = comparisonCfg;
     }
 
     /*
@@ -50,36 +45,28 @@ public class TaijituRunner implements Callable<ComparisonResult> {
      */
     @Override
     public ComparisonResult call() {
-        ComparisonResult result = new SimpleComparisonResult();
-        Map<IPluginCfg, TaijituPlugin> plugins = PluginRegistry.getPlugins(config.getComparisonPluginConfigs());
+        List<IPluginCfg> pluginConfigs = comparisonCfg.getPluginConfigs();
 
-        try {
+        runPluginsPreComparison(pluginConfigs, comparisonCfg);
 
-            runPluginsPreComparison(plugins);
+        ComparisonResult result = runComparison(comparisonCfg);
 
-            result = runComparison(config);
-
-            runPluginsPostComparison(plugins);
-
-        } catch (final TaijituException e) {
-            logger.error(e.getMessage(), e);
-        }
+        runPluginsPostComparison(pluginConfigs, comparisonCfg);
 
         return result;
     }
 
-    private void runPluginsPostComparison(Map<IPluginCfg, TaijituPlugin> plugins) throws TaijituException {
-        for (Entry<IPluginCfg, TaijituPlugin> entry : plugins.entrySet()) {
-            entry.getValue().postComparison(entry.getKey());
+    private void runPluginsPostComparison(List<IPluginCfg> plugins, IComparisonCfg comparisonConfig) {
+        for (IPluginCfg plugin : plugins) {
+            PluginRegistry.getPlugin(plugin.getName()).postComparison(plugin, comparisonConfig);
         }
     }
 
-    private void runPluginsPreComparison(Map<IPluginCfg, TaijituPlugin> plugins) throws TaijituException {
-        for (Entry<IPluginCfg, TaijituPlugin> entry : plugins.entrySet()) {
-            entry.getValue().preComparison(entry.getKey());
+    private void runPluginsPreComparison(List<IPluginCfg> plugins, IComparisonCfg comparisonCfg) {
+        for (IPluginCfg plugin : plugins) {
+            PluginRegistry.getPlugin(plugin.getName()).preComparison(plugin, comparisonCfg);
         }
     }
-
 
     private class SourceData<R, T> {
         final ISourceCfg sourceCfg;

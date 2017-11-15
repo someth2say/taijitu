@@ -1,6 +1,5 @@
 package org.someth2say.taijitu.config.impl.defaults;
 
-import org.apache.commons.collections4.ListUtils;
 import org.someth2say.taijitu.config.DefaultConfig;
 import org.someth2say.taijitu.config.impl.EqualityCfg;
 import org.someth2say.taijitu.config.impl.PluginCfg;
@@ -12,8 +11,6 @@ import org.someth2say.taijitu.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.config.interfaces.ISourceCfg;
 import org.someth2say.taijitu.config.interfaces.IStrategyCfg;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,11 +39,11 @@ public interface IComparisonCfgDefaults<T extends IComparisonCfg> extends ICompa
         return safeUnion(localSources, parentSources);
     }
 
-    @Override
-    default String getMatchingStrategyName() {
-        String matchingStrategyName = getDelegate().getMatchingStrategyName();
-        return matchingStrategyName != null ? matchingStrategyName : getParent() != null ? getParent().getMatchingStrategyName() : DefaultConfig.DEFAULT_MATCHING_STRATEGY_NAME;
-    }
+//    @Override
+//    default String getMatchingStrategyName() {
+//        String matchingStrategyName = getDelegate().getMatchingStrategyName();
+//        return matchingStrategyName != null ? matchingStrategyName : getParent() != null ? getParent().getMatchingStrategyName() : DefaultConfig.DEFAULT_MATCHING_STRATEGY_NAME;
+//    }
 
     // Warning: equalities are additive, not failback-ing
     @Override
@@ -67,18 +64,20 @@ public interface IComparisonCfgDefaults<T extends IComparisonCfg> extends ICompa
     }
 
     @Override
-    default List<IPluginCfg> getComparisonPluginConfigs() {
-        List<IPluginCfg> delegates = getDelegate().getComparisonPluginConfigs();
+    default List<IPluginCfg> getPluginConfigs() {
+        List<IPluginCfg> delegates = getDelegate().getPluginConfigs();
         List<IPluginCfg> plugins = null;
         if (delegates != null) {
             plugins = delegates.stream().map(dele -> new PluginCfg(dele, this)).collect(Collectors.toList());
         }
-        List<IPluginCfg> parentPlugins = null;
+        List<IPluginCfg> parentPlugins;
         if (getParent() != null) {
-            parentPlugins = getParent().getComparisonPluginConfigs();
+            parentPlugins = getParent().getPluginConfigs();
+        } else {
+            parentPlugins = DefaultConfig.DEFAULT_PLUGINS_CONFIG;
         }
 
-        return safeUnion(plugins, parentPlugins, DefaultConfig.DEFAULT_PLUGINS_CONFIG);
+        return safeUnion(plugins, parentPlugins);
 
 
     }

@@ -17,7 +17,6 @@ public class FileUtil {
      * Dumps to System.out a resource file.
      * Resource files should be present in runtime classpath.
      *
-     * @param fileName
      */
     public static void dumpResource(String fileName) {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream(fileName)))) {

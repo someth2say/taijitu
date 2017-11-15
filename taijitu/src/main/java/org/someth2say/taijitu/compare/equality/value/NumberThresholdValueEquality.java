@@ -8,8 +8,8 @@ import java.math.RoundingMode;
 
 public class NumberThresholdValueEquality extends AbstractComparableValueEquality<Number> {
 
-    public static String NAME = "threshold";
-    public static final int DEFAULT_SCALE = 2;
+    public static final String NAME = "threshold";
+    private static final int DEFAULT_SCALE = 2;
 
     public NumberThresholdValueEquality(Object equalityConfig) {
         super(equalityConfig);

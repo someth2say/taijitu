@@ -12,7 +12,4 @@ public interface StreamEquality<T> extends Named {
 
         ComparisonResult<T> runComparison(Stream<T> source, Object sourceId, Stream<T> target, Object targetId);
 
-//        @Deprecated
-//        ComparisonResult<T> runExternalComparison(Source<T> source, Source<T> target);
-
 }

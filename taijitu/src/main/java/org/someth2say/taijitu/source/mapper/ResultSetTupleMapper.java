@@ -1,18 +1,17 @@
 package org.someth2say.taijitu.source.mapper;
 
-import org.slf4j.Logger;import org.slf4j.LoggerFactory;
-import org.someth2say.taijitu.source.Source;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.source.FieldDescription;
-import org.someth2say.taijitu.tuple.Tuple;
+import org.someth2say.taijitu.source.Source;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ResultSetTupleMapper extends AbstractSourceMapper<ResultSet, Tuple> {
+public class ResultSetTupleMapper extends AbstractSourceMapper<ResultSet, Object[]> {
     private static final Logger logger = LoggerFactory.getLogger(ResultSetTupleMapper.class);
     public static final String NAME = "resultSetToTuple";
 
@@ -22,11 +21,11 @@ public class ResultSetTupleMapper extends AbstractSourceMapper<ResultSet, Tuple>
     }
 
     @Override
-    public Source<Tuple> apply(Source<ResultSet> other) {
-        return new Source<Tuple>() {
+    public Source<Object[]> apply(Source<ResultSet> source) {
+        return new AbstractMappedTupleSource(source) {
 
-            Tuple mapItem(ResultSet rs) {
-                Object[] fieldValues = getProvidedFields().stream().map(fd -> {
+            Object[] mapItem(ResultSet rs) {
+                return getProvidedFields().stream().map(fd -> {
                     try {
                         return rs.getObject(fd.getName());
                     } catch (SQLException e) {
@@ -34,46 +33,27 @@ public class ResultSetTupleMapper extends AbstractSourceMapper<ResultSet, Tuple>
                         return null;
                     }
                 }).collect(Collectors.toList()).toArray(new Object[0]);
-                return new Tuple(fieldValues);
             }
 
             @Override
-            public List<FieldDescription<?>> getProvidedFields() {
-                return other.getProvidedFields();
-            }
-
-            @Override
-            public <V> Function<Tuple, V> getExtractor(FieldDescription<V> fd) {
-                int index = getProvidedFields().indexOf(fd);
-                if (index < 0) return null;
-                //TODO: Add classes to tuple elements
-                return (Tuple tuple) -> (V) tuple.getValue(index);
-            }
-
-            @Override
-            public Stream<Tuple> stream() {
-                return other.stream().map(this::mapItem);
+            public Stream<Object[]> stream() {
+                return source.stream().map(this::mapItem);
             }
 
             @Override
             public void close() throws ClosingException {
-                other.close();
+                source.close();
             }
 
             @Override
-            public Class<Tuple> getTypeParameter() {
-                return Tuple.class;
-            }
-
-            @Override
-            public String getName() {
-                return other.getName();
+            public List<FieldDescription<?>> getProvidedFields() {
+                return source.getProvidedFields();
             }
         };
     }
 
     @Override
-    public Class<Tuple> getTypeParameter() {
-        return Tuple.class;
+    public Class<Object[]> getTypeParameter() {
+        return Object[].class;
     }
 }

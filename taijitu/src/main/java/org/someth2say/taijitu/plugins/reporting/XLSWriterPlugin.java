@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.plugins.reporting;
 
-import org.someth2say.taijitu.TaijituException;
+import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.config.interfaces.IPluginCfg;
 
 /**
@@ -13,18 +13,13 @@ public class XLSWriterPlugin extends AbstractWriterPlugin {
         return "xls";
     }
 
-//    @Override
-//    protected FileCommand getFileCommand(String fileNameSource, String sheetName, File outputFolder) throws CommandException {
-//        return new XSLFileCommand(outputFolder, fileNameSource, sheetName);
-//    }
-
     @Override
-    public void preComparison(IPluginCfg comparisonConfig) throws TaijituException {
+    public void preComparison(IPluginCfg pluginCfg, IComparisonCfg comparisonCfg) {
 
     }
 
     @Override
-    public void postComparison(IPluginCfg comparisonConfig) throws TaijituException {
+    public void postComparison(IPluginCfg pluginCfg, IComparisonCfg comparisonCfg) {
 
     }
 }

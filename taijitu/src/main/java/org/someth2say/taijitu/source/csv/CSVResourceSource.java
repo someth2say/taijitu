@@ -21,9 +21,9 @@ import java.util.Properties;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class CSVResourceSource extends AbstractSource<Object[]> {
+public class CSVResourceSource extends AbstractSource<String[]> {
     public static final String NAME = "csv";
-    public static final String FIELD_SEPARATOR = ",";
+    private static final String FIELD_SEPARATOR = ",";
     private Stream<String> lines;
     private List<FieldDescription<?>> providedFields;
 
@@ -33,8 +33,8 @@ public class CSVResourceSource extends AbstractSource<Object[]> {
     }
 
     @Override
-    public Class<Object[]> getTypeParameter() {
-        return Object[].class;
+    public Class<String[]> getTypeParameter() {
+        return String[].class;
     }
 
     private static class BuildProperties {
@@ -48,7 +48,7 @@ public class CSVResourceSource extends AbstractSource<Object[]> {
     //TODO: this properties should be created externally to the source
     private final BuildProperties buildProperties;
 
-    public CSVResourceSource(final ISourceCfg iSource) throws IOException, URISyntaxException {
+    public CSVResourceSource(final ISourceCfg iSource) {
         super(iSource);
         this.buildProperties = new BuildProperties(iSource.getBuildProperties());
     }
@@ -101,14 +101,14 @@ public class CSVResourceSource extends AbstractSource<Object[]> {
     }
 
     @Override
-    public <V> Function<Object[], V> getExtractor(FieldDescription<V> fd) {
+    public <V> Function<String[], V> getExtractor(FieldDescription<V> fd) {
         int index = getProvidedFields().indexOf(fd);
         if (index < 0) return null;
-        return (Object[] obj) -> (V) obj[index];
+        return (String[] obj) -> (V) obj[index];
     }
 
     @Override
-    public Stream<Object[]> stream() {
+    public Stream<String[]> stream() {
         lines = getLines();
         if (lines != null) {
             return lines.skip(1).map(l -> l.split(FIELD_SEPARATOR));

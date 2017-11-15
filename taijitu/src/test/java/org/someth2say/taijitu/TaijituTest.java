@@ -18,7 +18,6 @@ import org.someth2say.taijitu.config.delegates.simple.*;
 import org.someth2say.taijitu.config.impl.TaijituCfg;
 import org.someth2say.taijitu.config.interfaces.*;
 import org.someth2say.taijitu.source.csv.CSVResourceSource;
-import org.someth2say.taijitu.source.mapper.CSVTupleMapper;
 import org.someth2say.taijitu.source.mapper.ResultSetTupleMapper;
 import org.someth2say.taijitu.source.query.ConnectionManager;
 import org.someth2say.taijitu.source.query.QuerySource;
@@ -116,11 +115,12 @@ public class TaijituTest {
         assertEquals(1, comparisonResults.length);
         final ComparisonResult firstResult = comparisonResults[0];
         assertEquals(0, firstResult.getMismatches().size());
+        System.out.println(firstResult.getMismatches());
+
     }
 
     private TaijituCfg getCSVConfiguration() {
         BasicTaijituCfg basicTaijituCfg = new BasicTaijituCfg("");
-        basicTaijituCfg.setConsoleLog("DEBUG");
 
         // Comparisons
 
@@ -134,11 +134,12 @@ public class TaijituTest {
         // File scheme (must be absolute)
 //        s2buildProperties.setProperty(ConfigurationLabels.Comparison.RESOUCE, "file:///"+ ClassLoader.getSystemResource(".").getPath() +"/csv/Sacramentorealestatetransactions.csv");
 
+        // We don't actually need a mapper here, we can compare directly the strings provided by the source.
         BasicSourceCfg sourceSrc = new BasicSourceCfg("source", CSVResourceSource.NAME, null, s1buildProperties, null);//CSVTupleMapper.NAME);
         BasicSourceCfg targetSrc = new BasicSourceCfg("target", CSVResourceSource.NAME, null, s2buildProperties, null); //CSVTupleMapper.NAME);
 
         BasicComparisonCfg comp1 = new BasicComparisonCfg("csv", Arrays.asList("street", "price", "latitude", "longitude"), Arrays.asList(sourceSrc, targetSrc));
-        basicTaijituCfg.setComparisons(Arrays.asList(comp1));
+        basicTaijituCfg.setComparisons(Collections.singletonList(comp1));
 
         //Strategy
         basicTaijituCfg.setStrategyConfig(new BasicStrategyCfg(strategyName));
@@ -153,9 +154,8 @@ public class TaijituTest {
     }
 
 
-    private ITaijituCfg getTaijituConfig(Properties sourceBuildProperties) throws SQLException, ConfigurationException {
+    private ITaijituCfg getTaijituConfig(Properties sourceBuildProperties) {
         BasicTaijituCfg basicTaijituCfg = new BasicTaijituCfg("");
-        basicTaijituCfg.setConsoleLog("DEBUG");
 
         // Databases
         // Nothing, will add to sources
@@ -188,7 +188,7 @@ public class TaijituTest {
         return new TaijituCfg(basicTaijituCfg);
     }
 
-    private ImmutableHierarchicalConfiguration getApacheConfiguration(Properties sourceBuildProperties) throws SQLException, ConfigurationException {
+    private ImmutableHierarchicalConfiguration getApacheConfiguration(Properties sourceBuildProperties) throws ConfigurationException {
 
         final PropertiesConfiguration properties = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).getConfiguration();
 
@@ -205,7 +205,6 @@ public class TaijituTest {
 
         // Disable plugins, 'cause we need to write nothing.
         properties.setProperty(ConfigurationLabels.Comparison.STRATEGY, strategyName);
-        properties.setProperty(ConfigurationLabels.Setup.CONSOLE_LOG, "DEBUG");
 
         //Add comparators
         //Case insensitive strings
@@ -700,11 +699,11 @@ public class TaijituTest {
             result.setProperty(comparisonPrefix + KEYS, keys);
 
         if (sourceSource != null) {
-            putAll(result, sourceSource, comparisonPrefix + SOURCES + "." + SOURCE + ".");
+            putAll(result, sourceSource, comparisonPrefix + SOURCES + ".source.");
         }
 
         if (targetSource != null) {
-            putAll(result, targetSource, comparisonPrefix + SOURCES + "." + TARGET + ".");
+            putAll(result, targetSource, comparisonPrefix + SOURCES + ".target.");
         }
 
         if (database != null) {

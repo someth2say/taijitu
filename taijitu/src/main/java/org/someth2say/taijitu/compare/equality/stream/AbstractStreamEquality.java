@@ -19,11 +19,11 @@ public abstract class AbstractStreamEquality<T> implements StreamEquality<T> {
         return resultSetSource.hasNext() ? resultSetSource.next() : null;
     }
 
-    public ICompositeEquality<T> getEquality() {
+    protected ICompositeEquality<T> getEquality() {
         return equality;
     }
 
-    public ICompositeEquality<T> getCategorizer() {
+    protected ICompositeEquality<T> getCategorizer() {
         return categorizer;
     }
 }

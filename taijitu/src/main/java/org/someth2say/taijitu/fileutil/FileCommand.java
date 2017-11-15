@@ -57,7 +57,7 @@ public abstract class FileCommand implements Command {
         }
     }
 
-    abstract public void process(final OutputStream os, final Object payload) throws CommandException;
+    protected abstract void process(final OutputStream os, final Object payload) throws CommandException;
 
     private File getOrDeleteFile() throws CommandException {
         final File file = getFile();
@@ -82,7 +82,7 @@ public abstract class FileCommand implements Command {
         this.append = _append;
     }
 
-    protected FileOutputStream getFileOutputStream(File file) throws FileNotFoundException {
+    private FileOutputStream getFileOutputStream(File file) throws FileNotFoundException {
         return new FileOutputStream(file, isAppend());
     }
 
@@ -91,7 +91,7 @@ public abstract class FileCommand implements Command {
     /**
      * @return the file
      */
-    public File getFile() {
+    protected File getFile() {
         return file;
     }
 

@@ -7,7 +7,7 @@ public abstract class AbstractValueEquality<T> implements ValueEquality<T> {
         this.equalityConfig = equalityConfig;
     }
 
-    public Object getEqualityConfig() {
+    Object getEqualityConfig() {
         return equalityConfig;
     }
 

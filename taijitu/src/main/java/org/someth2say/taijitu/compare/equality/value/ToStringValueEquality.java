@@ -5,7 +5,7 @@ import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
 public class ToStringValueEquality extends AbstractComparableValueEquality<Object> {
 
-    public static String NAME = "toString";
+    public static final String NAME = "toString";
 
     public ToStringValueEquality(Object equalityConfig) {
         super(equalityConfig);

@@ -1,14 +1,13 @@
 package org.someth2say.taijitu.source.mapper;
 
-import org.someth2say.taijitu.source.Source;
 import org.someth2say.taijitu.source.FieldDescription;
-import org.someth2say.taijitu.tuple.Tuple;
+import org.someth2say.taijitu.source.Source;
 
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class CSVTupleMapper extends AbstractSourceMapper<Object[], Tuple> {
+//TODO: Maybe this is the point to add some semantics to CSV: Parse provided fields names, try to cast values to the appropiate object
+public class CSVTupleMapper extends AbstractSourceMapper<Object[], Object[]> {
 
     public static final String NAME = "csvToTuple";
 
@@ -23,34 +22,21 @@ public class CSVTupleMapper extends AbstractSourceMapper<Object[], Tuple> {
 
 
     @Override
-    public Class<Tuple> getTypeParameter() {
-        return Tuple.class;
+    public Class<Object[]> getTypeParameter() {
+        return Object[].class;
     }
 
     @Override
-    public Source<Tuple> apply(Source<Object[]> source) {
-        return new Source<Tuple>() {
+    public Source<Object[]> apply(Source<Object[]> source) {
+        return new AbstractMappedTupleSource(source) {
 
-            Tuple mapItem(Object[] csvEntry) {
-                return new Tuple(csvEntry);
+            Object[] mapItem(Object[] csvEntry) {
+                //TODO: Maybe we can get rid of the items not actually needed?
+                return csvEntry;
             }
 
             @Override
-            public List<FieldDescription<?>> getProvidedFields() {
-                // Same names, types and positions
-                return source.getProvidedFields();
-            }
-
-            @Override
-            public <V> Function<Tuple, V> getExtractor(FieldDescription<V> fd) {
-                int index = getProvidedFields().indexOf(fd);
-                if (index < 0) return null;
-                //TODO: Add classes to tuple elements, so cast is unneded.
-                return (Tuple tuple) -> (V) tuple.getValue(index);
-            }
-
-            @Override
-            public Stream<Tuple> stream() {
+            public Stream<Object[]> stream() {
                 return source.stream().map(this::mapItem);
             }
 
@@ -60,16 +46,10 @@ public class CSVTupleMapper extends AbstractSourceMapper<Object[], Tuple> {
             }
 
             @Override
-            public Class<Tuple> getTypeParameter() {
-                return Tuple.class;
+            public List<FieldDescription<?>> getProvidedFields() {
+                return source.getProvidedFields();
             }
 
-            @Override
-            public String getName() {
-                return source.getName();
-            }
         };
     }
-
-
 }

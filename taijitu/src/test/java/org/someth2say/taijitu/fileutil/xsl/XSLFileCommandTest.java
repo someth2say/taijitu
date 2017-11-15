@@ -9,12 +9,12 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by Jordi Sola on 10/03/2017.
  */
-public class XSLFileCommandTest {
+class XSLFileCommandTest {
 
-    private String filename = "test";
-    private String[][] vals = new String[][]{new String[]{null, "Some", "Value"}};
-    private File folder = new File(".");
-    private String sheetname = "sheet";
+    private final String filename = "test";
+    private final String[][] vals = new String[][]{new String[]{null, "Some", "Value"}};
+    private final File folder = new File(".");
+    private final String sheetname = "sheet";
 
     //@Test
     public void process() throws Exception {

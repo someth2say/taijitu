@@ -32,11 +32,11 @@ public class CompositeEqualityWrapper<T> {
         return ICompositeEquality.hashCode(wrapped);
     }
 
-    public T getWrapped() {
+    T getWrapped() {
         return wrapped;
     }
 
-    public ICompositeEquality<T> getICompositeEquality() {
+    ICompositeEquality<T> getICompositeEquality() {
         return ICompositeEquality;
     }
 }

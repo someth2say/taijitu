@@ -1,13 +1,11 @@
 package org.someth2say.taijitu.discarter;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.function.BiConsumer;
 
 /**
  * @author Jordi Sola
  */
-public class IterationBiDiscarter<T, U> implements BiConsumer<T, U> {
+class IterationBiDiscarter<T, U> implements BiConsumer<T, U> {
     private final long iterations;
     private final BiConsumer<T, U> biConsumer;
     private long iterationsRemaining = 0L;

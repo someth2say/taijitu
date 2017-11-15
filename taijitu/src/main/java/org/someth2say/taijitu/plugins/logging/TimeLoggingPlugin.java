@@ -6,7 +6,7 @@ import org.joda.time.Duration;
 import org.joda.time.Period;
 import org.joda.time.format.ISOPeriodFormat;
 import org.joda.time.format.PeriodFormatter;
-import org.someth2say.taijitu.TaijituException;
+import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
 
@@ -14,7 +14,7 @@ import org.someth2say.taijitu.plugins.TaijituPlugin;
  * Created by Jordi Sola on 24/02/2017.
  */
 public class TimeLoggingPlugin implements TaijituPlugin {
-    public static final String NAME = "timeLog";
+    private static final String NAME = "timeLog";
     private static final Logger logger = LoggerFactory.getLogger(TimeLoggingPlugin.class);
     private long comparisonStart;
     private long comparisonEnd;
@@ -29,40 +29,41 @@ public class TimeLoggingPlugin implements TaijituPlugin {
 
 
     @Override
-    public void preComparison(IPluginCfg comparisonConfig) throws TaijituException {
+    public void preComparison(IPluginCfg pluginCfg, IComparisonCfg comparisonCfg) {
         comparisonStart = System.currentTimeMillis();
+        logger.info("Comparison {} started.", comparisonCfg.getName());
     }
 
     @Override
-    public void postComparison(IPluginCfg comparisonConfig) throws TaijituException {
+    public void postComparison(IPluginCfg pluginCfg, IComparisonCfg comparisonCfg) {
         comparisonEnd = System.currentTimeMillis();
-        logComparisonTimes();
+        logComparisonTimes(pluginCfg, comparisonCfg);
         comparisonCount++;
     }
 
     @Override
-    public void start(IPluginCfg config) throws TaijituException {
+    public void start(IPluginCfg config) {
         start = System.currentTimeMillis();
 
     }
 
     @Override
-    public void end(IPluginCfg config) throws TaijituException {
+    public void end(IPluginCfg config) {
         end = System.currentTimeMillis();
         logTotalTimes();
 
     }
 
-    private void logComparisonTimes() {
+    private void logComparisonTimes(IPluginCfg pluginConfig, IComparisonCfg comparisonCfg) {
         final PeriodFormatter formatter = ISOPeriodFormat.standard();
         final Period periodTotal = new Duration(comparisonStart, comparisonEnd).toPeriod();
-        logger.info("DONE comparison: {}", formatter.print(periodTotal));
+        logger.info("Comparison {} completed in {}", comparisonCfg.getName(), formatter.print(periodTotal));
     }
 
     private void logTotalTimes() {
         final PeriodFormatter formatter = ISOPeriodFormat.standard();
         final Period periodTotal = new Duration(start, end).toPeriod();
-        logger.info("DONE {} comparisons: {} ", comparisonCount, formatter.print(periodTotal));
+        logger.info("Completed {} comparisons: {} ", comparisonCount, formatter.print(periodTotal));
     }
 
     public static IPluginCfg defaultConfig() {

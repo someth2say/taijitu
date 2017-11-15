@@ -1,16 +1,12 @@
 package org.someth2say.taijitu.plugins.reporting;
 
-import org.slf4j.Logger;import org.slf4j.LoggerFactory;
-import org.someth2say.taijitu.TaijituException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
 import org.someth2say.taijitu.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.plugins.TaijituPlugin;
-import org.someth2say.taijitu.source.FieldDescription;
-import org.someth2say.taijitu.tuple.Tuple;
-import org.someth2say.taijitu.util.Pair;
 
 import java.io.File;
-import java.util.List;
 
 /**
  * Created by Jordi Sola on 22/02/2017.
@@ -24,7 +20,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 
 //    private String[][] printDifferent(final ComparisonResult comparisonResult, final ComparisonContext taijituData, final WritterPluginConfigIface config) {
 //        this.config = config;
-//        final Collection<Pair<Tuple, Tuple>> different = comparisonResult.getDifferent();
+//        final Collection<Pair<Object[], Object[]>> different = comparisonResult.getDifferent();
 //        final String[][] result = new String[different.size() * 2 + 1][];
 //
 //        final List<String> fields = taijituData.getCanonicalFields();
@@ -43,7 +39,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //            int[] sourceFieldToColumnsMap = ColumnDescriptionUtils.getFieldPositions(fields, comparisonResult.getSourceColumnDescriptions());
 //            int[] targetFieldToColumnsMap = ColumnDescriptionUtils.getFieldPositions(fields, comparisonResult.getTargetColumnDescriptions());
 //            // Contents
-//            for (Pair<Tuple, Tuple> difference : different) {
+//            for (Pair<Object[], Object[]> difference : different) {
 //
 //                final int sourceRowIdx = createRow(result, fieldCount, ++rowIdx, SOURCE_LABEL);
 //                final int targetRowIdx = createRow(result, fieldCount, ++rowIdx, TARGET_LABEL);
@@ -53,36 +49,36 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //        }
 //        return null;
 //    }
+//
+//    private void highLightKeyFields(List<String> header, List<FieldDescription> keyFields) {
+//        for (int fieldIdx = 0; fieldIdx < header.size(); fieldIdx++) {
+//            if (keyFields.contains(header.get(fieldIdx))) {
+//                header.set(fieldIdx, header.get(fieldIdx) + "*");
+//            }
+//        }
+//    }
+//
+//    private int createRow(String[][] result, int fieldCount, int rowIdx, String label) {
+//        result[rowIdx] = new String[fieldCount + 1];
+//        result[rowIdx][0] = label;
+//        return rowIdx;
+//    }
+//
+//    private void copyDifferencesAndKeys(Pair<Object[], Object[]> difference, String[] sourceRow, String[] targetRow, int[] sourceFieldToColumnsMap, int[] targetFieldToColumnsMap, boolean[] keyFieldsMap, boolean[] compareFieldsMap) {
+//        final Object[] sourceObjs = difference.getLeft();
+//        final Object[] targetObjs = difference.getRight();
+//
+//        for (int fieldIdx = 0; fieldIdx < sourceObjs.length; fieldIdx++) {
+//            if (isKeyField(keyFieldsMap, fieldIdx) || (isCompareColumn(compareFieldsMap, fieldIdx) && isDifferent(sourceObjs, targetObjs, fieldIdx, sourceFieldToColumnsMap))) {
+//                final Object sourceValue = sourceObjs[sourceFieldToColumnsMap[fieldIdx]];
+//                final Object targetValue = targetObjs[targetFieldToColumnsMap[fieldIdx]];
+//                sourceRow[fieldIdx + 1] = sourceValue.toString();
+//                targetRow[fieldIdx + 1] = targetValue.toString();
+//            }
+//        }
+//    }
 
-    private void highLightKeyFields(List<String> header, List<FieldDescription> keyFields) {
-        for (int fieldIdx = 0; fieldIdx < header.size(); fieldIdx++) {
-            if (keyFields.contains(header.get(fieldIdx))) {
-                header.set(fieldIdx, header.get(fieldIdx) + "*");
-            }
-        }
-    }
-
-    private int createRow(String[][] result, int fieldCount, int rowIdx, String label) {
-        result[rowIdx] = new String[fieldCount + 1];
-        result[rowIdx][0] = label;
-        return rowIdx;
-    }
-
-    private void copyDifferencesAndKeys(Pair<Tuple, Tuple> difference, String[] sourceRow, String[] targetRow, int[] sourceFieldToColumnsMap, int[] targetFieldToColumnsMap, boolean[] keyFieldsMap, boolean[] compareFieldsMap) {
-        final Tuple sourceObjs = difference.getLeft();
-        final Tuple targetObjs = difference.getRight();
-
-        for (int fieldIdx = 0; fieldIdx < sourceObjs.size(); fieldIdx++) {
-            if (isKeyField(keyFieldsMap, fieldIdx) || (isCompareColumn(compareFieldsMap, fieldIdx) && isDifferent(sourceObjs, targetObjs, fieldIdx, sourceFieldToColumnsMap))) {
-                final Object sourceValue = sourceObjs.getValue(sourceFieldToColumnsMap[fieldIdx]);
-                final Object targetValue = targetObjs.getValue(targetFieldToColumnsMap[fieldIdx]);
-                sourceRow[fieldIdx + 1] = sourceValue.toString();
-                targetRow[fieldIdx + 1] = targetValue.toString();
-            }
-        }
-    }
-
-//    private List<String>[] printMissing(final ComparisonContext comparison, Collection<Tuple> missings) {
+//    private List<String>[] printMissing(final ComparisonContext comparison, Collection<Object[]> missings) {
 //        final List<String>[] result = new List[missings.size() + 1];
 //        if (!missings.isEmpty()) {
 //            int idx = 0;
@@ -93,7 +89,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //            highLightKeyFields(result[0], keyFields);
 //
 //            // Contents
-//            for (Tuple missing : missings) {
+//            for (Object[] missing : missings) {
 //                Iterator<Object> iterator = missing.iterator();
 //                result[++idx] = Stream.generate(iterator::next).map(Object::toString).collect(Collectors.toList());
 //            }
@@ -105,7 +101,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
         return compareFieldsMap[fieldIdx];
     }
 
-    private boolean isDifferent(Tuple sourceRow, Tuple targetRow, int fieldIdx, int[] fieldToColumnsMap) {
+    private boolean isDifferent(Object[] sourceRow, Object[] targetRow, int fieldIdx, int[] fieldToColumnsMap) {
         //TODO: Fix dependency to comparators.
         return true;
         //return !sourceRow.isColumnEquals(targetRow, fieldToColumnsMap[fieldIdx], comparators);
@@ -177,12 +173,12 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //    }
 
     @Override
-    public void start(final IPluginCfg config) throws TaijituException {
+    public void start(final IPluginCfg config) {
         // Do nothing
     }
 
     @Override
-    public void end(final IPluginCfg config) throws TaijituException {
+    public void end(final IPluginCfg config) {
         // Do nothing
     }
 

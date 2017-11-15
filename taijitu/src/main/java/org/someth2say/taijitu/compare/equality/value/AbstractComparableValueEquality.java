@@ -1,8 +1,8 @@
 package org.someth2say.taijitu.compare.equality.value;
 
-public abstract class AbstractComparableValueEquality<T> extends AbstractValueEquality<T> implements ComparableValueEquality<T> {
+abstract class AbstractComparableValueEquality<T> extends AbstractValueEquality<T> implements ComparableValueEquality<T> {
 
-    public AbstractComparableValueEquality(Object equalityConfig) {
+    AbstractComparableValueEquality(Object equalityConfig) {
         super(equalityConfig);
     }
 }

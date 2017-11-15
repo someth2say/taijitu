@@ -1,14 +1,16 @@
 package org.someth2say.taijitu.compare.equality.stream.mapping;
 
-import org.slf4j.Logger;import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.composite.ICompositeEquality;
 import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
 import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
 import org.someth2say.taijitu.compare.equality.composite.CompositeEqualityWrapper;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
-import org.someth2say.taijitu.compare.result.ComparisonResult.SourceIdAndStructure;
+import org.someth2say.taijitu.compare.result.ComparisonResult.SourceIdAndComposite;
 import org.someth2say.taijitu.compare.result.SynchronizedComparisonResult;
 import org.someth2say.taijitu.config.interfaces.IStrategyCfg;
+import org.someth2say.taijitu.discarter.TimeBiDiscarter;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -40,9 +42,9 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
     }
 
 //    @Override
-//    public ComparisonResult<T> runExternalComparison(Source<T> source, Source<T> target) {
-//        Iterator<T> sourceIterator = source.iterator();
-//        Iterator<T> targetIterator = target.iterator();
+//    public ComparisonResult<TMT> runExternalComparison(Source<TMT> source, Source<TMT> target) {
+//        Iterator<TMT> sourceIterator = source.iterator();
+//        Iterator<TMT> targetIterator = target.iterator();
 //        Object sourceID = source.getConfig();
 //        ISourceCfg targetId = target.getConfig();
 //        return compare(sourceIterator, sourceID, targetIterator, targetId);
@@ -53,7 +55,7 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
         SynchronizedComparisonResult<T> result = new SynchronizedComparisonResult<>();
         //TODO: Another option is running queries/pages alternating, so we can "restrict" memory usage, but only using a single thread
         final ExecutorService executorService = Executors.newFixedThreadPool(2);
-        Map<CompositeEqualityWrapper<T>, SourceIdAndStructure<T>> sharedMap = new ConcurrentHashMap<>();
+        Map<CompositeEqualityWrapper<T>, SourceIdAndComposite<T>> sharedMap = new ConcurrentHashMap<>();
         Runnable sourceMapper = new TupleMapperExt<>(source, sharedMap, result, sourceID, getCategorizer(), getEquality());
         Runnable targetMapper = new TupleMapperExt<>(target, sharedMap, result, targetId, getCategorizer(), getEquality());
         executorService.submit(sourceMapper);// Map source
@@ -62,7 +64,7 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
         shutdownAndAwaitTermination(executorService);
 
         //2.- When both mapping tasks are completed, remaining data are source/target only
-        final Collection<SourceIdAndStructure<T>> entries = sharedMap.values();
+        final Collection<SourceIdAndComposite<T>> entries = sharedMap.values();
         result.addAllDisjoint(entries);
 
         return result;
@@ -87,15 +89,15 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
         return () -> MappingStreamEquality.NAME;
     }
 
-    private class TupleMapperExt<T>  implements Runnable {
-        private final Iterator<T> source;
-        private final Map<CompositeEqualityWrapper<T>, SourceIdAndStructure<T>> sharedMap;
-        private final SynchronizedComparisonResult<T> result;
+    private class TupleMapperExt<TMT> implements Runnable {
+        private final Iterator<TMT> source;
+        private final Map<CompositeEqualityWrapper<TMT>, SourceIdAndComposite<TMT>> sharedMap;
+        private final SynchronizedComparisonResult<TMT> result;
         private final Object sourceId;
-        private final ICompositeEquality<T> categorizer;
-        private final ICompositeEquality<T> equality;
+        private final ICompositeEquality<TMT> categorizer;
+        private final ICompositeEquality<TMT> equality;
 
-        private TupleMapperExt(final Iterator<T> source, final Map<CompositeEqualityWrapper<T>, SourceIdAndStructure<T>> sharedMap, final SynchronizedComparisonResult<T> result, Object sourceId, ICompositeEquality<T> categorizer, ICompositeEquality<T> equality) {
+        private TupleMapperExt(final Iterator<TMT> source, final Map<CompositeEqualityWrapper<TMT>, SourceIdAndComposite<TMT>> sharedMap, final SynchronizedComparisonResult<TMT> result, Object sourceId, ICompositeEquality<TMT> categorizer, ICompositeEquality<TMT> equality) {
             this.source = source;
             this.sharedMap = sharedMap;
             this.result = result;
@@ -106,20 +108,25 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
 
         @Override
         public void run() {
-            T thisRecord = getNextRecordOrNull(source);
+            TimeBiDiscarter<String, Object[]> timedLogger = new TimeBiDiscarter<>(1000, logger::debug);
+            int recordCount = 0;
+            TMT thisRecord = getNextRecordOrNull(source);
             while (thisRecord != null) {
-                SourceIdAndStructure<T> thisQueryAndTuple = new SourceIdAndStructure<>(sourceId, thisRecord);
-                CompositeEqualityWrapper<T> wrap = categorizer.wrap(thisRecord);
-                SourceIdAndStructure<T> otherQueryAndTuple = sharedMap.putIfAbsent(wrap, thisQueryAndTuple);
+                recordCount++;
+                SourceIdAndComposite<TMT> thisQueryAndTuple = new SourceIdAndComposite<>(sourceId, thisRecord);
+                CompositeEqualityWrapper<TMT> wrap = categorizer.wrap(thisRecord);
+                SourceIdAndComposite<TMT> otherQueryAndTuple = sharedMap.putIfAbsent(wrap, thisQueryAndTuple);
                 if (otherQueryAndTuple != null) {
                     //we have a key match ...
                     sharedMap.remove(wrap);
-                    final T otherRecord = otherQueryAndTuple.getValue();
-                    if (!equality.equals(thisRecord,otherRecord)) {
+                    final TMT otherRecord = otherQueryAndTuple.getComposite();
+                    if (!equality.equals(thisRecord, otherRecord)) {
                         // ...and contents differ
                         result.addDifference(thisQueryAndTuple, otherQueryAndTuple);
                     }
                 }
+                timedLogger.accept("Processed {} records from source {}", new Object[]{recordCount, sourceId});
+
                 thisRecord = getNextRecordOrNull(source);
             }
         }

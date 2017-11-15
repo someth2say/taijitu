@@ -1,20 +1,23 @@
 package org.someth2say.taijitu.compare.equality.composite;
 
 import org.someth2say.taijitu.compare.equality.value.ValueEquality;
-import org.someth2say.taijitu.util.ImmutablePair;
 
 import java.util.function.Function;
 
-public class ExtractorAndEquality<T,Y> extends ImmutablePair<Function<T, Y>, ValueEquality<Y>> {
-    public ExtractorAndEquality(Function<T, Y> left, ValueEquality<Y> right) {
-        super(left, right);
+public class ExtractorAndEquality<T, Y> {
+    private final Function<T, Y> extractor;
+    private final ValueEquality<Y> valueEquality;
+
+    public ExtractorAndEquality(Function<T, Y> extractor, ValueEquality<Y> valueEquality) {
+        this.extractor = extractor;
+        this.valueEquality = valueEquality;
     }
 
     Function<T, Y> getExtractor() {
-        return super.getKey();
+        return this.extractor;
     }
 
     ValueEquality<Y> getEquality() {
-        return super.getRight();
+        return this.valueEquality;
     }
 }

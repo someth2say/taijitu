@@ -8,12 +8,10 @@ public interface IComparisonCfg extends ISourceCfg, IStrategyCfg, IEqualityCfg, 
 
     IStrategyCfg getStrategyConfig();
 
-    String getMatchingStrategyName();
-
     List<IEqualityCfg> getEqualityConfigs();
 
     List<ISourceCfg> getSourceConfigs();
 
-    List<IPluginCfg> getComparisonPluginConfigs();
+    List<IPluginCfg> getPluginConfigs();
 
 }

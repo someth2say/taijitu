@@ -24,22 +24,9 @@ public class PluginRegistry {
     private PluginRegistry() {
     }
 
-    public static Collection<TaijituPlugin> getAllPlugins() {
-        // Do we actually need plugins to be in some order?
+    //TODO: This does not respect the order of plugins
+    public static Collection<TaijituPlugin> getPlugins() {
         return instances.values();
-    }
-
-    public static Map<IPluginCfg, TaijituPlugin> getPlugins(List<IPluginCfg> pluginConfigIfaces) {
-        Map<IPluginCfg, TaijituPlugin> result = new HashMap<>(pluginConfigIfaces.size());
-        for (IPluginCfg pluginConfigIface : pluginConfigIfaces) {
-            final TaijituPlugin pluginInstance = instances.get(pluginConfigIface.getName());
-            if (pluginInstance == null) {
-                logger.warn("PluginCfg reference {} not available.", pluginConfigIface.getName());
-            } else {
-                result.put(pluginConfigIface, pluginInstance);
-            }
-        }
-        return result;
     }
 
     public static void scanClassPath() {
@@ -52,13 +39,11 @@ public class PluginRegistry {
 
     public static void useDefaults() {
         instances = new ConcurrentHashMap<>();
-//		addPlugin(new XLSWriterPlugin());
-//		addPlugin(new CSVWriterPlugin());
         addPlugin(new TimeLoggingPlugin());
     }
 
-    private static TaijituPlugin addPlugin(TaijituPlugin plugin) {
-        return instances.put(plugin.getName(), plugin);
+    private static void addPlugin(TaijituPlugin plugin) {
+        instances.put(plugin.getName(), plugin);
     }
 
     public static TaijituPlugin getPlugin(String name) {

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.someth2say.taijitu.config.DefaultConfig.*;
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_SCAN_CLASSPATH;
 
 public interface ApacheTaijituCfgDefaults extends ApacheCfgDefaults, ITaijituCfg, ApacheComparisonCfgDefaults, ApachePluginCfgDefaults {
 
@@ -18,7 +17,7 @@ public interface ApacheTaijituCfgDefaults extends ApacheCfgDefaults, ITaijituCfg
     default List<IComparisonCfg> getComparisons() {
         final List<ImmutableHierarchicalConfiguration> comparisonConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.Sections.COMPARISON);
         if (comparisonConfigs != null) {
-            return comparisonConfigs.stream().map(cs -> new ApacheComparison(cs)).collect(Collectors.toList());
+            return comparisonConfigs.stream().map(ApacheComparison::new).collect(Collectors.toList());
         }
         return null;
     }
@@ -26,21 +25,6 @@ public interface ApacheTaijituCfgDefaults extends ApacheCfgDefaults, ITaijituCfg
     @Override
     default Integer getThreads() {
         return getConfiguration().getInt(ConfigurationLabels.Setup.THREADS, DEFAULT_THREADS);
-    }
-
-    @Override
-    default String getConsoleLog() {
-        return getConfiguration().getString(ConfigurationLabels.Setup.CONSOLE_LOG, DEFAULT_CONSOLE_LOG_LEVEL);
-    }
-
-    @Override
-    default String getFileLog() {
-        return getConfiguration().getString(ConfigurationLabels.Setup.FILE_LOG, DEFAULT_FILE_LOG_LEVEL);
-    }
-
-    @Override
-    default String getOutputFolder() {
-        return getConfiguration().getString(ConfigurationLabels.Setup.OUTPUT_FOLDER, DEFAULT_OUTPUT_FOLDER);
     }
 
     @Override

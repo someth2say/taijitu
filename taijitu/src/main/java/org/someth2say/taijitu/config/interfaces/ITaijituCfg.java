@@ -8,12 +8,6 @@ public interface ITaijituCfg extends IComparisonCfg {
 
     Integer getThreads();
 
-    String getConsoleLog();
-
-    String getFileLog();
-
-    String getOutputFolder();
-
     Boolean isUseScanClassPath();
 
 

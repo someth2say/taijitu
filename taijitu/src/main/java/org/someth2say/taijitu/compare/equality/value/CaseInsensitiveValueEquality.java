@@ -8,8 +8,8 @@ import java.util.Locale;
 
 public class CaseInsensitiveValueEquality extends AbstractComparableValueEquality<String> {
 
-    public static String NAME = "caseInsensitive";
-    private Locale locale;
+    public static final String NAME = "caseInsensitive";
+    private final Locale locale;
 
     public CaseInsensitiveValueEquality(Object equalityConfig) {
         super(equalityConfig);

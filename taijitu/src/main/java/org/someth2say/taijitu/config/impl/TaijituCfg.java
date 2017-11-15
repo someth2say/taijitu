@@ -31,7 +31,7 @@ public class TaijituCfg
         return new TaijituCfg(new ApacheTaijitu(config));
     }
 
-    public static TaijituCfg fromApacheConfig(final ImmutableHierarchicalConfiguration config) throws TaijituException {
+    public static TaijituCfg fromApacheConfig(final ImmutableHierarchicalConfiguration config) {
         return new TaijituCfg(new ApacheTaijitu(config));
     }
 

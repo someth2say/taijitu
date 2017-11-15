@@ -46,7 +46,7 @@ public class CompositeEquality<T> implements ICompositeEquality<T> {
 
     }
 
-    private <T, V> int valueHashCode(T obj, ExtractorAndEquality<T, V> eae) {
+    private <V> int valueHashCode(T obj, ExtractorAndEquality<T, V> eae) {
         Function<T, V> key = eae.getExtractor();
         V value = key.apply(obj);
         return eae.getEquality().computeHashCode(value);

@@ -8,7 +8,6 @@ import java.util.Properties;
 public class BasicComparisonCfg implements IComparisonCfg {
 
     private IStrategyCfg strategyConfig;
-    private String matchingStrategyName;
 
     private List<IEqualityCfg> equalityConfigs;
     private List<ISourceCfg> sourceConfigs;
@@ -85,11 +84,6 @@ public class BasicComparisonCfg implements IComparisonCfg {
     }
 
     @Override
-    public String getMatchingStrategyName() {
-        return this.matchingStrategyName;
-    }
-
-    @Override
     public List<IEqualityCfg> getEqualityConfigs() {
         return this.equalityConfigs;
     }
@@ -100,7 +94,7 @@ public class BasicComparisonCfg implements IComparisonCfg {
     }
 
     @Override
-    public List<IPluginCfg> getComparisonPluginConfigs() {
+    public List<IPluginCfg> getPluginConfigs() {
         return this.comparisonPluginConfigs;
     }
 
@@ -148,10 +142,6 @@ public class BasicComparisonCfg implements IComparisonCfg {
 
     public void setStrategyConfig(IStrategyCfg strategyConfig) {
         this.strategyConfig = strategyConfig;
-    }
-
-    public void setMatchingStrategyName(String matchingStrategyName) {
-        this.matchingStrategyName = matchingStrategyName;
     }
 
     public void setEqualityConfigs(List<IEqualityCfg> equalityConfigs) {

@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.plugins;
 
-import org.someth2say.taijitu.TaijituException;
+import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.util.Named;
 
@@ -9,11 +9,11 @@ import org.someth2say.taijitu.util.Named;
  */
 public interface TaijituPlugin extends Named {
 
-    void preComparison(final IPluginCfg comparisonConfig) throws TaijituException;
+    void preComparison(final IPluginCfg pluginCfg, final IComparisonCfg comparisonCfg);
 
-    void postComparison(final IPluginCfg comparisonConfig) throws TaijituException;
+    void postComparison(final IPluginCfg pluginCfg, final IComparisonCfg comparisonCfg);
 
-    void start(final IPluginCfg config) throws TaijituException;
+    void start(final IPluginCfg config);
 
-    void end(final IPluginCfg config) throws TaijituException;
+    void end(final IPluginCfg config);
 }

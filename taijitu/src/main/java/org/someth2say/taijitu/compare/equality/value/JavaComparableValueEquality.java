@@ -5,7 +5,7 @@ import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
 
 public class JavaComparableValueEquality<T extends Comparable<T>> extends AbstractComparableValueEquality<T> {
 
-    public static String NAME = "comparable";
+    public static final String NAME = "comparable";
 
     public JavaComparableValueEquality(Object equalityConfig) {
         super(equalityConfig);

@@ -10,12 +10,9 @@ public class BasicTaijituCfg implements ITaijituCfg {
     private final String name;
     private List<IComparisonCfg> comparisons;
     private Integer threads;
-    private String consoleLog;
-    private String fileLog;
-    private String outputFolder;
+
     private Boolean isUseScanClassPath;
     private IStrategyCfg strategyConfig;
-    private String matchingStrategyName;
 
     private List<IEqualityCfg> equalityConfigs;
     private List<ISourceCfg> sourceConfigs;
@@ -42,28 +39,12 @@ public class BasicTaijituCfg implements ITaijituCfg {
         this.threads = threads;
     }
 
-    public void setConsoleLog(String consoleLog) {
-        this.consoleLog = consoleLog;
-    }
-
-    public void setFileLog(String fileLog) {
-        this.fileLog = fileLog;
-    }
-
-    public void setOutputFolder(String outputFolder) {
-        this.outputFolder = outputFolder;
-    }
-
     public void setUseScanClassPath(Boolean useScanClassPath) {
         isUseScanClassPath = useScanClassPath;
     }
 
     public void setStrategyConfig(IStrategyCfg strategyConfig) {
         this.strategyConfig = strategyConfig;
-    }
-
-    public void setMatchingStrategyName(String matchingStrategyName) {
-        this.matchingStrategyName = matchingStrategyName;
     }
 
     public void setEqualityConfigs(List<IEqualityCfg> equalityConfigs) {
@@ -129,20 +110,6 @@ public class BasicTaijituCfg implements ITaijituCfg {
         return this.threads;
     }
 
-    @Override
-    public String getConsoleLog() {
-        return this.consoleLog;
-    }
-
-    @Override
-    public String getFileLog() {
-        return this.fileLog;
-    }
-
-    @Override
-    public String getOutputFolder() {
-        return this.outputFolder;
-    }
 
     @Override
     public Boolean isUseScanClassPath() {
@@ -152,11 +119,6 @@ public class BasicTaijituCfg implements ITaijituCfg {
     @Override
     public IStrategyCfg getStrategyConfig() {
         return this.strategyConfig;
-    }
-
-    @Override
-    public String getMatchingStrategyName() {
-        return this.matchingStrategyName;
     }
 
     @Override
@@ -170,7 +132,7 @@ public class BasicTaijituCfg implements ITaijituCfg {
     }
 
     @Override
-    public List<IPluginCfg> getComparisonPluginConfigs() {
+    public List<IPluginCfg> getPluginConfigs() {
         return this.comparisonPluginConfigs;
     }
 

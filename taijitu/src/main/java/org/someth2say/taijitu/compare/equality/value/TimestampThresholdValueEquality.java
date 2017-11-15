@@ -7,8 +7,8 @@ import java.sql.Timestamp;
 
 public class TimestampThresholdValueEquality extends AbstractComparableValueEquality<Timestamp> {
 
-    public static String NAME = "timestamp";
-    public static final int DEFAULT_THRESHOLD = 1000;
+    public static final String NAME = "timestamp";
+    private static final int DEFAULT_THRESHOLD = 1000;
 
     public TimestampThresholdValueEquality(Object equalityConfig) {
         super(equalityConfig);

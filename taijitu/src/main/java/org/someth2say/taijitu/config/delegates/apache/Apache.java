@@ -7,7 +7,7 @@ public abstract class Apache<P extends ApacheCfgDefaults> implements ApacheCfgDe
     private final ImmutableHierarchicalConfiguration configuration;
 
 
-    public Apache(final ImmutableHierarchicalConfiguration configuration) {
+    Apache(final ImmutableHierarchicalConfiguration configuration) {
         this.configuration = configuration;
     }
 

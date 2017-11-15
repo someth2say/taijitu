@@ -6,12 +6,12 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
-import org.someth2say.taijitu.util.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Created by Jordi Sola on 10/02/2017.
  */
-public class TestUtils {
+class TestUtils {
 
     private static final Set<String> tableRegister = new HashSet<>();
 
@@ -32,11 +32,11 @@ public class TestUtils {
 
     static void createTable(Connection conn, String tableName, String[] fieldDefs, String[][] fieldValues) throws SQLException {
         //Create the table
-        conn.createStatement().executeUpdate("CREATE TABLE " + tableName + " (" + StringUtil.join(fieldDefs) + ");");
+        conn.createStatement().executeUpdate("CREATE TABLE " + tableName + " (" + StringUtils.join(fieldDefs,",") + ");");
 
         //Insert values
         for (String[] fieldValue : fieldValues) {
-            conn.createStatement().executeUpdate("INSERT INTO " + tableName + " VALUES(" + StringUtil.join(fieldValue) + ");");
+            conn.createStatement().executeUpdate("INSERT INTO " + tableName + " VALUES(" + StringUtils.join(fieldValue,",") + ");");
         }
 
         registerTable(tableName);

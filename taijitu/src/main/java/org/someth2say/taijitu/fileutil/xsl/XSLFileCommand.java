@@ -25,7 +25,7 @@ public class XSLFileCommand extends FileCommand {
         this(folderName, fileName, _sheetName, null, null);
     }
 
-    public XSLFileCommand(final File folderName, final String fileName, final String _sheetName, final Integer row, final Integer column) throws CommandException {
+    private XSLFileCommand(final File folderName, final String fileName, final String _sheetName, final Integer row, final Integer column) throws CommandException {
         super(folderName, fileName);
         this.sheetName = _sheetName;
         this.targetRow = row;
@@ -153,7 +153,7 @@ public class XSLFileCommand extends FileCommand {
 
     }
 
-    private Workbook createWorkbook() throws CommandException {
+    private Workbook createWorkbook() {
         Workbook wb;
         final File file = getFile();
         if (file.exists()) {
