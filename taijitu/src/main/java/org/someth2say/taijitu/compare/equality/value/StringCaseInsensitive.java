@@ -8,6 +8,10 @@ public class StringCaseInsensitive extends AbstractConfigurableComparableCategor
 
     private final Locale locale;
 
+    public StringCaseInsensitive(){
+        this(null);
+    }
+
     public StringCaseInsensitive(Object equalityConfig) {
         super(equalityConfig);
         locale = equalityConfig != null && !StringUtils.isBlank(equalityConfig.toString()) ? Locale.forLanguageTag(equalityConfig.toString()) : Locale.getDefault();

@@ -8,10 +8,12 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.someth2say.taijitu.compare.equality.composite.CompositeComparableCategorizerEquality;
+import org.someth2say.taijitu.compare.equality.composite.CompositeEquality;
+import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndComparableCategorizerEquality;
+import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndEquality;
+import org.someth2say.taijitu.compare.equality.value.*;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
-import org.someth2say.taijitu.compare.equality.value.StringCaseInsensitive;
-import org.someth2say.taijitu.compare.equality.value.DateThreshold;
-import org.someth2say.taijitu.compare.equality.value.NumberThreshold;
 import org.someth2say.taijitu.ui.config.ConfigurationLabels;
 import org.someth2say.taijitu.ui.config.DefaultConfig;
 import org.someth2say.taijitu.ui.config.delegates.simple.*;
@@ -29,9 +31,10 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.someth2say.taijitu.ui.config.ConfigurationLabels.Comparison.*;
@@ -101,16 +104,20 @@ public class TaijituTest {
 
         assertEquals(2, comparisonResults.length);
         final ComparisonResult firstResult = comparisonResults[0];
-        System.out.println(firstResult.getMismatches());
-        assertEquals(0, firstResult.getMismatches().size());
+        Collection<ComparisonResult.Mismatch> firstResultMismatches = firstResult.getMismatches();
+        System.out.println(firstResultMismatches);
+        assertEquals(0, firstResultMismatches.size());
         final ComparisonResult secondResult = comparisonResults[1];
-        System.out.println(secondResult.getMismatches());
-        assertEquals(1, secondResult.getMismatches().size());
+        Collection<ComparisonResult.Mismatch> secondResultMismatches = secondResult.getMismatches();
+        System.out.println(secondResultMismatches);
+        assertEquals(1, secondResultMismatches.size());
 
         //TODO: Define exactly the expected difference!
 //        Collection<Pair<ComparisonResult.QueryAndTuple, ComparisonResult.QueryAndTuple>> different = secondResult.getDifferent();
 //        Pair<ComparisonResult.QueryAndTuple, ComparisonResult.QueryAndTuple> dif = different.iterator().next();
 //        dif.equals(new ImmutablePair<>(new ComparisonResult.QueryAndTuple(sourceCfg,sourceTuple), new ComparisonResult.QueryAndTuple(targetCfg,targetTuple)));
+
+
     }
 
     @Test
@@ -162,12 +169,11 @@ public class TaijituTest {
     }
 
 
-    private ITaijituCfg getTaijituConfig(Properties sourceBuildProperties) {
+    private ITaijituCfg getTaijituConfig(Properties dbProperties) {
         BasicTaijituCfg basicTaijituCfg = new BasicTaijituCfg("");
 
         // Databases
-        // Nothing, will add to sources
-        basicTaijituCfg.setBuildProperties(sourceBuildProperties);
+        basicTaijituCfg.setBuildProperties(dbProperties);
         // Comparisons
 
         Properties s1fetchProperties = new Properties();
@@ -180,8 +186,8 @@ public class TaijituTest {
         BasicSourceCfg source2Src = new BasicSourceCfg("source2", QuerySource.NAME, s1fetchProperties, null, ResultSetTupleMapper.NAME);
         BasicSourceCfg targetSrc = new BasicSourceCfg("target", QuerySource.NAME, s2fetchProperties, null, ResultSetTupleMapper.NAME);
 
-        BasicComparisonCfg comp1 = new BasicComparisonCfg("test1", Arrays.asList("KEY"), Arrays.asList(sourceSrc, source2Src));
-        BasicComparisonCfg comp2 = new BasicComparisonCfg("test2", Arrays.asList("KEY"), Arrays.asList(sourceSrc, targetSrc));
+        BasicComparisonCfg comp1 = new BasicComparisonCfg("test1", Collections.singletonList("KEY"), Arrays.asList(sourceSrc, source2Src));
+        BasicComparisonCfg comp2 = new BasicComparisonCfg("test2", Collections.singletonList("KEY"), Arrays.asList(sourceSrc, targetSrc));
         basicTaijituCfg.setComparisons(Arrays.asList(comp1, comp2));
 
         //Strategy
@@ -279,6 +285,32 @@ public class TaijituTest {
             // Do nothing, this is just for test.
         }
 
+    }
+
+    @Test
+    public void testCompositeEqualityBuilder() {
+        List<ExtractorAndEquality<TestClass, ?>> equalityEaEs = new ArrayList<>();
+        equalityEaEs.add(new ExtractorAndEquality<>(TestClass::getOne, new StringCaseInsensitive()));
+        equalityEaEs.add(new ExtractorAndEquality<>(TestClass::getTwo, new StringCaseInsensitive()));
+        CompositeEquality<TestClass> equality = new CompositeEquality<>(equalityEaEs);
+
+        List<ExtractorAndComparableCategorizerEquality<TestClass, ?>> comparerEaEs = new ArrayList<>();
+        Function<TestClass, Integer> getThree = TestClass::getThree;
+        comparerEaEs.add(new ExtractorAndComparableCategorizerEquality<TestClass,Integer>(getThree, new ObjectToString()));
+        CompositeComparableCategorizerEquality<TestClass> comparer = new CompositeComparableCategorizerEquality<>(comparerEaEs);
+        Stream<TestClass> stream1 = Stream.of(
+                new TestClass("aaa", "aaa", 1),
+                new TestClass("bbb", "bbb", 1),
+                new TestClass("ccc", "ccc", 2)
+        );
+
+        Stream<TestClass> stream2 = Stream.of(
+                new TestClass("aAA", "aAa", 1),
+                new TestClass("bbb", "bb", 1),
+                new TestClass("ccc", "ccc", 3)
+        );
+
+        ComparableStreamEquality.compare(stream1, 1, stream2, 2, comparer, equality);
     }
 
     //
@@ -754,6 +786,28 @@ public class TaijituTest {
     private static void putAll(final Properties to, final Properties from, final String keyPrefix) {
         from.forEach((o, o2) -> to.put(keyPrefix + o.toString(), o2));
     }
+}
 
+class TestClass {
+    private final String one;
+    private final String two;
+    private final Integer three;
 
+    TestClass(String one, String two, Integer three) {
+        this.one = one;
+        this.two = two;
+        this.three = three;
+    }
+
+    public String getOne() {
+        return one;
+    }
+
+    public String getTwo() {
+        return two;
+    }
+
+    public Integer getThree() {
+        return three;
+    }
 }

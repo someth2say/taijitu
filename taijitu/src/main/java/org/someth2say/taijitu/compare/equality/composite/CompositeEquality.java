@@ -1,7 +1,6 @@
 package org.someth2say.taijitu.compare.equality.composite;
 
 import org.someth2say.taijitu.compare.equality.Equality;
-import org.someth2say.taijitu.compare.equality.composite.eae.AbstractExtractorAndEquality;
 import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndEquality;
 
 import java.util.List;

@@ -28,7 +28,7 @@ public abstract class ComparisonResult<T> {
         }
     }
 
-    abstract class Mismatch<MMT> {
+    public abstract class Mismatch<MMT> {
         final Map<Object, MMT> entries;
 
         Mismatch(Collection<SourceIdAndComposite<MMT>> entries) {
@@ -42,13 +42,13 @@ public abstract class ComparisonResult<T> {
         }
     }
 
-    class Difference<DT> extends Mismatch<DT> {
+    public class Difference<DT> extends Mismatch<DT> {
         Difference(Collection<SourceIdAndComposite<DT>> different) {
             super(different);
         }
     }
 
-    class Missing<MT> extends Mismatch<MT> {
+    public class Missing<MT> extends Mismatch<MT> {
         Missing(Collection<SourceIdAndComposite<MT>> existing) {
             super(existing);
         }

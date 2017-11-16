@@ -2,6 +2,9 @@ package org.someth2say.taijitu.compare.equality.value;
 
 public class JavaComparable<T extends Comparable<T>> extends AbstractConfigurableComparableCategorizerEquality<T> {
 
+    public JavaComparable() {
+        this(null);
+    }
     public JavaComparable(Object equalityConfig) {
         super(equalityConfig);
     }

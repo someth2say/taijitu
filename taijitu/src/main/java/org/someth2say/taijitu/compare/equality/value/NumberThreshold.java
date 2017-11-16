@@ -7,6 +7,10 @@ public class NumberThreshold extends AbstractConfigurableComparableCategorizerEq
 
     private static final int DEFAULT_SCALE = 2;
 
+    public NumberThreshold() {
+        this(null);
+    }
+
     public NumberThreshold(Object equalityConfig) {
         super(equalityConfig);
     }

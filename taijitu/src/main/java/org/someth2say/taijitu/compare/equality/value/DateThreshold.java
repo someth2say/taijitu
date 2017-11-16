@@ -6,6 +6,10 @@ public class DateThreshold extends AbstractConfigurableComparableCategorizerEqua
 
     private static final int DEFAULT_THRESHOLD = 1000;
 
+    public DateThreshold() {
+        this(null);
+    }
+
     public DateThreshold(Object equalityConfig) {
         super(equalityConfig);
     }

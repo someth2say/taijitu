@@ -2,6 +2,10 @@ package org.someth2say.taijitu.compare.equality.value;
 
 public class ObjectToString extends AbstractConfigurableComparableCategorizerEquality<Object> {
 
+    public ObjectToString() {
+        this(null);
+    }
+
     public ObjectToString(Object equalityConfig) {
         super(equalityConfig);
     }
