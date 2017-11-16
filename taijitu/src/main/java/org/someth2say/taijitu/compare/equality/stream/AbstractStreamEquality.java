@@ -1,16 +1,18 @@
 package org.someth2say.taijitu.compare.equality.stream;
 
-import org.someth2say.taijitu.compare.equality.composite.ICompositeEquality;
+import org.someth2say.taijitu.compare.equality.ComparableCategorizerEquality;
+import org.someth2say.taijitu.compare.equality.Equality;
 
 import java.util.Iterator;
 
+//TODO: Deprecate this class, as all equalities may come as parameters
 public abstract class AbstractStreamEquality<T> implements StreamEquality<T> {
 
-    final private ICompositeEquality<T> equality;
+    final private Equality<T> equality;
     //TODO: Generify this to a collection of Categorizers/Comparers
-    final private ICompositeEquality<T> categorizer;
+    final private ComparableCategorizerEquality<T> categorizer;
 
-    protected AbstractStreamEquality(ICompositeEquality<T> equality, ICompositeEquality<T> categorizer) {
+    protected AbstractStreamEquality(Equality<T> equality, ComparableCategorizerEquality<T> categorizer) {
         this.equality = equality;
         this.categorizer = categorizer;
     }
@@ -19,11 +21,11 @@ public abstract class AbstractStreamEquality<T> implements StreamEquality<T> {
         return resultSetSource.hasNext() ? resultSetSource.next() : null;
     }
 
-    protected ICompositeEquality<T> getEquality() {
+    protected Equality<T> getEquality() {
         return equality;
     }
 
-    protected ICompositeEquality<T> getCategorizer() {
+    protected ComparableCategorizerEquality<T> getCategorizer() {
         return categorizer;
     }
 }

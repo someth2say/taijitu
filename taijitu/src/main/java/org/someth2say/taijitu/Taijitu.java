@@ -4,19 +4,19 @@ import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
-import org.someth2say.taijitu.config.impl.TaijituCfg;
-import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
-import org.someth2say.taijitu.config.interfaces.IPluginCfg;
-import org.someth2say.taijitu.config.interfaces.ITaijituCfg;
-import org.someth2say.taijitu.plugins.TaijituPlugin;
-import org.someth2say.taijitu.registry.*;
-import org.someth2say.taijitu.source.query.ConnectionManager;
+import org.someth2say.taijitu.ui.config.impl.TaijituCfg;
+import org.someth2say.taijitu.ui.config.interfaces.IComparisonCfg;
+import org.someth2say.taijitu.ui.config.interfaces.IPluginCfg;
+import org.someth2say.taijitu.ui.config.interfaces.ITaijituCfg;
+import org.someth2say.taijitu.ui.plugins.TaijituPlugin;
+import org.someth2say.taijitu.ui.registry.*;
+import org.someth2say.taijitu.ui.config.source.query.ConnectionManager;
 import org.someth2say.taijitu.util.FileUtil;
 
 import java.util.List;
 import java.util.concurrent.*;
 
-import static org.someth2say.taijitu.config.DefaultConfig.DEFAULT_CONFIG_FILE;
+import static org.someth2say.taijitu.ui.config.DefaultConfig.DEFAULT_CONFIG_FILE;
 
 /**
  * @author Jordi Sola

@@ -2,31 +2,32 @@ package org.someth2say.taijitu;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.someth2say.taijitu.compare.equality.composite.ComparableCompositeEquality;
+import org.someth2say.taijitu.compare.equality.ComparableCategorizerEquality;
+import org.someth2say.taijitu.compare.equality.Equality;
+import org.someth2say.taijitu.compare.equality.composite.CompositeComparableCategorizerEquality;
 import org.someth2say.taijitu.compare.equality.composite.CompositeEquality;
-import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndComparableEquality;
+import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndComparableCategorizerEquality;
 import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndEquality;
-import org.someth2say.taijitu.compare.equality.composite.ICompositeEquality;
 import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
-import org.someth2say.taijitu.compare.equality.value.AbstractValueEquality;
-import org.someth2say.taijitu.compare.equality.value.ComparableValueEquality;
-import org.someth2say.taijitu.compare.equality.value.ValueEquality;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
-import org.someth2say.taijitu.config.interfaces.IComparisonCfg;
-import org.someth2say.taijitu.config.interfaces.IEqualityCfg;
-import org.someth2say.taijitu.config.interfaces.IPluginCfg;
-import org.someth2say.taijitu.config.interfaces.ISourceCfg;
-import org.someth2say.taijitu.registry.*;
-import org.someth2say.taijitu.source.FieldDescription;
-import org.someth2say.taijitu.source.Source;
-import org.someth2say.taijitu.source.mapper.SourceMapper;
+import org.someth2say.taijitu.ui.config.interfaces.IComparisonCfg;
+import org.someth2say.taijitu.ui.config.interfaces.IEqualityCfg;
+import org.someth2say.taijitu.ui.config.interfaces.IPluginCfg;
+import org.someth2say.taijitu.ui.config.interfaces.ISourceCfg;
+import org.someth2say.taijitu.ui.config.source.FieldDescription;
+import org.someth2say.taijitu.ui.config.source.Source;
+import org.someth2say.taijitu.ui.config.source.mapper.SourceMapper;
+import org.someth2say.taijitu.ui.registry.*;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static java.util.stream.Stream.concat;
 
 /**
  * @author Jordi Sola
@@ -71,7 +72,7 @@ class TaijituRunner implements Callable<ComparisonResult> {
         Source<R> source;
         Source<T> mappedSource;
         SourceMapper<R, T> mapper;
-        List<ExtractorAndComparableEquality<T, ?>> categoryEaEs;
+        List<ExtractorAndComparableCategorizerEquality<T, ?>> categoryEaEs;
         List<ExtractorAndEquality<T, ?>> equalityEaEs;
 
         private SourceData(ISourceCfg sourceCfg) {
@@ -108,15 +109,18 @@ class TaijituRunner implements Callable<ComparisonResult> {
         //3. Obtain ValueExtractors and Equalities
         sourceDatas.forEach((SourceData<?, T> sd) -> {
             sd.categoryEaEs = identityFields.stream().map(fd -> buildExtractorAndComparableEquality(iComparisonCfg, sd, fd)).collect(Collectors.toList());
+            logger.debug("Category EaEs for {}:\n {}", sd.source.getName(), IntStream.range(0, identityFields.size()).mapToObj(fdIdx -> sd.categoryEaEs.get(fdIdx).toString() + "(" + identityFields.get(fdIdx).toString() + ")").collect(Collectors.joining(",\n ")));
             sd.equalityEaEs = nonIdentityFields.stream().map(fd -> buildExtractorAndEquality(iComparisonCfg, sd, fd)).collect(Collectors.toList());
+            logger.debug("Equality EaEs for {}:\n {}", sd.source.getName(), IntStream.range(0, nonIdentityFields.size()).mapToObj(fdIdx -> sd.equalityEaEs.get(fdIdx).toString() + "(" + nonIdentityFields.get(fdIdx).toString() + ")").collect(Collectors.joining(",\n ")));
         });
 
         //4. Build CompositeEqualities with ValueExtractors and ValueEqualities
         //TODO: This assumes all sources use the same extractors! Else, we need an "HybridCompositeEquality", providing, for each field on a) extractors for each source, and b) valueEqualities
-        ICompositeEquality<T> categorizer = new ComparableCompositeEquality<>(sourceDatas.get(0).categoryEaEs);
-        ICompositeEquality<T> equality = new CompositeEquality<>(sourceDatas.get(0).equalityEaEs);
+        SourceData<?, T> tSourceData = sourceDatas.get(0);
+        ComparableCategorizerEquality<T> categorizer = new CompositeComparableCategorizerEquality<>(tSourceData.categoryEaEs);
+        Equality<T> equality = new CompositeEquality<>(tSourceData.equalityEaEs);
 
-        //6. Run SteamEquality given ICompositeEquality and MappedStreams
+        //6. Run SteamEquality given CategorizerEquality and MappedStreams
         String strategyName = iComparisonCfg.getStrategyConfig().getName();
         final StreamEquality<T> streamEquality = StreamEqualityRegistry.getInstance(strategyName, equality, categorizer);
 
@@ -130,17 +134,17 @@ class TaijituRunner implements Callable<ComparisonResult> {
         if (extractor == null) {
             throw new RuntimeException("Can't obtain extractor for field " + fd);
         }
-        ValueEquality<V> valueEquality = getEquality(fd, iComparisonCfg);
-        return new ExtractorAndEquality<>(extractor, valueEquality);
+        Equality<V> equality = getEquality(fd, iComparisonCfg);
+        return new ExtractorAndEquality<>(extractor, equality);
     }
 
-    private <T, V> ExtractorAndComparableEquality<T, V> buildExtractorAndComparableEquality(IComparisonCfg iComparisonCfg, SourceData<?, T> sd, FieldDescription<V> fd) {
+    private <T, V> ExtractorAndComparableCategorizerEquality<T, V> buildExtractorAndComparableEquality(IComparisonCfg iComparisonCfg, SourceData<?, T> sd, FieldDescription<V> fd) {
         Function<T, V> extractor = sd.mappedSource.getExtractor(fd);
         if (extractor == null) {
             throw new RuntimeException("Can't obtain extractor for field " + fd);
         }
-        ComparableValueEquality<V> valueEquality = getComparableEquality(fd, iComparisonCfg);
-        return new ExtractorAndComparableEquality<>(extractor, valueEquality);
+        ComparableCategorizerEquality<V> valueEquality = getComparableEquality(fd, iComparisonCfg);
+        return new ExtractorAndComparableCategorizerEquality<>(extractor, valueEquality);
     }
 
     private <T> void buildMappedSources(List<SourceData<?, T>> sourceDatas) {
@@ -256,30 +260,45 @@ class TaijituRunner implements Callable<ComparisonResult> {
             // Misleading warning. See https://youtrack.jetbrains.com/issue/IDEA-181860
             return comparisonResult;
         }
-
     }
 
-    private <V> ValueEquality<V> getEquality(FieldDescription<V> fd, IComparisonCfg iComparisonCfg) {
+    private <V> Equality<V> getEquality(FieldDescription<V> fd, IComparisonCfg iComparisonCfg) {
         IEqualityCfg iEqualityCfg = getEqualityConfigFor(fd.getClazz(), fd.getName(), iComparisonCfg.getEqualityConfigs());
         return ValueEqualityRegistry.getInstance(iEqualityCfg.getName(), iEqualityCfg.getEqualityParameters());
     }
 
 
-    private <V> ComparableValueEquality<V> getComparableEquality(FieldDescription<V> fd, IComparisonCfg iComparisonCfg) {
-        IEqualityCfg iEqualityCfg = getEqualityConfigFor(fd.getClazz(), fd.getName(), iComparisonCfg.getEqualityConfigs());
-        AbstractValueEquality<V> abstractValueEquality = ValueEqualityRegistry.getInstance(iEqualityCfg.getName(), iEqualityCfg.getEqualityParameters());
-        //TODO: registry may be able to determine comparable equalities.
-        return (ComparableValueEquality<V>) abstractValueEquality;
+    private <V> ComparableCategorizerEquality<V> getComparableEquality(FieldDescription<V> fd, IComparisonCfg iComparisonCfg) {
+        List<IEqualityCfg> iEqualityCfgs = getEqualityConfigsFor(fd.getClazz(), fd.getName(), iComparisonCfg.getEqualityConfigs());
+        Optional<ComparableCategorizerEquality<V>> first = iEqualityCfgs.stream().map(cfg -> ValueEqualityRegistry.getInstance(cfg.getName(), cfg.getEqualityParameters())).filter(eq -> eq instanceof ComparableCategorizerEquality).map(eq -> (ComparableCategorizerEquality<V>) eq).findFirst();
+        if (first.isPresent()) {
+            return first.get();
+        }
+        throw new RuntimeException("Can't find any comparable categorizer equality for field " + fd);
+
     }
+
+
+    private List<IEqualityCfg> getEqualityConfigsFor(final String fieldClass, final String fieldName, final List<IEqualityCfg> equalityCfgs) {
+        List<IEqualityCfg> perfectMatchesEqualities = equalityCfgs.stream().filter(eq -> fieldNameMatch(fieldName, eq) && fieldClassMatch(fieldClass, eq)).collect(Collectors.toList());
+        if (!perfectMatchesEqualities.isEmpty()) return perfectMatchesEqualities;
+        List<IEqualityCfg> byNameEqualities = equalityCfgs.stream().filter(eq -> fieldNameMatch(fieldName, eq) && eq.getFieldClass() == null).collect(Collectors.toList());
+        if (!byNameEqualities.isEmpty()) return byNameEqualities;
+        List<IEqualityCfg> byClassEqualities = equalityCfgs.stream().filter(eq -> eq.getFieldName() == null && fieldClassMatch(fieldClass, eq)).collect(Collectors.toList());
+        if (!byClassEqualities.isEmpty()) return byClassEqualities;
+        List<IEqualityCfg> anythingMatchEqualities = equalityCfgs.stream().filter(eq -> eq.getFieldName() == null && eq.getFieldClass() == null).collect(Collectors.toList());
+        return anythingMatchEqualities;
+    }
+
 
     private IEqualityCfg getEqualityConfigFor(final String fieldClass, final String fieldName, final List<IEqualityCfg> equalityConfigIfaces) {
 
-        Optional<IEqualityCfg> perfectMatches = equalityConfigIfaces.stream().filter(eq -> fieldNameMatch(fieldName, eq) && fieldClassMatch(fieldClass, eq)).findFirst();
-        Optional<IEqualityCfg> nameMatches = equalityConfigIfaces.stream().filter(eq -> fieldNameMatch(fieldName, eq) && eq.getFieldClass() == null).findFirst();
-        Optional<IEqualityCfg> classMathes = equalityConfigIfaces.stream().filter(eq -> eq.getFieldName() == null && fieldClassMatch(fieldClass, eq)).findFirst();
-        Optional<IEqualityCfg> allMathes = equalityConfigIfaces.stream().filter(eq -> eq.getFieldName() == null && eq.getFieldClass() == null).findFirst();
+        Optional<IEqualityCfg> perfectMatchesEqualities = equalityConfigIfaces.stream().filter(eq -> fieldNameMatch(fieldName, eq) && fieldClassMatch(fieldClass, eq)).findFirst();
+        Optional<IEqualityCfg> byNameEqualities = equalityConfigIfaces.stream().filter(eq -> fieldNameMatch(fieldName, eq) && eq.getFieldClass() == null).findFirst();
+        Optional<IEqualityCfg> byClassEqualities = equalityConfigIfaces.stream().filter(eq -> eq.getFieldName() == null && fieldClassMatch(fieldClass, eq)).findFirst();
+        Optional<IEqualityCfg> anythingMatchEqualities = equalityConfigIfaces.stream().filter(eq -> eq.getFieldName() == null && eq.getFieldClass() == null).findFirst();
 
-        return perfectMatches.orElse(nameMatches.orElse(classMathes.orElse(allMathes.orElse(null))));
+        return perfectMatchesEqualities.orElse(byNameEqualities.orElse(byClassEqualities.orElse(anythingMatchEqualities.orElse(null))));
     }
 
     private boolean fieldNameMatch(String fieldName, IEqualityCfg eq) {

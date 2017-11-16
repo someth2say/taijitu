@@ -9,19 +9,19 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
-import org.someth2say.taijitu.compare.equality.value.CaseInsensitiveValueEquality;
-import org.someth2say.taijitu.compare.equality.value.TimestampThresholdValueEquality;
-import org.someth2say.taijitu.compare.equality.value.NumberThresholdValueEquality;
-import org.someth2say.taijitu.config.ConfigurationLabels;
-import org.someth2say.taijitu.config.DefaultConfig;
-import org.someth2say.taijitu.config.delegates.simple.*;
-import org.someth2say.taijitu.config.impl.TaijituCfg;
-import org.someth2say.taijitu.config.interfaces.*;
-import org.someth2say.taijitu.source.csv.CSVResourceSource;
-import org.someth2say.taijitu.source.mapper.CSVTupleMapper;
-import org.someth2say.taijitu.source.mapper.ResultSetTupleMapper;
-import org.someth2say.taijitu.source.query.ConnectionManager;
-import org.someth2say.taijitu.source.query.QuerySource;
+import org.someth2say.taijitu.compare.equality.value.StringCaseInsensitive;
+import org.someth2say.taijitu.compare.equality.value.DateThreshold;
+import org.someth2say.taijitu.compare.equality.value.NumberThreshold;
+import org.someth2say.taijitu.ui.config.ConfigurationLabels;
+import org.someth2say.taijitu.ui.config.DefaultConfig;
+import org.someth2say.taijitu.ui.config.delegates.simple.*;
+import org.someth2say.taijitu.ui.config.impl.TaijituCfg;
+import org.someth2say.taijitu.ui.config.interfaces.*;
+import org.someth2say.taijitu.ui.config.source.csv.CSVResourceSource;
+import org.someth2say.taijitu.ui.config.source.mapper.CSVTupleMapper;
+import org.someth2say.taijitu.ui.config.source.mapper.ResultSetTupleMapper;
+import org.someth2say.taijitu.ui.config.source.query.ConnectionManager;
+import org.someth2say.taijitu.ui.config.source.query.QuerySource;
 import org.someth2say.taijitu.compare.equality.stream.mapping.MappingStreamEquality;
 import org.someth2say.taijitu.compare.equality.stream.sorted.ComparableStreamEquality;
 
@@ -34,9 +34,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
-import static org.someth2say.taijitu.config.ConfigurationLabels.Comparison.*;
-import static org.someth2say.taijitu.config.ConfigurationLabels.Comparison.Fields.KEYS;
-import static org.someth2say.taijitu.config.ConfigurationLabels.Sections.COMPARISON;
+import static org.someth2say.taijitu.ui.config.ConfigurationLabels.Comparison.*;
+import static org.someth2say.taijitu.ui.config.ConfigurationLabels.Comparison.Fields.KEYS;
+import static org.someth2say.taijitu.ui.config.ConfigurationLabels.Sections.COMPARISON;
 
 
 /**
@@ -58,6 +58,11 @@ public class TaijituTest {
     public static Collection<String> strategies() {
         return Arrays.asList(
                 MappingStreamEquality.NAME, ComparableStreamEquality.NAME
+//                ,MappingStreamEquality.NAME, ComparableStreamEquality.NAME
+//                ,MappingStreamEquality.NAME, ComparableStreamEquality.NAME
+//                ,MappingStreamEquality.NAME, ComparableStreamEquality.NAME
+//                ,MappingStreamEquality.NAME, ComparableStreamEquality.NAME
+//                ,MappingStreamEquality.NAME, ComparableStreamEquality.NAME
         );
     }
 
@@ -78,8 +83,10 @@ public class TaijituTest {
 
         assertEquals(2, comparisonResults.length);
         final ComparisonResult firstResult = comparisonResults[0];
+        System.out.println(firstResult.getMismatches());
         assertEquals(0, firstResult.getMismatches().size());
         final ComparisonResult secondResult = comparisonResults[1];
+        System.out.println(secondResult.getMismatches());
         assertEquals(1, secondResult.getMismatches().size());
     }
 
@@ -146,9 +153,9 @@ public class TaijituTest {
         basicTaijituCfg.setStrategyConfig(new BasicStrategyCfg(strategyName));
 
         // Equality
-        BasicEqualityCfg stringEq = new BasicEqualityCfg(CaseInsensitiveValueEquality.NAME, String.class.getName(), null);
-        BasicEqualityCfg numberEq = new BasicEqualityCfg(NumberThresholdValueEquality.NAME, Number.class.getName(), null, "2");
-        IEqualityCfg timestampEq = new BasicEqualityCfg(TimestampThresholdValueEquality.NAME, Timestamp.class.getName(), null, "100");
+        BasicEqualityCfg stringEq = new BasicEqualityCfg(StringCaseInsensitive.class.getSimpleName(), String.class.getName(), null);
+        BasicEqualityCfg numberEq = new BasicEqualityCfg(NumberThreshold.class.getSimpleName(), Number.class.getName(), null, "2");
+        IEqualityCfg timestampEq = new BasicEqualityCfg(DateThreshold.class.getSimpleName(), Date.class.getName(), null, "100");
         basicTaijituCfg.setEqualityConfigs(Arrays.asList(stringEq, numberEq, timestampEq));
 
         return new TaijituCfg(basicTaijituCfg);
@@ -181,9 +188,9 @@ public class TaijituTest {
         basicTaijituCfg.setStrategyConfig(new BasicStrategyCfg(strategyName));
 
         // Equality
-        BasicEqualityCfg stringEq = new BasicEqualityCfg(CaseInsensitiveValueEquality.NAME, String.class.getName(), null);
-        BasicEqualityCfg numberEq = new BasicEqualityCfg(NumberThresholdValueEquality.NAME, Number.class.getName(), null, "2");
-        IEqualityCfg timestampEq = new BasicEqualityCfg(TimestampThresholdValueEquality.NAME, Timestamp.class.getName(), null, "100");
+        BasicEqualityCfg stringEq = new BasicEqualityCfg(StringCaseInsensitive.class.getSimpleName(), String.class.getName(), null);
+        BasicEqualityCfg numberEq = new BasicEqualityCfg(NumberThreshold.class.getSimpleName(), Number.class.getName(), null, "2");
+        IEqualityCfg timestampEq = new BasicEqualityCfg(DateThreshold.class.getSimpleName(), Date.class.getName(), null, "100");
         basicTaijituCfg.setEqualityConfigs(Arrays.asList(stringEq, numberEq, timestampEq));
 
         return new TaijituCfg(basicTaijituCfg);
@@ -209,13 +216,13 @@ public class TaijituTest {
 
         //Add comparators
         //Case insensitive strings
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + CaseInsensitiveValueEquality.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, String.class.getName());
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + StringCaseInsensitive.class.getSimpleName() + "." + ConfigurationLabels.Comparison.FIELD_CLASS, String.class.getName());
         //Decimal places for Numbers
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + NumberThresholdValueEquality.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Number.class.getName());
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + NumberThresholdValueEquality.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "2");
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + NumberThreshold.class.getSimpleName() + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Number.class.getName());
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + NumberThreshold.class.getSimpleName() + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "2");
         //Threshold 100ms for Timestamps.
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdValueEquality.NAME + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Timestamp.class.getName());
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + TimestampThresholdValueEquality.NAME + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "100");
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + DateThreshold.class.getSimpleName() + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Date.class.getName());
+        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + DateThreshold.class.getSimpleName() + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "100");
 
         final ImmutableHierarchicalConfiguration configuration = ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(properties));
 

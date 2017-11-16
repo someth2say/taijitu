@@ -114,12 +114,12 @@ _Warning: This same property may be used by plugins to identify the folder where
 - `setup.queryOptimization  = true`: If set to true, queries starting by "select * from..." will have the `*` replaced by the list of fields, as provided in `context.test_name.fields`.
 This may sometimes improve performance, and avoid typos when copying the list of fields.
 
-- `setup.plugins   = org.someth2say.taijitu.plugins.taijituWriter,org.someth2say.taijitu.plugins.taijituSQLProvider`: Comma separated list of `thread plugins`.
+- `setup.plugins   = org.someth2say.taijitu.ui.plugins.taijituWriter,org.someth2say.taijitu.ui.plugins.taijituSQLProvider`: Comma separated list of `thread plugins`.
 Each hook will perform different actions before and after each context is executed. Those can be understand as plug-ins for the context architecture.
  Currently, only those two hooks are provided:
- - `org.someth2say.taijitu.plugins.taijituWriter`: Write the context results into XLS or CSV files, as per configuration properties.
+ - `org.someth2say.taijitu.ui.plugins.taijituWriter`: Write the context results into XLS or CSV files, as per configuration properties.
  Also can dump context statistics in those same formats.
- - `org.someth2say.taijitu.plugins.taijituSQLProvider`: Generate a SQL text file, with the needed SQL sentences for repairing found differences.
+ - `org.someth2say.taijitu.ui.plugins.taijituSQLProvider`: Generate a SQL text file, with the needed SQL sentences for repairing found differences.
  Will generate INSERT statements for missing entries, and UPDATE statements for differences.
  
 - `setup.threads = 2`: Number of concurrent comparisons that will run anytime.
