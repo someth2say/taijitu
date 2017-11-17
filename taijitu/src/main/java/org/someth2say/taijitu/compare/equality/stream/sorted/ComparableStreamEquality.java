@@ -14,6 +14,8 @@ import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
 import org.someth2say.taijitu.discarter.TimeBiDiscarter;
 
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
@@ -33,7 +35,7 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
         return NAME;
     }
 
-    public ComparisonResult<T> runComparison(Stream<T> source, Object sourceId, Stream<T> target, Object targetId) {
+    public ComparisonResult<T> match(Stream<T> source, Object sourceId, Stream<T> target, Object targetId) {
         return compare(source, sourceId, target, targetId, getCategorizer(), getEquality());
     }
 
@@ -45,6 +47,21 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
         return compare(source, sourceId, target, targetId, compareFunc, equalsFunc);
     }
 
+    public static <T> ComparisonResult<T> compare(Map<Object, Stream<T>> streams , BiFunction<T, T, Integer> compareFunc, BiFunction<T, T, Boolean> equalsFunc) {
+    	if (streams.size()<2)
+    		throw new RuntimeException("Need at least two streams to compare");
+    	
+    	if (streams.size()>2) 
+    		logger.info("Provided {} streams, but only 2 first will be compared.",streams.size());
+    	
+    	
+    	Iterator<Entry<Object, Stream<T>>> iterator = streams.entrySet().iterator();
+		Entry<Object, Stream<T>> source = iterator.next();
+		Entry<Object, Stream<T>> target = iterator.next();
+    	
+		return compare(source.getValue(), source.getKey(), target.getValue(), target.getKey(),compareFunc, equalsFunc);
+    }
+    
     public static <T> ComparisonResult<T> compare(Stream<T> source, Object sourceId, Stream<T> target, Object targetId, BiFunction<T, T, Integer> compareFunc, BiFunction<T, T, Boolean> equalsFunc) {
         SimpleComparisonResult<T> result = new SimpleComparisonResult<>();
 

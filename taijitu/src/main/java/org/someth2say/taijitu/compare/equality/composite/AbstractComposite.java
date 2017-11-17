@@ -8,7 +8,7 @@ import org.someth2say.taijitu.compare.equality.composite.eae.AbstractExtractorAn
 import java.util.List;
 import java.util.function.Function;
 
-public abstract class AbstractComposite<T,EAE extends AbstractExtractorAndEquality<T, ?, ?>> {
+public abstract class AbstractComposite<T,EAE extends AbstractExtractorAndEquality<T, ?, ?>> implements Composite<T>{
     private static final Logger logger = LoggerFactory.getLogger(AbstractComposite.class);
 
     private final List<EAE> extractorsAndEqualities;

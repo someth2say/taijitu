@@ -252,7 +252,7 @@ class TaijituRunner implements Callable<ComparisonResult> {
              Stream<T> targetStr = sourceDatas.get(1).mappedSource.stream();
              Source sourceSrc = sourceDatas.get(0).mappedSource;
              Source targetSrc = sourceDatas.get(1).mappedSource) {
-            comparisonResult = streamEquality.runComparison(sourceStr, sourceSrc.getName(), targetStr, targetSrc.getName());
+            comparisonResult = streamEquality.match(sourceStr, sourceSrc.getName(), targetStr, targetSrc.getName());
             return comparisonResult;
         } catch (Source.ClosingException e) {
             //TODO: We are actually closing the stream, not the source!!!!!

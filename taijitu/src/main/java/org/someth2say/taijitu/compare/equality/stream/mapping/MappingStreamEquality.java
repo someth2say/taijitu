@@ -17,6 +17,7 @@ import org.someth2say.taijitu.discarter.TimeBiDiscarter;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,112 +29,134 @@ import java.util.stream.Stream;
  * Created by Jordi Sola on 02/03/2017.
  */
 public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implements StreamEquality<T> {
-    public static final String NAME = "mapping";
-    private static final Logger logger = LoggerFactory.getLogger(MappingStreamEquality.class);
+	public static final String NAME = "mapping";
+	private static final Logger logger = LoggerFactory.getLogger(MappingStreamEquality.class);
 
-    public MappingStreamEquality(Equality<T> equality, ComparableCategorizerEquality<T> categorizer) {
-        super(equality, categorizer);
-    }
+	public MappingStreamEquality(Equality<T> equality, ComparableCategorizerEquality<T> categorizer) {
+		super(equality, categorizer);
+	}
 
-    @Override
-    public String getName() {
-        return NAME;
-    }
+	@Override
+	public String getName() {
+		return NAME;
+	}
 
-    public ComparisonResult<T> runComparison(Stream<T> source, Object sourceId, Stream<T> target, Object targetId) {
-        CategorizerEquality<T> categorizer = getCategorizer();
-        Equality<T> equality = getEquality();
-        return compare(source, sourceId, target, targetId, categorizer, equality);
-    }
+	public ComparisonResult<T> match(Stream<T> source, Object sourceId, Stream<T> target, Object targetId) {
+		CategorizerEquality<T> categorizer = getCategorizer();
+		Equality<T> equality = getEquality();
+		return match(source, sourceId, target, targetId, categorizer, equality);
+	}
 
-    public static <T> ComparisonResult<T> compare(Stream<T> source, Object sourceId, Stream<T> target, Object targetId, CategorizerEquality<T> categorizer, Equality<T> equality) {
-        BiFunction<T, T, Boolean> equalityFunc = equality::equals;
-        return compare(source, sourceId, target, targetId, categorizer, equalityFunc);
-    }
+	public static <T> ComparisonResult<T> match(Stream<T> source, Object sourceId, Stream<T> target, Object targetId,
+			CategorizerEquality<T> categorizer, Equality<T> equality) {
+		BiFunction<T, T, Boolean> equalityFunc = equality::equals;
+		return match(source, sourceId, target, targetId, categorizer, equalityFunc);
+	}
 
-    public static <T> ComparisonResult<T> compare(Stream<T> source, Object sourceID, Stream<T> target, Object targetId, CategorizerEquality<T> categorizer, BiFunction<T, T, Boolean> equalityFunc) {
-        //1.- Build/run mapping tasks
-        SynchronizedComparisonResult<T> result = new SynchronizedComparisonResult<>();
-        Iterator<T> sourceIt = source.iterator();
-        Iterator<T> targetIt = target.iterator();
+	public static <T> ComparisonResult<T> match(Map<Object, Stream<T>> streams, CategorizerEquality<T> categorizer,
+			BiFunction<T, T, Boolean> equality) {
+		if (streams.size() < 2)
+			throw new RuntimeException("Need at least two streams to compare");
 
-        //TODO: Another option is running queries/pages alternating, so we can "restrict" memory usage, but only using a single thread
-        final ExecutorService executorService = Executors.newFixedThreadPool(2);
-        Map<CategorizerEqualityWrapper<T>, SourceIdAndComposite<T>> sharedMap = new ConcurrentHashMap<>();
-        Runnable sourceMapper = new TupleMapperExt<>(sourceIt, sharedMap, result, sourceID, categorizer, equalityFunc);
-        Runnable targetMapper = new TupleMapperExt<>(targetIt, sharedMap, result, targetId, categorizer, equalityFunc);
+		if (streams.size() > 2)
+			logger.info("Provided {} streams, but only 2 first will be compared.", streams.size());
 
-        executorService.submit(sourceMapper);// Map source
-        executorService.submit(targetMapper);// Map target
+		Iterator<Entry<Object, Stream<T>>> iterator = streams.entrySet().iterator();
+		Entry<Object, Stream<T>> source = iterator.next();
+		Entry<Object, Stream<T>> target = iterator.next();
 
-        shutdownAndAwaitTermination(executorService);
+		return match(source.getValue(), source.getKey(), target.getValue(), target.getKey(), categorizer, equality);
+	}
 
-        //2.- When both mapping tasks are completed, remaining data are source/target only
-        final Collection<SourceIdAndComposite<T>> entries = sharedMap.values();
-        result.addAllDisjoint(entries);
+	public static <T> ComparisonResult<T> match(Stream<T> source, Object sourceID, Stream<T> target, Object targetId,
+			CategorizerEquality<T> categorizer, BiFunction<T, T, Boolean> equality) {
+		// 1.- Build/run mapping tasks
+		SynchronizedComparisonResult<T> result = new SynchronizedComparisonResult<>();
+		Iterator<T> sourceIt = source.iterator();
+		Iterator<T> targetIt = target.iterator();
 
-        return result;
-    }
+		// TODO: Another option is running queries/pages alternating, so we can
+		// "restrict" memory usage, but only using a single thread
+		final ExecutorService executorService = Executors.newFixedThreadPool(2);
+		Map<CategorizerEqualityWrapper<T>, SourceIdAndComposite<T>> sharedMap = new ConcurrentHashMap<>();
+		Runnable sourceMapper = new TupleMapperExt<>(sourceIt, sharedMap, result, sourceID, categorizer, equality);
+		Runnable targetMapper = new TupleMapperExt<>(targetIt, sharedMap, result, targetId, categorizer, equality);
 
-    private static void shutdownAndAwaitTermination(ExecutorService pool) {
-        pool.shutdown(); // Disable new tasks from being submitted
-        try {
-            // Wait a while for existing tasks to terminate
-            while (!pool.awaitTermination(60, TimeUnit.SECONDS)) {
-                logger.info("Waiting for mapping stream to complete.");
-            }
-        } catch (InterruptedException ie) {
-            // (Re-)Cancel if current thread also interrupted
-            pool.shutdownNow();
-            // Preserve interrupt status
-            Thread.currentThread().interrupt();
-        }
-    }
+		executorService.submit(sourceMapper);// Map source
+		executorService.submit(targetMapper);// Map target
 
-    public static IStrategyCfg defaultConfig() {
-        return () -> MappingStreamEquality.NAME;
-    }
+		shutdownAndAwaitTermination(executorService);
 
-    private static class TupleMapperExt<TMT> implements Runnable {
-        private final Iterator<TMT> source;
-        private final Map<CategorizerEqualityWrapper<TMT>, SourceIdAndComposite<TMT>> sharedMap;
-        private final SynchronizedComparisonResult<TMT> result;
-        private final Object sourceId;
-        private final CategorizerEquality<TMT> categorizer;
-        private final BiFunction<TMT,TMT,Boolean> equalityFunc;
+		// 2.- When both mapping tasks are completed, remaining data are source/target
+		// only
+		final Collection<SourceIdAndComposite<T>> entries = sharedMap.values();
+		result.addAllDisjoint(entries);
 
-        private TupleMapperExt(final Iterator<TMT> source, final Map<CategorizerEqualityWrapper<TMT>, SourceIdAndComposite<TMT>> sharedMap, final SynchronizedComparisonResult<TMT> result, Object sourceId, CategorizerEquality<TMT> categorizer, BiFunction<TMT,TMT,Boolean> equalityFunc) {
-            this.source = source;
-            this.sharedMap = sharedMap;
-            this.result = result;
-            this.sourceId = sourceId;
-            this.categorizer = categorizer;
-            this.equalityFunc = equalityFunc;
-        }
+		return result;
+	}
 
-        @Override
-        public void run() {
-            TimeBiDiscarter<String, Object[]> timedLogger = new TimeBiDiscarter<>(1000, logger::debug);
-            int recordCount = 0;
-            TMT thisRecord = getNextRecordOrNull(source);
-            while (thisRecord != null) {
-                recordCount++;
-                SourceIdAndComposite<TMT> thisQueryAndTuple = new SourceIdAndComposite<>(sourceId, thisRecord);
-                CategorizerEqualityWrapper<TMT> wrap = categorizer.wrap(thisRecord);
-                SourceIdAndComposite<TMT> otherQueryAndTuple = sharedMap.putIfAbsent(wrap, thisQueryAndTuple);
-                if (otherQueryAndTuple != null) {
-                    //we have a key match ...
-                    sharedMap.remove(wrap);
-                    final TMT otherRecord = otherQueryAndTuple.getComposite();
-                    if (!equalityFunc.apply(thisRecord, otherRecord)) {
-                        // ...and contents differ
-                        result.addDifference(thisQueryAndTuple, otherQueryAndTuple);
-                    }
-                }
-                timedLogger.accept("Processed {} records from source {}", new Object[]{recordCount, sourceId});
+	private static void shutdownAndAwaitTermination(ExecutorService pool) {
+		pool.shutdown(); // Disable new tasks from being submitted
+		try {
+			// Wait a while for existing tasks to terminate
+			while (!pool.awaitTermination(60, TimeUnit.SECONDS)) {
+				logger.info("Waiting for mapping stream to complete.");
+			}
+		} catch (InterruptedException ie) {
+			// (Re-)Cancel if current thread also interrupted
+			pool.shutdownNow();
+			// Preserve interrupt status
+			Thread.currentThread().interrupt();
+		}
+	}
 
-                thisRecord = getNextRecordOrNull(source);
-            }
-        }
-    }
+	public static IStrategyCfg defaultConfig() {
+		return () -> MappingStreamEquality.NAME;
+	}
+
+	private static class TupleMapperExt<TMT> implements Runnable {
+		private final Iterator<TMT> source;
+		private final Map<CategorizerEqualityWrapper<TMT>, SourceIdAndComposite<TMT>> sharedMap;
+		private final SynchronizedComparisonResult<TMT> result;
+		private final Object sourceId;
+		private final CategorizerEquality<TMT> categorizer;
+		private final BiFunction<TMT, TMT, Boolean> equalityFunc;
+
+		private TupleMapperExt(final Iterator<TMT> source,
+				final Map<CategorizerEqualityWrapper<TMT>, SourceIdAndComposite<TMT>> sharedMap,
+				final SynchronizedComparisonResult<TMT> result, Object sourceId, CategorizerEquality<TMT> categorizer,
+				BiFunction<TMT, TMT, Boolean> equalityFunc) {
+			this.source = source;
+			this.sharedMap = sharedMap;
+			this.result = result;
+			this.sourceId = sourceId;
+			this.categorizer = categorizer;
+			this.equalityFunc = equalityFunc;
+		}
+
+		@Override
+		public void run() {
+			TimeBiDiscarter<String, Object[]> timedLogger = new TimeBiDiscarter<>(1000, logger::debug);
+			int recordCount = 0;
+			TMT thisRecord = getNextRecordOrNull(source);
+			while (thisRecord != null) {
+				recordCount++;
+				SourceIdAndComposite<TMT> thisQueryAndTuple = new SourceIdAndComposite<>(sourceId, thisRecord);
+				CategorizerEqualityWrapper<TMT> wrap = categorizer.wrap(thisRecord);
+				SourceIdAndComposite<TMT> otherQueryAndTuple = sharedMap.putIfAbsent(wrap, thisQueryAndTuple);
+				if (otherQueryAndTuple != null) {
+					// we have a key match ...
+					sharedMap.remove(wrap);
+					final TMT otherRecord = otherQueryAndTuple.getComposite();
+					if (!equalityFunc.apply(thisRecord, otherRecord)) {
+						// ...and contents differ
+						result.addDifference(thisQueryAndTuple, otherQueryAndTuple);
+					}
+				}
+				timedLogger.accept("Processed {} records from source {}", new Object[] { recordCount, sourceId });
+
+				thisRecord = getNextRecordOrNull(source);
+			}
+		}
+	}
 }

@@ -11,6 +11,6 @@ import java.util.stream.Stream;
 //TODO: For equality purposes, those need not to be Named! Naming should be something external
 public interface StreamEquality<T> extends Named {
 
-    ComparisonResult<T> runComparison(Stream<T> source, Object sourceId, Stream<T> target, Object targetId);
+    ComparisonResult<T> match(Stream<T> source, Object sourceId, Stream<T> target, Object targetId);
 
 }
