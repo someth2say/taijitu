@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @param <T>
  */
-public class CompositeEquality<T> extends AbstractComposite<T, ExtractorAndEquality<T, ?>> implements Equality<T> {
+public class CompositeEquality<T> extends AbstractCompositeEquality<T, ExtractorAndEquality<T, ?>> implements Equality<T> {
 
     public CompositeEquality(List<ExtractorAndEquality<T, ?>> eaes) {
         super(eaes);

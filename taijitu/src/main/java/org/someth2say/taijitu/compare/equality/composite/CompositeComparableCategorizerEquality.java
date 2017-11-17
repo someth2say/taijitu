@@ -8,7 +8,7 @@ import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndCompara
 import java.util.List;
 import java.util.function.Function;
 
-public class CompositeComparableCategorizerEquality<T> extends AbstractComposite<T, ExtractorAndComparableCategorizerEquality<T, ?>> implements ComparableCategorizerEquality<T> {
+public class CompositeComparableCategorizerEquality<T> extends AbstractCompositeEquality<T, ExtractorAndComparableCategorizerEquality<T, ?>> implements ComparableCategorizerEquality<T> {
     private static final Logger logger = LoggerFactory.getLogger(CompositeComparableCategorizerEquality.class);
 
     public CompositeComparableCategorizerEquality(List<ExtractorAndComparableCategorizerEquality<T, ?>> extractorsAndEqualities) {

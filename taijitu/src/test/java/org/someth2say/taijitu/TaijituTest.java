@@ -1,6 +1,9 @@
 package org.someth2say.taijitu;
 
-import org.apache.commons.configuration2.*;
+import org.apache.commons.configuration2.ConfigurationUtils;
+import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.YAMLConfiguration;
 import org.apache.commons.configuration2.builder.BasicConfigurationBuilder;
 import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
 import org.apache.commons.configuration2.ex.ConfigurationException;
@@ -12,9 +15,13 @@ import org.someth2say.taijitu.compare.equality.composite.CompositeComparableCate
 import org.someth2say.taijitu.compare.equality.composite.CompositeEquality;
 import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndComparableCategorizerEquality;
 import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndEquality;
-import org.someth2say.taijitu.compare.equality.value.*;
+import org.someth2say.taijitu.compare.equality.stream.mapping.MappingStreamEquality;
+import org.someth2say.taijitu.compare.equality.stream.sorted.ComparableStreamEquality;
+import org.someth2say.taijitu.compare.equality.value.DateThreshold;
+import org.someth2say.taijitu.compare.equality.value.NumberThreshold;
+import org.someth2say.taijitu.compare.equality.value.ObjectToString;
+import org.someth2say.taijitu.compare.equality.value.StringCaseInsensitive;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
-import org.someth2say.taijitu.compare.result.ComparisonResult.SourceIdAndComposite;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Mismatch;
 import org.someth2say.taijitu.compare.result.Missing;
@@ -22,14 +29,13 @@ import org.someth2say.taijitu.ui.config.ConfigurationLabels;
 import org.someth2say.taijitu.ui.config.DefaultConfig;
 import org.someth2say.taijitu.ui.config.delegates.simple.*;
 import org.someth2say.taijitu.ui.config.impl.TaijituCfg;
-import org.someth2say.taijitu.ui.config.interfaces.*;
+import org.someth2say.taijitu.ui.config.interfaces.IEqualityCfg;
+import org.someth2say.taijitu.ui.config.interfaces.ITaijituCfg;
 import org.someth2say.taijitu.ui.config.source.csv.CSVResourceSource;
 import org.someth2say.taijitu.ui.config.source.mapper.CSVTupleMapper;
 import org.someth2say.taijitu.ui.config.source.mapper.ResultSetTupleMapper;
 import org.someth2say.taijitu.ui.config.source.query.ConnectionManager;
 import org.someth2say.taijitu.ui.config.source.query.QuerySource;
-import org.someth2say.taijitu.compare.equality.stream.mapping.MappingStreamEquality;
-import org.someth2say.taijitu.compare.equality.stream.sorted.ComparableStreamEquality;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -41,8 +47,8 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.someth2say.taijitu.ui.config.ConfigurationLabels.Comparison.*;
 import static org.someth2say.taijitu.ui.config.ConfigurationLabels.Comparison.Fields.KEYS;
+import static org.someth2say.taijitu.ui.config.ConfigurationLabels.Comparison.*;
 import static org.someth2say.taijitu.ui.config.ConfigurationLabels.Sections.COMPARISON;
 
 
@@ -309,17 +315,21 @@ public class TaijituTest {
         TestClass missingFrom1 = new TestClass("bbb", "bbb", 2);
         TestClass equalsFrom1 = new TestClass("bBb", "bbb", 3);
         TestClass equalsFrom2 = new TestClass("bbb", "bbB", 3);
+
         Stream<TestClass> stream1 = Stream.of(differentFrom1, missingFrom1, equalsFrom1);
         Stream<TestClass> stream2 = Stream.of(differentFrom2, equalsFrom2);
 
-        ComparisonResult<TestClass> result = ComparableStreamEquality.compare(stream1, 1, stream2, 2, comparer, equality);
+        Object id1 = stream1;//1;
+        Object id2 = stream2;//2
+
+        ComparisonResult<TestClass> result = ComparableStreamEquality.compare(stream1, id1, stream2, id2, comparer, equality);
 
         // Test results
         Collection<Mismatch<TestClass>> mismatches = result.getMismatches();
-        Missing missing = new Missing<>(new SourceIdAndComposite<>(1, missingFrom1));
+        Missing missing = new Missing<>(id1, missingFrom1);
         assertEquals(2, mismatches.size());
         assertTrue(mismatches.contains(missing));
-        Difference difference = new Difference<>(new SourceIdAndComposite<>(1, differentFrom1), new SourceIdAndComposite<>(2, differentFrom2));
+        Difference difference = new Difference<>(id1, differentFrom1, id2, differentFrom2);
         assertTrue(mismatches.contains(difference));
 
     }

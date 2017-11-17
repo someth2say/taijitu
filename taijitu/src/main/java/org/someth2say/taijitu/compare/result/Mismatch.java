@@ -1,19 +1,25 @@
 package org.someth2say.taijitu.compare.result;
 
-import org.someth2say.taijitu.compare.result.ComparisonResult.SourceIdAndComposite;
-
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public abstract class Mismatch<MMT> {
     final Map<Object, MMT> entries;
 
-    Mismatch(Collection<SourceIdAndComposite<MMT>> entries) {
-        this.entries = new HashMap<>(entries.size());
-        entries.forEach(srcAndComposite -> this.entries.put(srcAndComposite.getSourceId(), srcAndComposite.getComposite()));
+    public Mismatch(Map<Object, MMT> entries) {
+        this.entries = entries;
     }
 
-    public Mismatch(SourceIdAndComposite<MMT>... entries) {
-        this(Arrays.asList(entries));
+    public Mismatch(Object id, MMT composite) {
+        this.entries = Collections.singletonMap(id, composite);
+    }
+
+    public Mismatch(Object id, MMT composite, Object id2, MMT composite2) {
+        this.entries = new HashMap<>(2);
+        this.entries.put(id,composite);
+        this.entries.put(id2,composite2);
     }
 
     @Override
