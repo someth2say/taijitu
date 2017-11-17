@@ -14,6 +14,10 @@ import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndCompara
 import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndEquality;
 import org.someth2say.taijitu.compare.equality.value.*;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
+import org.someth2say.taijitu.compare.result.ComparisonResult.SourceIdAndComposite;
+import org.someth2say.taijitu.compare.result.Difference;
+import org.someth2say.taijitu.compare.result.Mismatch;
+import org.someth2say.taijitu.compare.result.Missing;
 import org.someth2say.taijitu.ui.config.ConfigurationLabels;
 import org.someth2say.taijitu.ui.config.DefaultConfig;
 import org.someth2say.taijitu.ui.config.delegates.simple.*;
@@ -32,11 +36,11 @@ import java.io.OutputStreamWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.someth2say.taijitu.ui.config.ConfigurationLabels.Comparison.*;
 import static org.someth2say.taijitu.ui.config.ConfigurationLabels.Comparison.Fields.KEYS;
 import static org.someth2say.taijitu.ui.config.ConfigurationLabels.Sections.COMPARISON;
@@ -104,11 +108,11 @@ public class TaijituTest {
 
         assertEquals(2, comparisonResults.length);
         final ComparisonResult firstResult = comparisonResults[0];
-        Collection<ComparisonResult.Mismatch> firstResultMismatches = firstResult.getMismatches();
+        Collection<Mismatch> firstResultMismatches = firstResult.getMismatches();
         System.out.println(firstResultMismatches);
         assertEquals(0, firstResultMismatches.size());
         final ComparisonResult secondResult = comparisonResults[1];
-        Collection<ComparisonResult.Mismatch> secondResultMismatches = secondResult.getMismatches();
+        Collection<Mismatch> secondResultMismatches = secondResult.getMismatches();
         System.out.println(secondResultMismatches);
         assertEquals(1, secondResultMismatches.size());
 
@@ -289,28 +293,35 @@ public class TaijituTest {
 
     @Test
     public void testCompositeEqualityBuilder() {
-        List<ExtractorAndEquality<TestClass, ?>> equalityEaEs = new ArrayList<>();
-        equalityEaEs.add(new ExtractorAndEquality<>(TestClass::getOne, new StringCaseInsensitive()));
-        equalityEaEs.add(new ExtractorAndEquality<>(TestClass::getTwo, new StringCaseInsensitive()));
-        CompositeEquality<TestClass> equality = new CompositeEquality<>(equalityEaEs);
+        // Build Equality and Comparer
+        CompositeEquality<TestClass> equality = new CompositeEquality<>(Arrays.asList(
+                new ExtractorAndEquality<>(TestClass::getOne, new StringCaseInsensitive<>()),
+                new ExtractorAndEquality<>(TestClass::getTwo, new StringCaseInsensitive<>())
+        ));
 
-        List<ExtractorAndComparableCategorizerEquality<TestClass, ?>> comparerEaEs = new ArrayList<>();
-        Function<TestClass, Integer> getThree = TestClass::getThree;
-        comparerEaEs.add(new ExtractorAndComparableCategorizerEquality<TestClass,Integer>(getThree, new ObjectToString()));
-        CompositeComparableCategorizerEquality<TestClass> comparer = new CompositeComparableCategorizerEquality<>(comparerEaEs);
-        Stream<TestClass> stream1 = Stream.of(
-                new TestClass("aaa", "aaa", 1),
-                new TestClass("bbb", "bbb", 1),
-                new TestClass("ccc", "ccc", 2)
-        );
+        CompositeComparableCategorizerEquality<TestClass> comparer = new CompositeComparableCategorizerEquality<>(Arrays.asList(
+                new ExtractorAndComparableCategorizerEquality<>(TestClass::getThree, new ObjectToString<>())
+        ));
 
-        Stream<TestClass> stream2 = Stream.of(
-                new TestClass("aAA", "aAa", 1),
-                new TestClass("bbb", "bb", 1),
-                new TestClass("ccc", "ccc", 3)
-        );
+        // Build Streams
+        TestClass differentFrom1 = new TestClass("aaa", "aaa", 1);
+        TestClass differentFrom2 = new TestClass("aaa", "aa", 1);
+        TestClass missingFrom1 = new TestClass("bbb", "bbb", 2);
+        TestClass equalsFrom1 = new TestClass("bBb", "bbb", 3);
+        TestClass equalsFrom2 = new TestClass("bbb", "bbB", 3);
+        Stream<TestClass> stream1 = Stream.of(differentFrom1, missingFrom1, equalsFrom1);
+        Stream<TestClass> stream2 = Stream.of(differentFrom2, equalsFrom2);
 
-        ComparableStreamEquality.compare(stream1, 1, stream2, 2, comparer, equality);
+        ComparisonResult<TestClass> result = ComparableStreamEquality.compare(stream1, 1, stream2, 2, comparer, equality);
+
+        // Test results
+        Collection<Mismatch<TestClass>> mismatches = result.getMismatches();
+        Missing missing = new Missing<>(new SourceIdAndComposite<>(1, missingFrom1));
+        assertEquals(2, mismatches.size());
+        assertTrue(mismatches.contains(missing));
+        Difference difference = new Difference<>(new SourceIdAndComposite<>(1, differentFrom1), new SourceIdAndComposite<>(2, differentFrom2));
+        assertTrue(mismatches.contains(difference));
+
     }
 
     //
@@ -809,5 +820,29 @@ class TestClass {
 
     public Integer getThree() {
         return three;
+    }
+
+    @Override
+    public String toString() {
+        return "TestClass{" +
+                "one='" + one + '\'' +
+                ", two='" + two + '\'' +
+                ", three=" + three +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof TestClass)) return false;
+        TestClass testClass = (TestClass) o;
+        return Objects.equals(getOne(), testClass.getOne()) &&
+                Objects.equals(getTwo(), testClass.getTwo()) &&
+                Objects.equals(getThree(), testClass.getThree());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getOne(), getTwo(), getThree());
     }
 }

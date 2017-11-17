@@ -24,7 +24,7 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
     public static final String NAME = "sorted";
     private static final Logger logger = LoggerFactory.getLogger(ComparableStreamEquality.class);
 
-    public ComparableStreamEquality(Equality equality, ComparableCategorizerEquality categorizer) {
+    public ComparableStreamEquality(Equality<T> equality, ComparableCategorizerEquality<T> categorizer) {
         super(equality, categorizer);
     }
 
@@ -34,16 +34,7 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
     }
 
     public ComparisonResult<T> runComparison(Stream<T> source, Object sourceId, Stream<T> target, Object targetId) {
-        CategorizerEquality<T> categorizer = getCategorizer();
-        if (categorizer instanceof ComparableCategorizerEquality) {
-            ComparableEquality<T> comparer = (ComparableEquality<T>) categorizer;
-            Equality<T> equality = getEquality();
-            return compare(source, sourceId, target, targetId, comparer, equality);
-
-        } else {
-            logger.error("Sorted stream requires an ComparableCategorizerEquality (say, need to define category order)");
-            return null;
-        }
+        return compare(source, sourceId, target, targetId, getCategorizer(), getEquality());
     }
 
     public static <T> ComparisonResult<T> compare(Stream<T> source, Object sourceId, Stream<T> target, Object targetId, ComparableEquality<T> comparer, Equality<T> equality) {
@@ -57,7 +48,7 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
     public static <T> ComparisonResult<T> compare(Stream<T> source, Object sourceId, Stream<T> target, Object targetId, BiFunction<T, T, Integer> compareFunc, BiFunction<T, T, Boolean> equalsFunc) {
         SimpleComparisonResult<T> result = new SimpleComparisonResult<>();
 
-        Iterator<T> sourceIt= source.iterator();
+        Iterator<T> sourceIt = source.iterator();
         Iterator<T> targetIt = target.iterator();
 
         int recordCount = 0;
@@ -72,12 +63,12 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
             int keyComparison = compareFunc.apply(sourceRecord, targetRecord);
             if (keyComparison > 0) {
                 // SourceCfg is after target -> target record is not in source stream
-                result.addDisjoint(new SourceIdAndComposite<>(sourceId, targetRecord));
+                result.addDisjoint(new SourceIdAndComposite<>(targetId, targetRecord));
                 targetRecord = getNextRecordOrNull(targetIt);
                 recordCount++;
             } else if (keyComparison < 0) {
                 // SourceCfg is before target -> source record is not in target stream
-                result.addDisjoint(new SourceIdAndComposite<>(targetId, sourceRecord));
+                result.addDisjoint(new SourceIdAndComposite<>(sourceId, sourceRecord));
                 sourceRecord = getNextRecordOrNull(sourceIt);
                 recordCount++;
             } else {

@@ -3,7 +3,7 @@ package org.someth2say.taijitu.compare.equality.value;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class NumberThreshold extends AbstractConfigurableComparableCategorizerEquality<Number> {
+public class NumberThreshold<T extends Number> extends AbstractConfigurableComparableCategorizerEquality<T> {
 
     private static final int DEFAULT_SCALE = 2;
 
@@ -16,7 +16,7 @@ public class NumberThreshold extends AbstractConfigurableComparableCategorizerEq
     }
 
     @Override
-    public int hashCode(Number object) {
+    public int hashCode(T object) {
         int scale = getScale();
         double doubleValue = object.doubleValue();
         double rounded = round(doubleValue, scale);
@@ -36,7 +36,7 @@ public class NumberThreshold extends AbstractConfigurableComparableCategorizerEq
     }
 
     @Override
-    public boolean equals(Number object1, Number object2) {
+    public boolean equals(T object1, T object2) {
         int scale = getScale();
         double diff = object1.doubleValue() - object2.doubleValue();
         double scaleRange = getScaleRange(scale);
@@ -48,7 +48,7 @@ public class NumberThreshold extends AbstractConfigurableComparableCategorizerEq
     }
 
     @Override
-    public int compare(Number object1, Number object2) {
+    public int compare(T object1, T object2) {
         int scale = getScale();
         double diff = object1.doubleValue() - object2.doubleValue();
         double scaleRange = getScaleRange(scale);

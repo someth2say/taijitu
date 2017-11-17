@@ -2,7 +2,7 @@ package org.someth2say.taijitu.compare.equality.value;
 
 import java.util.Date;
 
-public class DateThreshold extends AbstractConfigurableComparableCategorizerEquality<Date> {
+public class DateThreshold<T extends Date> extends AbstractConfigurableComparableCategorizerEquality<T> {
 
     private static final int DEFAULT_THRESHOLD = 1000;
 
@@ -15,12 +15,12 @@ public class DateThreshold extends AbstractConfigurableComparableCategorizerEqua
     }
 
     @Override
-    public int hashCode(Date object) {
+    public int hashCode(T object) {
         return object.hashCode();
     }
 
     @Override
-    public boolean equals(Date object1, Date object2) {
+    public boolean equals(T object1, T object2) {
         Double threshold = getThreshold();
         long diff = object1.getTime() - object2.getTime();
         return (Math.abs(diff) < threshold);
@@ -32,7 +32,7 @@ public class DateThreshold extends AbstractConfigurableComparableCategorizerEqua
     }
 
     @Override
-    public int compare(Date object1, Date object2) {
+    public int compare(T object1, T object2) {
         Double threshold = getThreshold();
         long diff = object1.getTime() - object2.getTime();
         return Math.abs(diff) < threshold ? 0 : diff < 0 ? -1 : 1;

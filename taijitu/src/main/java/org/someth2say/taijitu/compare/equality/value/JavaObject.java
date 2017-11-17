@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.compare.equality.value;
 
-public class JavaObject extends AbstractConfigurableCategorizerEquality<Object> {
+public class JavaObject<T extends Object> extends AbstractConfigurableCategorizerEquality<T> {
 
 
 
@@ -13,12 +13,12 @@ public class JavaObject extends AbstractConfigurableCategorizerEquality<Object> 
     }
 
     @Override
-    public int hashCode(Object object) {
+    public int hashCode(T object) {
         return object.hashCode();
     }
 
     @Override
-    public boolean equals(Object object1, Object object2) {
+    public boolean equals(T object1, T object2) {
         return object1.equals(object2);
     }
 

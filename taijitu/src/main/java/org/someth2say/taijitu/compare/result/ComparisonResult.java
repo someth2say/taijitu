@@ -1,6 +1,8 @@
 package org.someth2say.taijitu.compare.result;
 
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.*;
 
 public abstract class ComparisonResult<T> {
@@ -26,31 +28,19 @@ public abstract class ComparisonResult<T> {
         public String toString() {
             return "[SourceId: " + sourceId + "-> Composite: " + composite + "]";
         }
-    }
 
-    public abstract class Mismatch<MMT> {
-        final Map<Object, MMT> entries;
-
-        Mismatch(Collection<SourceIdAndComposite<MMT>> entries) {
-            this.entries = new HashMap<>(entries.size());
-            entries.forEach(srcAndComposite -> this.entries.put(srcAndComposite.sourceId, srcAndComposite.composite));
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof SourceIdAndComposite)) return false;
+            SourceIdAndComposite<?> that = (SourceIdAndComposite<?>) o;
+            return Objects.equals(getSourceId(), that.getSourceId()) &&
+                    Objects.equals(getComposite(), that.getComposite());
         }
 
         @Override
-        public String toString() {
-            return this.getClass().getSimpleName()+": "+entries.toString();
-        }
-    }
-
-    public class Difference<DT> extends Mismatch<DT> {
-        Difference(Collection<SourceIdAndComposite<DT>> different) {
-            super(different);
-        }
-    }
-
-    public class Missing<MT> extends Mismatch<MT> {
-        Missing(Collection<SourceIdAndComposite<MT>> existing) {
-            super(existing);
+        public int hashCode() {
+            return Objects.hash(getSourceId(), getComposite());
         }
     }
 
@@ -75,4 +65,11 @@ public abstract class ComparisonResult<T> {
     public Collection<Mismatch<T>> getMismatches() {
         return mismatches;
     }
+
+    @Override
+    public String toString() {
+        return StringUtils.join(mismatches.toString(),",");
+    }
+
+
 }

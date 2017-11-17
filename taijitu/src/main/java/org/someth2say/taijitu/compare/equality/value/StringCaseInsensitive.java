@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Locale;
 
-public class StringCaseInsensitive extends AbstractConfigurableComparableCategorizerEquality<String> {
+public class StringCaseInsensitive<T extends String> extends AbstractConfigurableComparableCategorizerEquality<T> {
 
     private final Locale locale;
 
@@ -18,17 +18,17 @@ public class StringCaseInsensitive extends AbstractConfigurableComparableCategor
     }
 
     @Override
-    public int hashCode(String object) {
+    public int hashCode(T object) {
         return object.toUpperCase(locale).hashCode();
     }
 
     @Override
-    public boolean equals(String object1, String object2) {
+    public boolean equals(T object1, T object2) {
         return object1.toUpperCase().equals(object2.toUpperCase(locale));
     }
 
     @Override
-    public int compare(String object1, String object2) {
+    public int compare(T object1, T object2) {
         return object1.toUpperCase(locale).compareTo(object2.toUpperCase(locale));
     }
 
