@@ -74,15 +74,17 @@ public class StreamUtil {
             @Override
             public C next() {
                 return aIterator.hasNext() && bIterator.hasNext()
-                            ? zipper.apply(aIterator.next(), bIterator.next())
-                            : aIterator.hasNext()
-                                ? aTailer.apply(aIterator.next())
-                                : bTailer.apply(bIterator.next());
+                        ? zipper.apply(aIterator.next(), bIterator.next())
+                        : aIterator.hasNext()
+                        ? aTailer.apply(aIterator.next())
+                        : bTailer.apply(bIterator.next());
             }
         };
 
         Spliterator<C> split = Spliterators.spliterator(cIterator, zipSize, characteristics);
         return StreamSupport.stream(split, a.isParallel() || b.isParallel());
     }
+
+
 
 }

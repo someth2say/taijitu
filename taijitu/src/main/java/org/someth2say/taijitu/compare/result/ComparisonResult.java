@@ -19,6 +19,14 @@ public abstract class ComparisonResult<T> {
         getMismatches().add(new Difference<>(id1, composite1, id2, composite2));
     }
 
+    public void addDifference(Difference<T> difference) {
+        getMismatches().add(difference);
+    }
+
+    public void addDisjoint(Missing<T> missing) {
+        getMismatches().add(missing);
+    }
+
     public void addDisjoint(Object id, T composite) {
         getMismatches().add(new Missing<>(id, composite));
     }
