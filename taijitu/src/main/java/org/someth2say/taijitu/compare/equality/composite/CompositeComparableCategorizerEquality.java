@@ -4,9 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.ComparableCategorizerEquality;
 import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndComparableCategorizerEquality;
+import org.someth2say.taijitu.compare.result.Mismatch;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class CompositeComparableCategorizerEquality<T> extends AbstractCompositeEquality<T, ExtractorAndComparableCategorizerEquality<T, ?>> implements ComparableCategorizerEquality<T> {
     private static final Logger logger = LoggerFactory.getLogger(CompositeComparableCategorizerEquality.class);
@@ -32,7 +35,7 @@ public class CompositeComparableCategorizerEquality<T> extends AbstractComposite
         V firstValue = extractor.apply(first);
         V secondValue = extractor.apply(second);
         int compare = equality.compare(firstValue, secondValue);
-        logger.trace("{}<={}=>{} ({}({}))", firstValue, compare , secondValue, equality.getClass().getSimpleName(), firstValue.getClass().getName());
+        logger.trace("{}<={}=>{} ({}({}))", firstValue, compare, secondValue, equality.getClass().getSimpleName(), firstValue.getClass().getName());
         return compare;
     }
 
@@ -42,6 +45,11 @@ public class CompositeComparableCategorizerEquality<T> extends AbstractComposite
     @Override
     public boolean equals(T first, T second) {
         return getExtractorsAndEqualities().stream().allMatch(eae -> valueEquals(first, second, eae));
+    }
+
+    @Override
+    public Collection<Mismatch> differences(T t1, T t2) {
+        return getExtractorsAndEqualities().stream().map(eae -> difference(t1, t2, eae)).collect(Collectors.toList());
     }
 
     @Override

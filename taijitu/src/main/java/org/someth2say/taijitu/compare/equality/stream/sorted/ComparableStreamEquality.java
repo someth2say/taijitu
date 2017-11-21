@@ -7,10 +7,12 @@ import org.someth2say.taijitu.compare.equality.ComparableEquality;
 import org.someth2say.taijitu.compare.equality.Equality;
 import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
+import org.someth2say.taijitu.compare.result.Mismatch;
 import org.someth2say.taijitu.compare.result.SimpleComparisonResult;
 import org.someth2say.taijitu.discarter.TimeBiDiscarter;
 import org.someth2say.taijitu.ui.config.interfaces.IStrategyCfg;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,15 +39,7 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
         return compare(source, sourceId, target, targetId, getCategorizer(), getEquality());
     }
 
-    public static <T> ComparisonResult<T> compare(Stream<T> source, Object sourceId, Stream<T> target, Object targetId, ComparableEquality<T> comparer, Equality<T> equality) {
-
-        BiFunction<T, T, Integer> compareFunc = comparer::compare;
-        BiFunction<T, T, Boolean> equalsFunc = equality::equals;
-
-        return compare(source, sourceId, target, targetId, compareFunc, equalsFunc);
-    }
-
-    public static <T> ComparisonResult<T> compare(Map<Object, Stream<T>> streams, BiFunction<T, T, Integer> compareFunc, BiFunction<T, T, Boolean> equalsFunc) {
+    public static <T> ComparisonResult<T> compare(Map<Object, Stream<T>> streams,  ComparableCategorizerEquality<T> categorizer, Equality<T> equality) {
         if (streams.size() < 2)
             throw new RuntimeException("Need at least two streams to compare");
 
@@ -57,10 +51,10 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
         Entry<Object, Stream<T>> source = iterator.next();
         Entry<Object, Stream<T>> target = iterator.next();
 
-        return compare(source.getValue(), source.getKey(), target.getValue(), target.getKey(), compareFunc, equalsFunc);
+        return compare(source.getValue(), source.getKey(), target.getValue(), target.getKey(), categorizer, equality);
     }
 
-    public static <T> ComparisonResult<T> compare(Stream<T> source, Object sourceId, Stream<T> target, Object targetId, BiFunction<T, T, Integer> compareFunc, BiFunction<T, T, Boolean> equalsFunc) {
+    public static <T> ComparisonResult<T> compare(Stream<T> source, Object sourceId, Stream<T> target, Object targetId, ComparableCategorizerEquality<T> categorizer, Equality<T> equality) {
         SimpleComparisonResult<T> result = new SimpleComparisonResult<>();
 
         Iterator<T> sourceIt = source.iterator();
@@ -75,23 +69,28 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
         TimeBiDiscarter<String, Object[]> timedLogger = new TimeBiDiscarter<>(1000, logger::debug);
         while (sourceRecord != null && targetRecord != null) {
             timedLogger.accept("Processing {} records so far...", new Object[]{recordCount});
-            int keyComparison = compareFunc.apply(sourceRecord, targetRecord);
+            int keyComparison = categorizer.compare(sourceRecord, targetRecord);
             if (keyComparison > 0) {
                 // SourceCfg is after target -> target record is not in source stream
-                result.addDisjoint(targetId, targetRecord);
+                result.addDisjoint(categorizer, targetId, targetRecord);
                 targetRecord = getNextRecordOrNull(targetIt);
                 recordCount++;
             } else if (keyComparison < 0) {
                 // SourceCfg is before target -> source record is not in target stream
-                result.addDisjoint(sourceId, sourceRecord);
+                result.addDisjoint(categorizer, sourceId, sourceRecord);
                 sourceRecord = getNextRecordOrNull(sourceIt);
                 recordCount++;
             } else {
                 // same Keys
-                if (!equalsFunc.apply(sourceRecord, targetRecord)) {
-                    // Records are different
-                    result.addDifference(sourceId, sourceRecord, targetId, targetRecord);
+                // TODO: Use equality.difference
+                Collection<Mismatch> differences = equality.differences(sourceRecord, targetRecord);
+                // Records are different
+                if (differences != null && !differences.isEmpty()) {
+                   differences.forEach(d->result.addMismatch(equality,d));
                 }
+//                if (!equality.equals(sourceRecord, targetRecord)) {
+//                    result.addDifference(equality, sourceId, sourceRecord, targetId, targetRecord);
+//                }
                 sourceRecord = getNextRecordOrNull(sourceIt);
                 recordCount++;
                 targetRecord = getNextRecordOrNull(targetIt);
@@ -102,11 +101,11 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
         // At least, one stream is fully consumed, so add every other stream's element
         // to "missing"
         while (sourceIt.hasNext()) {
-            result.addDisjoint(sourceId, sourceIt.next());
+            result.addDisjoint(categorizer, sourceId, sourceIt.next());
             timedLogger.accept("Finalizing source {}, {} records so far...", new Object[]{sourceId, ++recordCount});
         }
         while (targetIt.hasNext()) {
-            result.addDisjoint(targetId, targetIt.next());
+            result.addDisjoint(categorizer, targetId, targetIt.next());
             timedLogger.accept("Finalizing source {}, {} records so far...", new Object[]{targetId, ++recordCount});
         }
 

@@ -139,8 +139,10 @@ public class TaijituTest {
 
         assertEquals(1, comparisonResults.length);
         final ComparisonResult firstResult = comparisonResults[0];
-        assertEquals(0, firstResult.getMismatches().size());
-        System.out.println(firstResult.getMismatches());
+        Collection<Mismatch> mismatches = firstResult.getMismatches();
+        mismatches.forEach(System.out::println);
+        assertEquals(0, mismatches.size());
+        System.out.println(mismatches);
 
     }
 
@@ -298,7 +300,27 @@ public class TaijituTest {
     }
 
     @Test
-    public void testCompositeEqualityBuilder() {
+    public void testDifferences(){
+        // Build Equality
+        CompositeEquality<TestClass> equality = new CompositeEquality<>(Arrays.asList(
+                new ExtractorAndEquality<>(TestClass::getOne, new StringCaseInsensitive<>()),
+                new ExtractorAndEquality<>(TestClass::getThree, new ObjectToString<>())
+        ));
+        TestClass differentFrom1 = new TestClass("aaa", "aaa", 1);
+        TestClass differentFrom2 = new TestClass("bbb", "bbb", 1);
+        TestClass differentFrom3 = new TestClass("aaa", "aaa", 2);
+        TestClass differentFrom4 = new TestClass("ccc", "ccc", 3);
+
+
+        equality.differences(differentFrom1, differentFrom2).forEach(System.out::println);
+        equality.differences(differentFrom1, differentFrom3).forEach(System.out::println);
+        equality.differences(differentFrom1, differentFrom4).forEach(System.out::println);
+    }
+
+
+
+    @Test
+    public void testCompositeEquality() {
         // Build Equality and Comparer
         CompositeEquality<TestClass> equality = new CompositeEquality<>(Arrays.asList(
                 new ExtractorAndEquality<>(TestClass::getOne, new StringCaseInsensitive<>()),
@@ -319,17 +341,18 @@ public class TaijituTest {
         Stream<TestClass> stream1 = Stream.of(differentFrom1, missingFrom1, equalsFrom1);
         Stream<TestClass> stream2 = Stream.of(differentFrom2, equalsFrom2);
 
-        Object id1 = stream1;//1;
-        Object id2 = stream2;//2
+        Object id1 = 1;
+        Object id2 = 2;
 
         ComparisonResult<TestClass> result = ComparableStreamEquality.compare(stream1, id1, stream2, id2, comparer, equality);
 
         // Test results
         Collection<Mismatch<TestClass>> mismatches = result.getMismatches();
-        Missing missing = new Missing<>(id1, missingFrom1);
+        mismatches.forEach(System.out::println);
+        Missing missing = new Missing<>(comparer, id1, missingFrom1);
         assertEquals(2, mismatches.size());
         assertTrue(mismatches.contains(missing));
-        Difference difference = new Difference<>(id1, differentFrom1, id2, differentFrom2);
+        Difference difference = new Difference<>(equality, id1, differentFrom1, id2, differentFrom2);
         assertTrue(mismatches.contains(difference));
 
     }
