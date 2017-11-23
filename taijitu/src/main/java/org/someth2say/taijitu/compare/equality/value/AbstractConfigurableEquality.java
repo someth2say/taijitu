@@ -27,7 +27,7 @@ public abstract class AbstractConfigurableEquality<T> implements Equality<T> {
 
     @Override
     public List<Mismatch> differences(T t1, T t2) {
-        //TODO: get rid of IDs
         return this.equals(t1, t2) ? Collections.emptyList() : Collections.singletonList(new Difference<>(this, t1, t2));
     }
+
 }

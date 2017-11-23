@@ -43,7 +43,7 @@ public abstract class Mismatch<MMT> {
         if (underlyingMismatches != null) {
             return this.getClass().getSimpleName() + ": " + cause.toString() + "(" + StringUtils.join(underlyingMismatches, ",") + ")";
         } else {
-            return this.getClass().getSimpleName() + ": " + cause.toString() + "(" + entries.toString() + ")";
+            return this.getClass().getSimpleName() + ": " + cause.toString() + "(" + StringUtils.join(entries, "<>") + ")";
         }
     }
 

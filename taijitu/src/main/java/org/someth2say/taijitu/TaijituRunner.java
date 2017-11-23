@@ -9,7 +9,7 @@ import org.someth2say.taijitu.compare.equality.composite.CompositeEquality;
 import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndComparableCategorizerEquality;
 import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndEquality;
 import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
-import org.someth2say.taijitu.compare.result.ComparisonResult;
+import org.someth2say.taijitu.compare.result.Mismatch;
 import org.someth2say.taijitu.ui.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.ui.config.interfaces.IEqualityCfg;
 import org.someth2say.taijitu.ui.config.interfaces.IPluginCfg;
@@ -27,12 +27,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.util.stream.Stream.concat;
-
 /**
  * @author Jordi Sola
  */
-class TaijituRunner implements Callable<ComparisonResult> {
+class TaijituRunner implements Callable<List<Mismatch>> {
 
     private static final Logger logger = LoggerFactory.getLogger(TaijituRunner.class);
 
@@ -43,12 +41,12 @@ class TaijituRunner implements Callable<ComparisonResult> {
     }
 
     @Override
-    public ComparisonResult call() {
+    public List<Mismatch> call() {
         List<IPluginCfg> pluginConfigs = comparisonCfg.getPluginConfigs();
 
         runPluginsPreComparison(pluginConfigs, comparisonCfg);
 
-        ComparisonResult result = runComparison(comparisonCfg);
+        List<Mismatch> result = runComparison(comparisonCfg);
 
         runPluginsPostComparison(pluginConfigs, comparisonCfg);
 
@@ -80,7 +78,7 @@ class TaijituRunner implements Callable<ComparisonResult> {
         }
     }
 
-    private <T> ComparisonResult<T> runComparison(IComparisonCfg iComparisonCfg) {
+    private <T> List<Mismatch> runComparison(IComparisonCfg iComparisonCfg) {
 
         List<ISourceCfg> sourceConfigs = iComparisonCfg.getSourceConfigs();
         if (sourceConfigs.size() < 2) {
@@ -246,13 +244,14 @@ class TaijituRunner implements Callable<ComparisonResult> {
         sourceData.source = source;
     }
 
-    private <T> ComparisonResult<T> runStreamEquality(StreamEquality<T> streamEquality, List<SourceData<?, T>> sourceDatas) {
-        ComparisonResult<T> comparisonResult = null;
+    private <T> List<Mismatch> runStreamEquality(StreamEquality<T> streamEquality, List<SourceData<?, T>> sourceDatas) {
+        List<Mismatch> comparisonResult = null;
         try (Stream<T> sourceStr = sourceDatas.get(0).mappedSource.stream();
              Stream<T> targetStr = sourceDatas.get(1).mappedSource.stream();
              Source sourceSrc = sourceDatas.get(0).mappedSource;
              Source targetSrc = sourceDatas.get(1).mappedSource) {
-            comparisonResult = streamEquality.match(sourceStr, sourceSrc.getName(), targetStr, targetSrc.getName());
+            //comparisonResult = streamEquality.match(sourceStr, sourceSrc.getName(), targetStr, targetSrc.getName());
+            comparisonResult = streamEquality.differences(sourceStr, targetStr);
             return comparisonResult;
         } catch (Source.ClosingException e) {
             //TODO: We are actually closing the stream, not the source!!!!!

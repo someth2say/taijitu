@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.compare.result;
+package org.someth2say.taijitu.compare.equality.stream.mapping;
 
 import java.util.Objects;
 

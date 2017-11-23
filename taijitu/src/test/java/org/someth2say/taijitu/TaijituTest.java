@@ -21,7 +21,7 @@ import org.someth2say.taijitu.compare.equality.value.DateThreshold;
 import org.someth2say.taijitu.compare.equality.value.NumberThreshold;
 import org.someth2say.taijitu.compare.equality.value.ObjectToString;
 import org.someth2say.taijitu.compare.equality.value.StringCaseInsensitive;
-import org.someth2say.taijitu.compare.result.ComparisonResult;
+import org.someth2say.taijitu.compare.equality.stream.ComparisonResult;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Mismatch;
 import org.someth2say.taijitu.compare.result.Missing;
@@ -92,15 +92,15 @@ public class TaijituTest {
 
         final ITaijituCfg configuration = getTaijituConfig(databaseProps);
 
-        final ComparisonResult[] comparisonResults = Taijitu.compare(configuration);
+        final List<List<Mismatch>> comparisonResults = Taijitu.compare(configuration);
 
-        assertEquals(2, comparisonResults.length);
-        final ComparisonResult firstResult = comparisonResults[0];
-        System.out.println(firstResult.getMismatches());
-        assertEquals(0, firstResult.getMismatches().size());
-        final ComparisonResult secondResult = comparisonResults[1];
-        System.out.println(secondResult.getMismatches());
-        assertEquals(1, secondResult.getMismatches().size());
+        assertEquals(2, comparisonResults.size());
+        final List<Mismatch> firstResult = comparisonResults.get(0);
+        System.out.println(firstResult);
+        assertEquals(0, firstResult.size());
+        final List<Mismatch> secondResult = comparisonResults.get(1);
+        System.out.println(secondResult);
+        assertEquals(1, secondResult.size());
     }
 
     @Test
@@ -110,17 +110,15 @@ public class TaijituTest {
 
         final ImmutableHierarchicalConfiguration configuration = getApacheConfiguration(sourceBuildProperties);
 
-        final ComparisonResult[] comparisonResults = Taijitu.compare(configuration);
+        final List<List<Mismatch>> comparisonResults = Taijitu.compare(configuration);
 
-        assertEquals(2, comparisonResults.length);
-        final ComparisonResult firstResult = comparisonResults[0];
-        Collection<Mismatch> firstResultMismatches = firstResult.getMismatches();
-        System.out.println(firstResultMismatches);
-        assertEquals(0, firstResultMismatches.size());
-        final ComparisonResult secondResult = comparisonResults[1];
-        Collection<Mismatch> secondResultMismatches = secondResult.getMismatches();
-        System.out.println(secondResultMismatches);
-        assertEquals(1, secondResultMismatches.size());
+        assertEquals(2, comparisonResults.size());
+        final List<Mismatch> firstResult = comparisonResults.get(0);
+        System.out.println(firstResult);
+        assertEquals(0, firstResult.size());
+        final List<Mismatch> secondResult = comparisonResults.get(1);
+        System.out.println(secondResult);
+        assertEquals(1, secondResult.size());
 
         //TODO: Define exactly the expected difference!
 //        Collection<Pair<ComparisonResult.QueryAndTuple, ComparisonResult.QueryAndTuple>> different = secondResult.getDifferent();
@@ -131,19 +129,16 @@ public class TaijituTest {
     }
 
     @Test
-    public void CSVTest() throws TaijituException, SQLException, ConfigurationException, InterruptedException {
+    public void CSVTest() throws TaijituException {
         // Create the tables and test data
         final TaijituCfg configuration = getCSVConfiguration();
 
-        final ComparisonResult[] comparisonResults = Taijitu.compare(configuration);
+        final List<List<Mismatch>> comparisonResults = Taijitu.compare(configuration);
 
-        assertEquals(1, comparisonResults.length);
-        final ComparisonResult firstResult = comparisonResults[0];
-        Collection<Mismatch> mismatches = firstResult.getMismatches();
-        mismatches.forEach(System.out::println);
-        assertEquals(0, mismatches.size());
-        System.out.println(mismatches);
-
+        assertEquals(1, comparisonResults.size());
+        final List<Mismatch> firstResult = comparisonResults.get(0);
+        firstResult.forEach(System.out::println);
+        assertEquals(0, firstResult.size());
     }
 
     private TaijituCfg getCSVConfiguration() {
@@ -300,7 +295,7 @@ public class TaijituTest {
     }
 
     @Test
-    public void testDifferences(){
+    public void testDifferences() {
         // Build Equality
         CompositeEquality<TestClass> equality = new CompositeEquality<>(Arrays.asList(
                 new ExtractorAndEquality<>(TestClass::getOne, new StringCaseInsensitive<>()),
@@ -315,7 +310,6 @@ public class TaijituTest {
         equality.differences(differentFrom1, differentFrom3).forEach(System.out::println);
         equality.differences(differentFrom1, differentFrom4).forEach(System.out::println);
     }
-
 
 
     @Test
@@ -343,17 +337,15 @@ public class TaijituTest {
         Object id1 = 1;
         Object id2 = 2;
 
-        ComparisonResult<TestClass> result = ComparableStreamEquality.compare(stream1, id1, stream2, id2, comparer, equality);
+        List<Mismatch> mismatches = new ComparableStreamEquality<>(equality, comparer).differences(stream1, stream2);
 
         // Test results
-        Collection<Mismatch<TestClass>> mismatches = result.getMismatches();
         mismatches.forEach(System.out::println);
         Missing missing = new Missing<>(comparer, missingFrom1);
         assertEquals(2, mismatches.size());
         assertTrue(mismatches.contains(missing));
         Difference difference = new Difference<>(equality, differentFrom1, differentFrom2);
         assertTrue(mismatches.contains(difference));
-
     }
 
     //

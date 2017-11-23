@@ -5,19 +5,18 @@ import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.ComparableCategorizerEquality;
 import org.someth2say.taijitu.compare.equality.Equality;
 import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
-import org.someth2say.taijitu.compare.result.ComparisonResult;
-import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Mismatch;
-import org.someth2say.taijitu.compare.result.SimpleComparisonResult;
 import org.someth2say.taijitu.discarter.TimeBiDiscarter;
 import org.someth2say.taijitu.ui.config.interfaces.IStrategyCfg;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
+
+import static org.someth2say.taijitu.compare.equality.stream.ComparisonResult.*;
 
 /**
  * Created by Jordi Sola on 02/03/2017.
@@ -35,11 +34,12 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
         return NAME;
     }
 
-    public ComparisonResult<T> match(Stream<T> source, Object sourceId, Stream<T> target, Object targetId) {
+    @Override
+    public List<Mismatch> match(Stream<T> source, Object sourceId, Stream<T> target, Object targetId) {
         return compare(source, sourceId, target, targetId, getCategorizer(), getEquality());
     }
 
-    public static <T> ComparisonResult<T> compare(Map<Object, Stream<T>> streams, ComparableCategorizerEquality<T> categorizer, Equality<T> equality) {
+    public static <T> List<Mismatch> compare(Map<Object, Stream<T>> streams, ComparableCategorizerEquality<T> categorizer, Equality<T> equality) {
         if (streams.size() < 2)
             throw new RuntimeException("Need at least two streams to compare");
 
@@ -54,9 +54,10 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
         return compare(source.getValue(), source.getKey(), target.getValue(), target.getKey(), categorizer, equality);
     }
 
-    public static <T> ComparisonResult<T> compare(Stream<T> source, Object sourceId, Stream<T> target, Object targetId, ComparableCategorizerEquality<T> categorizer, Equality<T> equality) {
-        SimpleComparisonResult<T> result = new SimpleComparisonResult<>();
+    public static <T> List<Mismatch> compare(Stream<T> source, Object sourceId, Stream<T> target, Object targetId, ComparableCategorizerEquality<T> categorizer, Equality<T> equality) {
+//        SimpleComparisonResult result = new SimpleComparisonResult();
 
+        List<Mismatch> newresult = new ArrayList<>();
         Iterator<T> sourceIt = source.iterator();
         Iterator<T> targetIt = target.iterator();
 
@@ -72,12 +73,12 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
             int keyComparison = categorizer.compare(sourceRecord, targetRecord);
             if (keyComparison > 0) {
                 // SourceCfg is after target -> target record is not in source stream
-                result.addDisjoint(categorizer, targetRecord);
+                addMissing(newresult, categorizer, targetRecord);
                 targetRecord = getNextRecordOrNull(targetIt);
                 recordCount++;
             } else if (keyComparison < 0) {
                 // SourceCfg is before target -> source record is not in target stream
-                result.addDisjoint(categorizer, sourceRecord);
+                addMissing(newresult, categorizer, sourceRecord);
                 sourceRecord = getNextRecordOrNull(sourceIt);
                 recordCount++;
             } else {
@@ -86,11 +87,8 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
                 List<Mismatch> differences = equality.differences(sourceRecord, targetRecord);
                 // Records are different
                 if (differences != null && !differences.isEmpty()) {
-                    result.addDifference(new Difference<>(equality, sourceRecord, targetRecord, differences));
+                    addDifference(newresult, equality, sourceRecord, targetRecord, differences);
                 }
-//                if (!equality.equals(sourceRecord, targetRecord)) {
-//                    result.addDifference(equality, sourceId, sourceRecord, targetId, targetRecord);
-//                }
                 sourceRecord = getNextRecordOrNull(sourceIt);
                 recordCount++;
                 targetRecord = getNextRecordOrNull(targetIt);
@@ -101,15 +99,15 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
         // At least, one stream is fully consumed, so add every other stream's element
         // to "missing"
         while (sourceIt.hasNext()) {
-            result.addDisjoint(categorizer, sourceIt.next());
+            addMissing(newresult, categorizer, sourceIt.next());
             timedLogger.accept("Finalizing source {}, {} records so far...", new Object[]{sourceId, ++recordCount});
         }
         while (targetIt.hasNext()) {
-            result.addDisjoint(categorizer, targetIt.next());
+            addMissing(newresult, categorizer, targetIt.next());
             timedLogger.accept("Finalizing source {}, {} records so far...", new Object[]{targetId, ++recordCount});
         }
 
-        return result;
+        return newresult;
     }
 
     public static IStrategyCfg defaultConfig() {

@@ -3,7 +3,7 @@ package org.someth2say.taijitu;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.someth2say.taijitu.compare.result.ComparisonResult;
+import org.someth2say.taijitu.compare.result.Mismatch;
 import org.someth2say.taijitu.ui.config.impl.TaijituCfg;
 import org.someth2say.taijitu.ui.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.ui.config.interfaces.IPluginCfg;
@@ -13,6 +13,7 @@ import org.someth2say.taijitu.ui.registry.*;
 import org.someth2say.taijitu.ui.config.source.query.ConnectionManager;
 import org.someth2say.taijitu.util.FileUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -72,21 +73,21 @@ final class Taijitu {
         }
     }
 
-    public static ComparisonResult[] compare() throws TaijituException {
+    public static List<List<Mismatch>> compare() throws TaijituException {
         return compare(DEFAULT_CONFIG_FILE);
     }
 
-    private static ComparisonResult[] compare(final String fileName) throws TaijituException {
+    private static List<List<Mismatch>> compare(final String fileName) throws TaijituException {
         return compare(configFromFile(fileName));
     }
 
 
-    public static ComparisonResult[] compare(final ImmutableHierarchicalConfiguration properties) throws TaijituException {
+    public static List<List<Mismatch>> compare(final ImmutableHierarchicalConfiguration properties) throws TaijituException {
         return compare(configFromApache(properties));
     }
 
 
-    public static ComparisonResult[] compare(final ITaijituCfg config) throws TaijituException {
+    public static List<List<Mismatch>> compare(final ITaijituCfg config) throws TaijituException {
         logger.info("Start comparisons.");
         performSetup(config);
 
@@ -94,10 +95,10 @@ final class Taijitu {
 
         startPlugins(config);
 
-        final CompletionService<ComparisonResult> completionService = runComparisons(config);
+        final CompletionService<List<Mismatch>> completionService = runComparisons(config);
 
         // Collect results
-        final ComparisonResult[] result = getComparisonResults(completionService, comparisons);
+        final List<List<Mismatch>> result = getComparisonResults(completionService, comparisons);
 
         endPlugins(config);
 
@@ -108,9 +109,9 @@ final class Taijitu {
 
     }
 
-    private static CompletionService<ComparisonResult> runComparisons(final ITaijituCfg config) {
+    private static CompletionService<List<Mismatch>> runComparisons(final ITaijituCfg config) {
         final ExecutorService executorService = Executors.newFixedThreadPool(config.getThreads());
-        CompletionService<ComparisonResult> completionService = new ExecutorCompletionService<>(executorService);
+        CompletionService<List<Mismatch>> completionService = new ExecutorCompletionService<>(executorService);
 
         config.getComparisons().forEach(comparison -> completionService.submit(new TaijituRunner(comparison)));
 
@@ -136,21 +137,22 @@ final class Taijitu {
         }
     }
 
-    private static ComparisonResult[] getComparisonResults(CompletionService<ComparisonResult> completionService,
-                                                           List<IComparisonCfg> iComparisonCfgs) {
-        final ComparisonResult[] result = new ComparisonResult[iComparisonCfgs.size()];
+    private static List<List<Mismatch>> getComparisonResults(CompletionService<List<Mismatch>> completionService,
+                                                             List<IComparisonCfg> iComparisonCfgs) {
+        final List<List<Mismatch>> result = new ArrayList<>(iComparisonCfgs.size());
+
         for (int i = 0; i < iComparisonCfgs.size(); i++) {
             try {
-                Future<ComparisonResult> future = completionService.take();
+                Future<List<Mismatch>> future = completionService.take();
                 try {
-                    result[i] = future.get();
+                    result.add(future.get());
                 } catch (ExecutionException e) {
                     logger.error("Unable to obtain comparison result.", e);
-                    result[i] = null;
+                    result.add(null);
                 }
             } catch (InterruptedException e) {
                 logger.error("Unable to obtain comparison result.", e);
-                result[i] = null;
+                result.add(null);
             }
         }
         return result;

@@ -33,4 +33,5 @@ public class CompositeEquality<T> extends AbstractCompositeEquality<T, Extractor
     public List<Mismatch> differences(T t1, T t2) {
         return getExtractorsAndEqualities().stream().map(eae -> difference(t1, t2, eae)).filter(Objects::nonNull).collect(Collectors.toList());
     }
+
 }

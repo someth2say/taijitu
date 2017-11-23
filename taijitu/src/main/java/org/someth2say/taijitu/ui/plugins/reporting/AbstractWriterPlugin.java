@@ -2,11 +2,13 @@ package org.someth2say.taijitu.ui.plugins.reporting;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.someth2say.taijitu.compare.result.ComparisonResult;
+import org.someth2say.taijitu.compare.equality.stream.ComparisonResult;
+import org.someth2say.taijitu.compare.result.Mismatch;
 import org.someth2say.taijitu.ui.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.ui.plugins.TaijituPlugin;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Created by Jordi Sola on 22/02/2017.
@@ -111,8 +113,8 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
         return keyFieldsMap[fieldIdx];
     }
 
-    private boolean isReportable(final ComparisonResult comparisonResult) {
-        return !comparisonResult.getMismatches().isEmpty();
+    private boolean isReportable(final List<Mismatch> comparisonResult) {
+        return !comparisonResult.isEmpty();
     }
 //
 //    private File createOutputFolder() throws TaijituException {

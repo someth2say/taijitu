@@ -10,7 +10,7 @@ import org.someth2say.taijitu.compare.result.Mismatch;
 import java.util.List;
 import java.util.function.Function;
 
-public abstract class AbstractCompositeEquality<T, EAE extends AbstractExtractorAndEquality<T, ?, ?>> {
+public abstract class AbstractCompositeEquality<T, EAE extends AbstractExtractorAndEquality<T, ?, ?>> implements Equality<T> {
     private static final Logger logger = LoggerFactory.getLogger(AbstractCompositeEquality.class);
 
     private final List<EAE> extractorsAndEqualities;
@@ -36,10 +36,8 @@ public abstract class AbstractCompositeEquality<T, EAE extends AbstractExtractor
         V secondValue = extractors.apply(second);
         boolean equals = equality.equals(firstValue, secondValue);
         logger.trace("{}<={}=>{} ({}({}))", firstValue, equals ? "=" : "/", secondValue, equality.getClass().getSimpleName(), firstValue.getClass().getName());
-        //TODO: Get rid of null ids
         return equals ? null : new Difference<>(equality, firstValue, secondValue);
     }
-
 
     public List<EAE> getExtractorsAndEqualities() {
         return extractorsAndEqualities;
