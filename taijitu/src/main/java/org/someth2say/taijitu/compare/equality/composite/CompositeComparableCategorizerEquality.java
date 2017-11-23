@@ -48,7 +48,7 @@ public class CompositeComparableCategorizerEquality<T> extends AbstractComposite
     }
 
     @Override
-    public Collection<Mismatch> differences(T t1, T t2) {
+    public List<Mismatch> differences(T t1, T t2) {
         return getExtractorsAndEqualities().stream().map(eae -> difference(t1, t2, eae)).collect(Collectors.toList());
     }
 

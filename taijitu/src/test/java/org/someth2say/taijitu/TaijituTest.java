@@ -311,7 +311,6 @@ public class TaijituTest {
         TestClass differentFrom3 = new TestClass("aaa", "aaa", 2);
         TestClass differentFrom4 = new TestClass("ccc", "ccc", 3);
 
-
         equality.differences(differentFrom1, differentFrom2).forEach(System.out::println);
         equality.differences(differentFrom1, differentFrom3).forEach(System.out::println);
         equality.differences(differentFrom1, differentFrom4).forEach(System.out::println);
@@ -349,10 +348,10 @@ public class TaijituTest {
         // Test results
         Collection<Mismatch<TestClass>> mismatches = result.getMismatches();
         mismatches.forEach(System.out::println);
-        Missing missing = new Missing<>(comparer, id1, missingFrom1);
+        Missing missing = new Missing<>(comparer, missingFrom1);
         assertEquals(2, mismatches.size());
         assertTrue(mismatches.contains(missing));
-        Difference difference = new Difference<>(equality, id1, differentFrom1, id2, differentFrom2);
+        Difference difference = new Difference<>(equality, differentFrom1, differentFrom2);
         assertTrue(mismatches.contains(difference));
 
     }

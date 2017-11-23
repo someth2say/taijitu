@@ -3,10 +3,10 @@ package org.someth2say.taijitu.compare.equality.stream.sorted;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.ComparableCategorizerEquality;
-import org.someth2say.taijitu.compare.equality.ComparableEquality;
 import org.someth2say.taijitu.compare.equality.Equality;
 import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
 import org.someth2say.taijitu.compare.result.ComparisonResult;
+import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Mismatch;
 import org.someth2say.taijitu.compare.result.SimpleComparisonResult;
 import org.someth2say.taijitu.discarter.TimeBiDiscarter;
@@ -14,9 +14,9 @@ import org.someth2say.taijitu.ui.config.interfaces.IStrategyCfg;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 /**
@@ -39,7 +39,7 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
         return compare(source, sourceId, target, targetId, getCategorizer(), getEquality());
     }
 
-    public static <T> ComparisonResult<T> compare(Map<Object, Stream<T>> streams,  ComparableCategorizerEquality<T> categorizer, Equality<T> equality) {
+    public static <T> ComparisonResult<T> compare(Map<Object, Stream<T>> streams, ComparableCategorizerEquality<T> categorizer, Equality<T> equality) {
         if (streams.size() < 2)
             throw new RuntimeException("Need at least two streams to compare");
 
@@ -72,21 +72,21 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
             int keyComparison = categorizer.compare(sourceRecord, targetRecord);
             if (keyComparison > 0) {
                 // SourceCfg is after target -> target record is not in source stream
-                result.addDisjoint(categorizer, targetId, targetRecord);
+                result.addDisjoint(categorizer, targetRecord);
                 targetRecord = getNextRecordOrNull(targetIt);
                 recordCount++;
             } else if (keyComparison < 0) {
                 // SourceCfg is before target -> source record is not in target stream
-                result.addDisjoint(categorizer, sourceId, sourceRecord);
+                result.addDisjoint(categorizer, sourceRecord);
                 sourceRecord = getNextRecordOrNull(sourceIt);
                 recordCount++;
             } else {
                 // same Keys
                 // TODO: Use equality.difference
-                Collection<Mismatch> differences = equality.differences(sourceRecord, targetRecord);
+                List<Mismatch> differences = equality.differences(sourceRecord, targetRecord);
                 // Records are different
                 if (differences != null && !differences.isEmpty()) {
-                   differences.forEach(d->result.addMismatch(equality,d));
+                    result.addDifference(new Difference<>(equality, sourceRecord, targetRecord, differences));
                 }
 //                if (!equality.equals(sourceRecord, targetRecord)) {
 //                    result.addDifference(equality, sourceId, sourceRecord, targetId, targetRecord);
@@ -101,11 +101,11 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
         // At least, one stream is fully consumed, so add every other stream's element
         // to "missing"
         while (sourceIt.hasNext()) {
-            result.addDisjoint(categorizer, sourceId, sourceIt.next());
+            result.addDisjoint(categorizer, sourceIt.next());
             timedLogger.accept("Finalizing source {}, {} records so far...", new Object[]{sourceId, ++recordCount});
         }
         while (targetIt.hasNext()) {
-            result.addDisjoint(categorizer, targetId, targetIt.next());
+            result.addDisjoint(categorizer, targetIt.next());
             timedLogger.accept("Finalizing source {}, {} records so far...", new Object[]{targetId, ++recordCount});
         }
 

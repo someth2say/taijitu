@@ -37,7 +37,7 @@ public abstract class AbstractCompositeEquality<T, EAE extends AbstractExtractor
         boolean equals = equality.equals(firstValue, secondValue);
         logger.trace("{}<={}=>{} ({}({}))", firstValue, equals ? "=" : "/", secondValue, equality.getClass().getSimpleName(), firstValue.getClass().getName());
         //TODO: Get rid of null ids
-        return equals ? null : new Difference<>(equality, "1", firstValue, "2", secondValue);
+        return equals ? null : new Difference<>(equality, firstValue, secondValue);
     }
 
 

@@ -6,6 +6,7 @@ import org.someth2say.taijitu.compare.result.Mismatch;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 public abstract class AbstractConfigurableEquality<T> implements Equality<T> {
 
@@ -25,8 +26,8 @@ public abstract class AbstractConfigurableEquality<T> implements Equality<T> {
     }
 
     @Override
-    public Collection<Mismatch> differences(T t1, T t2) {
+    public List<Mismatch> differences(T t1, T t2) {
         //TODO: get rid of IDs
-        return this.equals(t1, t2) ? Collections.emptyList() : Collections.singletonList(new Difference<>(this, null, t1, null, t2));
+        return this.equals(t1, t2) ? Collections.emptyList() : Collections.singletonList(new Difference<>(this, t1, t2));
     }
 }

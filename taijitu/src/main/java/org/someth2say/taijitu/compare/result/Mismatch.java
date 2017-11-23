@@ -1,37 +1,50 @@
 package org.someth2say.taijitu.compare.result;
 
+import org.apache.commons.lang3.StringUtils;
 import org.someth2say.taijitu.compare.equality.Equality;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public abstract class Mismatch<MMT> {
-    //TODO: A Mismatch may have many causes?
-    final Equality<MMT> cause;
-    final Map<Object, MMT> entries;
+    private final Equality<MMT> cause;
+    private final List<MMT> entries;
+    private final List<Mismatch> underlyingMismatches;
 
-    public Mismatch(Equality<MMT> cause, Map<Object, MMT> entries) {
+
+    public Mismatch(Equality<MMT> cause, List<MMT> entries, List<Mismatch> underlyingMismatches) {
         this.cause = cause;
         this.entries = entries;
+        this.underlyingMismatches = underlyingMismatches;
     }
 
-    public Mismatch(Equality<MMT> cause, Object id, MMT composite) {
-        this.cause = cause;
-        this.entries = Collections.singletonMap(id, composite);
+    public Mismatch(Equality<MMT> cause, List<MMT> entries) {
+        this(cause, entries, null);
     }
 
-    public Mismatch(Equality<MMT> cause, Object id, MMT composite, Object id2, MMT composite2) {
-        this.cause = cause;
-        this.entries = new HashMap<>(2);
-        this.entries.put(id,composite);
-        this.entries.put(id2,composite2);
+    public Mismatch(Equality<MMT> cause, MMT composite, List<Mismatch> underlyingMismatches) {
+        this(cause, Collections.singletonList(composite), underlyingMismatches);
     }
+
+    public Mismatch(Equality<MMT> cause, MMT composite) {
+        this(cause, composite, (List<Mismatch>) null);
+    }
+
+    public Mismatch(Equality<MMT> cause, MMT composite, MMT composite2) {
+        this(cause, composite, composite2, null);
+    }
+
+    public Mismatch(Equality<MMT> cause, MMT composite, MMT composite2, List<Mismatch> underlyingMismatches) {
+        this(cause, Arrays.asList(composite, composite2), underlyingMismatches);
+    }
+
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + ": "+cause.toString()+"(" + entries.toString()+")";
+        if (underlyingMismatches != null) {
+            return this.getClass().getSimpleName() + ": " + cause.toString() + "(" + StringUtils.join(underlyingMismatches, ",") + ")";
+        } else {
+            return this.getClass().getSimpleName() + ": " + cause.toString() + "(" + entries.toString() + ")";
+        }
     }
 
     @Override

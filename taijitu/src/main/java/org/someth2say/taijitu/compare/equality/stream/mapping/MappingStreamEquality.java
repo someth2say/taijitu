@@ -13,16 +13,12 @@ import org.someth2say.taijitu.discarter.TimeBiDiscarter;
 import org.someth2say.taijitu.ui.config.interfaces.IStrategyCfg;
 import org.someth2say.taijitu.util.StreamUtil;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -87,7 +83,7 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
         // 2.- When both mapping tasks are completed, remaining data are source/target
         // only
         final Collection<SourceIdAndComposite<T>> entries = sharedMap.values();
-        entries.stream().forEach(sc -> result.addDisjoint(categorizer, sc.getSourceId(), sc.getComposite()));
+        entries.stream().forEach(sc -> result.addDisjoint(categorizer, sc.getComposite()));
 
         return result;
     }
@@ -102,9 +98,10 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
             // we have a key matchSequential ...
             sharedMap.remove(wrap);
             final T otherRecord = otherQueryAndTuple.getComposite();
-            if (!equality.equals(thisRecord, otherRecord)) {
+            List<Mismatch> differences = equality.differences(thisRecord, otherRecord);
+            if (differences != null && !differences.isEmpty()) {
                 // ...and contents differ
-                return new Difference<>(equality, sourceId, thisRecord, otherQueryAndTuple.getSourceId(), otherRecord);
+                return new Difference<>(equality, thisRecord, otherRecord, differences);
             }
         }
         timedLogger.accept("Processed {} records from source {}", new Object[]{recordCount, sourceId});
@@ -133,7 +130,7 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
         // 2.- When both mapping tasks are completed, remaining data are source/target
         // only
         final Collection<SourceIdAndComposite<T>> entries = sharedMap.values();
-        entries.stream().forEach(sc -> result.addDisjoint(categorizer, sc.getSourceId(), sc.getComposite()));
+        entries.stream().forEach(sc -> result.addDisjoint(categorizer, sc.getComposite()));
 
         return result;
     }

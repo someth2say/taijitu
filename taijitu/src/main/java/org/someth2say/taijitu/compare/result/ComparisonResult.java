@@ -15,12 +15,12 @@ public abstract class ComparisonResult<T> {
         this.mismatches = mismatches;
     }
 
-    public void addMismatch(Equality<T> cause, Mismatch<T> mismatch) {
+    public void addMismatch(Mismatch<T> mismatch) {
         mismatches.add(mismatch);
     }
 
-    public void addDifference(Equality<T> cause, Object id1, T composite1, Object id2, T composite2) {
-        getMismatches().add(new Difference<>(cause, id1, composite1, id2, composite2));
+    public void addDifference(Equality<T> cause, T composite1, T composite2) {
+        getMismatches().add(new Difference<>(cause, composite1, composite2));
     }
 
     public void addDifference(Difference<T> difference) {
@@ -31,12 +31,12 @@ public abstract class ComparisonResult<T> {
         getMismatches().add(missing);
     }
 
-    public void addDisjoint(Equality<T> cause, Object id, T composite) {
-        getMismatches().add(new Missing<>(cause, id, composite));
+    public void addDisjoint(Equality<T> cause, T composite) {
+        getMismatches().add(new Missing<>(cause, composite));
     }
 
     public void addAllDisjoint(Equality<T> cause, Map<Object, T> entries) {
-        entries.forEach((id, composite) -> addDisjoint(cause, id, composite));
+        entries.forEach((id, composite) -> addDisjoint(cause, composite));
     }
 
     public Collection<Mismatch<T>> getMismatches() {

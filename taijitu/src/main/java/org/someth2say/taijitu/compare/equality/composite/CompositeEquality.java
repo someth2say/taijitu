@@ -4,7 +4,6 @@ import org.someth2say.taijitu.compare.equality.Equality;
 import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndEquality;
 import org.someth2say.taijitu.compare.result.Mismatch;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -31,7 +30,7 @@ public class CompositeEquality<T> extends AbstractCompositeEquality<T, Extractor
     }
 
     @Override
-    public Collection<Mismatch> differences(T t1, T t2) {
+    public List<Mismatch> differences(T t1, T t2) {
         return getExtractorsAndEqualities().stream().map(eae -> difference(t1, t2, eae)).filter(Objects::nonNull).collect(Collectors.toList());
     }
 }
