@@ -70,7 +70,7 @@ public class TaijituTest {
     @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection<String> strategies() {
         return Arrays.asList(
-                MappingStreamEquality.NAME, ComparableStreamEquality.NAME
+                MappingStreamEquality.class.getSimpleName(), ComparableStreamEquality.class.getSimpleName()
 //                ,MappingStreamEquality.NAME, ComparableStreamEquality.NAME
 //                ,MappingStreamEquality.NAME, ComparableStreamEquality.NAME
 //                ,MappingStreamEquality.NAME, ComparableStreamEquality.NAME
@@ -344,7 +344,8 @@ public class TaijituTest {
         Missing missing = new Missing<>(comparer, missingFrom1);
         assertEquals(2, mismatches.size());
         assertTrue(mismatches.contains(missing));
-        Difference difference = new Difference<>(equality, differentFrom1, differentFrom2);
+        List<Mismatch> underlyingCauses = Collections.singletonList(new Difference<>(new StringCaseInsensitive<>(), "aaa", "aa"));
+        Difference difference = new Difference<>(equality, differentFrom1, differentFrom2, underlyingCauses);
         assertTrue(mismatches.contains(difference));
     }
 

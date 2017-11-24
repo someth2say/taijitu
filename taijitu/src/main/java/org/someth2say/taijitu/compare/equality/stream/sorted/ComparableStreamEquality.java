@@ -22,16 +22,11 @@ import static org.someth2say.taijitu.compare.equality.stream.ComparisonResult.*;
  * Created by Jordi Sola on 02/03/2017.
  */
 public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
-    public static final String NAME = "sorted";
+
     private static final Logger logger = LoggerFactory.getLogger(ComparableStreamEquality.class);
 
     public ComparableStreamEquality(Equality<T> equality, ComparableCategorizerEquality<T> categorizer) {
         super(equality, categorizer);
-    }
-
-    @Override
-    public String getName() {
-        return NAME;
     }
 
     @Override
@@ -108,10 +103,6 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
         }
 
         return newresult;
-    }
-
-    public static IStrategyCfg defaultConfig() {
-        return () -> ComparableStreamEquality.NAME;
     }
 
 }

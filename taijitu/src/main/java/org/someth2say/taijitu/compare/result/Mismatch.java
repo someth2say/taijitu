@@ -52,12 +52,13 @@ public abstract class Mismatch<MMT> {
         if (this == o) return true;
         if (!(o instanceof Mismatch)) return false;
         Mismatch<?> mismatch = (Mismatch<?>) o;
-        //TODO: Warning, the order of entries is not relevant! Maybe shoudl use a Set...
-        return Objects.equals(entries, mismatch.entries);
+        return Objects.equals(cause, mismatch.cause) &&
+                Objects.equals(entries, mismatch.entries)
+                && Objects.equals(underlyingMismatches, mismatch.underlyingMismatches);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(entries);
+        return Objects.hash(entries, cause, underlyingMismatches);
     }
 }

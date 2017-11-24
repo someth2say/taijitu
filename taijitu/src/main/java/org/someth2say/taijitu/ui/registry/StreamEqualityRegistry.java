@@ -1,5 +1,6 @@
 package org.someth2say.taijitu.ui.registry;
 
+import org.apache.poi.ss.formula.functions.T;
 import org.slf4j.Logger;import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.ComparableCategorizerEquality;
 import org.someth2say.taijitu.compare.equality.Equality;
@@ -9,6 +10,7 @@ import org.someth2say.taijitu.compare.equality.stream.mapping.MappingStreamEqual
 import org.someth2say.taijitu.compare.equality.stream.sorted.ComparableStreamEquality;
 import org.someth2say.taijitu.ui.util.ClassScanUtils;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -30,27 +32,26 @@ public class StreamEqualityRegistry {
         // This seems fast enough for a one-shot initialization
         // If found slow, it can be changed to scan only sub-packages for taijitu
         // final FastClasspathScanner fcs = new FastClasspathScanner(taijitu.class.getPackage().getName());
-        final Class<AbstractStreamEquality> implementedInterface = AbstractStreamEquality.class;
+        Collection<Class<? extends AbstractStreamEquality>> equalityClasses = ClassScanUtils.getClassesImplementing(AbstractStreamEquality.class);
+        equalityClasses.forEach(StreamEqualityRegistry::addStreamEqualityType);
 
-        classes = ClassScanUtils.getNamedClassesImplementing(implementedInterface);
-
-        logger.info("Registered strategies: {}", classes.keySet().toString());
+        logger.info("Registered stream equalities: {}", StreamEqualityRegistry.classes.keySet().toString());
     }
 
     public static void useDefaults() {
-        addStreamEqualityType(MappingStreamEquality.NAME, MappingStreamEquality.class);
-        addStreamEqualityType(ComparableStreamEquality.NAME, ComparableStreamEquality.class);
+        addStreamEqualityType(MappingStreamEquality.class);
+        addStreamEqualityType(ComparableStreamEquality.class);
     }
 
-    private static <T extends AbstractStreamEquality<?>> void addStreamEqualityType(String name, Class<T> clazz) {
-        classes.put(name, clazz);
+    private static <T extends AbstractStreamEquality<?>> void addStreamEqualityType(Class<T> clazz) {
+        classes.put(clazz.getSimpleName(), clazz);
     }
 
-    public static <T> StreamEquality<T> getInstance(String type, Equality<T> equality, ComparableCategorizerEquality<T> comparableCategorizerEquality) {
+    public static <T> StreamEquality<T> getInstance(String type, Equality<T> equality, ComparableCategorizerEquality<T> categorizer) {
         //TODO: Fix this unchecked cast
         Class<? extends AbstractStreamEquality<T>> strategyType = (Class<? extends AbstractStreamEquality<T>>) getStrategyType(type);
         try {
-            return strategyType.getDeclaredConstructor(Equality.class, ComparableCategorizerEquality.class).newInstance(equality, comparableCategorizerEquality);
+            return strategyType.getDeclaredConstructor(Equality.class, ComparableCategorizerEquality.class).newInstance(equality, categorizer);
         } catch (Exception e) {
             logger.error("Unable to create stream equality. Type: " + type + " Arguments: " + equality, e);
         }

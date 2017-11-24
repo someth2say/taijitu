@@ -21,7 +21,7 @@ public class DefaultConfig {
     public static final int DEFAULT_THREADS = 1;
     public static final boolean DEFAULT_SCAN_CLASSPATH = false;
 
-    public static final IStrategyCfg DEFAULT_STRATEGY_CONFIG = MappingStreamEquality.defaultConfig();
+    public static final IStrategyCfg DEFAULT_STRATEGY_CONFIG = MappingStreamEquality.class::getSimpleName;
     //TODO: We are here adding two equalities: a simple one, and a ComparableCategorizer one. Maybe this should be split
     public static final List<IEqualityCfg> DEFAULT_EQUALITY_CONFIG = Arrays.asList((DefaultEqualityConfig) JavaObject.class::getSimpleName, (DefaultEqualityConfig) ObjectToString.class::getSimpleName);
     public static final List<IPluginCfg> DEFAULT_PLUGINS_CONFIG = Collections.singletonList(TimeLoggingPlugin.defaultConfig());
