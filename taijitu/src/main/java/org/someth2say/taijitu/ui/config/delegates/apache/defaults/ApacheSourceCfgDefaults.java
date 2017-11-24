@@ -10,27 +10,27 @@ public interface ApacheSourceCfgDefaults extends ApacheCfgDefaults, ISourceCfg {
 
     @Override
     default String getType() {
-        return getConfiguration().getString(ConfigurationLabels.Comparison.SOURCE_TYPE);
+        return getConfiguration().getString(ConfigurationLabels.SOURCE_TYPE);
     }
 
     @Override
     default List<String> getKeyFields() {
         //TODO: Consider '*' wildcard for key fields
-        return getConfiguration().getList(String.class, ConfigurationLabels.Comparison.Fields.KEYS, null);
+        return getConfiguration().getList(String.class, ConfigurationLabels.KEYS, null);
     }
 
     @Override
     default Properties getFetchProperties() {
-        return getConfiguration().getProperties(ConfigurationLabels.Comparison.SOURCE_FETCH_PROPERTIES);
+        return getConfiguration().getProperties(ConfigurationLabels.SOURCE_FETCH_PROPERTIES);
     }
 
     @Override
     default Properties getBuildProperties() {
-        return getConfiguration().getProperties(ConfigurationLabels.Comparison.SOURCE_BUILD_PROPERTIES);
+        return getConfiguration().getProperties(ConfigurationLabels.SOURCE_BUILD_PROPERTIES);
     }
 
     default String getMapper() {
-        return getConfiguration().getString(ConfigurationLabels.Comparison.MAPPER_TYPE);
+        return getConfiguration().getString(ConfigurationLabels.MAPPER_TYPE);
     }
 
 }

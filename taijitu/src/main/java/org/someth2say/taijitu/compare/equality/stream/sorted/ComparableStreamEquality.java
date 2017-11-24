@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
-import static org.someth2say.taijitu.compare.equality.stream.ComparisonResult.*;
+import static org.someth2say.taijitu.compare.equality.stream.MismatchHelper.*;
 
 /**
  * Created by Jordi Sola on 02/03/2017.
@@ -30,28 +30,11 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
     }
 
     @Override
-    public List<Mismatch> match(Stream<T> source, Object sourceId, Stream<T> target, Object targetId) {
-        return compare(source, sourceId, target, targetId, getCategorizer(), getEquality());
+    public List<Mismatch> differences(Stream<T> source, Stream<T> target) {
+        return compare(source, target, getCategorizer(), getEquality());
     }
 
-    public static <T> List<Mismatch> compare(Map<Object, Stream<T>> streams, ComparableCategorizerEquality<T> categorizer, Equality<T> equality) {
-        if (streams.size() < 2)
-            throw new RuntimeException("Need at least two streams to compare");
-
-        if (streams.size() > 2)
-            logger.info("Provided {} streams, but only 2 first will be compared.", streams.size());
-
-
-        Iterator<Entry<Object, Stream<T>>> iterator = streams.entrySet().iterator();
-        Entry<Object, Stream<T>> source = iterator.next();
-        Entry<Object, Stream<T>> target = iterator.next();
-
-        return compare(source.getValue(), source.getKey(), target.getValue(), target.getKey(), categorizer, equality);
-    }
-
-    public static <T> List<Mismatch> compare(Stream<T> source, Object sourceId, Stream<T> target, Object targetId, ComparableCategorizerEquality<T> categorizer, Equality<T> equality) {
-//        SimpleComparisonResult result = new SimpleComparisonResult();
-
+    public static <T> List<Mismatch> compare(Stream<T> source, Stream<T> target, ComparableCategorizerEquality<T> categorizer, Equality<T> equality) {
         List<Mismatch> newresult = new ArrayList<>();
         Iterator<T> sourceIt = source.iterator();
         Iterator<T> targetIt = target.iterator();
@@ -78,10 +61,9 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
                 recordCount++;
             } else {
                 // same Keys
-                // TODO: Use equality.difference
                 List<Mismatch> differences = equality.differences(sourceRecord, targetRecord);
-                // Records are different
                 if (differences != null && !differences.isEmpty()) {
+                	// Records are different
                     addDifference(newresult, equality, sourceRecord, targetRecord, differences);
                 }
                 sourceRecord = getNextRecordOrNull(sourceIt);
@@ -93,16 +75,19 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
 
         // At least, one stream is fully consumed, so add every other stream's element
         // to "missing"
-        while (sourceIt.hasNext()) {
-            addMissing(newresult, categorizer, sourceIt.next());
-            timedLogger.accept("Finalizing source {}, {} records so far...", new Object[]{sourceId, ++recordCount});
-        }
-        while (targetIt.hasNext()) {
-            addMissing(newresult, categorizer, targetIt.next());
-            timedLogger.accept("Finalizing source {}, {} records so far...", new Object[]{targetId, ++recordCount});
-        }
+		recordCount = flushMissings(categorizer, newresult, sourceIt, recordCount, timedLogger, sourceIt);
+        recordCount = flushMissings(categorizer, newresult, targetIt, recordCount, timedLogger, targetIt);
 
         return newresult;
     }
+
+	private static <T> int flushMissings(ComparableCategorizerEquality<T> categorizer, List<Mismatch> newresult,
+			Iterator<T> sourceIt, int recordCount, TimeBiDiscarter<String, Object[]> timedLogger, Iterator<T> it) {
+		while (it.hasNext()) {
+            addMissing(newresult, categorizer, sourceIt.next());
+            timedLogger.accept("Finalizing sources, {} records so far...", new Object[]{++recordCount});
+        }
+		return recordCount;
+	}
 
 }

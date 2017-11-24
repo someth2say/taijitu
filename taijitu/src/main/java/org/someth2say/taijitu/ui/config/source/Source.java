@@ -8,14 +8,15 @@ import java.util.stream.Stream;
 
 public interface Source<T> extends Named, AutoCloseable {
 
-    //TODO: This is a breack for the SRP!!! Describing the source contents should not be done by the source (stream)
     List<FieldDescription<?>> getProvidedFields();
 
     <V> Function<T,V> getExtractor(FieldDescription<V> fd);
 
     Stream<T> stream();
 
-    void close() throws ClosingException;
+    default void close() throws ClosingException {
+    	stream().close();
+    }
 
     class ClosingException extends Exception {
         public ClosingException() {

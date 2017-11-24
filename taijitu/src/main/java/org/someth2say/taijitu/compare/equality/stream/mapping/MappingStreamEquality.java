@@ -20,7 +20,7 @@ import org.someth2say.taijitu.compare.equality.CategorizerEquality;
 import org.someth2say.taijitu.compare.equality.ComparableCategorizerEquality;
 import org.someth2say.taijitu.compare.equality.Equality;
 import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
-import org.someth2say.taijitu.compare.equality.stream.ComparisonResult;
+import org.someth2say.taijitu.compare.equality.stream.MismatchHelper;
 import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
 import org.someth2say.taijitu.compare.equality.wrapper.CategorizerEqualityWrapper;
 import org.someth2say.taijitu.compare.result.Difference;
@@ -33,6 +33,7 @@ import org.someth2say.taijitu.util.StreamUtil;
  * Created by Jordi Sola on 02/03/2017.
  */
 public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implements StreamEquality<T> {
+	
 	private static final Logger logger = LoggerFactory.getLogger(MappingStreamEquality.class);
 
 	public MappingStreamEquality(Equality<T> equality, ComparableCategorizerEquality<T> categorizer) {
@@ -40,46 +41,46 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
 	}
 
 	@Override
-	public List<Mismatch> match(Stream<T> source, Object sourceId, Stream<T> target, Object targetId) {
+	public List<Mismatch> differences(Stream<T> source, Stream<T> target) {
 		// TODO: Find a way to discriminate (config)?
 		// return matchParallel(source, sourceID, target, targetId, getCategorizer(),
 		// getEquality());
-		return matchSequential(source, sourceId, target, targetId, getCategorizer(), getEquality());
+		return matchSequential(source, target, getCategorizer(), getEquality());
 	}
 
-	public static <T> List<Mismatch> matchSequential(Stream<T> source, Object sourceId, Stream<T> target,
-			Object targetId, CategorizerEquality<T> categorizer, Equality<T> equality) {
+	public static <T> List<Mismatch> matchSequential(Stream<T> source, Stream<T> target,
+			CategorizerEquality<T> categorizer, Equality<T> equality) {
 
 		final List<Mismatch> result = Collections.synchronizedList(new ArrayList<>());
 
-		Map<CategorizerEqualityWrapper<T>, SourceIdAndComposite<T>> sharedMap = new ConcurrentHashMap<>();
+		Map<CategorizerEqualityWrapper<T>, OrdinalAndComposite<T>> sharedMap = new ConcurrentHashMap<>();
 		final int recordCount = 0;
 		final TimeBiDiscarter<String, Object[]> timedLogger = new TimeBiDiscarter<>(1000, logger::debug);
 
 		Stream<Difference<T>> differences = StreamUtil
-				.zip(source.map(c -> new SourceIdAndComposite<>(sourceId, c)),
-						target.map(c -> new SourceIdAndComposite<>(targetId, c)))
-				.map(sac -> map(sac.getComposite(), sac.getSourceId(), timedLogger, recordCount, categorizer, sharedMap,
+				.zip(source.map(c -> new OrdinalAndComposite<>(0, c)),
+					 target.map(c -> new OrdinalAndComposite<>(1, c)))
+				.map(sac -> map(sac.getComposite(), sac.getOrdinal(), timedLogger, recordCount, categorizer, sharedMap,
 						equality))
 				.filter(Objects::nonNull);
 
 		// 2.- When both mapping tasks are completed, remaining data are source/target
 		// only
 		Stream<Missing<T>> missings = sharedMap.values().stream()
-				.map((SourceIdAndComposite<T> sac) -> new Missing<T>(categorizer, sac.getComposite()));
+				.map((OrdinalAndComposite<T> sac) -> new Missing<T>(categorizer, sac.getComposite()));
 		// sharedMap.values().forEach(sc -> ComparisonResult.addMissing(result,
 		// categorizer, sc.getComposite()));
 
 		return Stream.concat(differences, missings).collect(Collectors.toList());
 	}
 
-	private static <T> Difference<T> map(T thisComposite, Object sourceId,
+	private static <T> Difference<T> map(T thisComposite, int thisOrdinal,
 			TimeBiDiscarter<String, Object[]> timedLogger, int recordCount, CategorizerEquality<T> categorizer,
-			Map<CategorizerEqualityWrapper<T>, SourceIdAndComposite<T>> sharedMap, Equality<T> equality) {
+			Map<CategorizerEqualityWrapper<T>, OrdinalAndComposite<T>> sharedMap, Equality<T> equality) {
 		timedLogger.accept("Processed {} records so far.", new Object[] { recordCount });
 		CategorizerEqualityWrapper<T> wrap = categorizer.wrap(thisComposite);
-		SourceIdAndComposite<T> otherSaC = sharedMap.putIfAbsent(wrap,
-				new SourceIdAndComposite<>(sourceId, thisComposite));
+		OrdinalAndComposite<T> otherSaC = sharedMap.putIfAbsent(wrap,
+				new OrdinalAndComposite<>(thisOrdinal, thisComposite));
 		if (otherSaC != null) {
 			// we have a key matchSequential ...
 			sharedMap.remove(wrap);
@@ -87,11 +88,11 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
 			List<Mismatch> differences = equality.differences(thisComposite, otherComposite);
 			if (differences != null && !differences.isEmpty()) {
 				// ...and contents differ
-				// TODO: the order of the composites is not defined here! Need to use ids to
-				// sort correctly.
-				return new Difference<>(equality, thisComposite, otherComposite, differences);
-				// return ComparisonResult.addDifference(result, equality, thisComposite,
-				// otherComposite);
+
+				if (thisOrdinal<otherSaC.getOrdinal()) 
+					return new Difference<>(equality, thisComposite, otherComposite, differences);
+				else 
+					return new Difference<>(equality, otherComposite, thisComposite, differences);
 			}
 		}
 		return null;
@@ -104,12 +105,10 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
 		Iterator<T> sourceIt = source.iterator();
 		Iterator<T> targetIt = target.iterator();
 
-		// TODO: Another option is running queries/pages alternating, so we can
-		// "restrict" memory usage, but only using a single thread
 		final ExecutorService executorService = Executors.newFixedThreadPool(2);
-		Map<CategorizerEqualityWrapper<T>, SourceIdAndComposite<T>> sharedMap = new ConcurrentHashMap<>();
-		Runnable sourceMapper = new TupleMapperExt<>(sourceIt, sharedMap, result, sourceID, categorizer, equality);
-		Runnable targetMapper = new TupleMapperExt<>(targetIt, sharedMap, result, targetId, categorizer, equality);
+		Map<CategorizerEqualityWrapper<T>, OrdinalAndComposite<T>> sharedMap = new ConcurrentHashMap<>();
+		Runnable sourceMapper = new TupleMapperExt<>(sourceIt, sharedMap, result, 0, categorizer, equality);
+		Runnable targetMapper = new TupleMapperExt<>(targetIt, sharedMap, result, 1, categorizer, equality);
 
 		executorService.submit(sourceMapper);// Map source
 		executorService.submit(targetMapper);// Map target
@@ -118,8 +117,8 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
 
 		// 2.- When both mapping tasks are completed, remaining data are source/target
 		// only
-		final Collection<SourceIdAndComposite<T>> entries = sharedMap.values();
-		entries.stream().forEach(sc -> ComparisonResult.addMissing(result, categorizer, sc.getComposite()));
+		final Collection<OrdinalAndComposite<T>> entries = sharedMap.values();
+		entries.stream().forEach(sc -> MismatchHelper.addMissing(result, categorizer, sc.getComposite()));
 
 		return result;
 	}
@@ -141,20 +140,20 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
 
 	private static class TupleMapperExt<TMT> implements Runnable {
 		private final Iterator<TMT> source;
-		private final Map<CategorizerEqualityWrapper<TMT>, SourceIdAndComposite<TMT>> sharedMap;
+		private final Map<CategorizerEqualityWrapper<TMT>, OrdinalAndComposite<TMT>> sharedMap;
 		private final List<Mismatch> result;
-		private final Object sourceId;
+		private final int ordinal;
 		private final CategorizerEquality<TMT> categorizer;
 		private final Equality<TMT> equality;
 
 		private TupleMapperExt(final Iterator<TMT> source,
-				final Map<CategorizerEqualityWrapper<TMT>, SourceIdAndComposite<TMT>> sharedMap,
-				final List<Mismatch> result, Object sourceId, CategorizerEquality<TMT> categorizer,
+				final Map<CategorizerEqualityWrapper<TMT>, OrdinalAndComposite<TMT>> sharedMap,
+				final List<Mismatch> result, int ordinal, CategorizerEquality<TMT> categorizer,
 				Equality<TMT> equality) {
 			this.source = source;
 			this.sharedMap = sharedMap;
 			this.result = result;
-			this.sourceId = sourceId;
+			this.ordinal = ordinal;
 			this.categorizer = categorizer;
 			this.equality = equality;
 		}
@@ -166,8 +165,7 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implemen
 			TMT thisRecord = getNextRecordOrNull(source);
 			while (thisRecord != null) {
 				recordCount++;
-				Difference<TMT> difference = map(thisRecord, sourceId, timedLogger, recordCount, categorizer, sharedMap,
-						equality);
+				Difference<TMT> difference = map(thisRecord, ordinal, timedLogger, recordCount, categorizer, sharedMap, equality);
 				if (difference != null) {
 					result.add(difference);
 				}

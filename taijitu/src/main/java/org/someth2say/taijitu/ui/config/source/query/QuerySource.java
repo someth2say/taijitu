@@ -41,8 +41,8 @@ public class QuerySource extends AbstractSource<ResultSet> {
         private final List<Object> queryParameters;
 
         FetchProperties(Properties properties) {
-            this.statement = properties.getProperty(ConfigurationLabels.Comparison.STATEMENT);
-            String property = properties.getProperty(ConfigurationLabels.Setup.FETCH_SIZE);
+            this.statement = properties.getProperty(ConfigurationLabels.STATEMENT);
+            String property = properties.getProperty(ConfigurationLabels.FETCH_SIZE);
 
             int fs;
             try {
@@ -52,7 +52,7 @@ public class QuerySource extends AbstractSource<ResultSet> {
             }
             this.fetchSize = fs;
 
-            String qp = properties.getProperty(ConfigurationLabels.Comparison.QUERY_PARAMETERS);
+            String qp = properties.getProperty(ConfigurationLabels.QUERY_PARAMETERS);
             if (qp != null) {
                 this.queryParameters = Arrays.asList(StringUtils.split(qp, DefaultConfig.DEFAULT_LIST_DELIMITER));
             } else {

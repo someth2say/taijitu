@@ -41,7 +41,7 @@ public class CSVResourceSource extends AbstractSource<String[]> {
         final String path;
 
         BuildProperties(Properties properties) {
-            this.path = properties.getProperty(ConfigurationLabels.Comparison.RESOURCE);
+            this.path = properties.getProperty(ConfigurationLabels.RESOURCE);
         }
     }
 

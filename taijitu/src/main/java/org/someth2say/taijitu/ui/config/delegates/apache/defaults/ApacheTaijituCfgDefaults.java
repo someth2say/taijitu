@@ -15,7 +15,7 @@ public interface ApacheTaijituCfgDefaults extends ApacheCfgDefaults, ITaijituCfg
 
     @Override
     default List<IComparisonCfg> getComparisons() {
-        final List<ImmutableHierarchicalConfiguration> comparisonConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.Sections.COMPARISON);
+        final List<ImmutableHierarchicalConfiguration> comparisonConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.COMPARISON);
         if (comparisonConfigs != null) {
             return comparisonConfigs.stream().map(ApacheComparison::new).collect(Collectors.toList());
         }
@@ -24,12 +24,12 @@ public interface ApacheTaijituCfgDefaults extends ApacheCfgDefaults, ITaijituCfg
 
     @Override
     default Integer getThreads() {
-        return getConfiguration().getInt(ConfigurationLabels.Setup.THREADS, DEFAULT_THREADS);
+        return getConfiguration().getInt(ConfigurationLabels.THREADS, DEFAULT_THREADS);
     }
 
     @Override
     default Boolean isUseScanClassPath() {
-        return getConfiguration().getBoolean(ConfigurationLabels.Setup.SCAN_CLASSPATH, DEFAULT_SCAN_CLASSPATH);
+        return getConfiguration().getBoolean(ConfigurationLabels.SCAN_CLASSPATH, DEFAULT_SCAN_CLASSPATH);
     }
 
 }

@@ -1,5 +1,22 @@
 package org.someth2say.taijitu;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
@@ -21,13 +38,16 @@ import org.someth2say.taijitu.compare.equality.value.DateThreshold;
 import org.someth2say.taijitu.compare.equality.value.NumberThreshold;
 import org.someth2say.taijitu.compare.equality.value.ObjectToString;
 import org.someth2say.taijitu.compare.equality.value.StringCaseInsensitive;
-import org.someth2say.taijitu.compare.equality.stream.ComparisonResult;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Mismatch;
 import org.someth2say.taijitu.compare.result.Missing;
 import org.someth2say.taijitu.ui.config.ConfigurationLabels;
 import org.someth2say.taijitu.ui.config.DefaultConfig;
-import org.someth2say.taijitu.ui.config.delegates.simple.*;
+import org.someth2say.taijitu.ui.config.delegates.simple.BasicComparisonCfg;
+import org.someth2say.taijitu.ui.config.delegates.simple.BasicEqualityCfg;
+import org.someth2say.taijitu.ui.config.delegates.simple.BasicSourceCfg;
+import org.someth2say.taijitu.ui.config.delegates.simple.BasicStrategyCfg;
+import org.someth2say.taijitu.ui.config.delegates.simple.BasicTaijituCfg;
 import org.someth2say.taijitu.ui.config.impl.TaijituCfg;
 import org.someth2say.taijitu.ui.config.interfaces.IEqualityCfg;
 import org.someth2say.taijitu.ui.config.interfaces.ITaijituCfg;
@@ -36,20 +56,6 @@ import org.someth2say.taijitu.ui.config.source.mapper.CSVTupleMapper;
 import org.someth2say.taijitu.ui.config.source.mapper.ResultSetTupleMapper;
 import org.someth2say.taijitu.ui.config.source.query.ConnectionManager;
 import org.someth2say.taijitu.ui.config.source.query.QuerySource;
-
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.someth2say.taijitu.ui.config.ConfigurationLabels.Comparison.Fields.KEYS;
-import static org.someth2say.taijitu.ui.config.ConfigurationLabels.Comparison.*;
-import static org.someth2say.taijitu.ui.config.ConfigurationLabels.Sections.COMPARISON;
 
 
 /**
@@ -148,11 +154,11 @@ public class TaijituTest {
 
         Properties s1buildProperties = new Properties();
         //URL Scheme
-        s1buildProperties.setProperty(ConfigurationLabels.Comparison.RESOURCE, "http://samplecsvs.s3.amazonaws.com/Sacramentorealestatetransactions.csv");
+        s1buildProperties.setProperty(ConfigurationLabels.RESOURCE, "http://samplecsvs.s3.amazonaws.com/Sacramentorealestatetransactions.csv");
 
         Properties s2buildProperties = new Properties();
         // No scheme: File source (should be in classpath)
-        s2buildProperties.setProperty(ConfigurationLabels.Comparison.RESOURCE, "/csv/Sacramentorealestatetransactions.csv");
+        s2buildProperties.setProperty(ConfigurationLabels.RESOURCE, "/csv/Sacramentorealestatetransactions.csv");
         // File scheme (must be absolute)
 //        s2buildProperties.setProperty(ConfigurationLabels.Comparison.RESOUCE, "file:///"+ ClassLoader.getSystemResource(".").getPath() +"/csv/Sacramentorealestatetransactions.csv");
 
@@ -184,10 +190,10 @@ public class TaijituTest {
         // Comparisons
 
         Properties s1fetchProperties = new Properties();
-        s1fetchProperties.setProperty(ConfigurationLabels.Comparison.STATEMENT, "select * from test");
+        s1fetchProperties.setProperty(ConfigurationLabels.STATEMENT, "select * from test");
 
         Properties s2fetchProperties = new Properties();
-        s2fetchProperties.setProperty(ConfigurationLabels.Comparison.STATEMENT, "select * from test2");
+        s2fetchProperties.setProperty(ConfigurationLabels.STATEMENT, "select * from test2");
 
         BasicSourceCfg sourceSrc = new BasicSourceCfg("source", QuerySource.NAME, s1fetchProperties, null, ResultSetTupleMapper.NAME);
         BasicSourceCfg source2Src = new BasicSourceCfg("source2", QuerySource.NAME, s1fetchProperties, null, ResultSetTupleMapper.NAME);
@@ -225,17 +231,17 @@ public class TaijituTest {
         putAll(properties, makeComparisonProps("test2", "KEY", sourceProps1, sourceProps2, null), "");
 
         // Disable plugins, 'cause we need to write nothing.
-        properties.setProperty(ConfigurationLabels.Comparison.STRATEGY, strategyName);
+        properties.setProperty(ConfigurationLabels.STRATEGY, strategyName);
 
         //Add comparators
         //Case insensitive strings
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + StringCaseInsensitive.class.getSimpleName() + "." + ConfigurationLabels.Comparison.FIELD_CLASS, String.class.getName());
+        properties.setProperty(ConfigurationLabels.EQUALITY + "." + StringCaseInsensitive.class.getSimpleName() + "." + ConfigurationLabels.FIELD_CLASS, String.class.getName());
         //Decimal places for Numbers
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + NumberThreshold.class.getSimpleName() + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Number.class.getName());
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + NumberThreshold.class.getSimpleName() + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "2");
+        properties.setProperty(ConfigurationLabels.EQUALITY + "." + NumberThreshold.class.getSimpleName() + "." + ConfigurationLabels.FIELD_CLASS, Number.class.getName());
+        properties.setProperty(ConfigurationLabels.EQUALITY + "." + NumberThreshold.class.getSimpleName() + "." + ConfigurationLabels.EQUALITY_PARAMS, "2");
         //Threshold 100ms for Timestamps.
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + DateThreshold.class.getSimpleName() + "." + ConfigurationLabels.Comparison.FIELD_CLASS, Date.class.getName());
-        properties.setProperty(ConfigurationLabels.Comparison.EQUALITY + "." + DateThreshold.class.getSimpleName() + "." + ConfigurationLabels.Comparison.EQUALITY_PARAMS, "100");
+        properties.setProperty(ConfigurationLabels.EQUALITY + "." + DateThreshold.class.getSimpleName() + "." + ConfigurationLabels.FIELD_CLASS, Date.class.getName());
+        properties.setProperty(ConfigurationLabels.EQUALITY + "." + DateThreshold.class.getSimpleName() + "." + ConfigurationLabels.EQUALITY_PARAMS, "100");
 
         final ImmutableHierarchicalConfiguration configuration = ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(properties));
 
@@ -769,21 +775,21 @@ public class TaijituTest {
 
 
     private Properties makeComparisonProps(String name, String keys, Properties sourceSource, Properties targetSource, Properties database) {
-        String comparisonPrefix = COMPARISON + "." + name + ".";
+        String comparisonPrefix = ConfigurationLabels.COMPARISON + "." + name + ".";
         Properties result = new Properties();
         if (keys != null)
-            result.setProperty(comparisonPrefix + KEYS, keys);
+            result.setProperty(comparisonPrefix + ConfigurationLabels.KEYS, keys);
 
         if (sourceSource != null) {
-            putAll(result, sourceSource, comparisonPrefix + SOURCES + ".source.");
+            putAll(result, sourceSource, comparisonPrefix + ConfigurationLabels.SOURCES + ".source.");
         }
 
         if (targetSource != null) {
-            putAll(result, targetSource, comparisonPrefix + SOURCES + ".target.");
+            putAll(result, targetSource, comparisonPrefix + ConfigurationLabels.SOURCES + ".target.");
         }
 
         if (database != null) {
-            result.setProperty(comparisonPrefix + ConfigurationLabels.Comparison.SOURCE_BUILD_PROPERTIES, linearizeProperties(database));
+            result.setProperty(comparisonPrefix + ConfigurationLabels.SOURCE_BUILD_PROPERTIES, linearizeProperties(database));
         }
 
         return result;
@@ -792,19 +798,19 @@ public class TaijituTest {
 
     private Properties makeQuerySourceProps(String query, Properties databaseProperties, String mapperName) {
         Properties result = new Properties();
-        result.put(SOURCE_TYPE, QuerySource.NAME);
+        result.put(ConfigurationLabels.SOURCE_TYPE, QuerySource.NAME);
 
         Properties fetchProperties = new Properties();
-        fetchProperties.put(STATEMENT, query);
+        fetchProperties.put(ConfigurationLabels.STATEMENT, query);
 
-        result.put(ConfigurationLabels.Comparison.SOURCE_FETCH_PROPERTIES, linearizeProperties(fetchProperties));
+        result.put(ConfigurationLabels.SOURCE_FETCH_PROPERTIES, linearizeProperties(fetchProperties));
 
         if (databaseProperties != null) {
-            result.put(ConfigurationLabels.Comparison.SOURCE_BUILD_PROPERTIES, linearizeProperties(databaseProperties));
+            result.put(ConfigurationLabels.SOURCE_BUILD_PROPERTIES, linearizeProperties(databaseProperties));
         }
 
         if (mapperName != null) {
-            result.put(ConfigurationLabels.Comparison.MAPPER_TYPE, mapperName);
+            result.put(ConfigurationLabels.MAPPER_TYPE, mapperName);
         }
 
         return result;

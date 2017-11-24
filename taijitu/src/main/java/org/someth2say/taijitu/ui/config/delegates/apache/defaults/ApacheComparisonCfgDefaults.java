@@ -18,7 +18,7 @@ public interface ApacheComparisonCfgDefaults extends ApacheNamedCfgDefaults, ICo
     @Override
     default IStrategyCfg getStrategyConfig() {
         try {
-            ImmutableHierarchicalConfiguration strategyConfiguration = getConfiguration().immutableConfigurationAt(ConfigurationLabels.Comparison.STRATEGY);
+            ImmutableHierarchicalConfiguration strategyConfiguration = getConfiguration().immutableConfigurationAt(ConfigurationLabels.STRATEGY);
             return new ApacheStrategy(strategyConfiguration);
         } catch (ConfigurationRuntimeException e){
             return null;
@@ -29,7 +29,7 @@ public interface ApacheComparisonCfgDefaults extends ApacheNamedCfgDefaults, ICo
     default List<IEqualityCfg> getEqualityConfigs() {
         List<ImmutableHierarchicalConfiguration> thisEqConfigs;
         try {
-            thisEqConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.Comparison.EQUALITY);
+            thisEqConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.EQUALITY);
         } catch (ConfigurationRuntimeException e) {
             thisEqConfigs = Collections.emptyList();
         }
@@ -38,13 +38,13 @@ public interface ApacheComparisonCfgDefaults extends ApacheNamedCfgDefaults, ICo
 
     @Override
     default List<ISourceCfg> getSourceConfigs() {
-        final List<ImmutableHierarchicalConfiguration> sourceConfigs = this.getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.Comparison.SOURCES);
+        final List<ImmutableHierarchicalConfiguration> sourceConfigs = this.getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.SOURCES);
         return sourceConfigs.stream().map(ApacheSource::new).collect(Collectors.toList());
     }
 
     @Override
     default List<IPluginCfg> getPluginConfigs() {
-        final List<ImmutableHierarchicalConfiguration> pluginConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.Sections.PLUGINS);
+        final List<ImmutableHierarchicalConfiguration> pluginConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.PLUGINS);
         return pluginConfigs.stream().map(ApachePlugin::new).collect(Collectors.toList());
     }
 

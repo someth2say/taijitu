@@ -8,7 +8,7 @@ import org.someth2say.taijitu.compare.result.Missing;
 
 import java.util.List;
 
-public abstract class ComparisonResult {
+public abstract class MismatchHelper {
 
     public static void addMissing(List<Mismatch> list, Missing missing) {
         list.add(missing);

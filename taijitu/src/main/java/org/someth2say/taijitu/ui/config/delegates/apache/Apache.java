@@ -16,14 +16,12 @@ public abstract class Apache<P extends ApacheCfgDefaults> implements ApacheCfgDe
         return configuration;
     }
 
-    //TODO: Woho! Apache Configuration does not defines equals/hashcode! :'(
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Apache)) return false;
-
         Apache<?> other = (Apache<?>) o;
-
+        //TODO: Woho! Apache Configuration does not defines equals/hashcode! :'(
         return getConfiguration().equals(other.getConfiguration());
     }
 
