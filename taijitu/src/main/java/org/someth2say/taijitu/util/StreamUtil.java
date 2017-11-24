@@ -15,7 +15,7 @@ import java.util.stream.StreamSupport;
  */
 public class StreamUtil {
 
-    public static <C, A extends C, B extends C> Stream<C> interleave(Stream<? extends A> a, Stream<? extends B> b) {
+    public static <C, A extends C, B extends C> Stream<C> zip(Stream<? extends A> a, Stream<? extends B> b) {
         Spliterator<? extends A> aSpliterator = Objects.requireNonNull(a).spliterator();
         Spliterator<? extends B> bSpliterator = Objects.requireNonNull(b).spliterator();
 
@@ -41,7 +41,7 @@ public class StreamUtil {
     }
 
 
-    public static <A, B, C> Stream<C> zipMap(Stream<? extends A> a, Stream<? extends B> b,
+    public static <A, B, C> Stream<C> biMap(Stream<? extends A> a, Stream<? extends B> b,
                                              BiFunction<? super A, ? super B, ? extends C> zipper) {
         Objects.requireNonNull(zipper);
         Spliterator<? extends A> aSpliterator = Objects.requireNonNull(a).spliterator();
@@ -49,20 +49,12 @@ public class StreamUtil {
 
         Iterator<A> aIterator = Spliterators.iterator(aSpliterator);
         Iterator<B> bIterator = Spliterators.iterator(bSpliterator);
-        Iterator<C> cIterator = new ZipMapIterator<>(aIterator, bIterator, zipper);
+        Iterator<C> cIterator = new BiMapIterator<>(aIterator, bIterator, zipper);
         return getStreamFromIterator(a, b, aSpliterator, bSpliterator, cIterator, Math::min);
 
     }
 
-    public static <A, C> Stream<C> zipMapTail(Stream<? extends A> a, Stream<? extends A> b,
-                                                 BiFunction<? super A, ? super A, ? extends C> zipper,
-                                                 Function<? super A, ? extends C> tailer,
-                                                 ) {
-
-    }
-
-
-    public static <A, B, C> Stream<C> zipMapTail(Stream<? extends A> a, Stream<? extends B> b,
+    public static <A, B, C> Stream<C> biMapTail(Stream<? extends A> a, Stream<? extends B> b,
                                                  BiFunction<? super A, ? super B, ? extends C> zipper,
                                                  Function<? super A, ? extends C> aTailer,
                                                  Function<? super B, ? extends C> bTailer) {
@@ -75,7 +67,7 @@ public class StreamUtil {
 
         Iterator<A> aIterator = Spliterators.iterator(aSpliterator);
         Iterator<B> bIterator = Spliterators.iterator(bSpliterator);
-        Iterator<C> cIterator = new ZipMapTailIterator<>(aIterator, bIterator, zipper, aTailer, bTailer);
+        Iterator<C> cIterator = new BiMapTailIterator<>(aIterator, bIterator, zipper, aTailer, bTailer);
         return getStreamFromIterator(a, b, aSpliterator, bSpliterator, cIterator, Math::max);
 
     }
@@ -105,12 +97,12 @@ public class StreamUtil {
         }
     }
 
-    public static class ZipMapIterator<C, A, B> implements Iterator<C> {
+    public static class BiMapIterator<C, A, B> implements Iterator<C> {
         private final Iterator<A> aIterator;
         private final Iterator<B> bIterator;
         private final BiFunction<? super A, ? super B, ? extends C> zipper;
 
-        public ZipMapIterator(Iterator<A> aIterator, Iterator<B> bIterator, BiFunction<? super A, ? super B, ? extends C> zipper) {
+        public BiMapIterator(Iterator<A> aIterator, Iterator<B> bIterator, BiFunction<? super A, ? super B, ? extends C> zipper) {
             this.aIterator = aIterator;
             this.bIterator = bIterator;
             this.zipper = zipper;
@@ -127,14 +119,14 @@ public class StreamUtil {
         }
     }
 
-    public static class ZipMapTailIterator<C, A, B> implements Iterator<C> {
+    public static class BiMapTailIterator<C, A, B> implements Iterator<C> {
         private final Iterator<A> aIterator;
         private final Iterator<B> bIterator;
         private final BiFunction<? super A, ? super B, ? extends C> zipper;
         private final Function<? super A, ? extends C> aTailer;
         private final Function<? super B, ? extends C> bTailer;
 
-        public ZipMapTailIterator(Iterator<A> aIterator, Iterator<B> bIterator, BiFunction<? super A, ? super B, ? extends C> zipper, Function<? super A, ? extends C> aTailer, Function<? super B, ? extends C> bTailer) {
+        public BiMapTailIterator(Iterator<A> aIterator, Iterator<B> bIterator, BiFunction<? super A, ? super B, ? extends C> zipper, Function<? super A, ? extends C> aTailer, Function<? super B, ? extends C> bTailer) {
             this.aIterator = aIterator;
             this.bIterator = bIterator;
             this.zipper = zipper;
