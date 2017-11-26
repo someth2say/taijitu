@@ -25,7 +25,6 @@ import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * @author Jordi Sola
@@ -136,7 +135,7 @@ class TaijituRunner implements Callable<List<Mismatch>> {
 		SourceData<?, T> tSourceData = sourceDatas.get(0);
 		ComparableCategorizerEquality<T> categorizer = new CompositeComparableCategorizerEquality<>(
 				tSourceData.categoryEaEs);
-		Equality<T> equality = new CompositeEquality<>(tSourceData.equalityEaEs);
+		Equality<T> equality = new CompositeEquality.CompositeEqualityBuilder().setEaes(tSourceData.equalityEaEs).createCompositeEquality();
 
 		// 6. Run SteamEquality given CategorizerEquality and MappedStreams
 		String strategyName = iComparisonCfg.getStrategyConfig().getName();
