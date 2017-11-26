@@ -22,7 +22,7 @@ import static org.someth2say.taijitu.ui.config.DefaultConfig.DEFAULT_CONFIG_FILE
 /**
  * @author Jordi Sola
  */
-final class Taijitu {
+public final class Taijitu {
 
     private static final Logger logger = LoggerFactory.getLogger(Taijitu.class);
 

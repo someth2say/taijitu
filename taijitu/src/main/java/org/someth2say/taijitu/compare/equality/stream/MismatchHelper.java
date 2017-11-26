@@ -26,7 +26,6 @@ public abstract class MismatchHelper {
 		return missing;
     }
 
-
     public static <T> Difference<T> addDifference(List<Mismatch> list, Equality<T> cause, T t1, T t2) {
         Difference<T> difference = new Difference<>(cause, t1, t2);
 		list.add(difference);
