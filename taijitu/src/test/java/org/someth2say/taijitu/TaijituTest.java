@@ -1,6 +1,7 @@
 package org.someth2say.taijitu;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -33,6 +34,7 @@ import org.someth2say.taijitu.compare.equality.composite.CompositeEquality;
 import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndComparableCategorizerEquality;
 import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndEquality;
 import org.someth2say.taijitu.compare.equality.stream.mapping.MappingStreamEquality;
+import org.someth2say.taijitu.compare.equality.stream.simple.SimpleStreamEquality;
 import org.someth2say.taijitu.compare.equality.stream.sorted.ComparableStreamEquality;
 import org.someth2say.taijitu.compare.equality.value.DateThreshold;
 import org.someth2say.taijitu.compare.equality.value.NumberThreshold;
@@ -77,11 +79,11 @@ public class TaijituTest {
     public static Collection<String> strategies() {
         return Arrays.asList(
                 MappingStreamEquality.class.getSimpleName(), ComparableStreamEquality.class.getSimpleName()
-//                ,MappingStreamEquality.NAME, ComparableStreamEquality.NAME
-//                ,MappingStreamEquality.NAME, ComparableStreamEquality.NAME
-//                ,MappingStreamEquality.NAME, ComparableStreamEquality.NAME
-//                ,MappingStreamEquality.NAME, ComparableStreamEquality.NAME
-//                ,MappingStreamEquality.NAME, ComparableStreamEquality.NAME
+//                ,MappingStreamEquality.NAME, SimpleStreamEquality.NAME
+//                ,MappingStreamEquality.NAME, SimpleStreamEquality.NAME
+//                ,MappingStreamEquality.NAME, SimpleStreamEquality.NAME
+//                ,MappingStreamEquality.NAME, SimpleStreamEquality.NAME
+//                ,MappingStreamEquality.NAME, SimpleStreamEquality.NAME
         );
     }
 
@@ -301,35 +303,45 @@ public class TaijituTest {
     }
 
     @Test
-    public void testDifferences() {
-        // Build Equality
-        CompositeEquality<TestClass> equality = new CompositeEquality<>(Arrays.asList(
-                new ExtractorAndEquality<>(TestClass::getOne, new StringCaseInsensitive<>()),
-                new ExtractorAndEquality<>(TestClass::getThree, new ObjectToString<>())
-        ));
+    public void testCompositeEquality() {
         TestClass differentFrom1 = new TestClass("aaa", "aaa", 1);
-        TestClass differentFrom2 = new TestClass("bbb", "bbb", 1);
-        TestClass differentFrom3 = new TestClass("aaa", "aaa", 2);
-        TestClass differentFrom4 = new TestClass("ccc", "ccc", 3);
+        TestClass differentFrom2 = new TestClass("bbb", "ccc", 1);
+        TestClass differentFrom3 = new TestClass("aaa", "AAA", 2);
 
-        equality.differences(differentFrom1, differentFrom2).forEach(System.out::println);
-        equality.differences(differentFrom1, differentFrom3).forEach(System.out::println);
-        equality.differences(differentFrom1, differentFrom4).forEach(System.out::println);
+        assertFalse(testClassOneTwoEquality.equals(differentFrom1, differentFrom2));
+        assertTrue(testClassOneTwoEquality.equals(differentFrom1, differentFrom3));
+        assertTrue(testClassOneTwoEquality.differences(differentFrom1, differentFrom2)
+                .containsAll(Arrays.asList(
+                        new Difference(new StringCaseInsensitive(), "aaa", "bbb"),
+                        new Difference(new StringCaseInsensitive(), "aaa", "ccc"))));
     }
 
+    @Test
+    public void testSimpleStreamEquality() {
+
+        // Build Streams
+        TestClass differentFrom1 = new TestClass("aaa", "aaa", 1);
+        TestClass differentFrom2 = new TestClass("aaa", "aa", 1);
+        TestClass missingFrom1 = new TestClass("bbb", "bbb", 2);
+        TestClass equalsFrom1 = new TestClass("bBb", "bbb", 3);
+        TestClass equalsFrom2 = new TestClass("bbb", "bbB", 3);
+
+        Stream<TestClass> stream1 = Stream.of(differentFrom1, equalsFrom1, missingFrom1);
+        Stream<TestClass> stream2 = Stream.of(differentFrom2, equalsFrom2);
+
+        SimpleStreamEquality<TestClass> streamEquality = new SimpleStreamEquality<>(testClassOneTwoEquality, null);
+        List<Mismatch> mismatches = streamEquality.differences(stream1, stream2);
+
+        // Test results
+        mismatches.forEach(System.out::println);
+        assertEquals(2, mismatches.size());
+        assertTrue(mismatches.contains(new Missing(streamEquality, missingFrom1)));
+        List<Mismatch> underlyingCauses = Collections.singletonList(new Difference<>(new StringCaseInsensitive<>(), "aaa", "aa"));
+        assertTrue(mismatches.contains(new Difference<>(testClassOneTwoEquality, differentFrom1, differentFrom2, underlyingCauses)));
+    }
 
     @Test
-    public void testCompositeEquality() {
-        // Build Equality and Comparer
-        CompositeEquality<TestClass> equality = new CompositeEquality<>(Arrays.asList(
-                new ExtractorAndEquality<>(TestClass::getOne, new StringCaseInsensitive<>()),
-                new ExtractorAndEquality<>(TestClass::getTwo, new StringCaseInsensitive<>())
-        ));
-
-        CompositeComparableCategorizerEquality<TestClass> comparer = new CompositeComparableCategorizerEquality<>(Arrays.asList(
-                new ExtractorAndComparableCategorizerEquality<>(TestClass::getThree, new ObjectToString<>())
-        ));
-
+    public void testComparableStreamEquality() {
         // Build Streams
         TestClass differentFrom1 = new TestClass("aaa", "aaa", 1);
         TestClass differentFrom2 = new TestClass("aaa", "aa", 1);
@@ -340,18 +352,15 @@ public class TaijituTest {
         Stream<TestClass> stream1 = Stream.of(differentFrom1, missingFrom1, equalsFrom1);
         Stream<TestClass> stream2 = Stream.of(differentFrom2, equalsFrom2);
 
-        Object id1 = 1;
-        Object id2 = 2;
-
-        List<Mismatch> mismatches = new ComparableStreamEquality<>(equality, comparer).differences(stream1, stream2);
+        List<Mismatch> mismatches = new ComparableStreamEquality<>(testClassOneTwoEquality, testClassThreeComparer).differences(stream1, stream2);
 
         // Test results
         mismatches.forEach(System.out::println);
-        Missing missing = new Missing<>(comparer, missingFrom1);
+        Missing<TestClass> missing = new Missing<>(testClassThreeComparer, missingFrom1);
         assertEquals(2, mismatches.size());
         assertTrue(mismatches.contains(missing));
         List<Mismatch> underlyingCauses = Collections.singletonList(new Difference<>(new StringCaseInsensitive<>(), "aaa", "aa"));
-        Difference difference = new Difference<>(equality, differentFrom1, differentFrom2, underlyingCauses);
+        Difference<TestClass> difference = new Difference<>(testClassOneTwoEquality, differentFrom1, differentFrom2, underlyingCauses);
         assertTrue(mismatches.contains(difference));
     }
 
@@ -828,6 +837,18 @@ public class TaijituTest {
     private static void putAll(final Properties to, final Properties from, final String keyPrefix) {
         from.forEach((o, o2) -> to.put(keyPrefix + o.toString(), o2));
     }
+
+    // Build Equality and Comparer
+    CompositeEquality<TestClass> testClassOneTwoEquality = new CompositeEquality<>(Arrays.asList(
+            new ExtractorAndEquality<>(TestClass::getOne, new StringCaseInsensitive<>()),
+            new ExtractorAndEquality<>(TestClass::getTwo, new StringCaseInsensitive<>())
+    ));
+
+    CompositeComparableCategorizerEquality<TestClass> testClassThreeComparer = new CompositeComparableCategorizerEquality<>(Arrays.asList(
+            new ExtractorAndComparableCategorizerEquality<>(TestClass::getThree, new ObjectToString<>())
+    ));
+
+
 }
 
 class TestClass {

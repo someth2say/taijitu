@@ -21,10 +21,6 @@ public class Difference<DT> extends Mismatch<DT> {
         super(cause, entries, underlyingMismatches);
     }
 
-    public Difference(Equality<DT> cause, DT composite) {
-        super(cause, composite);
-    }
-
     public Difference(Equality<DT> cause, DT composite, DT composite2) {
         super(cause, composite, composite2);
     }
