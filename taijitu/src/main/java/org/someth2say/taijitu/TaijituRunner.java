@@ -277,7 +277,7 @@ class TaijituRunner implements Callable<List<Mismatch>> {
 		SourceData<?, T> sourceData0 = sourceDatas.get(0);
 		SourceData<?, T> sourceData1 = sourceDatas.get(1);
 		try (Source sourceSrc = sourceData0.mappedSource; Source targetSrc = sourceData1.mappedSource) {
-			comparisonResult = streamEquality.differences(sourceSrc.stream(), targetSrc.stream());
+			comparisonResult = streamEquality.underlyingDiffs(sourceSrc.stream(), targetSrc.stream());
 			return comparisonResult;
 		} catch (Source.ClosingException e) {
 			logger.warn("Unable to close sources.", e);

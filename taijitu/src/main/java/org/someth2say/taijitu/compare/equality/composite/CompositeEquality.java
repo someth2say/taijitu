@@ -35,7 +35,7 @@ public class CompositeEquality<T> extends AbstractCompositeEquality<T, Extractor
     }
 
     @Override
-    public List<Mismatch> differences(T t1, T t2) {
+    public List<Mismatch<?>> underlyingDiffs(T t1, T t2) {
         return getExtractorsAndEqualities().stream().map(eae -> difference(t1, t2, eae)).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
@@ -43,11 +43,11 @@ public class CompositeEquality<T> extends AbstractCompositeEquality<T, Extractor
     public static class Builder<T> {
         private List<ExtractorAndEquality<T, ?>> eaes = new ArrayList<>();
 
-        public <V> Builder addComponent(Function<T, V> extractor) {
+        public <V> Builder<T> addComponent(Function<T, V> extractor) {
             return addComponent(extractor, new JavaObject<>());
         }
 
-        public <V> Builder addComponent(Function<T, V> extractor, Equality<V> equality) {
+        public <V> Builder<T> addComponent(Function<T, V> extractor, Equality<V> equality) {
             eaes.add(new ExtractorAndEquality<>(extractor, equality));
             return this;
         }

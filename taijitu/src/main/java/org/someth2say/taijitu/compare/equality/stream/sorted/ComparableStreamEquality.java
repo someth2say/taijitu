@@ -26,12 +26,12 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
     }
 
     @Override
-    public List<Mismatch> differences(Stream<T> source, Stream<T> target) {
+    public List<Mismatch<?>> underlyingDiffs(Stream<T> source, Stream<T> target) {
         return compare(source, target, getCategorizer(), getEquality());
     }
 
-    public static <T> List<Mismatch> compare(Stream<T> source, Stream<T> target, ComparableCategorizerEquality<T> categorizer, Equality<T> equality) {
-        List<Mismatch> newresult = new ArrayList<>();
+    public static <T> List<Mismatch<?>> compare(Stream<T> source, Stream<T> target, ComparableCategorizerEquality<T> categorizer, Equality<T> equality) {
+        List<Mismatch<?>> newresult = new ArrayList<>();
         Iterator<T> sourceIt = source.iterator();
         Iterator<T> targetIt = target.iterator();
 
@@ -57,7 +57,7 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
                 recordCount++;
             } else {
                 // same Keys
-                List<Mismatch> differences = equality.differences(sourceRecord, targetRecord);
+                List<Mismatch<?>> differences = equality.underlyingDiffs(sourceRecord, targetRecord);
                 if (differences != null && !differences.isEmpty()) {
                 	// Records are different
                     addDifference(newresult, equality, sourceRecord, targetRecord, differences);
@@ -77,7 +77,7 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T> {
         return newresult;
     }
 
-	private static <T> int flushMissings(ComparableCategorizerEquality<T> categorizer, List<Mismatch> newresult,
+	private static <T> int flushMissings(ComparableCategorizerEquality<T> categorizer, List<Mismatch<?>> newresult,
 			Iterator<T> sourceIt, int recordCount, TimeBiDiscarter<String, Object[]> timedLogger, Iterator<T> it) {
 		while (it.hasNext()) {
             addMissing(newresult, categorizer, sourceIt.next());

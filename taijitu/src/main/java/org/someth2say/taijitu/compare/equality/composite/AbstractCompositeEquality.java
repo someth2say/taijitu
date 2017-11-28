@@ -29,7 +29,7 @@ public abstract class AbstractCompositeEquality<T, EAE extends AbstractExtractor
         return equals;
     }
 
-    protected <T,V> Mismatch difference(T first, T second, AbstractExtractorAndEquality<T, V, ?> eae) {
+    protected <V> Mismatch<V> difference(T first, T second, AbstractExtractorAndEquality<T, V, ?> eae) {
         Function<T, V> extractors = eae.getExtractor();
         Equality<V> equality = eae.getEquality();
         V firstValue = extractors.apply(first);

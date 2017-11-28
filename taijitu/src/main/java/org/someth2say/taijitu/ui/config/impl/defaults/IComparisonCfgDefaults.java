@@ -56,7 +56,6 @@ public interface IComparisonCfgDefaults<T extends IComparisonCfg> extends ICompa
         }
 
         return safeUnion(equalityCfgs, parentCfgs);
-
     }
 
     @Override

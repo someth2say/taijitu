@@ -4,7 +4,7 @@ import org.someth2say.taijitu.compare.equality.Equality;
 
 import java.util.function.Function;
 
-public abstract class AbstractExtractorAndEquality<T, Y, E extends Equality<Y>> {
+public class AbstractExtractorAndEquality<T, Y, E extends Equality<Y>> {
 
     private final E equality;
     private final Function<T, Y> extractor;

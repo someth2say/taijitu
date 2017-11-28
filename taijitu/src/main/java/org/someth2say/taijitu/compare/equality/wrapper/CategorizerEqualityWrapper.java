@@ -22,7 +22,8 @@ public class CategorizerEqualityWrapper<T> {
             return obj == null;
         }
         if (obj instanceof CategorizerEqualityWrapper) {
-            CategorizerEqualityWrapper<T> otherWrapper = (CategorizerEqualityWrapper<T>) obj;
+            @SuppressWarnings("unchecked")
+			CategorizerEqualityWrapper<T> otherWrapper = (CategorizerEqualityWrapper<T>) obj;
             T otherWrapped = otherWrapper.getWrapped();
             return categorizerEquality.equals(wrapped, otherWrapped);
         }

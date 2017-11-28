@@ -9,15 +9,15 @@ public class Difference<DT> extends Mismatch<DT> {
         super(cause, entries);
     }
 
-    public Difference(Equality<DT> cause, DT composite, List<Mismatch> underlyingMismatches) {
+    public Difference(Equality<DT> cause, DT composite, List<Mismatch<?>> underlyingMismatches) {
         super(cause, composite, underlyingMismatches);
     }
 
-    public Difference(Equality<DT> cause, DT composite, DT composite2, List<Mismatch> underlyingMismatches) {
+    public Difference(Equality<DT> cause, DT composite, DT composite2, List<Mismatch<?>> underlyingMismatches) {
         super(cause, composite, composite2, underlyingMismatches);
     }
 
-    public Difference(Equality<DT> cause, List<DT> entries, List<Mismatch> underlyingMismatches) {
+    public Difference(Equality<DT> cause, List<DT> entries, List<Mismatch<?>> underlyingMismatches) {
         super(cause, entries, underlyingMismatches);
     }
 

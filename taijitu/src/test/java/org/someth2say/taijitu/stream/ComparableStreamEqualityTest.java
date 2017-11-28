@@ -30,7 +30,7 @@ public class ComparableStreamEqualityTest {
         Stream<TestComposite> stream1 = Stream.of(differentFrom1, missingFrom1, equalsFrom1);
         Stream<TestComposite> stream2 = Stream.of(differentFrom2, equalsFrom2);
 
-        List<Mismatch> mismatches = new ComparableStreamEquality<>(testClassOneTwoEquality, testClassThreeComparer).differences(stream1, stream2);
+        List<Mismatch> mismatches = new ComparableStreamEquality<>(testClassOneTwoEquality, testClassThreeComparer).underlyingDiffs(stream1, stream2);
 
         // Test results
         mismatches.forEach(System.out::println);

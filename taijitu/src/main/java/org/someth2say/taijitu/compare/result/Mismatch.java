@@ -8,10 +8,10 @@ import java.util.*;
 public abstract class Mismatch<MMT> {
     private final Equality<MMT> cause;
     private final List<MMT> entries;
-    private final List<Mismatch> underlyingMismatches;
+    private final List<Mismatch<?>> underlyingMismatches;
 
 
-    public Mismatch(Equality<MMT> cause, List<MMT> entries, List<Mismatch> underlyingMismatches) {
+    public Mismatch(Equality<MMT> cause, List<MMT> entries, List<Mismatch<?>> underlyingMismatches) {
         this.cause = cause;
         this.entries = entries;
         this.underlyingMismatches = underlyingMismatches;
@@ -21,19 +21,19 @@ public abstract class Mismatch<MMT> {
         this(cause, entries, null);
     }
 
-    public Mismatch(Equality<MMT> cause, MMT composite, List<Mismatch> underlyingMismatches) {
+    public Mismatch(Equality<MMT> cause, MMT composite, List<Mismatch<?>> underlyingMismatches) {
         this(cause, Collections.singletonList(composite), underlyingMismatches);
     }
 
     public Mismatch(Equality<MMT> cause, MMT composite) {
-        this(cause, composite, (List<Mismatch>) null);
+        this(cause, composite, (List<Mismatch<?>>) null);
     }
 
     public Mismatch(Equality<MMT> cause, MMT composite, MMT composite2) {
         this(cause, composite, composite2, null);
     }
 
-    public Mismatch(Equality<MMT> cause, MMT composite, MMT composite2, List<Mismatch> underlyingMismatches) {
+    public Mismatch(Equality<MMT> cause, MMT composite, MMT composite2, List<Mismatch<?>> underlyingMismatches) {
         this(cause, Arrays.asList(composite, composite2), underlyingMismatches);
     }
 

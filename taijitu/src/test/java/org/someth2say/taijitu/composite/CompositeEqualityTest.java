@@ -20,7 +20,7 @@ public class CompositeEqualityTest {
 
         assertFalse(testClassOneTwoEquality.equals(differentFrom1, differentFrom2));
         assertTrue(testClassOneTwoEquality.equals(differentFrom1, differentFrom3));
-        assertTrue(testClassOneTwoEquality.differences(differentFrom1, differentFrom2)
+        assertTrue(testClassOneTwoEquality.underlyingDiffs(differentFrom1, differentFrom2)
                 .containsAll(Arrays.asList(
                         new Difference(new StringCaseInsensitive(), "aaa", "bbb"),
                         new Difference(new StringCaseInsensitive(), "aaa", "ccc"))));
