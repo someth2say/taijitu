@@ -1,10 +1,6 @@
 package org.someth2say.taijitu.compare.equality.stream;
 
 import org.someth2say.taijitu.compare.equality.Equality;
-import org.someth2say.taijitu.compare.result.Mismatch;
-import org.someth2say.taijitu.util.Named;
-
-import java.util.List;
 import java.util.stream.Stream;
 
 /**

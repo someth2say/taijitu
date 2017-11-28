@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.ui.config.source;
+package org.someth2say.taijitu.ui.source;
 
 import org.someth2say.taijitu.ui.config.interfaces.ISourceCfg;
 

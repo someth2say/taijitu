@@ -59,10 +59,10 @@ public class TestComposite {
 
 
     // Build Equality and Comparer
-    public static CompositeEquality<TestComposite> testClassOneTwoEquality = new CompositeEquality.CompositeEqualityBuilder().setEaes(Arrays.asList(
+    public static CompositeEquality<TestComposite> testClassOneTwoEquality = new CompositeEquality<>(Arrays.asList(
             new ExtractorAndEquality<>(TestComposite::getOne, new StringCaseInsensitive<>()),
             new ExtractorAndEquality<>(TestComposite::getTwo, new StringCaseInsensitive<>())
-    )).createCompositeEquality();
+    ));
 
     public static CompositeComparableCategorizerEquality<TestComposite> testClassThreeComparer = new CompositeComparableCategorizerEquality<>(Arrays.asList(
             new ExtractorAndComparableCategorizerEquality<>(TestComposite::getThree, new ObjectToString<>())

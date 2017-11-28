@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.ui.config.source.query;
+package org.someth2say.taijitu.ui.source.query;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.ui.config.ConfigurationLabels;
 import org.someth2say.taijitu.ui.config.DefaultConfig;
 import org.someth2say.taijitu.ui.config.interfaces.ISourceCfg;
-import org.someth2say.taijitu.ui.config.source.AbstractSource;
-import org.someth2say.taijitu.ui.config.source.FieldDescription;
+import org.someth2say.taijitu.ui.source.AbstractSource;
+import org.someth2say.taijitu.ui.source.FieldDescription;
 
 import java.sql.*;
 import java.sql.Date;
@@ -120,7 +120,8 @@ public class QuerySource extends AbstractSource<ResultSet> {
         }
     }
 
-    public void close() {
+    @Override
+	public void close() {
         try {
             resultSet.close();
             try {
@@ -146,7 +147,8 @@ public class QuerySource extends AbstractSource<ResultSet> {
         return providedFields;
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public <V> Function<ResultSet, V> getExtractor(FieldDescription<V> fd) {
         return (ResultSet rs) -> {
             try {

@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.ui.config.source;
+package org.someth2say.taijitu.ui.source;
 
 import org.someth2say.taijitu.util.Named;
 
@@ -14,7 +14,8 @@ public interface Source<T> extends Named, AutoCloseable {
 
     Stream<T> stream();
 
-    default void close() throws ClosingException {
+    @Override
+	default void close() throws ClosingException {
     	stream().close();
     }
 

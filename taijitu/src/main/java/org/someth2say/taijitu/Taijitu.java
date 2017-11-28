@@ -10,7 +10,7 @@ import org.someth2say.taijitu.ui.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.ui.config.interfaces.ITaijituCfg;
 import org.someth2say.taijitu.ui.plugins.TaijituPlugin;
 import org.someth2say.taijitu.ui.registry.*;
-import org.someth2say.taijitu.ui.config.source.query.ConnectionManager;
+import org.someth2say.taijitu.ui.source.query.ConnectionManager;
 import org.someth2say.taijitu.util.FileUtil;
 
 import java.util.ArrayList;

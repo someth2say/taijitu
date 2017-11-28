@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.ui.config.source.query;
+package org.someth2say.taijitu.ui.source.query;
 
 import java.sql.Connection;
 import java.sql.SQLException;

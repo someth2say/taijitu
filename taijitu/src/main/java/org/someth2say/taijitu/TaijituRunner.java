@@ -14,10 +14,10 @@ import org.someth2say.taijitu.ui.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.ui.config.interfaces.IEqualityCfg;
 import org.someth2say.taijitu.ui.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.ui.config.interfaces.ISourceCfg;
-import org.someth2say.taijitu.ui.config.source.FieldDescription;
-import org.someth2say.taijitu.ui.config.source.Source;
-import org.someth2say.taijitu.ui.config.source.mapper.SourceMapper;
 import org.someth2say.taijitu.ui.registry.*;
+import org.someth2say.taijitu.ui.source.FieldDescription;
+import org.someth2say.taijitu.ui.source.Source;
+import org.someth2say.taijitu.ui.source.mapper.SourceMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -135,7 +135,7 @@ class TaijituRunner implements Callable<List<Mismatch>> {
 		SourceData<?, T> tSourceData = sourceDatas.get(0);
 		ComparableCategorizerEquality<T> categorizer = new CompositeComparableCategorizerEquality<>(
 				tSourceData.categoryEaEs);
-		Equality<T> equality = new CompositeEquality.CompositeEqualityBuilder().setEaes(tSourceData.equalityEaEs).createCompositeEquality();
+		Equality<T> equality = new CompositeEquality(tSourceData.equalityEaEs);
 
 		// 6. Run SteamEquality given CategorizerEquality and MappedStreams
 		String strategyName = iComparisonCfg.getStrategyConfig().getName();

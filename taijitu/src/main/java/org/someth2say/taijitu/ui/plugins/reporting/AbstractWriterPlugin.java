@@ -2,7 +2,6 @@ package org.someth2say.taijitu.ui.plugins.reporting;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.someth2say.taijitu.compare.equality.stream.MismatchHelper;
 import org.someth2say.taijitu.compare.result.Mismatch;
 import org.someth2say.taijitu.ui.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.ui.plugins.TaijituPlugin;

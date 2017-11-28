@@ -7,13 +7,9 @@ import org.someth2say.taijitu.compare.equality.Equality;
 import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
 import org.someth2say.taijitu.compare.result.Mismatch;
 import org.someth2say.taijitu.discarter.TimeBiDiscarter;
-import org.someth2say.taijitu.ui.config.interfaces.IStrategyCfg;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Stream;
 
 import static org.someth2say.taijitu.compare.equality.stream.MismatchHelper.*;

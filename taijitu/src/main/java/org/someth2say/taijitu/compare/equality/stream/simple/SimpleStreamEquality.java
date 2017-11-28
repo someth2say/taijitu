@@ -15,9 +15,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.someth2say.taijitu.compare.equality.stream.MismatchHelper.addDifference;
-import static org.someth2say.taijitu.compare.equality.stream.MismatchHelper.addMissing;
-
 /**
  * Created by Jordi Sola on 02/03/2017.
  */

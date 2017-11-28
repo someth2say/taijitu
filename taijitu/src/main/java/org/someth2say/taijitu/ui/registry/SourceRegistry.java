@@ -3,10 +3,10 @@ package org.someth2say.taijitu.ui.registry;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.ui.config.interfaces.ISourceCfg;
-import org.someth2say.taijitu.ui.config.source.AbstractSource;
-import org.someth2say.taijitu.ui.config.source.Source;
-import org.someth2say.taijitu.ui.config.source.csv.CSVResourceSource;
-import org.someth2say.taijitu.ui.config.source.query.QuerySource;
+import org.someth2say.taijitu.ui.source.AbstractSource;
+import org.someth2say.taijitu.ui.source.Source;
+import org.someth2say.taijitu.ui.source.csv.CSVResourceSource;
+import org.someth2say.taijitu.ui.source.query.QuerySource;
 import org.someth2say.taijitu.ui.util.ClassScanUtils;
 
 import java.util.Map;

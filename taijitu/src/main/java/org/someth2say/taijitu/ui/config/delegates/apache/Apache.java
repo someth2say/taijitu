@@ -12,7 +12,8 @@ public abstract class Apache<P extends ApacheCfgDefaults> implements ApacheCfgDe
     }
 
 
-    public ImmutableHierarchicalConfiguration getConfiguration() {
+    @Override
+	public ImmutableHierarchicalConfiguration getConfiguration() {
         return configuration;
     }
 

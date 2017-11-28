@@ -1,10 +1,10 @@
-package org.someth2say.taijitu.ui.config.source.mapper;
-
-import org.someth2say.taijitu.ui.config.source.FieldDescription;
-import org.someth2say.taijitu.ui.config.source.Source;
+package org.someth2say.taijitu.ui.source.mapper;
 
 import java.util.List;
 import java.util.stream.Stream;
+
+import org.someth2say.taijitu.ui.source.FieldDescription;
+import org.someth2say.taijitu.ui.source.Source;
 
 //TODO: Maybe this is the point to add some semantics to CSV: Parse provided fields names, try to cast values to the right object
 public class CSVTupleMapper extends AbstractSourceMapper<String[], Object[]> {

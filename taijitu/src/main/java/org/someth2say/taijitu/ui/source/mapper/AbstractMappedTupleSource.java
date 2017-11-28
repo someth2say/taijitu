@@ -1,12 +1,12 @@
-package org.someth2say.taijitu.ui.config.source.mapper;
-
-import org.someth2say.taijitu.ui.config.source.AbstractSource;
-import org.someth2say.taijitu.ui.config.source.FieldDescription;
-import org.someth2say.taijitu.ui.config.source.Source;
+package org.someth2say.taijitu.ui.source.mapper;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+
+import org.someth2say.taijitu.ui.source.AbstractSource;
+import org.someth2say.taijitu.ui.source.FieldDescription;
+import org.someth2say.taijitu.ui.source.Source;
 
 public abstract class AbstractMappedTupleSource extends AbstractSource<Object[]> {
 

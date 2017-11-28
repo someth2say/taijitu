@@ -2,8 +2,6 @@ package org.someth2say.taijitu.stream;
 
 import org.junit.Test;
 import org.someth2say.taijitu.TestComposite;
-import org.someth2say.taijitu.compare.equality.composite.CompositeComparableCategorizerEquality;
-import org.someth2say.taijitu.compare.equality.composite.CompositeEquality;
 import org.someth2say.taijitu.compare.equality.stream.sorted.ComparableStreamEquality;
 import org.someth2say.taijitu.compare.equality.value.StringCaseInsensitive;
 import org.someth2say.taijitu.compare.result.Difference;

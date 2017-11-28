@@ -1,9 +1,6 @@
 package org.someth2say.taijitu.ui;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.sql.Connection;
@@ -15,8 +12,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
@@ -30,21 +25,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.someth2say.taijitu.Taijitu;
 import org.someth2say.taijitu.TaijituException;
-import org.someth2say.taijitu.TestComposite;
 import org.someth2say.taijitu.TestUtils;
-import org.someth2say.taijitu.compare.equality.composite.CompositeComparableCategorizerEquality;
-import org.someth2say.taijitu.compare.equality.composite.CompositeEquality;
-import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndComparableCategorizerEquality;
-import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndEquality;
 import org.someth2say.taijitu.compare.equality.stream.mapping.MappingStreamEquality;
 import org.someth2say.taijitu.compare.equality.stream.sorted.ComparableStreamEquality;
 import org.someth2say.taijitu.compare.equality.value.DateThreshold;
 import org.someth2say.taijitu.compare.equality.value.NumberThreshold;
-import org.someth2say.taijitu.compare.equality.value.ObjectToString;
 import org.someth2say.taijitu.compare.equality.value.StringCaseInsensitive;
-import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Mismatch;
-import org.someth2say.taijitu.compare.result.Missing;
 import org.someth2say.taijitu.ui.config.ConfigurationLabels;
 import org.someth2say.taijitu.ui.config.DefaultConfig;
 import org.someth2say.taijitu.ui.config.delegates.simple.BasicComparisonCfg;
@@ -55,11 +42,11 @@ import org.someth2say.taijitu.ui.config.delegates.simple.BasicTaijituCfg;
 import org.someth2say.taijitu.ui.config.impl.TaijituCfg;
 import org.someth2say.taijitu.ui.config.interfaces.IEqualityCfg;
 import org.someth2say.taijitu.ui.config.interfaces.ITaijituCfg;
-import org.someth2say.taijitu.ui.config.source.csv.CSVResourceSource;
-import org.someth2say.taijitu.ui.config.source.mapper.CSVTupleMapper;
-import org.someth2say.taijitu.ui.config.source.mapper.ResultSetTupleMapper;
-import org.someth2say.taijitu.ui.config.source.query.ConnectionManager;
-import org.someth2say.taijitu.ui.config.source.query.QuerySource;
+import org.someth2say.taijitu.ui.source.csv.CSVResourceSource;
+import org.someth2say.taijitu.ui.source.mapper.CSVTupleMapper;
+import org.someth2say.taijitu.ui.source.mapper.ResultSetTupleMapper;
+import org.someth2say.taijitu.ui.source.query.ConnectionManager;
+import org.someth2say.taijitu.ui.source.query.QuerySource;
 
 
 /**
@@ -228,9 +215,9 @@ public class CLITest {
         //putAll(properties, sourceBuildProperties, DATABASE + ".");
 
         // Comparisons
-        //TODO: ResultSet are transient objects, so can not be used for mapping comparison! Mapper is a must. Should we detect it?
-        Properties sourceProps1 = makeQuerySourceProps("select * from test", sourceBuildProperties, ResultSetTupleMapper.NAME);
-        Properties sourceProps2 = makeQuerySourceProps("select * from test2", sourceBuildProperties, ResultSetTupleMapper.NAME);
+        //TODO: ResultSet are transient objects, so Mismatch objects will have references to invalid objects!
+        Properties sourceProps1 = makeQuerySourceProps("select * from test", sourceBuildProperties,ResultSetTupleMapper.NAME);
+        Properties sourceProps2 = makeQuerySourceProps("select * from test2", sourceBuildProperties,ResultSetTupleMapper.NAME);
         putAll(properties, makeComparisonProps("test1", "KEY", sourceProps1, sourceProps1, null), "");
         putAll(properties, makeComparisonProps("test2", "KEY", sourceProps1, sourceProps2, null), "");
 
@@ -250,8 +237,7 @@ public class CLITest {
         final ImmutableHierarchicalConfiguration configuration = ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(properties));
 
         dumpConfig(configuration);
-
-
+        
         return configuration;
     }
 

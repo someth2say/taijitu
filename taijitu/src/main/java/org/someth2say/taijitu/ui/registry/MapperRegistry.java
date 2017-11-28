@@ -1,9 +1,9 @@
 package org.someth2say.taijitu.ui.registry;
 
 import org.slf4j.Logger;import org.slf4j.LoggerFactory;
-import org.someth2say.taijitu.ui.config.source.mapper.CSVTupleMapper;
-import org.someth2say.taijitu.ui.config.source.mapper.ResultSetTupleMapper;
-import org.someth2say.taijitu.ui.config.source.mapper.SourceMapper;
+import org.someth2say.taijitu.ui.source.mapper.CSVTupleMapper;
+import org.someth2say.taijitu.ui.source.mapper.ResultSetTupleMapper;
+import org.someth2say.taijitu.ui.source.mapper.SourceMapper;
 import org.someth2say.taijitu.ui.util.ClassScanUtils;
 
 import java.util.Map;

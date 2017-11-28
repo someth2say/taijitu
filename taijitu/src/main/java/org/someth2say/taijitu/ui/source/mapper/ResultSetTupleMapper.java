@@ -1,9 +1,9 @@
-package org.someth2say.taijitu.ui.config.source.mapper;
+package org.someth2say.taijitu.ui.source.mapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.someth2say.taijitu.ui.config.source.FieldDescription;
-import org.someth2say.taijitu.ui.config.source.Source;
+import org.someth2say.taijitu.ui.source.FieldDescription;
+import org.someth2say.taijitu.ui.source.Source;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

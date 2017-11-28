@@ -1,9 +1,9 @@
-package org.someth2say.taijitu.ui.config.source.csv;
+package org.someth2say.taijitu.ui.source.csv;
 
 import org.someth2say.taijitu.ui.config.ConfigurationLabels;
 import org.someth2say.taijitu.ui.config.interfaces.ISourceCfg;
-import org.someth2say.taijitu.ui.config.source.AbstractSource;
-import org.someth2say.taijitu.ui.config.source.FieldDescription;
+import org.someth2say.taijitu.ui.source.AbstractSource;
+import org.someth2say.taijitu.ui.source.FieldDescription;
 
 import java.io.BufferedReader;
 import java.io.IOException;

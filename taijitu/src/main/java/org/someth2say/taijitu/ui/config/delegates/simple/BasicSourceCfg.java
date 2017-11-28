@@ -22,19 +22,23 @@ public class BasicSourceCfg implements ISourceCfg {
         this.mapper = mapper;
     }
 
-    public String getType() {
+    @Override
+	public String getType() {
         return this.type;
     }
 
-    public List<String> getKeyFields() {
+    @Override
+	public List<String> getKeyFields() {
         return this.keyFields;
     }
 
-    public Properties getFetchProperties() {
+    @Override
+	public Properties getFetchProperties() {
         return this.fetchProperties;
     }
 
-    public Properties getBuildProperties() {
+    @Override
+	public Properties getBuildProperties() {
         return this.buildProperties;
     }
 

@@ -4,8 +4,6 @@ import org.someth2say.taijitu.compare.equality.Equality;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Mismatch;
 
-import javax.swing.*;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
