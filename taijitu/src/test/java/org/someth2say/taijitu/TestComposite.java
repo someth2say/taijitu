@@ -60,8 +60,8 @@ public class TestComposite {
 
     // Build Equality and Comparer
     public static CompositeEquality<TestComposite> testClassOneTwoEquality = new CompositeEquality<>(Arrays.asList(
-            new ExtractorAndEquality<>(TestComposite::getOne, new StringCaseInsensitive<>()),
-            new ExtractorAndEquality<>(TestComposite::getTwo, new StringCaseInsensitive<>())
+            new ExtractorAndEquality<>(TestComposite::getOne, new StringCaseInsensitive()),
+            new ExtractorAndEquality<>(TestComposite::getTwo, new StringCaseInsensitive())
     ));
 
     public static CompositeComparableCategorizerEquality<TestComposite> testClassThreeComparer = new CompositeComparableCategorizerEquality<>(Arrays.asList(

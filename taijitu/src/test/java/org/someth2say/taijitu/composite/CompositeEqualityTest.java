@@ -22,7 +22,7 @@ public class CompositeEqualityTest {
         assertTrue(testClassOneTwoEquality.equals(differentFrom1, differentFrom3));
         assertTrue(testClassOneTwoEquality.underlyingDiffs(differentFrom1, differentFrom2)
                 .containsAll(Arrays.asList(
-                        new Difference(new StringCaseInsensitive(), "aaa", "bbb"),
-                        new Difference(new StringCaseInsensitive(), "aaa", "ccc"))));
+                        new Difference<>(new StringCaseInsensitive(), "aaa", "bbb"),
+                        new Difference<>(new StringCaseInsensitive(), "aaa", "ccc"))));
     }
 }

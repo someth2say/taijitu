@@ -31,13 +31,15 @@ public class SimpleStreamEqualityTest {
         Stream<TestComposite> stream2 = Stream.of(differentFrom2, equalsFrom2);
 
         SimpleStreamEquality<TestComposite> streamEquality = new SimpleStreamEquality<>(testClassOneTwoEquality, null);
-        List<Mismatch> mismatches = streamEquality.underlyingDiffs(stream1, stream2);
+        List<Mismatch<?>> mismatches = streamEquality.underlyingDiffs(stream1, stream2);
 
         // Test results
         mismatches.forEach(System.out::println);
         assertEquals(2, mismatches.size());
-        assertTrue(mismatches.contains(new Missing(streamEquality, missingFrom1)));
-        List<Mismatch> underlyingCauses = Collections.singletonList(new Difference<>(new StringCaseInsensitive<>(), "aaa", "aa"));
+        //TODO: What?!
+        Missing<TestComposite> missing = new Missing(testClassOneTwoEquality, missingFrom1);
+        assertTrue(mismatches.contains(missing));
+        List<Mismatch<?>> underlyingCauses = Collections.singletonList(new Difference<>(new StringCaseInsensitive(), "aaa", "aa"));
         assertTrue(mismatches.contains(new Difference<>(testClassOneTwoEquality, differentFrom1, differentFrom2, underlyingCauses)));
     }
 }

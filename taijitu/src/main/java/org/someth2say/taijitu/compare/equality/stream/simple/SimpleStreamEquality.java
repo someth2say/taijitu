@@ -30,7 +30,7 @@ public class SimpleStreamEquality<T> extends AbstractStreamEquality<T> {
     public List<Mismatch<?>> compare(Stream<T> source, Stream<T> target, Equality<T> equality) {
         return StreamUtil.biMapTail(source, target,
                 (t, t2) -> differenceOrNull(equality, t, t2),
-                t -> new Missing<T>(null, t)).filter(Objects::nonNull).collect(Collectors.toList());
+                t -> new Missing<>(equality, t)).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     private static <T> Difference<T> differenceOrNull(Equality<T> equality, T sourceRecord, T targetRecord) {

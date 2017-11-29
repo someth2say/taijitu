@@ -30,14 +30,15 @@ public class ComparableStreamEqualityTest {
         Stream<TestComposite> stream1 = Stream.of(differentFrom1, missingFrom1, equalsFrom1);
         Stream<TestComposite> stream2 = Stream.of(differentFrom2, equalsFrom2);
 
-        List<Mismatch> mismatches = new ComparableStreamEquality<>(testClassOneTwoEquality, testClassThreeComparer).underlyingDiffs(stream1, stream2);
+        ComparableStreamEquality<TestComposite> equality = new ComparableStreamEquality<>(testClassOneTwoEquality, testClassThreeComparer);
+        List<Mismatch<?>> mismatches = equality.underlyingDiffs(stream1, stream2);
 
         // Test results
         mismatches.forEach(System.out::println);
         Missing<TestComposite> missing = new Missing<>(testClassThreeComparer, missingFrom1);
         assertEquals(2, mismatches.size());
         assertTrue(mismatches.contains(missing));
-        List<Mismatch> underlyingCauses = Collections.singletonList(new Difference<>(new StringCaseInsensitive<>(), "aaa", "aa"));
+        List<Mismatch<?>> underlyingCauses = Collections.singletonList(new Difference<>(new StringCaseInsensitive(), "aaa", "aa"));
         Difference<TestComposite> difference = new Difference<>(testClassOneTwoEquality, differentFrom1, differentFrom2, underlyingCauses);
         assertTrue(mismatches.contains(difference));
     }
