@@ -1,13 +1,10 @@
 package org.someth2say.taijitu;
 
-import org.someth2say.taijitu.compare.equality.composite.CompositeComparableCategorizerEquality;
+import org.someth2say.taijitu.compare.equality.composite.CompositeComparableEquality;
 import org.someth2say.taijitu.compare.equality.composite.CompositeEquality;
-import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndComparableCategorizerEquality;
-import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndEquality;
 import org.someth2say.taijitu.compare.equality.value.ObjectToString;
 import org.someth2say.taijitu.compare.equality.value.StringCaseInsensitive;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 public class TestComposite {
@@ -58,13 +55,10 @@ public class TestComposite {
     }
 
 
-    // Build Equality and Comparer
-    public static CompositeEquality<TestComposite> testClassOneTwoEquality = new CompositeEquality<>(Arrays.asList(
-            new ExtractorAndEquality<>(TestComposite::getOne, new StringCaseInsensitive()),
-            new ExtractorAndEquality<>(TestComposite::getTwo, new StringCaseInsensitive())
-    ));
+    public static CompositeEquality<TestComposite> testClassOneTwoEquality = new CompositeEquality.Builder<TestComposite>()
+            .addComponent(TestComposite::getOne, new StringCaseInsensitive())
+            .addComponent(TestComposite::getTwo, new StringCaseInsensitive()).build();
 
-    public static CompositeComparableCategorizerEquality<TestComposite> testClassThreeComparer = new CompositeComparableCategorizerEquality<>(Arrays.asList(
-            new ExtractorAndComparableCategorizerEquality<>(TestComposite::getThree, new ObjectToString<>())
-    ));
+    public static CompositeComparableEquality<TestComposite> testClassThreeComparer = new CompositeComparableEquality.Builder<TestComposite>()
+            .addComponent(TestComposite::getThree, new ObjectToString<>()).build();
 }

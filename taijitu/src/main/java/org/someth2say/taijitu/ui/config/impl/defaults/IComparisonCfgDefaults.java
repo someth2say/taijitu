@@ -19,9 +19,24 @@ import static org.someth2say.taijitu.ui.util.ListUtil.safeUnion;
 public interface IComparisonCfgDefaults<T extends IComparisonCfg> extends IComparisonCfg, INamedCfgDefaults<T>, IEqualityCfgDefaults<T>, ISourceCfgDefaults<T>, IStrategyCfgDefaults<T>, IPluginCfgDefaults<T> {
 
     @Override
-    default IStrategyCfg getStrategyConfig() {
-        IStrategyCfg delegate = getDelegate().getStrategyConfig();
-        return delegate != null ? new StrategyCfg(delegate, this) : getParent() != null ? getParent().getStrategyConfig() : DefaultConfig.DEFAULT_STRATEGY_CONFIG;
+    default List<String> getKeyFields() {
+        List<String> keyFields = getDelegate().getKeyFields();
+        return keyFields != null ? keyFields
+                : getParent() != null ? getParent().getKeyFields() : DefaultConfig.DEFAULT_KEY_FIELDS;
+    }
+
+    @Override
+    default List<String> getSortFields() {
+        List<String> sortFields = getDelegate().getSortFields();
+        return sortFields != null ? sortFields
+                : getParent() != null ? getParent().getSortFields() : DefaultConfig.DEFAULT_SORT_FIELDS;
+    }
+
+    @Override
+    default List<String> getCompareFields() {
+        List<String> compareFields = getDelegate().getCompareFields();
+        return compareFields != null ? compareFields
+                : getParent() != null ? getParent().getCompareFields() : DefaultConfig.DEFAULT_COMPARE_FIELDS;
     }
 
     // Warning: Sources are additive, not failback-ing

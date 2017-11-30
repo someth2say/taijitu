@@ -27,6 +27,8 @@ public class BasicTaijituCfg implements ITaijituCfg {
     //TODO: Same for sourceCfg...
     private String type;
     private List<String> keyFields;
+    private List<String> sortFields;
+    private List<String> compareFields;
     private Properties buildProperties;
     private Properties fetchProperties;
     private String mapper;
@@ -87,6 +89,14 @@ public class BasicTaijituCfg implements ITaijituCfg {
         this.keyFields = keyFields;
     }
 
+    public void setSortFields(List<String> sortFields) {
+        this.sortFields = sortFields;
+    }
+
+    public void setCompareFields(List<String> compareFields) {
+        this.compareFields = compareFields;
+    }
+
     public void setFetchProperties(Properties fetchProperties) {
         this.fetchProperties = fetchProperties;
     }
@@ -95,11 +105,11 @@ public class BasicTaijituCfg implements ITaijituCfg {
         this.name = name;
     }
 
-	public void setMapper(String mapper) {
-		this.mapper = mapper;
-	}
+    public void setMapper(String mapper) {
+        this.mapper = mapper;
+    }
 
-	
+
     @Override
     public List<IComparisonCfg> getComparisons() {
         return this.comparisons;
@@ -114,11 +124,6 @@ public class BasicTaijituCfg implements ITaijituCfg {
     @Override
     public Boolean isUseScanClassPath() {
         return this.isUseScanClassPath;
-    }
-
-    @Override
-    public IStrategyCfg getStrategyConfig() {
-        return this.strategyConfig;
     }
 
     @Override
@@ -167,6 +172,16 @@ public class BasicTaijituCfg implements ITaijituCfg {
     }
 
     @Override
+    public List<String> getSortFields() {
+        return this.sortFields;
+    }
+
+    @Override
+    public List<String> getCompareFields() {
+        return this.compareFields;
+    }
+
+    @Override
     public Properties getFetchProperties() {
         return this.fetchProperties;
     }
@@ -180,9 +195,9 @@ public class BasicTaijituCfg implements ITaijituCfg {
     public String getName() {
         return this.name;
     }
-    
+
     @Override
-	public String getMapper() {
-		return mapper;
-	}
+    public String getMapper() {
+        return mapper;
+    }
 }

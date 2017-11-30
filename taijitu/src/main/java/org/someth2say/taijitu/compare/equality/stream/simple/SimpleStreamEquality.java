@@ -16,15 +16,18 @@ import org.someth2say.taijitu.util.StreamUtil;
 /**
  * Created by Jordi Sola on 02/03/2017.
  */
-public class SimpleStreamEquality<T> extends AbstractStreamEquality<T> {
+public class SimpleStreamEquality<T> implements org.someth2say.taijitu.compare.equality.stream.StreamEquality<T> {
 
-    public SimpleStreamEquality(Equality<T> equality, ComparableCategorizerEquality<T> categorizer) {
-        super(equality, null);
+    private final Equality<T> equality;
+
+    public SimpleStreamEquality(Equality<T> equality) {
+
+        this.equality = equality;
     }
 
     @Override
     public List<Mismatch<?>> underlyingDiffs(Stream<T> source, Stream<T> target) {
-        return compare(source, target, getEquality());
+        return compare(source, target, equality);
     }
 
     public List<Mismatch<?>> compare(Stream<T> source, Stream<T> target, Equality<T> equality) {

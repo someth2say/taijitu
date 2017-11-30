@@ -9,7 +9,6 @@ public class BasicSourceCfg implements ISourceCfg {
 
     private final String name;
     private String type;
-    private List<String> keyFields;
     private Properties fetchProperties;
     private Properties buildProperties;
     private String mapper;
@@ -27,10 +26,6 @@ public class BasicSourceCfg implements ISourceCfg {
         return this.type;
     }
 
-    @Override
-	public List<String> getKeyFields() {
-        return this.keyFields;
-    }
 
     @Override
 	public Properties getFetchProperties() {
@@ -44,10 +39,6 @@ public class BasicSourceCfg implements ISourceCfg {
 
     public void setType(String type) {
         this.type = type;
-    }
-
-    public void setKeyFields(List<String> keyFields) {
-        this.keyFields = keyFields;
     }
 
     public void setFetchProperties(Properties fetchProperties) {

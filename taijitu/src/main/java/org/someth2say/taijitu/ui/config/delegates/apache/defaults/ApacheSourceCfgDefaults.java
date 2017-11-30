@@ -14,12 +14,6 @@ public interface ApacheSourceCfgDefaults extends ApacheCfgDefaults, ISourceCfg {
     }
 
     @Override
-    default List<String> getKeyFields() {
-        //TODO: Consider '*' wildcard for key fields
-        return getConfiguration().getList(String.class, ConfigurationLabels.KEYS, null);
-    }
-
-    @Override
     default Properties getFetchProperties() {
         return getConfiguration().getProperties(ConfigurationLabels.SOURCE_FETCH_PROPERTIES);
     }

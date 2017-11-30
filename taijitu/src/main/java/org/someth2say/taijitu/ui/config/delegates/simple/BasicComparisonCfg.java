@@ -7,8 +7,6 @@ import java.util.Properties;
 
 public class BasicComparisonCfg implements IComparisonCfg {
 
-    private IStrategyCfg strategyConfig;
-
     private List<IEqualityCfg> equalityConfigs;
     private List<ISourceCfg> sourceConfigs;
     private List<IPluginCfg> comparisonPluginConfigs;
@@ -24,6 +22,8 @@ public class BasicComparisonCfg implements IComparisonCfg {
     //TODO: Same for sourceCfg...
     private String type;
     private List<String> keyFields;
+    private List<String> sortFields;
+    private List<String> compareFields;
     private Properties buildProperties;
     private Properties fetchProperties;
     private String mapper;
@@ -32,9 +32,11 @@ public class BasicComparisonCfg implements IComparisonCfg {
         this.name = name;
     }
 
-    public BasicComparisonCfg(String name, List<String> keyFields, List<ISourceCfg> sourceConfigs) {
+    public BasicComparisonCfg(String name, List<String> compareFields, List<String> keyFields, List<String> sortFields, List<ISourceCfg> sourceConfigs) {
         this.name = name;
+        this.compareFields = compareFields;
         this.keyFields = keyFields;
+        this.sortFields = sortFields;
         this.sourceConfigs = sourceConfigs;
     }
 
@@ -63,9 +65,19 @@ public class BasicComparisonCfg implements IComparisonCfg {
         return this.type;
     }
 
+
     @Override
     public List<String> getKeyFields() {
         return this.keyFields;
+    }
+
+    @Override
+    public List<String> getSortFields() {
+        return this.sortFields;
+    }
+    @Override
+    public List<String> getCompareFields() {
+        return this.compareFields;
     }
 
     @Override
@@ -76,11 +88,6 @@ public class BasicComparisonCfg implements IComparisonCfg {
     @Override
     public Properties getBuildProperties() {
         return this.buildProperties;
-    }
-
-    @Override
-    public IStrategyCfg getStrategyConfig() {
-        return this.strategyConfig;
     }
 
     @Override
@@ -131,6 +138,12 @@ public class BasicComparisonCfg implements IComparisonCfg {
     public void setKeyFields(List<String> keyFields) {
         this.keyFields = keyFields;
     }
+    public void setSortFields(List<String> sortFields) {
+        this.sortFields=sortFields;
+    }
+    public void setCompareFields(List<String> compareFields) {
+        this.compareFields = compareFields;
+    }
 
     public void setBuildProperties(Properties buildProperties) {
         this.buildProperties = buildProperties;
@@ -138,10 +151,6 @@ public class BasicComparisonCfg implements IComparisonCfg {
 
     public void setFetchProperties(Properties fetchProperties) {
         this.fetchProperties = fetchProperties;
-    }
-
-    public void setStrategyConfig(IStrategyCfg strategyConfig) {
-        this.strategyConfig = strategyConfig;
     }
 
     public void setEqualityConfigs(List<IEqualityCfg> equalityConfigs) {

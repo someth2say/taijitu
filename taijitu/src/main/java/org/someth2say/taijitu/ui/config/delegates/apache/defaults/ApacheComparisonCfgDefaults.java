@@ -15,14 +15,20 @@ import java.util.stream.Collectors;
 
 public interface ApacheComparisonCfgDefaults extends ApacheNamedCfgDefaults, IComparisonCfg, ApacheEqualityCfgDefaults, ApacheSourceCfgDefaults, ApacheStrategyCfgDefaults, ApachePluginCfgDefaults {
 
+
     @Override
-    default IStrategyCfg getStrategyConfig() {
-        try {
-            ImmutableHierarchicalConfiguration strategyConfiguration = getConfiguration().immutableConfigurationAt(ConfigurationLabels.STRATEGY);
-            return new ApacheStrategy(strategyConfiguration);
-        } catch (ConfigurationRuntimeException e){
-            return null;
-        }
+    default List<String> getKeyFields() {
+        return getConfiguration().getList(String.class, ConfigurationLabels.KEYS, null);
+    }
+
+    @Override
+    default List<String> getSortFields() {
+        return getConfiguration().getList(String.class, ConfigurationLabels.SORT, null);
+    }
+
+    @Override
+    default List<String> getCompareFields() {
+        return getConfiguration().getList(String.class, ConfigurationLabels.COMPARE, null);
     }
 
     @Override

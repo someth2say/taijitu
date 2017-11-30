@@ -6,7 +6,12 @@ import java.util.List;
 
 public interface IComparisonCfg extends ISourceCfg, IStrategyCfg, IEqualityCfg, IPluginCfg, Named {
 
-    IStrategyCfg getStrategyConfig();
+
+    List<String> getKeyFields();
+
+    List<String> getSortFields();
+
+    List<String> getCompareFields();
 
     List<IEqualityCfg> getEqualityConfigs();
 

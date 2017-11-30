@@ -9,9 +9,6 @@ public interface ISourceCfg extends ICfg, Named {
 
     String getType();
 
-    //TODO: Reconsider this: A Source needs not to know about equalities.
-    List<String> getKeyFields();
-
     Properties getFetchProperties();
 
     Properties getBuildProperties();

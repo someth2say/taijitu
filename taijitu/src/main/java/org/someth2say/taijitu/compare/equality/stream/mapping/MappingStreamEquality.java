@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.CategorizerEquality;
-import org.someth2say.taijitu.compare.equality.ComparableCategorizerEquality;
 import org.someth2say.taijitu.compare.equality.Equality;
 import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
 import org.someth2say.taijitu.compare.equality.stream.MismatchHelper;
@@ -32,24 +31,22 @@ import org.someth2say.taijitu.util.StreamUtil;
 /**
  * Created by Jordi Sola on 02/03/2017.
  */
-public class MappingStreamEquality<T> extends AbstractStreamEquality<T> implements StreamEquality<T> {
+public class MappingStreamEquality<T> extends AbstractStreamEquality<T,CategorizerEquality<T>> implements StreamEquality<T> {
 	
 	private static final Logger logger = LoggerFactory.getLogger(MappingStreamEquality.class);
 
-	public MappingStreamEquality(Equality<T> equality, ComparableCategorizerEquality<T> categorizer) {
+	public MappingStreamEquality(Equality<T> equality, CategorizerEquality<T> categorizer) {
 		super(equality, categorizer);
 	}
 
 	@Override
 	public List<Mismatch<?>> underlyingDiffs(Stream<T> source, Stream<T> target) {
 		// TODO: Find a way to discriminate (config)?
-		// return matchParallel(source, sourceID, target, targetId, getCategorizer(),
-		// getEquality());
-		return matchSequential(source, target, getCategorizer(), getEquality());
+		// return matchParallel(source, sourceID, target, targetId, getCategorizer(), getEquality());
+		return matchSequential(source, target, getOther(), getEquality());
 	}
 
-	public static <T> List<Mismatch<?>> matchSequential(Stream<T> source, Stream<T> target,
-			CategorizerEquality<T> categorizer, Equality<T> equality) {
+	public static <T> List<Mismatch<?>> matchSequential(Stream<T> source, Stream<T> target, CategorizerEquality<T> categorizer, Equality<T> equality) {
 
 		Map<CategorizerEqualityWrapper<T>, OrdinalAndComposite<T>> sharedMap = new ConcurrentHashMap<>();
 		final int recordCount = 0;

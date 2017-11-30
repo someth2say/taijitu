@@ -1,6 +1,7 @@
 package org.someth2say.taijitu.ui;
 
 import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.sql.Connection;
@@ -12,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
+
 import org.apache.commons.configuration2.ConfigurationUtils;
 import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
@@ -53,37 +55,41 @@ import org.someth2say.taijitu.ui.source.query.QuerySource;
  * @author Jordi Sola
  */
 @RunWith(Parameterized.class)
-public class CLITest {
+public class CLITest_DB {
 
     private static final String DB_NAME = "test";
     private static final String DB_USER = "user";
     private static final String DB_PWD = "pwd";
-    private final String strategyName;
 
-    public CLITest(final String strategyName) {
-        this.strategyName = strategyName;
+    private List<String> compare;
+    private List<String> key;
+    private List<String> sort;
+
+    public CLITest_DB(String compare, String key, String sort) {
+        this.compare = compare == "" ? null : Arrays.asList(compare.split(","));
+        this.key = key == "" ? null : Arrays.asList(key.split(","));
+        this.sort = sort == "" ? null : Arrays.asList(sort.split(","));
     }
 
+
+    //FIELDS, in the form of [COMPARE, KEY, SORT]
     @Parameterized.Parameters(name = "{index}: {0}")
-    public static Collection<String> strategies() {
-        return Arrays.asList(
-                MappingStreamEquality.class.getSimpleName(), ComparableStreamEquality.class.getSimpleName()
-//                ,MappingStreamEquality.NAME, SimpleStreamEquality.NAME
-//                ,MappingStreamEquality.NAME, SimpleStreamEquality.NAME
-//                ,MappingStreamEquality.NAME, SimpleStreamEquality.NAME
-//                ,MappingStreamEquality.NAME, SimpleStreamEquality.NAME
-//                ,MappingStreamEquality.NAME, SimpleStreamEquality.NAME
+    public static Collection<String[]> fields() {
+        //return Arrays.asList(
+        return Collections.singletonList(
+                new String[]{"", "KEY", ""}
         );
     }
 
+
     @After
-    public void dropTables() throws SQLException, ConfigurationException {
+    public void dropTables() throws SQLException {
         Connection conn = ConnectionManager.getConnection(TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD));
         TestUtils.dropRegisteredTables(conn);
     }
 
     @Test
-    public void basicDBTest() throws TaijituException, SQLException, ConfigurationException, InterruptedException {
+    public void basicDBTest() throws TaijituException, SQLException {
         // Create the tables and test data
         final Properties databaseProps = buildDbSampleData();
 
@@ -101,7 +107,7 @@ public class CLITest {
     }
 
     @Test
-    public void apacheDBTest() throws TaijituException, SQLException, ConfigurationException, InterruptedException {
+    public void apacheDBTest() throws TaijituException, SQLException, ConfigurationException {
         // Create the tables and test data
         final Properties sourceBuildProperties = buildDbSampleData();
 
@@ -125,54 +131,6 @@ public class CLITest {
 
     }
 
-    @Test
-    public void CSVTest() throws TaijituException {
-        // Create the tables and test data
-        final TaijituCfg configuration = getCSVConfiguration();
-
-        final List<List<Mismatch>> comparisonResults = Taijitu.compare(configuration);
-
-        assertEquals(1, comparisonResults.size());
-        final List<Mismatch> firstResult = comparisonResults.get(0);
-        firstResult.forEach(System.out::println);
-        assertEquals(0, firstResult.size());
-    }
-
-    private TaijituCfg getCSVConfiguration() {
-        BasicTaijituCfg basicTaijituCfg = new BasicTaijituCfg("");
-
-        // Comparisons
-
-        Properties s1buildProperties = new Properties();
-        //URL Scheme
-        s1buildProperties.setProperty(ConfigurationLabels.RESOURCE, "http://samplecsvs.s3.amazonaws.com/Sacramentorealestatetransactions.csv");
-
-        Properties s2buildProperties = new Properties();
-        // No scheme: File source (should be in classpath)
-        s2buildProperties.setProperty(ConfigurationLabels.RESOURCE, "/csv/Sacramentorealestatetransactions.csv");
-        // File scheme (must be absolute)
-//        s2buildProperties.setProperty(ConfigurationLabels.Comparison.RESOUCE, "file:///"+ ClassLoader.getSystemResource(".").getPath() +"/csv/Sacramentorealestatetransactions.csv");
-
-        // We don't actually need a mapper here, we can compare directly the strings provided by the source.
-        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", CSVResourceSource.NAME, null, s1buildProperties, null);//CSVTupleMapper.NAME);
-        BasicSourceCfg targetSrc = new BasicSourceCfg("target", CSVResourceSource.NAME, null, s2buildProperties, CSVTupleMapper.NAME);
-
-        BasicComparisonCfg comp1 = new BasicComparisonCfg("csv", Arrays.asList("street", "price", "latitude", "longitude"), Arrays.asList(sourceSrc, targetSrc));
-        basicTaijituCfg.setComparisons(Collections.singletonList(comp1));
-
-        //Strategy
-        basicTaijituCfg.setStrategyConfig(new BasicStrategyCfg(strategyName));
-
-        // Equality
-        BasicEqualityCfg stringEq = new BasicEqualityCfg(StringCaseInsensitive.class.getSimpleName(), String.class.getName(), null);
-        BasicEqualityCfg numberEq = new BasicEqualityCfg(NumberThreshold.class.getSimpleName(), Number.class.getName(), null, "2");
-        IEqualityCfg timestampEq = new BasicEqualityCfg(DateThreshold.class.getSimpleName(), Date.class.getName(), null, "100");
-        basicTaijituCfg.setEqualityConfigs(Arrays.asList(stringEq, numberEq, timestampEq));
-
-        return new TaijituCfg(basicTaijituCfg);
-    }
-
-
     private ITaijituCfg getTaijituConfig(Properties dbProperties) {
         BasicTaijituCfg basicTaijituCfg = new BasicTaijituCfg("");
 
@@ -190,12 +148,9 @@ public class CLITest {
         BasicSourceCfg source2Src = new BasicSourceCfg("source2", QuerySource.NAME, s1fetchProperties, null, ResultSetTupleMapper.NAME);
         BasicSourceCfg targetSrc = new BasicSourceCfg("target", QuerySource.NAME, s2fetchProperties, null, ResultSetTupleMapper.NAME);
 
-        BasicComparisonCfg comp1 = new BasicComparisonCfg("test1", Collections.singletonList("KEY"), Arrays.asList(sourceSrc, source2Src));
-        BasicComparisonCfg comp2 = new BasicComparisonCfg("test2", Collections.singletonList("KEY"), Arrays.asList(sourceSrc, targetSrc));
+        BasicComparisonCfg comp1 = new BasicComparisonCfg("test1", compare, key, sort, Arrays.asList(sourceSrc, source2Src));
+        BasicComparisonCfg comp2 = new BasicComparisonCfg("test2", compare, key, sort, Arrays.asList(sourceSrc, targetSrc));
         basicTaijituCfg.setComparisons(Arrays.asList(comp1, comp2));
-
-        //Strategy
-        basicTaijituCfg.setStrategyConfig(new BasicStrategyCfg(strategyName));
 
         // Equality
         BasicEqualityCfg stringEq = new BasicEqualityCfg(StringCaseInsensitive.class.getSimpleName(), String.class.getName(), null);
@@ -216,13 +171,13 @@ public class CLITest {
 
         // Comparisons
         //TODO: ResultSet are transient objects, so Mismatch objects will have references to invalid objects!
-        Properties sourceProps1 = makeQuerySourceProps("select * from test", sourceBuildProperties,ResultSetTupleMapper.NAME);
-        Properties sourceProps2 = makeQuerySourceProps("select * from test2", sourceBuildProperties,ResultSetTupleMapper.NAME);
-        putAll(properties, makeComparisonProps("test1", "KEY", sourceProps1, sourceProps1, null), "");
-        putAll(properties, makeComparisonProps("test2", "KEY", sourceProps1, sourceProps2, null), "");
-
-        // Disable plugins, 'cause we need to write nothing.
-        properties.setProperty(ConfigurationLabels.STRATEGY, strategyName);
+        Properties sourceProps1 = makeQuerySourceProps("select * from test", sourceBuildProperties, ResultSetTupleMapper.NAME);
+        Properties sourceProps2 = makeQuerySourceProps("select * from test2", sourceBuildProperties, ResultSetTupleMapper.NAME);
+        String compareStr = compare != null ? String.join(",", compare) : "";
+        String keyStr = key != null ? String.join(",", key) : "";
+        String sortStr = sort != null ? String.join(",", sort) : "";
+        putAll(properties, makeComparisonProps("test1", compareStr, keyStr, sortStr, sourceProps1, sourceProps1, null), "");
+        putAll(properties, makeComparisonProps("test2", compareStr, keyStr, sortStr, sourceProps1, sourceProps2, null), "");
 
         //Add comparators
         //Case insensitive strings
@@ -237,7 +192,7 @@ public class CLITest {
         final ImmutableHierarchicalConfiguration configuration = ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(properties));
 
         dumpConfig(configuration);
-        
+
         return configuration;
     }
 
@@ -709,11 +664,17 @@ public class CLITest {
 //    }
 
 
-    private Properties makeComparisonProps(String name, String keys, Properties sourceSource, Properties targetSource, Properties database) {
+    private Properties makeComparisonProps(String name, String compare, String keys, String sort, Properties sourceSource, Properties targetSource, Properties database) {
         String comparisonPrefix = ConfigurationLabels.COMPARISON + "." + name + ".";
         Properties result = new Properties();
+        if (compare != null)
+            result.setProperty(comparisonPrefix + ConfigurationLabels.COMPARE, compare);
+
         if (keys != null)
             result.setProperty(comparisonPrefix + ConfigurationLabels.KEYS, keys);
+
+        if (sort != null)
+            result.setProperty(comparisonPrefix + ConfigurationLabels.SORT, sort);
 
         if (sourceSource != null) {
             putAll(result, sourceSource, comparisonPrefix + ConfigurationLabels.SOURCES + ".source.");

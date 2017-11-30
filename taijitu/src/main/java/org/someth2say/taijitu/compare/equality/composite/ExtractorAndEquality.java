@@ -1,15 +1,13 @@
-package org.someth2say.taijitu.compare.equality.composite.eae;
+package org.someth2say.taijitu.compare.equality.composite;
 
 import org.someth2say.taijitu.compare.equality.Equality;
 
 import java.util.function.Function;
-
-public class AbstractExtractorAndEquality<T, Y, E extends Equality<Y>> {
-
+class ExtractorAndEquality<T, Y, E extends Equality<Y>> {
     private final E equality;
     private final Function<T, Y> extractor;
 
-    public AbstractExtractorAndEquality(E equality, Function<T, Y> extractor) {
+    public ExtractorAndEquality(Function<T, Y> extractor,E equality) {
         this.equality = equality;
         this.extractor = extractor;
     }
@@ -21,7 +19,6 @@ public class AbstractExtractorAndEquality<T, Y, E extends Equality<Y>> {
     public Function<T, Y> getExtractor() {
         return this.extractor;
     }
-
 
     @Override
     public String toString() {

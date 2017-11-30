@@ -1,16 +1,14 @@
 package org.someth2say.taijitu.compare.equality.composite;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.Equality;
-import org.someth2say.taijitu.compare.equality.composite.eae.ExtractorAndEquality;
 import org.someth2say.taijitu.compare.equality.value.JavaObject;
-import org.someth2say.taijitu.compare.result.Mismatch;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * This is the simplest class of CompositeEquality. It assumes that:
@@ -19,36 +17,31 @@ import java.util.stream.Collectors;
  *
  * @param <T>
  */
-public class CompositeEquality<T> extends AbstractCompositeEquality<T, ExtractorAndEquality<T, ?>> implements Equality<T> {
+public class CompositeEquality<T> extends AbstractCompositeEquality implements ICompositeEquality<T> {
+    private static final Logger logger = LoggerFactory.getLogger(CompositeEquality.class);
 
-    public CompositeEquality(List<ExtractorAndEquality<T, ?>> eaes) {
+    public Logger getLogger() {
+        return logger;
+    }
+
+    protected CompositeEquality(List<ExtractorAndEquality> eaes) {
         super(eaes);
     }
 
-    public <V> CompositeEquality(Function<T, V> extractor, Equality<V> equality) {
-        super(Collections.singletonList(new ExtractorAndEquality<>(extractor, equality)));
+    protected <V> CompositeEquality(Function<T, V> extractor, Equality<V> equality) {
+        this(Collections.singletonList(new ExtractorAndEquality<>(extractor,equality)));
     }
 
-    @Override
-    public boolean equals(T first, T second) {
-        return getExtractorsAndEqualities().stream().allMatch(eae -> valueEquals(first, second, eae));
-    }
-
-    @Override
-    public List<Mismatch<?>> underlyingDiffs(T t1, T t2) {
-        return getExtractorsAndEqualities().stream().map(eae -> difference(t1, t2, eae)).filter(Objects::nonNull).collect(Collectors.toList());
-    }
-
-    //TODO: This is not enough. Builder should be able to type-safe produce any kind of composite equalities.
     public static class Builder<T> {
-        private List<ExtractorAndEquality<T, ?>> eaes = new ArrayList<>();
+        private List<ExtractorAndEquality> eaes = new ArrayList<>();
 
         public <V> Builder<T> addComponent(Function<T, V> extractor) {
             return addComponent(extractor, new JavaObject<>());
         }
 
         public <V> Builder<T> addComponent(Function<T, V> extractor, Equality<V> equality) {
-            eaes.add(new ExtractorAndEquality<>(extractor, equality));
+            ExtractorAndEquality<T, V, Equality<V>> eae = new ExtractorAndEquality<>(extractor, equality);
+            eaes.add(eae);
             return this;
         }
 

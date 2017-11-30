@@ -16,16 +16,6 @@ public class ComparisonCfg
         super(delegate, parent);
     }
 
-    private IStrategyCfg iStrategy = null;
-    @Override
-    public IStrategyCfg getStrategyConfig() {
-        if (iStrategy == null) {
-            iStrategy = IComparisonCfgDefaults.super.getStrategyConfig();
-        }
-        return iStrategy;
-    }
-
-
     private List<ISourceCfg> sourceConfigs = null;
 
     @Override

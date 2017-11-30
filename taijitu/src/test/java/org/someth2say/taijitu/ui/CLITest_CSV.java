@@ -1,0 +1,119 @@
+package org.someth2say.taijitu.ui;
+
+import org.apache.commons.configuration2.ConfigurationUtils;
+import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.YAMLConfiguration;
+import org.apache.commons.configuration2.builder.BasicConfigurationBuilder;
+import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
+import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.junit.After;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.someth2say.taijitu.Taijitu;
+import org.someth2say.taijitu.TaijituException;
+import org.someth2say.taijitu.TestUtils;
+import org.someth2say.taijitu.compare.equality.value.DateThreshold;
+import org.someth2say.taijitu.compare.equality.value.NumberThreshold;
+import org.someth2say.taijitu.compare.equality.value.StringCaseInsensitive;
+import org.someth2say.taijitu.compare.result.Mismatch;
+import org.someth2say.taijitu.ui.config.ConfigurationLabels;
+import org.someth2say.taijitu.ui.config.DefaultConfig;
+import org.someth2say.taijitu.ui.config.delegates.simple.BasicComparisonCfg;
+import org.someth2say.taijitu.ui.config.delegates.simple.BasicEqualityCfg;
+import org.someth2say.taijitu.ui.config.delegates.simple.BasicSourceCfg;
+import org.someth2say.taijitu.ui.config.delegates.simple.BasicTaijituCfg;
+import org.someth2say.taijitu.ui.config.impl.TaijituCfg;
+import org.someth2say.taijitu.ui.config.interfaces.IEqualityCfg;
+import org.someth2say.taijitu.ui.config.interfaces.ITaijituCfg;
+import org.someth2say.taijitu.ui.source.csv.CSVResourceSource;
+import org.someth2say.taijitu.ui.source.mapper.CSVTupleMapper;
+import org.someth2say.taijitu.ui.source.mapper.ResultSetTupleMapper;
+import org.someth2say.taijitu.ui.source.query.ConnectionManager;
+import org.someth2say.taijitu.ui.source.query.QuerySource;
+
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.junit.Assert.assertEquals;
+
+
+/**
+ * @author Jordi Sola
+ */
+@RunWith(Parameterized.class)
+public class CLITest_CSV {
+
+
+    private List<String> compare;
+    private List<String> key;
+    private List<String> sort;
+
+    public CLITest_CSV(String compare, String key, String sort) {
+        this.compare = compare == "" ? null : Arrays.asList(compare.split(","));
+        this.key = key == "" ? null : Arrays.asList(key.split(","));
+        this.sort = sort == "" ? null : Arrays.asList(sort.split(","));
+    }
+
+    //FIELDS, in the form of [COMPARE, KEY, SORT]
+    @Parameterized.Parameters(name = "{index}: {0}")
+    public static Collection<String[]> fields() {
+        //return Arrays.asList(
+        return Collections.singletonList(
+                new String[]{"", "street,price,latitude,longitude", ""}
+        );
+    }
+
+
+    @Test
+    public void CSVTest() throws TaijituException {
+        // Create the tables and test data
+        final TaijituCfg configuration = getCSVConfiguration();
+
+        final List<List<Mismatch>> comparisonResults = Taijitu.compare(configuration);
+
+        assertEquals(1, comparisonResults.size());
+        final List<Mismatch> firstResult = comparisonResults.get(0);
+        firstResult.forEach(System.out::println);
+        assertEquals(0, firstResult.size());
+    }
+
+    private TaijituCfg getCSVConfiguration() {
+        BasicTaijituCfg basicTaijituCfg = new BasicTaijituCfg("");
+
+        // Comparisons
+
+        Properties s1buildProperties = new Properties();
+        //URL Scheme
+        s1buildProperties.setProperty(ConfigurationLabels.RESOURCE, "http://samplecsvs.s3.amazonaws.com/Sacramentorealestatetransactions.csv");
+
+        Properties s2buildProperties = new Properties();
+        // No scheme: File source (should be in classpath)
+        s2buildProperties.setProperty(ConfigurationLabels.RESOURCE, "/csv/Sacramentorealestatetransactions.csv");
+        // File scheme (must be absolute)
+//        s2buildProperties.setProperty(ConfigurationLabels.Comparison.RESOUCE, "file:///"+ ClassLoader.getSystemResource(".").getPath() +"/csv/Sacramentorealestatetransactions.csv");
+
+        // We don't actually need a mapper here, we can compare directly the strings provided by the source.
+        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", CSVResourceSource.NAME, null, s1buildProperties, null);//CSVTupleMapper.NAME);
+        BasicSourceCfg targetSrc = new BasicSourceCfg("target", CSVResourceSource.NAME, null, s2buildProperties, CSVTupleMapper.NAME);
+
+
+        BasicComparisonCfg comp1 = new BasicComparisonCfg("csv", compare, key, sort, Arrays.asList(sourceSrc, targetSrc));
+        basicTaijituCfg.setComparisons(Collections.singletonList(comp1));
+
+        // Equality
+        BasicEqualityCfg stringEq = new BasicEqualityCfg(StringCaseInsensitive.class.getSimpleName(), String.class.getName(), null);
+        BasicEqualityCfg numberEq = new BasicEqualityCfg(NumberThreshold.class.getSimpleName(), Number.class.getName(), null, "2");
+        IEqualityCfg timestampEq = new BasicEqualityCfg(DateThreshold.class.getSimpleName(), Date.class.getName(), null, "100");
+        basicTaijituCfg.setEqualityConfigs(Arrays.asList(stringEq, numberEq, timestampEq));
+
+        return new TaijituCfg(basicTaijituCfg);
+    }
+
+}
+

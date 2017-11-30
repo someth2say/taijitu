@@ -18,12 +18,6 @@ public interface ISourceCfgDefaults<T extends ISourceCfg> extends ISourceCfg, IC
 		return getDelegate().getType();
 	}
 
-	@Override
-	default List<String> getKeyFields() {
-		List<String> keyFields = getDelegate().getKeyFields();
-		return keyFields != null ? keyFields
-				: getParent() != null ? getParent().getKeyFields() : DefaultConfig.DEFAULT_KEY_FIELDS;
-	}
 
 	@Override
 	default Properties getFetchProperties() {

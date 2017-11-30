@@ -1,19 +1,17 @@
 package org.someth2say.taijitu.compare.equality.stream;
 
-import org.someth2say.taijitu.compare.equality.ComparableCategorizerEquality;
 import org.someth2say.taijitu.compare.equality.Equality;
 
 import java.util.Iterator;
 
-public abstract class AbstractStreamEquality<T> implements StreamEquality<T> {
+public abstract class AbstractStreamEquality<T, E> {
 
     final private Equality<T> equality;
-    //TODO: Generify this to a List of Categorizers/Comparers
-    final private ComparableCategorizerEquality<T> categorizer;
+    final private E other;
 
-    protected AbstractStreamEquality(Equality<T> equality, ComparableCategorizerEquality<T> categorizer) {
+    protected AbstractStreamEquality(Equality<T> equality, E other) {
         this.equality = equality;
-        this.categorizer = categorizer;
+        this.other = other;
     }
 
     protected static <T> T getNextRecordOrNull(Iterator<T> resultSetSource) {
@@ -24,7 +22,7 @@ public abstract class AbstractStreamEquality<T> implements StreamEquality<T> {
         return equality;
     }
 
-    protected ComparableCategorizerEquality<T> getCategorizer() {
-        return categorizer;
+    protected E getOther() {
+        return other;
     }
 }

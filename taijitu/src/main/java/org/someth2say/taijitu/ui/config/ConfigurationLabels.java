@@ -6,6 +6,8 @@ package org.someth2say.taijitu.ui.config;
 //TODO: Use an ENUM
 public final class ConfigurationLabels {
     public static final String KEYS = "keys";
+    public static final String SORT= "sort";
+    public static final String COMPARE = "compare";
 	public static final String FETCH_SIZE = "fetchSize";
 	public static final String THREADS = "threads";
 	public static final String SCAN_CLASSPATH = "scanClasspath";
