@@ -1,11 +1,10 @@
 package org.someth2say.taijitu.compare.equality.composite;
 
-import org.someth2say.taijitu.compare.equality.CategorizerEquality;
-import org.someth2say.taijitu.compare.equality.ComparableCategorizerEquality;
+import org.someth2say.taijitu.compare.equality.external.CategorizerEquality;
 
 import java.util.function.Function;
 
-public interface ICompositeCategorizer<T> extends IComposite, CategorizerEquality<T>{
+public interface ICompositeCategorizer<T> extends ICompositeEquality<T>, CategorizerEquality<T> {
 
     @Override
     default int hashCode(T obj) {

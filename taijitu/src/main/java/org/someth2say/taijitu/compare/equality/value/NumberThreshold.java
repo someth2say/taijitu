@@ -1,9 +1,11 @@
 package org.someth2say.taijitu.compare.equality.value;
 
+import org.someth2say.taijitu.compare.equality.external.ComparatorCategorizerEquality;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class NumberThreshold<T extends Number> extends AbstractConfigurableComparableCategorizerEquality<T> {
+public class NumberThreshold<T extends Number> extends AbstractConfigurableEquality<T> implements ComparatorCategorizerEquality<T> {
 
     private static final int DEFAULT_SCALE = 2;
 

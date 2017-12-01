@@ -5,9 +5,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.someth2say.taijitu.compare.equality.ComparableCategorizerEquality;
-import org.someth2say.taijitu.compare.equality.Equality;
-import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
+import org.someth2say.taijitu.compare.equality.external.Equality;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Mismatch;
 import org.someth2say.taijitu.compare.result.Missing;

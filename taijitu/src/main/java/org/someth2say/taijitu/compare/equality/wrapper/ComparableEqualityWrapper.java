@@ -1,13 +1,13 @@
 package org.someth2say.taijitu.compare.equality.wrapper;
 
-import org.someth2say.taijitu.compare.equality.internal.ComparableCategorizableEqualizable;
-import org.someth2say.taijitu.compare.equality.external.ComparatorCategorizerEquality;
+import org.someth2say.taijitu.compare.equality.internal.ComparableEqualizable;
+import org.someth2say.taijitu.compare.equality.external.ComparatorEquality;
 
-public class ComparableCategorizerEqualityWrapper<T, EQ extends ComparatorCategorizerEquality<T>>
+public class ComparableEqualityWrapper<T,EQ extends ComparatorEquality<T>>
         extends EqualityWrapper<T, EQ>
-        implements ComparableCategorizableEqualizable<T, EQ> {
+        implements ComparableEqualizable<T,EQ> {
 
-    public ComparableCategorizerEqualityWrapper(T wrapped, EQ comparer) {
+    public ComparableEqualityWrapper(T wrapped, EQ comparer) {
         super(wrapped, comparer);
     }
 
@@ -15,6 +15,7 @@ public class ComparableCategorizerEqualityWrapper<T, EQ extends ComparatorCatego
     public int compareTo(T other) {
         return getEquality().compare(getWrapped(), other);
     }
+
 
     @Override
     public boolean equals(Object obj) {
@@ -28,11 +29,6 @@ public class ComparableCategorizerEqualityWrapper<T, EQ extends ComparatorCatego
             return getEquality().equals(getWrapped(), otherWrapped);
         }
         return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return getEquality().hashCode(getWrapped());
     }
 
 }

@@ -1,8 +1,8 @@
 package org.someth2say.taijitu.compare.equality.value;
 
-public class JavaObject<T extends Object> extends AbstractConfigurableCategorizerEquality<T> {
+import org.someth2say.taijitu.compare.equality.external.CategorizerEquality;
 
-
+public class JavaObject<T extends Object> extends AbstractConfigurableEquality<T> implements CategorizerEquality<T> {
 
     public JavaObject() {
         this(null);

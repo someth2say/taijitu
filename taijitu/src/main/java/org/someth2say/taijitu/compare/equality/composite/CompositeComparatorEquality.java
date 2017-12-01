@@ -2,10 +2,9 @@ package org.someth2say.taijitu.compare.equality.composite;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.someth2say.taijitu.compare.equality.ComparableEquality;
-import org.someth2say.taijitu.compare.equality.Equality;
+import org.someth2say.taijitu.compare.equality.external.ComparatorEquality;
+import org.someth2say.taijitu.compare.equality.external.Equality;
 import org.someth2say.taijitu.compare.equality.value.JavaComparable;
-import org.someth2say.taijitu.compare.equality.value.JavaObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,18 +18,18 @@ import java.util.function.Function;
  *
  * @param <T>
  */
-public class CompositeComparableEquality<T> extends AbstractCompositeEquality implements ICompositeEquality<T>, ICompositeComparable<T> {
-    private static final Logger logger = LoggerFactory.getLogger(CompositeComparableEquality.class);
+public class CompositeComparatorEquality<T> extends AbstractCompositeEquality implements ICompositeEquality<T>, ICompositeComparator<T> {
+    private static final Logger logger = LoggerFactory.getLogger(CompositeComparatorEquality.class);
 
     public Logger getLogger() {
         return logger;
     }
 
-    protected CompositeComparableEquality(List<ExtractorAndEquality> eaes) {
+    protected CompositeComparatorEquality(List<ExtractorAndEquality> eaes) {
         super(eaes);
     }
 
-    protected <V> CompositeComparableEquality(Function<T, V> extractor, Equality<V> equality) {
+    protected <V> CompositeComparatorEquality(Function<T, V> extractor, Equality<V> equality) {
         this(Collections.singletonList(new ExtractorAndEquality<>(extractor, equality)));
     }
 
@@ -41,14 +40,14 @@ public class CompositeComparableEquality<T> extends AbstractCompositeEquality im
             return addComponent(extractor, new JavaComparable<>());
         }
 
-        public <V> Builder<T> addComponent(Function<T, V> extractor, ComparableEquality<V> equality) {
+        public <V> Builder<T> addComponent(Function<T, V> extractor, ComparatorEquality<V> equality) {
             ExtractorAndEquality<T, V, Equality<V>> eae = new ExtractorAndEquality<>(extractor, equality);
             eaes.add(eae);
             return this;
         }
 
-        public CompositeComparableEquality<T> build() {
-            return new CompositeComparableEquality<>(eaes);
+        public CompositeComparatorEquality<T> build() {
+            return new CompositeComparatorEquality<>(eaes);
         }
     }
 

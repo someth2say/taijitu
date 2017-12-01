@@ -1,8 +1,10 @@
 package org.someth2say.taijitu.compare.equality.value;
 
+import org.someth2say.taijitu.compare.equality.external.ComparatorCategorizerEquality;
+
 import java.util.Date;
 
-public class DateThreshold<T extends Date> extends AbstractConfigurableComparableCategorizerEquality<T> {
+public class DateThreshold<T extends Date> extends AbstractConfigurableEquality<T> implements ComparatorCategorizerEquality<T> {
 
     private static final int DEFAULT_THRESHOLD = 1000;
 

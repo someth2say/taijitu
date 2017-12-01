@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.compare.result;
 
-import org.someth2say.taijitu.compare.equality.Equality;
+import org.someth2say.taijitu.compare.equality.external.Equality;
 
 import java.util.List;
 

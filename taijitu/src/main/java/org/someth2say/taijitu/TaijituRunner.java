@@ -2,12 +2,11 @@ package org.someth2say.taijitu;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.someth2say.taijitu.compare.equality.CategorizerEquality;
-import org.someth2say.taijitu.compare.equality.ComparableCategorizerEquality;
-import org.someth2say.taijitu.compare.equality.ComparableEquality;
-import org.someth2say.taijitu.compare.equality.Equality;
+import org.someth2say.taijitu.compare.equality.external.CategorizerEquality;
+import org.someth2say.taijitu.compare.equality.external.ComparatorEquality;
+import org.someth2say.taijitu.compare.equality.external.Equality;
 import org.someth2say.taijitu.compare.equality.composite.CompositeCategorizerEquality;
-import org.someth2say.taijitu.compare.equality.composite.CompositeComparableEquality;
+import org.someth2say.taijitu.compare.equality.composite.CompositeComparatorEquality;
 import org.someth2say.taijitu.compare.equality.composite.CompositeEquality;
 import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
 import org.someth2say.taijitu.compare.equality.stream.mapping.MappingStreamEquality;
@@ -103,7 +102,7 @@ class TaijituRunner implements Callable<List<Mismatch>> {
         // A. Get fields for each comparison:
         // A.1.- Identity
 //        List<FieldDescription<?>> identityFDs = commonFDs.stream().filter(fd -> iComparisonCfg.getKeyFields().contains(fd.getName())).collect(Collectors.toList());
-        // A.2.- CategoryEquality (for mapping) and ComparableEquality (for sorted) we just use all non-key fields
+        // A.2.- CategoryEquality (for mapping) and ComparatorEquality (for sorted) we just use all non-key fields
 //        List<FieldDescription<?>> nonIdentityFDs = commonFDs.stream().filter(fd -> !identityFDs.contains(fd)).collect(Collectors.toList());
 
         // 3.- Create comparators:
@@ -117,10 +116,10 @@ class TaijituRunner implements Callable<List<Mismatch>> {
         }
 
         // 3.2.- If Sort fields present, build comparator
-        CompositeComparableEquality<T> sorter = null;
+        CompositeComparatorEquality<T> sorter = null;
         List<FieldDescription<?>> sortFDs = iComparisonCfg.getSortFields().stream().map(commonFDs::get).collect(Collectors.toList());
         if (!sortFDs.isEmpty()) {
-            CompositeComparableEquality.Builder<T> comparerBuilder = new CompositeComparableEquality.Builder<>();
+            CompositeComparatorEquality.Builder<T> comparerBuilder = new CompositeComparatorEquality.Builder<>();
             sortFDs.forEach(fd -> addComparerComponent(iComparisonCfg, sourceDatas, comparerBuilder, fd));
             sorter = comparerBuilder.build();
         }
@@ -148,9 +147,9 @@ class TaijituRunner implements Callable<List<Mismatch>> {
                 throw new RuntimeException("Hybrid equality not supported yet");
             } else {
                 if (sorter == null) {
-                    streamEquality = new MappingStreamEquality<>(equality, categorizer);
+                    streamEquality = new MappingStreamEquality<T>(equality, categorizer);
                 } else if (categorizer == null) {
-                    streamEquality = new ComparableStreamEquality<>(equality, sorter);
+                    streamEquality = new ComparableStreamEquality<T>(equality, sorter);
                 } else {
                     streamEquality = new SimpleStreamEquality<>(equality);
                 }
@@ -177,10 +176,10 @@ class TaijituRunner implements Callable<List<Mismatch>> {
         categorizerBuilder.addComponent(extractor, vEquality);
     }
 
-    private <T, V> void addComparerComponent(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, CompositeComparableEquality.Builder<T> comparerBuilder, FieldDescription<V> fd) {
+    private <T, V> void addComparerComponent(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, CompositeComparatorEquality.Builder<T> comparerBuilder, FieldDescription<V> fd) {
         Source<T> mappedSource = sourceDatas.get(0).mappedSource;
         Function<T, V> extractor = mappedSource.getExtractor(fd);
-        ComparableEquality<V> vEquality = getComparableEquality(fd, iComparisonCfg.getEqualityConfigs());
+        ComparatorEquality<V> vEquality = getComparableEquality(fd, iComparisonCfg.getEqualityConfigs());
         comparerBuilder.addComponent(extractor, vEquality);
     }
 
@@ -307,13 +306,13 @@ class TaijituRunner implements Callable<List<Mismatch>> {
         return ValueEqualityRegistry.getInstance(iEqualityCfg.getName(), iEqualityCfg.getEqualityParameters());
     }
 
-    private <V> ComparableEquality<V> getComparableEquality(FieldDescription<V> fd, List<IEqualityCfg> equalityConfigs) {
+    private <V> ComparatorEquality<V> getComparableEquality(FieldDescription<V> fd, List<IEqualityCfg> equalityConfigs) {
         List<IEqualityCfg> compatibleEqualityConfigs = getEqualityConfigsFor(fd, equalityConfigs);
 
-        Optional<ComparableEquality<V>> first = compatibleEqualityConfigs.stream()
+        Optional<ComparatorEquality<V>> first = compatibleEqualityConfigs.stream()
                 .map(cfg -> ValueEqualityRegistry.getInstance(cfg.getName(), cfg.getEqualityParameters()))
-                .filter(eq -> eq instanceof ComparableEquality)
-                .map(eq -> (ComparableEquality<V>) eq).findFirst();
+                .filter(eq -> eq instanceof ComparatorEquality)
+                .map(eq -> (ComparatorEquality<V>) eq).findFirst();
         if (first.isPresent()) {
             return first.get();
         }

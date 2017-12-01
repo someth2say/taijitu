@@ -1,45 +1,20 @@
 package org.someth2say.taijitu.compare.equality.wrapper;
 
-import org.someth2say.taijitu.compare.equality.CategorizerEquality;
+import org.someth2say.taijitu.compare.equality.internal.CategorizableEqualizable;
+import org.someth2say.taijitu.compare.equality.external.CategorizerEquality;
 
-public class CategorizerEqualityWrapper<T> {
+public class CategorizerEqualityWrapper<T>
+        extends EqualityWrapper<T, CategorizerEquality<T>>
+        implements CategorizableEqualizable<T, CategorizerEquality<T>> {
 
-    private final T wrapped;
-    private final CategorizerEquality<T> categorizerEquality;
-
-    public CategorizerEqualityWrapper(T wrapped, CategorizerEquality<T> CategorizerEquality) {
-        this.wrapped = wrapped;
-        this.categorizerEquality = CategorizerEquality;
+    public CategorizerEqualityWrapper(T wrapped, CategorizerEquality<T> categorizer) {
+        super(wrapped, categorizer);
     }
 
-    public T unwrapp() {
-        return wrapped;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (wrapped == null) {
-            return obj == null;
-        }
-        if (obj instanceof CategorizerEqualityWrapper) {
-            @SuppressWarnings("unchecked")
-			CategorizerEqualityWrapper<T> otherWrapper = (CategorizerEqualityWrapper<T>) obj;
-            T otherWrapped = otherWrapper.getWrapped();
-            return categorizerEquality.equals(wrapped, otherWrapped);
-        }
-        return false;
-    }
-
+    // Unluckily, this can not be pushed up to CategorizableEqualizable interface, as java.lang.Object methods can not be defaulted.
     @Override
     public int hashCode() {
-        return categorizerEquality.hashCode(wrapped);
+        return getEquality().hashCode(getWrapped());
     }
 
-    T getWrapped() {
-        return wrapped;
-    }
-
-    CategorizerEquality<T> getCategorizerEquality() {
-        return categorizerEquality;
-    }
 }
