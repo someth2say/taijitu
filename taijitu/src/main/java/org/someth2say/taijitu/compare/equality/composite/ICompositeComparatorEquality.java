@@ -5,8 +5,7 @@ import org.someth2say.taijitu.compare.equality.external.ComparatorEquality;
 
 import java.util.function.Function;
 
-public interface ICompositeComparator<T> extends ICompositeEquality<T>, ComparatorEquality<T> {
-
+public interface ICompositeComparatorEquality<T> extends ICompositeEquality<T>, ComparatorEquality<T> {
 
     @Override
     default int compare(T first, T second) {

@@ -3,7 +3,6 @@ package org.someth2say.taijitu.ui.config.delegates.apache.defaults;
 import org.someth2say.taijitu.ui.config.ConfigurationLabels;
 import org.someth2say.taijitu.ui.config.interfaces.ISourceCfg;
 
-import java.util.List;
 import java.util.Properties;
 
 public interface ApacheSourceCfgDefaults extends ApacheCfgDefaults, ISourceCfg {

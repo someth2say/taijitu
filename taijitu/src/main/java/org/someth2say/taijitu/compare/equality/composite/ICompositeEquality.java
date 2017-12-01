@@ -12,7 +12,8 @@ import java.util.stream.Stream;
 
 public interface ICompositeEquality<T> extends IComposite, Equality<T> {
 
-    List<ExtractorAndEquality> getExtractorsAndEqualities();
+    @Override
+	List<ExtractorAndEquality> getExtractorsAndEqualities();
 
     @Override
     default boolean equals(T first, T second) {

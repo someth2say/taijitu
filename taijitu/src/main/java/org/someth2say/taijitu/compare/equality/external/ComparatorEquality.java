@@ -7,7 +7,8 @@ import java.util.Comparator;
 
 public interface ComparatorEquality<T> extends Comparator<T>, Equality<T> {
 
-    default ComparableEqualizable<T, ? extends ComparatorEquality<T>> wrap(T obj) {
+    @Override
+	default ComparableEqualizable<T, ? extends ComparatorEquality<T>> wrap(T obj) {
         return new ComparableEqualityWrapper<>(obj, this);
     }
 

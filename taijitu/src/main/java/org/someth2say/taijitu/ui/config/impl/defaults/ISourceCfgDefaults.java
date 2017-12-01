@@ -1,9 +1,7 @@
 package org.someth2say.taijitu.ui.config.impl.defaults;
 
-import java.util.List;
 import java.util.Properties;
 
-import org.someth2say.taijitu.ui.config.DefaultConfig;
 import org.someth2say.taijitu.ui.config.interfaces.ISourceCfg;
 
 public interface ISourceCfgDefaults<T extends ISourceCfg> extends ISourceCfg, ICfgDefaults<T> {

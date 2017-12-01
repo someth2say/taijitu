@@ -10,10 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public class CompositeCategorizerEquality<T> extends AbstractCompositeEquality implements ICompositeCategorizer<T>, ICompositeEquality<T> {
+public class CompositeCategorizerEquality<T> extends AbstractCompositeEquality implements ICompositeCategorizerEquality<T>, ICompositeEquality<T> {
     private static final Logger logger = LoggerFactory.getLogger(CompositeCategorizerEquality.class);
 
-    public Logger getLogger() {
+    @Override
+	public Logger getLogger() {
         return logger;
     }
 

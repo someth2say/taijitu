@@ -22,7 +22,6 @@ import org.someth2say.taijitu.compare.equality.internal.CategorizableEqualizable
 import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
 import org.someth2say.taijitu.compare.equality.stream.MismatchHelper;
 import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
-import org.someth2say.taijitu.compare.equality.wrapper.CategorizerEqualityWrapper;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Mismatch;
 import org.someth2say.taijitu.compare.result.Missing;

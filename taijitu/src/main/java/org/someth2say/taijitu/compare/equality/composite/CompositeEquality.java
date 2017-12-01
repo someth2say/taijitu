@@ -20,7 +20,8 @@ import java.util.function.Function;
 public class CompositeEquality<T> extends AbstractCompositeEquality implements ICompositeEquality<T> {
     private static final Logger logger = LoggerFactory.getLogger(CompositeEquality.class);
 
-    public Logger getLogger() {
+    @Override
+	public Logger getLogger() {
         return logger;
     }
 

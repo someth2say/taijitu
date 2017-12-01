@@ -18,10 +18,11 @@ import java.util.function.Function;
  *
  * @param <T>
  */
-public class CompositeComparatorEquality<T> extends AbstractCompositeEquality implements ICompositeEquality<T>, ICompositeComparator<T> {
+public class CompositeComparatorEquality<T> extends AbstractCompositeEquality implements ICompositeEquality<T>, ICompositeComparatorEquality<T> {
     private static final Logger logger = LoggerFactory.getLogger(CompositeComparatorEquality.class);
 
-    public Logger getLogger() {
+    @Override
+	public Logger getLogger() {
         return logger;
     }
 

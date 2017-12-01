@@ -3,8 +3,6 @@ package org.someth2say.taijitu.ui.config.impl;
 import org.someth2say.taijitu.ui.config.impl.defaults.IComparisonCfgDefaults;
 import org.someth2say.taijitu.ui.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.ui.config.interfaces.ISourceCfg;
-import org.someth2say.taijitu.ui.config.interfaces.IStrategyCfg;
-
 import java.util.List;
 
 

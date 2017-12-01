@@ -9,11 +9,13 @@ public abstract class AbstractEqualityWrapper<T, EQ> implements Wrapper<T,EQ> {
         this.wrapped = wrapped;
     }
 
-    public T getWrapped() {
+    @Override
+	public T getWrapped() {
         return wrapped;
     }
 
-    public EQ getEquality() {
+    @Override
+	public EQ getEquality() {
         return equality;
     }
 }

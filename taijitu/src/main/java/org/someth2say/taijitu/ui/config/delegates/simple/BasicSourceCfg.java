@@ -2,7 +2,6 @@ package org.someth2say.taijitu.ui.config.delegates.simple;
 
 import org.someth2say.taijitu.ui.config.interfaces.ISourceCfg;
 
-import java.util.List;
 import java.util.Properties;
 
 public class BasicSourceCfg implements ISourceCfg {

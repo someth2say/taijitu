@@ -1,45 +1,24 @@
 package org.someth2say.taijitu.ui;
 
-import org.apache.commons.configuration2.ConfigurationUtils;
-import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
-import org.apache.commons.configuration2.PropertiesConfiguration;
-import org.apache.commons.configuration2.YAMLConfiguration;
-import org.apache.commons.configuration2.builder.BasicConfigurationBuilder;
-import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
-import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.someth2say.taijitu.Taijitu;
 import org.someth2say.taijitu.TaijituException;
-import org.someth2say.taijitu.TestUtils;
 import org.someth2say.taijitu.compare.equality.value.DateThreshold;
 import org.someth2say.taijitu.compare.equality.value.NumberThreshold;
 import org.someth2say.taijitu.compare.equality.value.StringCaseInsensitive;
 import org.someth2say.taijitu.compare.result.Mismatch;
 import org.someth2say.taijitu.ui.config.ConfigurationLabels;
-import org.someth2say.taijitu.ui.config.DefaultConfig;
 import org.someth2say.taijitu.ui.config.delegates.simple.BasicComparisonCfg;
 import org.someth2say.taijitu.ui.config.delegates.simple.BasicEqualityCfg;
 import org.someth2say.taijitu.ui.config.delegates.simple.BasicSourceCfg;
 import org.someth2say.taijitu.ui.config.delegates.simple.BasicTaijituCfg;
 import org.someth2say.taijitu.ui.config.impl.TaijituCfg;
 import org.someth2say.taijitu.ui.config.interfaces.IEqualityCfg;
-import org.someth2say.taijitu.ui.config.interfaces.ITaijituCfg;
 import org.someth2say.taijitu.ui.source.csv.CSVResourceSource;
 import org.someth2say.taijitu.ui.source.mapper.CSVTupleMapper;
-import org.someth2say.taijitu.ui.source.mapper.ResultSetTupleMapper;
-import org.someth2say.taijitu.ui.source.query.ConnectionManager;
-import org.someth2say.taijitu.ui.source.query.QuerySource;
-
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collectors;
-
 import static org.junit.Assert.assertEquals;
 
 

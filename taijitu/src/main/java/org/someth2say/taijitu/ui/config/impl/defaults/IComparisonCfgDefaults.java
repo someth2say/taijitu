@@ -4,13 +4,10 @@ import org.someth2say.taijitu.ui.config.DefaultConfig;
 import org.someth2say.taijitu.ui.config.impl.EqualityCfg;
 import org.someth2say.taijitu.ui.config.impl.PluginCfg;
 import org.someth2say.taijitu.ui.config.impl.SourceCfg;
-import org.someth2say.taijitu.ui.config.impl.StrategyCfg;
 import org.someth2say.taijitu.ui.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.ui.config.interfaces.IEqualityCfg;
 import org.someth2say.taijitu.ui.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.ui.config.interfaces.ISourceCfg;
-import org.someth2say.taijitu.ui.config.interfaces.IStrategyCfg;
-
 import java.util.List;
 import java.util.stream.Collectors;
 

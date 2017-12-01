@@ -6,7 +6,6 @@ import org.someth2say.taijitu.ui.config.ConfigurationLabels;
 import org.someth2say.taijitu.ui.config.delegates.apache.ApacheEquality;
 import org.someth2say.taijitu.ui.config.delegates.apache.ApachePlugin;
 import org.someth2say.taijitu.ui.config.delegates.apache.ApacheSource;
-import org.someth2say.taijitu.ui.config.delegates.apache.ApacheStrategy;
 import org.someth2say.taijitu.ui.config.interfaces.*;
 
 import java.util.Collections;

@@ -4,7 +4,7 @@ import org.someth2say.taijitu.compare.equality.external.CategorizerEquality;
 
 import java.util.function.Function;
 
-public interface ICompositeCategorizer<T> extends ICompositeEquality<T>, CategorizerEquality<T> {
+public interface ICompositeCategorizerEquality<T> extends ICompositeEquality<T>, CategorizerEquality<T> {
 
     @Override
     default int hashCode(T obj) {
