@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.compare.result;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.someth2say.taijitu.compare.equality.external.Equality;
 
 import java.util.*;

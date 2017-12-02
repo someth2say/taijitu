@@ -23,6 +23,8 @@
 		<snakeyaml.version>1.19</snakeyaml.version>
 		<slf4j.version>1.7.25</slf4j.version>
 		<logback.version>1.2.3</logback.version>
+		<poi.version>3.15</poi.version>
+		<opencsv.version>3.8</opencsv.version>
 		<sonar.host.url>https://sonarqube.com</sonar.host.url>
 		<sonar.projectName>taijitu</sonar.projectName>
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
@@ -69,6 +71,7 @@
 
 	<modules>
 		<module>taijitu</module>
+		<module>cli</module>
 	</modules>
 
 	<build>

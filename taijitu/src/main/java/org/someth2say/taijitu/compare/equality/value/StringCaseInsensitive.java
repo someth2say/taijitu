@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.compare.equality.value;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.someth2say.taijitu.compare.equality.external.ComparatorCategorizerEquality;
 
 import java.util.Locale;

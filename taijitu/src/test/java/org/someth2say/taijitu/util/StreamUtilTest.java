@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 
 public class StreamUtilTest {
     @Test
-    public void zip() throws Exception {
+    public void zip() {
         Stream<String> s1 = Stream.of("a", "b", "c", "d");
         Stream<String> s2 = Stream.of("1", "2", "3");
         Stream<String> zip = StreamUtil.biMap(s1, s2, String::concat);
@@ -19,7 +19,7 @@ public class StreamUtilTest {
     }
 
     @Test
-    public void zipWithTail() throws Exception {
+    public void zipWithTail() {
         Stream<String> s1 = Stream.of("a", "b", "c", "d");
         Stream<String> s2 = Stream.of("1", "2", "3");
         Stream<String> zip = StreamUtil.biMapTail(s1, s2, String::concat, String::toUpperCase, Function.identity());
