@@ -3,7 +3,7 @@ package org.someth2say.taijitu.composite;
 import org.junit.Test;
 import org.someth2say.taijitu.TestComposite;
 import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
-import org.someth2say.taijitu.compare.result.Difference;
+import org.someth2say.taijitu.compare.result.Unequal;
 
 import java.util.Arrays;
 
@@ -22,7 +22,7 @@ public class CompositeEqualizerTest {
         assertTrue(testClassOneTwoEquality.equals(differentFrom1, differentFrom3));
         assertTrue(testClassOneTwoEquality.underlyingDiffs(differentFrom1, differentFrom2)
                 .containsAll(Arrays.asList(
-                        new Difference<>(new StringCaseInsensitive(), "aaa", "bbb"),
-                        new Difference<>(new StringCaseInsensitive(), "aaa", "ccc"))));
+                        new Unequal<>(new StringCaseInsensitive(), "aaa", "bbb"),
+                        new Unequal<>(new StringCaseInsensitive(), "aaa", "ccc"))));
     }
 }

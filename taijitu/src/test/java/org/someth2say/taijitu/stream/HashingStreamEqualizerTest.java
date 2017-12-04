@@ -2,11 +2,12 @@ package org.someth2say.taijitu.stream;
 
 import org.junit.Test;
 import org.someth2say.taijitu.TestComposite;
+import org.someth2say.taijitu.compare.equality.impl.stream.mapping.HashingStreamEqualizer;
 import org.someth2say.taijitu.compare.equality.impl.stream.sorted.ComparableStreamEqualizer;
 import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
-import org.someth2say.taijitu.compare.result.Unequal;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Missing;
+import org.someth2say.taijitu.compare.result.Unequal;
 
 import java.util.Collections;
 import java.util.List;
@@ -16,8 +17,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.someth2say.taijitu.TestComposite.testClassOneTwoEquality;
 import static org.someth2say.taijitu.TestComposite.testClassThreeComparer;
+import static org.someth2say.taijitu.TestComposite.testClassThreeHasher;
 
-public class ComparableStreamEqualizerTest {
+public class HashingStreamEqualizerTest {
     @Test
     public void testComparableStreamEquality() {
         // Build Streams
@@ -30,12 +32,12 @@ public class ComparableStreamEqualizerTest {
         Stream<TestComposite> stream1 = Stream.of(differentFrom1, missingFrom1, equalsFrom1);
         Stream<TestComposite> stream2 = Stream.of(differentFrom2, equalsFrom2);
 
-        ComparableStreamEqualizer<TestComposite> equality = new ComparableStreamEqualizer<>(testClassOneTwoEquality, testClassThreeComparer);
-        List<Difference<?>> differences = equality.underlyingDiffs(stream1, stream2);
+        HashingStreamEqualizer<TestComposite> streamEqualizer = new HashingStreamEqualizer<>(testClassOneTwoEquality, testClassThreeHasher);
+        List<Difference<?>> differences = streamEqualizer.underlyingDiffs(stream1, stream2);
 
         // Test results
         differences.forEach(System.out::println);
-        Missing<TestComposite> missing = new Missing<>(testClassThreeComparer, missingFrom1);
+        Missing<TestComposite> missing = new Missing<>(testClassThreeHasher, missingFrom1);
         assertEquals(2, differences.size());
         assertTrue(differences.contains(missing));
         List<Difference<?>> underlyingCauses = Collections.singletonList(new Unequal<>(new StringCaseInsensitive(), "aaa", "aa"));

@@ -8,7 +8,7 @@ import java.util.function.BiConsumer;
 class IterationBiDiscarter<T, U> implements BiConsumer<T, U> {
     private final long iterations;
     private final BiConsumer<T, U> biConsumer;
-    private long iterationsRemaining = 0L;
+    private long iterationsRemaining;
 
     public IterationBiDiscarter(long _iterations, BiConsumer<T, U> biConsumer) {
         this.iterationsRemaining = _iterations;

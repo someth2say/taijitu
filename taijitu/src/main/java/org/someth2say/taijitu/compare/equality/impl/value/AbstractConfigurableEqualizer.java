@@ -2,7 +2,7 @@ package org.someth2say.taijitu.compare.equality.impl.value;
 
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.result.Difference;
-import org.someth2say.taijitu.compare.result.Mismatch;
+import org.someth2say.taijitu.compare.result.Unequal;
 
 import java.util.Collections;
 import java.util.List;
@@ -12,7 +12,7 @@ public abstract class AbstractConfigurableEqualizer<T> implements Equalizer<T> {
 
     private final Object equalityConfig;
 
-    protected AbstractConfigurableEqualizer(Object equalityConfig) {
+    AbstractConfigurableEqualizer(Object equalityConfig) {
         this.equalityConfig = equalityConfig;
     }
 
@@ -26,8 +26,8 @@ public abstract class AbstractConfigurableEqualizer<T> implements Equalizer<T> {
     }
 
     @Override
-    public List<Mismatch<?>> underlyingDiffs(T t1, T t2) {
-        return this.equals(t1, t2) ? Collections.emptyList() : Collections.singletonList(new Difference<>(this, t1, t2));
+    public List<Difference<?>> underlyingDiffs(T t1, T t2) {
+        return this.equals(t1, t2) ? Collections.emptyList() : Collections.singletonList(new Unequal<>(this, t1, t2));
     }
 
     @Override

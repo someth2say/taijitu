@@ -34,7 +34,7 @@ public class CompositeEqualizer<T> extends AbstractCompositeEquality implements 
     }
 
     public static class Builder<T> {
-        private List<ExtractorAndEquality> eaes = new ArrayList<>();
+        private final List<ExtractorAndEquality> eaes = new ArrayList<>();
 
         public <V> Builder<T> addComponent(Function<T, V> extractor) {
             return addComponent(extractor, new JavaObject<>());

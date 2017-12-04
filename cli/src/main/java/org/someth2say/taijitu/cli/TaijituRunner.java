@@ -9,10 +9,10 @@ import org.someth2say.taijitu.compare.equality.impl.composite.CompositeHasherEqu
 import org.someth2say.taijitu.compare.equality.impl.composite.CompositeEqualizer;
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
-import org.someth2say.taijitu.compare.equality.impl.stream.mapping.MappingStreamEqualizer;
+import org.someth2say.taijitu.compare.equality.impl.stream.mapping.HashingStreamEqualizer;
 import org.someth2say.taijitu.compare.equality.impl.stream.simple.SimpleStreamEqualizer;
 import org.someth2say.taijitu.compare.equality.impl.stream.sorted.ComparableStreamEqualizer;
-import org.someth2say.taijitu.compare.result.Mismatch;
+import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.cli.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.cli.config.interfaces.IEqualityCfg;
 import org.someth2say.taijitu.cli.config.interfaces.IPluginCfg;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 /**
  * @author Jordi Sola
  */
-class TaijituRunner implements Callable<List<Mismatch>> {
+class TaijituRunner implements Callable<List<Difference>> {
 
     private static final Logger logger = LoggerFactory.getLogger(TaijituRunner.class);
 
@@ -43,12 +43,12 @@ class TaijituRunner implements Callable<List<Mismatch>> {
     }
 
     @Override
-    public List<Mismatch> call() {
+    public List<Difference> call() {
         List<IPluginCfg> pluginConfigs = comparisonCfg.getPluginConfigs();
 
         runPluginsPreComparison(pluginConfigs, comparisonCfg);
 
-        List<Mismatch> result = runComparison(comparisonCfg);
+        List<Difference> result = runComparison(comparisonCfg);
 
         runPluginsPostComparison(pluginConfigs, comparisonCfg);
 
@@ -78,7 +78,7 @@ class TaijituRunner implements Callable<List<Mismatch>> {
         }
     }
 
-    private <T> List<Mismatch> runComparison(IComparisonCfg iComparisonCfg) {
+    private <T> List<Difference> runComparison(IComparisonCfg iComparisonCfg) {
 
         List<ISourceCfg> sourceConfigs = iComparisonCfg.getSourceConfigs();
         if (sourceConfigs.size() < 2) {
@@ -147,7 +147,7 @@ class TaijituRunner implements Callable<List<Mismatch>> {
                 throw new RuntimeException("Hybrid equality not supported yet");
             } else {
                 if (sorter == null) {
-                    streamEquality = new MappingStreamEqualizer<>(equality, categorizer);
+                    streamEquality = new HashingStreamEqualizer<>(equality, categorizer);
                 } else if (categorizer == null) {
                     streamEquality = new ComparableStreamEqualizer<>(equality, sorter);
                 } else {
@@ -287,8 +287,8 @@ class TaijituRunner implements Callable<List<Mismatch>> {
         sourceData.source = source;
     }
 
-    private <T> List<Mismatch> runStreamEquality(StreamEqualizer<T> streamEquality, List<SourceData<?, T>> sourceDatas) {
-        List<Mismatch> comparisonResult = null;
+    private <T> List<Difference> runStreamEquality(StreamEqualizer<T> streamEquality, List<SourceData<?, T>> sourceDatas) {
+        List<Difference> comparisonResult = null;
         SourceData<?, T> sourceData0 = sourceDatas.get(0);
         SourceData<?, T> sourceData1 = sourceDatas.get(1);
         try (Source sourceSrc = sourceData0.mappedSource; Source targetSrc = sourceData1.mappedSource) {

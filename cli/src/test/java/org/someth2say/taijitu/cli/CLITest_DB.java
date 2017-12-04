@@ -27,7 +27,7 @@ import org.someth2say.taijitu.cli.source.query.QuerySource;
 import org.someth2say.taijitu.compare.equality.impl.value.DateThreshold;
 import org.someth2say.taijitu.compare.equality.impl.value.NumberThreshold;
 import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
-import org.someth2say.taijitu.compare.result.Mismatch;
+import org.someth2say.taijitu.compare.result.Difference;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -81,13 +81,13 @@ public class CLITest_DB {
 
         final ITaijituCfg configuration = getTaijituConfig(databaseProps);
 
-        final List<List<Mismatch>> comparisonResults = Taijitu.compare(configuration);
+        final List<List<Difference>> comparisonResults = Taijitu.compare(configuration);
 
         Assert.assertEquals(2, comparisonResults.size());
-        final List<Mismatch> firstResult = comparisonResults.get(0);
+        final List<Difference> firstResult = comparisonResults.get(0);
         System.out.println(firstResult);
         Assert.assertEquals(0, firstResult.size());
-        final List<Mismatch> secondResult = comparisonResults.get(1);
+        final List<Difference> secondResult = comparisonResults.get(1);
         System.out.println(secondResult);
         Assert.assertEquals(1, secondResult.size());
     }
@@ -99,13 +99,13 @@ public class CLITest_DB {
 
         final ImmutableHierarchicalConfiguration configuration = getApacheConfiguration(sourceBuildProperties);
 
-        final List<List<Mismatch>> comparisonResults = Taijitu.compare(configuration);
+        final List<List<Difference>> comparisonResults = Taijitu.compare(configuration);
 
         Assert.assertEquals(2, comparisonResults.size());
-        final List<Mismatch> firstResult = comparisonResults.get(0);
+        final List<Difference> firstResult = comparisonResults.get(0);
         System.out.println(firstResult);
         Assert.assertEquals(0, firstResult.size());
-        final List<Mismatch> secondResult = comparisonResults.get(1);
+        final List<Difference> secondResult = comparisonResults.get(1);
         System.out.println(secondResult);
         Assert.assertEquals(1, secondResult.size());
 
@@ -156,7 +156,7 @@ public class CLITest_DB {
         //putAll(properties, sourceBuildProperties, DATABASE + ".");
 
         // Comparisons
-        //TODO: ResultSet are transient objects, so Mismatch objects will have references to invalid objects!
+        //TODO: ResultSet are transient objects, so Difference objects will have references to invalid objects!
         Properties sourceProps1 = makeQuerySourceProps("select * from test", sourceBuildProperties, ResultSetTupleMapper.NAME);
         Properties sourceProps2 = makeQuerySourceProps("select * from test2", sourceBuildProperties, ResultSetTupleMapper.NAME);
         String compareStr = compare != null ? String.join(",", compare) : "";

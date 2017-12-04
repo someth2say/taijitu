@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.cli.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.cli.plugins.TaijituPlugin;
-import org.someth2say.taijitu.compare.result.Mismatch;
+import org.someth2say.taijitu.compare.result.Difference;
 
 import java.io.File;
 import java.util.List;
@@ -112,7 +112,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
         return keyFieldsMap[fieldIdx];
     }
 
-    private boolean isReportable(final List<Mismatch> comparisonResult) {
+    private boolean isReportable(final List<Difference> comparisonResult) {
         return !comparisonResult.isEmpty();
     }
 //

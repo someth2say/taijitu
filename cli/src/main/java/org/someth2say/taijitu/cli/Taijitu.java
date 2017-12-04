@@ -7,7 +7,7 @@ import org.someth2say.taijitu.cli.registry.MapperRegistry;
 import org.someth2say.taijitu.cli.registry.PluginRegistry;
 import org.someth2say.taijitu.cli.registry.SourceRegistry;
 import org.someth2say.taijitu.cli.registry.ValueEqualityRegistry;
-import org.someth2say.taijitu.compare.result.Mismatch;
+import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.cli.config.impl.TaijituCfg;
 import org.someth2say.taijitu.cli.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.cli.config.interfaces.IPluginCfg;
@@ -74,21 +74,21 @@ public final class Taijitu {
         }
     }
 
-    public static List<List<Mismatch>> compare() throws TaijituException {
+    public static List<List<Difference>> compare() throws TaijituException {
         return compare(DEFAULT_CONFIG_FILE);
     }
 
-    private static List<List<Mismatch>> compare(final String fileName) throws TaijituException {
+    private static List<List<Difference>> compare(final String fileName) throws TaijituException {
         return compare(configFromFile(fileName));
     }
 
 
-    public static List<List<Mismatch>> compare(final ImmutableHierarchicalConfiguration properties) throws TaijituException {
+    public static List<List<Difference>> compare(final ImmutableHierarchicalConfiguration properties) throws TaijituException {
         return compare(configFromApache(properties));
     }
 
 
-    public static List<List<Mismatch>> compare(final ITaijituCfg config) throws TaijituException {
+    public static List<List<Difference>> compare(final ITaijituCfg config) throws TaijituException {
         logger.info("Start comparisons.");
         performSetup(config);
 
@@ -96,10 +96,10 @@ public final class Taijitu {
 
         startPlugins(config);
 
-        final CompletionService<List<Mismatch>> completionService = runComparisons(config);
+        final CompletionService<List<Difference>> completionService = runComparisons(config);
 
         // Collect results
-        final List<List<Mismatch>> result = getComparisonResults(completionService, comparisons);
+        final List<List<Difference>> result = getComparisonResults(completionService, comparisons);
 
         endPlugins(config);
 
@@ -110,9 +110,9 @@ public final class Taijitu {
 
     }
 
-    private static CompletionService<List<Mismatch>> runComparisons(final ITaijituCfg config) {
+    private static CompletionService<List<Difference>> runComparisons(final ITaijituCfg config) {
         final ExecutorService executorService = Executors.newFixedThreadPool(config.getThreads());
-        CompletionService<List<Mismatch>> completionService = new ExecutorCompletionService<>(executorService);
+        CompletionService<List<Difference>> completionService = new ExecutorCompletionService<>(executorService);
 
         config.getComparisons().forEach(comparison -> completionService.submit(new TaijituRunner(comparison)));
 
@@ -138,13 +138,13 @@ public final class Taijitu {
         }
     }
 
-    private static List<List<Mismatch>> getComparisonResults(CompletionService<List<Mismatch>> completionService,
-                                                             List<IComparisonCfg> iComparisonCfgs) {
-        final List<List<Mismatch>> result = new ArrayList<>(iComparisonCfgs.size());
+    private static List<List<Difference>> getComparisonResults(CompletionService<List<Difference>> completionService,
+                                                               List<IComparisonCfg> iComparisonCfgs) {
+        final List<List<Difference>> result = new ArrayList<>(iComparisonCfgs.size());
 
         for (int i = 0; i < iComparisonCfgs.size(); i++) {
             try {
-                Future<List<Mismatch>> future = completionService.take();
+                Future<List<Difference>> future = completionService.take();
                 try {
                     result.add(future.get());
                 } catch (ExecutionException e) {

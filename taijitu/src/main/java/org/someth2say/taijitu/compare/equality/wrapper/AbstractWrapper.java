@@ -1,10 +1,10 @@
 package org.someth2say.taijitu.compare.equality.wrapper;
 
-public abstract class AbstractEqualityWrapper<T, EQ> {
-    protected final T wrapped;
-    protected final EQ equality;
+public abstract class AbstractWrapper<T, EQ> {
+    private final T wrapped;
+    private final EQ equality;
 
-    public AbstractEqualityWrapper(T wrapped, EQ equality) {
+    AbstractWrapper(T wrapped, EQ equality) {
         this.equality = equality;
         this.wrapped = wrapped;
     }

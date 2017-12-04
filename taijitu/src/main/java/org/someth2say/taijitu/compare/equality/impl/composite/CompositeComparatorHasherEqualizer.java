@@ -23,7 +23,7 @@ public class CompositeComparatorHasherEqualizer<T> extends AbstractCompositeEqua
     }
 
     public static class Builder<T> {
-        private List<ExtractorAndEquality> eaes = new ArrayList<>();
+        private final List<ExtractorAndEquality> eaes = new ArrayList<>();
 
         public <V extends Comparable<V>> Builder<T> addComponent(Function<T, V> extractor) {
             return addComponent(extractor, new JavaComparable<>());

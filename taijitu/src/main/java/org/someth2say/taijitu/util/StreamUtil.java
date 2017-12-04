@@ -84,7 +84,7 @@ public class StreamUtil {
     public static class ZipIterator<C, A extends C, B extends C> implements Iterator<C> {
         private final Iterator<A> aIterator;
         private final Iterator<B> bIterator;
-        private int batchSize;
+        private final int batchSize;
         int batchStep;
 
         public ZipIterator(Iterator<A> aIterator, Iterator<B> bIterator, int batchSize) {

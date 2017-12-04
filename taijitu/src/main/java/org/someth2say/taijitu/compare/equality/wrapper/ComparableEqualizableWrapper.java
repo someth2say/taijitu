@@ -3,11 +3,11 @@ package org.someth2say.taijitu.compare.equality.wrapper;
 import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorEqualizer;
 import org.someth2say.taijitu.compare.equality.aspects.internal.ComparableEqualizable;
 
-public class ComparableEqualityWrapper<T,EQ extends ComparatorEqualizer<T>>
-        extends EqualityWrapper<T, EQ>
+public class ComparableEqualizableWrapper<T,EQ extends ComparatorEqualizer<T>>
+        extends EqualizableWrapper<T, EQ>
         implements ComparableEqualizable<T> {
 
-    public ComparableEqualityWrapper(T wrapped, EQ comparer) {
+    public ComparableEqualizableWrapper(T wrapped, EQ comparer) {
         super(wrapped, comparer);
     }
 
@@ -22,9 +22,9 @@ public class ComparableEqualityWrapper<T,EQ extends ComparatorEqualizer<T>>
         if (getWrapped() == null) {
             return obj == null;
         }
-        if (obj instanceof CategorizerEqualityWrapper) {
+        if (obj instanceof HashableEqualizableWrapper) {
             @SuppressWarnings("unchecked")
-            CategorizerEqualityWrapper<T> otherWrapper = (CategorizerEqualityWrapper<T>) obj;
+            HashableEqualizableWrapper<T> otherWrapper = (HashableEqualizableWrapper<T>) obj;
             T otherWrapped = otherWrapper.getWrapped();
             return getEquality().equals(getWrapped(), otherWrapped);
         }

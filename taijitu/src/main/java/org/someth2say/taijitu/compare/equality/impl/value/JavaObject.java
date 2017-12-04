@@ -2,7 +2,7 @@ package org.someth2say.taijitu.compare.equality.impl.value;
 
 import org.someth2say.taijitu.compare.equality.aspects.external.HasherEqualizer;
 
-public class JavaObject<T extends Object> extends AbstractConfigurableEqualizer<T> implements HasherEqualizer<T> {
+public class JavaObject<T> extends AbstractConfigurableEqualizer<T> implements HasherEqualizer<T> {
 
     public JavaObject() {
         this(null);

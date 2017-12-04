@@ -23,7 +23,7 @@ public class CompositeHasherEqualizer<T> extends AbstractCompositeEquality imple
     }
 
     public static class Builder<T> {
-        private List<ExtractorAndEquality> eaes = new ArrayList<>();
+        private final List<ExtractorAndEquality> eaes = new ArrayList<>();
 
         public <V> Builder<T> addComponent(Function<T, V> extractor) {
             return addComponent(extractor, new JavaObject<>());

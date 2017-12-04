@@ -4,8 +4,8 @@ import org.junit.Test;
 import org.someth2say.taijitu.TestComposite;
 import org.someth2say.taijitu.compare.equality.impl.stream.simple.SimpleStreamEqualizer;
 import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
+import org.someth2say.taijitu.compare.result.Unequal;
 import org.someth2say.taijitu.compare.result.Difference;
-import org.someth2say.taijitu.compare.result.Mismatch;
 import org.someth2say.taijitu.compare.result.Missing;
 
 import java.util.Collections;
@@ -32,14 +32,14 @@ public class SimpleStreamEqualizerTest {
 
         SimpleStreamEqualizer<TestComposite> streamEquality
                 = new SimpleStreamEqualizer<>(testClassOneTwoEquality);
-        List<Mismatch<?>> mismatches = streamEquality.underlyingDiffs(stream1, stream2);
+        List<Difference<?>> differences = streamEquality.underlyingDiffs(stream1, stream2);
 
         // Test results
-        mismatches.forEach(System.out::println);
-        assertEquals(2, mismatches.size());
+        differences.forEach(System.out::println);
+        assertEquals(2, differences.size());
         Missing<TestComposite> missing = new Missing<>(testClassOneTwoEquality, missingFrom1);
-        assertTrue(mismatches.contains(missing));
-        List<Mismatch<?>> underlyingCauses = Collections.singletonList(new Difference<>(new StringCaseInsensitive(), "aaa", "aa"));
-        assertTrue(mismatches.contains(new Difference<>(testClassOneTwoEquality, differentFrom1, differentFrom2, underlyingCauses)));
+        assertTrue(differences.contains(missing));
+        List<Difference<?>> underlyingCauses = Collections.singletonList(new Unequal<>(new StringCaseInsensitive(), "aaa", "aa"));
+        assertTrue(differences.contains(new Unequal<>(testClassOneTwoEquality, differentFrom1, differentFrom2, underlyingCauses)));
     }
 }

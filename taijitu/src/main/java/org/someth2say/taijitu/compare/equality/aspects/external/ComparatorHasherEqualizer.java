@@ -1,13 +1,13 @@
 package org.someth2say.taijitu.compare.equality.aspects.external;
 
-import org.someth2say.taijitu.compare.equality.aspects.internal.ComparableCategorizableEqualizable;
-import org.someth2say.taijitu.compare.equality.wrapper.ComparableCategorizerEqualityWrapper;
+import org.someth2say.taijitu.compare.equality.aspects.internal.ComparableHashableEqualizable;
+import org.someth2say.taijitu.compare.equality.wrapper.ComparableHashableEqualizableWrapper;
 
 public interface ComparatorHasherEqualizer<T> extends ComparatorEqualizer<T>, HasherEqualizer<T> {
 
     @Override
-    default ComparableCategorizableEqualizable<T> wrap(T obj) {
-        return new ComparableCategorizerEqualityWrapper<>(obj, this);
+    default ComparableHashableEqualizable<T> wrap(T obj) {
+        return new ComparableHashableEqualizableWrapper<>(obj, this);
     }
 
 }

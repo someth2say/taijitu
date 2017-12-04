@@ -109,7 +109,7 @@ _Warning: This same property may be used by plugins to identify the folder where
 
  _Note: Accepted log levels are OFF, FATAL, ERROR, WARN, INFO, DEBUG, TRACE and ALL, from more silent to more verbose._
 
-- `setup.precisionThreshold = 0`: When comparing numeric entries, some threshold will be permitted. If the difference between two numeric fieldValues is _below_ threshold, no difference will be assumed.
+- `setup.precisionThreshold = 0`: When comparing numeric entries, some threshold will be permitted. If the unequal between two numeric fieldValues is _below_ threshold, no unequal will be assumed.
 
 - `setup.queryOptimization  = true`: If set to true, queries starting by "select * from..." will have the `*` replaced by the list of fields, as provided in `context.test_name.fields`.
 This may sometimes improve performance, and avoid typos when copying the list of fields.

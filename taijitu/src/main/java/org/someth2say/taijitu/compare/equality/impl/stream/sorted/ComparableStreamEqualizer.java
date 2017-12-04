@@ -6,7 +6,7 @@ import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorEquali
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
 import org.someth2say.taijitu.compare.result.Difference;
-import org.someth2say.taijitu.compare.result.Mismatch;
+import org.someth2say.taijitu.compare.result.Unequal;
 import org.someth2say.taijitu.compare.result.Missing;
 import org.someth2say.taijitu.discarter.TimeBiDiscarter;
 
@@ -30,12 +30,12 @@ public class ComparableStreamEqualizer<T> implements StreamEqualizer<T> {
     }
 
     @Override
-    public List<Mismatch<?>> underlyingDiffs(Stream<T> source, Stream<T> target) {
+    public List<Difference<?>> underlyingDiffs(Stream<T> source, Stream<T> target) {
         return compare(source, target, categorizer, equalizer);
     }
 
-    public static <T> List<Mismatch<?>> compare(Stream<T> source, Stream<T> target, ComparatorEqualizer<T> comparer, Equalizer<T> equalizer) {
-        List<Mismatch<?>> newresult = new ArrayList<>();
+    public static <T> List<Difference<?>> compare(Stream<T> source, Stream<T> target, ComparatorEqualizer<T> comparer, Equalizer<T> equalizer) {
+        List<Difference<?>> newresult = new ArrayList<>();
         Iterator<T> sourceIt = source.iterator();
         Iterator<T> targetIt = target.iterator();
 
@@ -61,10 +61,10 @@ public class ComparableStreamEqualizer<T> implements StreamEqualizer<T> {
                 recordCount++;
             } else {
                 // same Keys
-                Difference<T> difference = equalizer.asDifference(sourceRecord, targetRecord);
-                if (difference!=null) {
+                Unequal<T> unequal = equalizer.asDifference(sourceRecord, targetRecord);
+                if (unequal !=null) {
                     // Records are different
-                    newresult.add(difference);
+                    newresult.add(unequal);
                 }
                 sourceRecord = getNextRecordOrNull(sourceIt);
                 recordCount++;
@@ -81,7 +81,7 @@ public class ComparableStreamEqualizer<T> implements StreamEqualizer<T> {
         return newresult;
     }
 
-    private static <T> int flushMissings(ComparatorEqualizer<T> comparer, List<Mismatch<?>> newresult,
+    private static <T> int flushMissings(ComparatorEqualizer<T> comparer, List<Difference<?>> newresult,
                                          Iterator<T> sourceIt, int recordCount, TimeBiDiscarter<String, Object[]> timedLogger, Iterator<T> it) {
         while (it.hasNext()) {
             Missing<T> missing = comparer.asMissing(sourceIt.next());

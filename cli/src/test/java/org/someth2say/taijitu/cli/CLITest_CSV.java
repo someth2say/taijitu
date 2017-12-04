@@ -16,7 +16,7 @@ import org.someth2say.taijitu.cli.source.mapper.CSVTupleMapper;
 import org.someth2say.taijitu.compare.equality.impl.value.DateThreshold;
 import org.someth2say.taijitu.compare.equality.impl.value.NumberThreshold;
 import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
-import org.someth2say.taijitu.compare.result.Mismatch;
+import org.someth2say.taijitu.compare.result.Difference;
 
 import java.util.*;
 
@@ -53,10 +53,10 @@ public class CLITest_CSV {
         // Create the tables and test data
         final TaijituCfg configuration = getCSVConfiguration();
 
-        final List<List<Mismatch>> comparisonResults = Taijitu.compare(configuration);
+        final List<List<Difference>> comparisonResults = Taijitu.compare(configuration);
 
         Assert.assertEquals(1, comparisonResults.size());
-        final List<Mismatch> firstResult = comparisonResults.get(0);
+        final List<Difference> firstResult = comparisonResults.get(0);
         firstResult.forEach(System.out::println);
         Assert.assertEquals(0, firstResult.size());
     }
