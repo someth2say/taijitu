@@ -4,7 +4,7 @@ import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.aspects.internal.Equalizable;
 
 public class EqualizableWrapper<T, EQ extends Equalizer<T>>
-        extends AbstractWrapper<T,EQ>
+        extends AbstractWrapper<T, EQ>
         implements Equalizable {
 
     public EqualizableWrapper(T wrapped, EQ equality) {
@@ -13,14 +13,14 @@ public class EqualizableWrapper<T, EQ extends Equalizer<T>>
 
     @Override
     public boolean equals(Object obj) {
-        if (getWrapped() == null) {
+        if (unwrap() == null) {
             return obj == null;
         }
-        if (obj instanceof HashableEqualizableWrapper) {
+        if (obj instanceof EqualizableWrapper) {
             @SuppressWarnings("unchecked")
-            HashableEqualizableWrapper<T> otherWrapper = (HashableEqualizableWrapper<T>) obj;
-            T otherWrapped = otherWrapper.getWrapped();
-            return getEquality().equals(getWrapped(), otherWrapped);
+            EqualizableWrapper<T, ?> otherWrapper = (EqualizableWrapper<T, ?>) obj;
+            T otherWrapped = otherWrapper.unwrap();
+            return getEquality().equals(unwrap(), otherWrapped);
         }
         return false;
     }

@@ -103,7 +103,7 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         return unequal;
     }
 
-    public static <T> List<Difference<?>> matchParallel(Stream<T> source, Object sourceID, Stream<T> target, Object targetId,
+    public static <T> List<Difference<?>> matchParallel(Stream<T> source, Stream<T> target,
                                                         HasherEqualizer<T> categorizer, Equalizer<T> equalizer) {
         // 1.- Build/run mapping tasks
         List<Difference<?>> result = Collections.synchronizedList(new ArrayList<>());

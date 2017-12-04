@@ -24,5 +24,9 @@ public class CompositeEqualizerTest {
                 .containsAll(Arrays.asList(
                         new Unequal<>(new StringCaseInsensitive(), "aaa", "bbb"),
                         new Unequal<>(new StringCaseInsensitive(), "aaa", "ccc"))));
+
+        assertFalse(testClassOneTwoEquality.wrap(differentFrom1).equals(testClassOneTwoEquality.wrap(differentFrom2)));
+        assertTrue(testClassOneTwoEquality.wrap(differentFrom1).equals(testClassOneTwoEquality.wrap(differentFrom3)));
+
     }
 }

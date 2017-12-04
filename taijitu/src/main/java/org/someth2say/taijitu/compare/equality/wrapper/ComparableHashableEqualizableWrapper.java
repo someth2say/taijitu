@@ -13,26 +13,13 @@ public class ComparableHashableEqualizableWrapper<T, EQ extends ComparatorHasher
 
     @Override
     public int compareTo(T other) {
-        return getEquality().compare(getWrapped(), other);
+        return getEquality().compare(unwrap(), other);
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (getWrapped() == null) {
-            return obj == null;
-        }
-        if (obj instanceof HashableEqualizableWrapper) {
-            @SuppressWarnings("unchecked")
-            HashableEqualizableWrapper<T> otherWrapper = (HashableEqualizableWrapper<T>) obj;
-            T otherWrapped = otherWrapper.getWrapped();
-            return getEquality().equals(getWrapped(), otherWrapped);
-        }
-        return false;
-    }
-
+    // Unluckily, this can not be pushed up to HashableEqualizable interface, as java.lang.Object methods can not be defaulted.
     @Override
     public int hashCode() {
-        return getEquality().hashCode(getWrapped());
+        return getEquality().hashCode(unwrap());
     }
 
 }

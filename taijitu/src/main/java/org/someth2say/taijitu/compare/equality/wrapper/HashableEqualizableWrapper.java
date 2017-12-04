@@ -14,7 +14,7 @@ public class HashableEqualizableWrapper<T>
     // Unluckily, this can not be pushed up to HashableEqualizable interface, as java.lang.Object methods can not be defaulted.
     @Override
     public int hashCode() {
-        return getEquality().hashCode(getWrapped());
+        return getEquality().hashCode(unwrap());
     }
 
 }

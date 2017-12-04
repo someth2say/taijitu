@@ -9,7 +9,7 @@ public abstract class AbstractWrapper<T, EQ> {
         this.wrapped = wrapped;
     }
 
-	public T getWrapped() {
+	public T unwrap() {
         return wrapped;
     }
 
