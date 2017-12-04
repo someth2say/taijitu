@@ -1,10 +1,10 @@
-package org.someth2say.taijitu.compare.equality.composite;
+package org.someth2say.taijitu.compare.equality.impl.composite;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.someth2say.taijitu.compare.equality.external.CategorizerEquality;
-import org.someth2say.taijitu.compare.equality.external.Equality;
-import org.someth2say.taijitu.compare.equality.value.JavaObject;
+import org.someth2say.taijitu.compare.equality.aspects.external.CategorizerEquality;
+import org.someth2say.taijitu.compare.equality.aspects.external.Equality;
+import org.someth2say.taijitu.compare.equality.impl.value.JavaObject;
 
 import java.util.ArrayList;
 import java.util.List;

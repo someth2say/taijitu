@@ -3,7 +3,7 @@ package org.someth2say.taijitu.cli.registry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.cli.util.ClassScanUtils;
-import org.someth2say.taijitu.compare.equality.value.*;
+import org.someth2say.taijitu.compare.equality.impl.value.*;
 
 import java.util.Collection;
 import java.util.Map;

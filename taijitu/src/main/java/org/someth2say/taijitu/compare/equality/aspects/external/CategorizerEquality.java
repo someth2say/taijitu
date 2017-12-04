@@ -1,6 +1,6 @@
-package org.someth2say.taijitu.compare.equality.external;
+package org.someth2say.taijitu.compare.equality.aspects.external;
 
-import org.someth2say.taijitu.compare.equality.internal.CategorizableEqualizable;
+import org.someth2say.taijitu.compare.equality.aspects.internal.CategorizableEqualizable;
 import org.someth2say.taijitu.compare.equality.wrapper.CategorizerEqualityWrapper;
 
 public interface CategorizerEquality<T> extends Categorizer<T>, Equality<T> {

@@ -1,15 +1,16 @@
-package org.someth2say.taijitu.compare.equality.external;
+package org.someth2say.taijitu.compare.equality.aspects.external;
 
-import org.someth2say.taijitu.compare.equality.internal.Equalizable;
+import org.someth2say.taijitu.compare.equality.aspects.internal.Equalizable;
 import org.someth2say.taijitu.compare.equality.wrapper.EqualityWrapper;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Mismatch;
+import org.someth2say.taijitu.compare.result.Missing;
 
 import java.util.List;
 
 public interface Equality<T> {
 
-    default Equalizable<T,? extends Equality<T>> wrap(T obj) {
+    default Equalizable<T, ? extends Equality<T>> wrap(T obj) {
         return new EqualityWrapper<>(obj, this);
     }
 
@@ -26,5 +27,9 @@ public interface Equality<T> {
         } else {
             return null;
         }
+    }
+
+    default Missing<T> asMissing(T t1) {
+        return new Missing<>(this, t1);
     }
 }

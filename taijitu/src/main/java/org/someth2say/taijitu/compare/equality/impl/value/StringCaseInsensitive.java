@@ -1,7 +1,7 @@
-package org.someth2say.taijitu.compare.equality.value;
+package org.someth2say.taijitu.compare.equality.impl.value;
 
 import org.apache.commons.lang.StringUtils;
-import org.someth2say.taijitu.compare.equality.external.ComparatorCategorizerEquality;
+import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorCategorizerEquality;
 
 import java.util.Locale;
 

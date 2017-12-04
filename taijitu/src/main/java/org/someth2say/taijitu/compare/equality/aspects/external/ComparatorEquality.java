@@ -1,6 +1,6 @@
-package org.someth2say.taijitu.compare.equality.external;
+package org.someth2say.taijitu.compare.equality.aspects.external;
 
-import org.someth2say.taijitu.compare.equality.internal.ComparableEqualizable;
+import org.someth2say.taijitu.compare.equality.aspects.internal.ComparableEqualizable;
 import org.someth2say.taijitu.compare.equality.wrapper.ComparableEqualityWrapper;
 
 import java.util.Comparator;

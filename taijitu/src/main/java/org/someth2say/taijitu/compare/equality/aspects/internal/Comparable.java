@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.compare.equality.internal;
+package org.someth2say.taijitu.compare.equality.aspects.internal;
 
 import org.someth2say.taijitu.compare.equality.wrapper.Wrapper;
 

@@ -1,6 +1,6 @@
-package org.someth2say.taijitu.compare.equality.composite;
+package org.someth2say.taijitu.compare.equality.impl.composite;
 
-import org.someth2say.taijitu.compare.equality.external.Equality;
+import org.someth2say.taijitu.compare.equality.aspects.external.Equality;
 
 import java.util.function.Function;
 class ExtractorAndEquality<T, Y, E extends Equality<Y>> {

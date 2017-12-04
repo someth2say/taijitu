@@ -1,11 +1,13 @@
-package org.someth2say.taijitu.compare.equality.stream.sorted;
+package org.someth2say.taijitu.compare.equality.impl.stream.sorted;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.someth2say.taijitu.compare.equality.external.ComparatorEquality;
-import org.someth2say.taijitu.compare.equality.external.Equality;
-import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
+import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorEquality;
+import org.someth2say.taijitu.compare.equality.aspects.external.Equality;
+import org.someth2say.taijitu.compare.equality.impl.stream.StreamEquality;
+import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Mismatch;
+import org.someth2say.taijitu.compare.result.Missing;
 import org.someth2say.taijitu.discarter.TimeBiDiscarter;
 
 import java.util.ArrayList;
@@ -13,22 +15,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.someth2say.taijitu.compare.equality.stream.MismatchHelper.*;
-
 /**
  * Created by Jordi Sola on 02/03/2017.
  */
-public class ComparableStreamEquality<T> extends AbstractStreamEquality<T, ComparatorEquality<T>> implements org.someth2say.taijitu.compare.equality.stream.StreamEquality<T> {
+public class ComparableStreamEquality<T> implements StreamEquality<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(ComparableStreamEquality.class);
+    private final Equality<T> equality;
+    private final ComparatorEquality<T> categorizer;
 
     public ComparableStreamEquality(Equality<T> equality, ComparatorEquality<T> categorizer) {
-        super(equality, categorizer);
+        this.equality = equality;
+        this.categorizer = categorizer;
     }
 
     @Override
     public List<Mismatch<?>> underlyingDiffs(Stream<T> source, Stream<T> target) {
-        return compare(source, target, getOther(), getEquality());
+        return compare(source, target, categorizer, equality);
     }
 
     public static <T> List<Mismatch<?>> compare(Stream<T> source, Stream<T> target, ComparatorEquality<T> comparer, Equality<T> equality) {
@@ -48,20 +51,20 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T, Compa
             int keyComparison = comparer.compare(sourceRecord, targetRecord);
             if (keyComparison > 0) {
                 // SourceCfg is after target -> target record is not in source stream
-                addMissing(newresult, comparer, targetRecord);
+                newresult.add(comparer.asMissing(targetRecord));
                 targetRecord = getNextRecordOrNull(targetIt);
                 recordCount++;
             } else if (keyComparison < 0) {
                 // SourceCfg is before target -> source record is not in target stream
-                addMissing(newresult, comparer, sourceRecord);
+                newresult.add(comparer.asMissing(sourceRecord));
                 sourceRecord = getNextRecordOrNull(sourceIt);
                 recordCount++;
             } else {
                 // same Keys
-                List<Mismatch<?>> differences = equality.underlyingDiffs(sourceRecord, targetRecord);
-                if (differences != null && !differences.isEmpty()) {
+                Difference<T> difference = equality.asDifference(sourceRecord, targetRecord);
+                if (difference!=null) {
                     // Records are different
-                    addDifference(newresult, equality, sourceRecord, targetRecord, differences);
+                    newresult.add(difference);
                 }
                 sourceRecord = getNextRecordOrNull(sourceIt);
                 recordCount++;
@@ -81,10 +84,14 @@ public class ComparableStreamEquality<T> extends AbstractStreamEquality<T, Compa
     private static <T> int flushMissings(ComparatorEquality<T> comparer, List<Mismatch<?>> newresult,
                                          Iterator<T> sourceIt, int recordCount, TimeBiDiscarter<String, Object[]> timedLogger, Iterator<T> it) {
         while (it.hasNext()) {
-            addMissing(newresult, comparer, sourceIt.next());
+            Missing<T> missing = comparer.asMissing(sourceIt.next());
+            newresult.add(missing);
             timedLogger.accept("Finalizing sources, {} records so far...", new Object[]{++recordCount});
         }
         return recordCount;
     }
 
+    private static <T> T getNextRecordOrNull(Iterator<T> resultSetSource) {
+        return resultSetSource.hasNext() ? resultSetSource.next() : null;
+    }
 }

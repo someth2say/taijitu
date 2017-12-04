@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.compare.equality.stream.mapping;
+package org.someth2say.taijitu.compare.equality.impl.stream.mapping;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,12 +16,10 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.someth2say.taijitu.compare.equality.external.CategorizerEquality;
-import org.someth2say.taijitu.compare.equality.external.Equality;
-import org.someth2say.taijitu.compare.equality.internal.CategorizableEqualizable;
-import org.someth2say.taijitu.compare.equality.stream.AbstractStreamEquality;
-import org.someth2say.taijitu.compare.equality.stream.MismatchHelper;
-import org.someth2say.taijitu.compare.equality.stream.StreamEquality;
+import org.someth2say.taijitu.compare.equality.aspects.external.CategorizerEquality;
+import org.someth2say.taijitu.compare.equality.aspects.external.Equality;
+import org.someth2say.taijitu.compare.equality.aspects.internal.CategorizableEqualizable;
+import org.someth2say.taijitu.compare.equality.impl.stream.StreamEquality;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Mismatch;
 import org.someth2say.taijitu.compare.result.Missing;
@@ -31,22 +29,25 @@ import org.someth2say.taijitu.util.StreamUtil;
 /**
  * Created by Jordi Sola on 02/03/2017.
  */
-public class MappingStreamEquality<T> extends AbstractStreamEquality<T, CategorizerEquality<T>> implements StreamEquality<T> {
+public class MappingStreamEquality<T> implements StreamEquality<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(MappingStreamEquality.class);
+    final private Equality<T> equality;
+    final private CategorizerEquality<T> categorizer;
 
     public MappingStreamEquality(Equality<T> equality, CategorizerEquality<T> categorizer) {
-        super(equality, categorizer);
+        this.equality = equality;
+        this.categorizer = categorizer;
     }
 
     @Override
     public List<Mismatch<?>> underlyingDiffs(Stream<T> source, Stream<T> target) {
         // TODO: Find a way to discriminate (config)?
-        // return matchParallel(source, sourceID, target, targetId, getCategorizer(), getEquality());
-        return matchSequential(source, target, getOther(), getEquality());
+        // return matchParallel(source, sourceID, target, targetId, categorizer, equality);
+        return matchSequential(source, target, categorizer, equality);
     }
 
-    public static <T> List<Mismatch<?>> matchSequential(Stream<T> source, Stream<T> target, CategorizerEquality<T> categorizer, Equality<T> equality) {
+    private static <T> List<Mismatch<?>> matchSequential(Stream<T> source, Stream<T> target, CategorizerEquality<T> categorizer, Equality<T> equality) {
 
         Map<CategorizableEqualizable<T, ? extends CategorizerEquality<T>>, OrdinalAndComposite<T>> sharedMap = new ConcurrentHashMap<>();
         final int recordCount = 0;
@@ -62,7 +63,7 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T, Categori
         // 2.- When both mapping tasks are completed, remaining data are source/target
         // only
         Stream<Missing<T>> missings = sharedMap.values().stream()
-                .map((OrdinalAndComposite<T> sac) -> new Missing<T>(categorizer, sac.getComposite()));
+                .map(sac -> categorizer.asMissing(sac.getComposite()));
 
         return Stream.concat(differences, missings).collect(Collectors.toList());
     }
@@ -81,6 +82,7 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T, Categori
             if (differences != null && !differences.isEmpty()) {
                 // ...and contents differ
                 if (thisOrdinal < otherSaC.getOrdinal())
+
                     return new Difference<>(equality, thisComposite, otherComposite, differences);
                 else
                     return new Difference<>(equality, otherComposite, thisComposite, differences);
@@ -109,7 +111,7 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T, Categori
         // 2.- When both mapping tasks are completed, remaining data are source/target
         // only
         final Collection<OrdinalAndComposite<T>> entries = sharedMap.values();
-        entries.stream().forEach(sc -> MismatchHelper.addMissing(result, categorizer, sc.getComposite()));
+        entries.stream().forEach(sc -> result.add(categorizer.asMissing(sc.getComposite())));
 
         return result;
     }
@@ -163,5 +165,9 @@ public class MappingStreamEquality<T> extends AbstractStreamEquality<T, Categori
                 thisRecord = getNextRecordOrNull(source);
             }
         }
+    }
+
+    private static <T> T getNextRecordOrNull(Iterator<T> resultSetSource) {
+        return resultSetSource.hasNext() ? resultSetSource.next() : null;
     }
 }

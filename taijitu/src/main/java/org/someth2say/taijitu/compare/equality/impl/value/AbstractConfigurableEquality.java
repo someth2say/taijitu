@@ -1,6 +1,6 @@
-package org.someth2say.taijitu.compare.equality.value;
+package org.someth2say.taijitu.compare.equality.impl.value;
 
-import org.someth2say.taijitu.compare.equality.external.Equality;
+import org.someth2say.taijitu.compare.equality.aspects.external.Equality;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Mismatch;
 

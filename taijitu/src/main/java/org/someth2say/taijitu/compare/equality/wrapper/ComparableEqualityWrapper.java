@@ -1,7 +1,7 @@
 package org.someth2say.taijitu.compare.equality.wrapper;
 
-import org.someth2say.taijitu.compare.equality.internal.ComparableEqualizable;
-import org.someth2say.taijitu.compare.equality.external.ComparatorEquality;
+import org.someth2say.taijitu.compare.equality.aspects.internal.ComparableEqualizable;
+import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorEquality;
 
 public class ComparableEqualityWrapper<T,EQ extends ComparatorEquality<T>>
         extends EqualityWrapper<T, EQ>

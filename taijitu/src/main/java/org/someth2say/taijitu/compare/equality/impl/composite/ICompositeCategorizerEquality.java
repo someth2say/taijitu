@@ -1,6 +1,6 @@
-package org.someth2say.taijitu.compare.equality.composite;
+package org.someth2say.taijitu.compare.equality.impl.composite;
 
-import org.someth2say.taijitu.compare.equality.external.CategorizerEquality;
+import org.someth2say.taijitu.compare.equality.aspects.external.CategorizerEquality;
 
 import java.util.function.Function;
 

@@ -1,6 +1,6 @@
-package org.someth2say.taijitu.compare.equality.value;
+package org.someth2say.taijitu.compare.equality.impl.value;
 
-import org.someth2say.taijitu.compare.equality.external.CategorizerEquality;
+import org.someth2say.taijitu.compare.equality.aspects.external.CategorizerEquality;
 
 public class JavaObject<T extends Object> extends AbstractConfigurableEquality<T> implements CategorizerEquality<T> {
 

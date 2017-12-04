@@ -1,12 +1,12 @@
 package org.someth2say.taijitu.compare.result;
 
-import org.someth2say.taijitu.compare.equality.external.Equality;
+import org.someth2say.taijitu.compare.equality.aspects.external.Equality;
 
 import java.util.List;
 
 public class Difference<DT> extends Mismatch<DT> {
-    public Difference(Equality<DT> cause, List<DT> entries) {
-        super(cause, entries);
+    public Difference(Equality<DT> cause, List<DT> composites) {
+        super(cause, composites);
     }
 
     public Difference(Equality<DT> cause, DT composite, List<Mismatch<?>> underlyingMismatches) {

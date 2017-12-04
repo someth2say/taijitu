@@ -1,6 +1,6 @@
-package org.someth2say.taijitu.compare.equality.stream;
+package org.someth2say.taijitu.compare.equality.impl.stream;
 
-import org.someth2say.taijitu.compare.equality.external.Equality;
+import org.someth2say.taijitu.compare.equality.aspects.external.Equality;
 import java.util.stream.Stream;
 
 /**

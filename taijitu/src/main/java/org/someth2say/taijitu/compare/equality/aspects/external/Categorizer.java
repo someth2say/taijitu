@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.compare.equality.external;
+package org.someth2say.taijitu.compare.equality.aspects.external;
 
 @FunctionalInterface
 public interface Categorizer<T> {

@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.compare.equality.composite;
+package org.someth2say.taijitu.compare.equality.impl.composite;
 
 import java.util.List;
 
