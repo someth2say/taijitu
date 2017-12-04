@@ -2,7 +2,7 @@ package org.someth2say.taijitu.stream;
 
 import org.junit.Test;
 import org.someth2say.taijitu.TestComposite;
-import org.someth2say.taijitu.compare.equality.impl.stream.sorted.ComparableStreamEquality;
+import org.someth2say.taijitu.compare.equality.impl.stream.sorted.ComparableStreamEqualizer;
 import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Mismatch;
@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 import static org.someth2say.taijitu.TestComposite.testClassOneTwoEquality;
 import static org.someth2say.taijitu.TestComposite.testClassThreeComparer;
 
-public class ComparableStreamEqualityTest {
+public class ComparableStreamEqualizerTest {
     @Test
     public void testComparableStreamEquality() {
         // Build Streams
@@ -30,7 +30,7 @@ public class ComparableStreamEqualityTest {
         Stream<TestComposite> stream1 = Stream.of(differentFrom1, missingFrom1, equalsFrom1);
         Stream<TestComposite> stream2 = Stream.of(differentFrom2, equalsFrom2);
 
-        ComparableStreamEquality<TestComposite> equality = new ComparableStreamEquality<>(testClassOneTwoEquality, testClassThreeComparer);
+        ComparableStreamEqualizer<TestComposite> equality = new ComparableStreamEqualizer<>(testClassOneTwoEquality, testClassThreeComparer);
         List<Mismatch<?>> mismatches = equality.underlyingDiffs(stream1, stream2);
 
         // Test results

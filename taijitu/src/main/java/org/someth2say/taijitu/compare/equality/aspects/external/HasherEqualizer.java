@@ -3,10 +3,10 @@ package org.someth2say.taijitu.compare.equality.aspects.external;
 import org.someth2say.taijitu.compare.equality.aspects.internal.CategorizableEqualizable;
 import org.someth2say.taijitu.compare.equality.wrapper.CategorizerEqualityWrapper;
 
-public interface CategorizerEquality<T> extends Categorizer<T>, Equality<T> {
+public interface HasherEqualizer<T> extends Hasher<T>, Equalizer<T> {
 
     @Override
-	default CategorizableEqualizable<T, ? extends CategorizerEquality<T>> wrap(T obj) {
+	default CategorizableEqualizable<T> wrap(T obj) {
         return new CategorizerEqualityWrapper<>(obj, this);
     }
 

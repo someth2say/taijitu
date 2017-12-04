@@ -11,7 +11,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.someth2say.taijitu.TestComposite.testClassOneTwoEquality;
 
-public class CompositeEqualityTest {
+public class CompositeEqualizerTest {
     @Test
     public void testCompositeEquality() {
         TestComposite differentFrom1 = new TestComposite("aaa", "aaa", 1);

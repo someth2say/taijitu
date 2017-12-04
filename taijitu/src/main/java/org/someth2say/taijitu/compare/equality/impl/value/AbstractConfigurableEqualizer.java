@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.compare.equality.impl.value;
 
-import org.someth2say.taijitu.compare.equality.aspects.external.Equality;
+import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Mismatch;
 
@@ -8,11 +8,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-public abstract class AbstractConfigurableEquality<T> implements Equality<T> {
+public abstract class AbstractConfigurableEqualizer<T> implements Equalizer<T> {
 
     private final Object equalityConfig;
 
-    protected AbstractConfigurableEquality(Object equalityConfig) {
+    protected AbstractConfigurableEqualizer(Object equalityConfig) {
         this.equalityConfig = equalityConfig;
     }
 
@@ -38,8 +38,8 @@ public abstract class AbstractConfigurableEquality<T> implements Equality<T> {
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
-        if (!(obj instanceof AbstractConfigurableEquality)) return false;
-        AbstractConfigurableEquality<?> other = (AbstractConfigurableEquality<?>) obj;
+        if (!(obj instanceof AbstractConfigurableEqualizer)) return false;
+        AbstractConfigurableEqualizer<?> other = (AbstractConfigurableEqualizer<?>) obj;
 
         return Objects.equals(getClass(), obj.getClass()) &&
                 Objects.equals(getEqualityConfig(), other.getEqualityConfig());

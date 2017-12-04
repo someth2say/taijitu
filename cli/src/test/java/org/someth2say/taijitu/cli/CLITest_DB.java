@@ -138,7 +138,7 @@ public class CLITest_DB {
         BasicComparisonCfg comp2 = new BasicComparisonCfg("test2", compare, key, sort, Arrays.asList(sourceSrc, targetSrc));
         basicTaijituCfg.setComparisons(Arrays.asList(comp1, comp2));
 
-        // Equality
+        // Equalizer
         BasicEqualityCfg stringEq = new BasicEqualityCfg(StringCaseInsensitive.class.getSimpleName(), String.class.getName(), null);
         BasicEqualityCfg numberEq = new BasicEqualityCfg(NumberThreshold.class.getSimpleName(), Number.class.getName(), null, "2");
         IEqualityCfg timestampEq = new BasicEqualityCfg(DateThreshold.class.getSimpleName(), Date.class.getName(), null, "100");

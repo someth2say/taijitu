@@ -16,10 +16,10 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.someth2say.taijitu.compare.equality.aspects.external.CategorizerEquality;
-import org.someth2say.taijitu.compare.equality.aspects.external.Equality;
+import org.someth2say.taijitu.compare.equality.aspects.external.HasherEqualizer;
+import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.aspects.internal.CategorizableEqualizable;
-import org.someth2say.taijitu.compare.equality.impl.stream.StreamEquality;
+import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Mismatch;
 import org.someth2say.taijitu.compare.result.Missing;
@@ -29,27 +29,27 @@ import org.someth2say.taijitu.util.StreamUtil;
 /**
  * Created by Jordi Sola on 02/03/2017.
  */
-public class MappingStreamEquality<T> implements StreamEquality<T> {
+public class MappingStreamEqualizer<T> implements StreamEqualizer<T> {
 
-    private static final Logger logger = LoggerFactory.getLogger(MappingStreamEquality.class);
-    final private Equality<T> equality;
-    final private CategorizerEquality<T> categorizer;
+    private static final Logger logger = LoggerFactory.getLogger(MappingStreamEqualizer.class);
+    final private Equalizer<T> equalizer;
+    final private HasherEqualizer<T> categorizer;
 
-    public MappingStreamEquality(Equality<T> equality, CategorizerEquality<T> categorizer) {
-        this.equality = equality;
+    public MappingStreamEqualizer(Equalizer<T> equalizer, HasherEqualizer<T> categorizer) {
+        this.equalizer = equalizer;
         this.categorizer = categorizer;
     }
 
     @Override
     public List<Mismatch<?>> underlyingDiffs(Stream<T> source, Stream<T> target) {
         // TODO: Find a way to discriminate (config)?
-        // return matchParallel(source, sourceID, target, targetId, categorizer, equality);
-        return matchSequential(source, target, categorizer, equality);
+        // return matchParallel(source, sourceID, target, targetId, categorizer, equalizer);
+        return matchSequential(source, target, categorizer, equalizer);
     }
 
-    private static <T> List<Mismatch<?>> matchSequential(Stream<T> source, Stream<T> target, CategorizerEquality<T> categorizer, Equality<T> equality) {
+    private static <T> List<Mismatch<?>> matchSequential(Stream<T> source, Stream<T> target, HasherEqualizer<T> categorizer, Equalizer<T> equalizer) {
 
-        Map<CategorizableEqualizable<T, ? extends CategorizerEquality<T>>, OrdinalAndComposite<T>> sharedMap = new ConcurrentHashMap<>();
+        Map<CategorizableEqualizable<T>, OrdinalAndComposite<T>> sharedMap = new ConcurrentHashMap<>();
         final int recordCount = 0;
         final TimeBiDiscarter<String, Object[]> timedLogger = new TimeBiDiscarter<>(1000, logger::debug);
 
@@ -57,7 +57,7 @@ public class MappingStreamEquality<T> implements StreamEquality<T> {
                 .zip(source.map(c -> new OrdinalAndComposite<>(0, c)),
                         target.map(c -> new OrdinalAndComposite<>(1, c)))
                 .map(sac -> map(sac.getComposite(), sac.getOrdinal(), timedLogger, recordCount, categorizer, sharedMap,
-                        equality))
+                        equalizer))
                 .filter(Objects::nonNull);
 
         // 2.- When both mapping tasks are completed, remaining data are source/target
@@ -69,39 +69,39 @@ public class MappingStreamEquality<T> implements StreamEquality<T> {
     }
 
     private static <T> Difference<T> map(T thisComposite, int thisOrdinal,
-                                         TimeBiDiscarter<String, Object[]> timedLogger, int recordCount, CategorizerEquality<T> categorizer,
-                                         Map<CategorizableEqualizable<T, ? extends CategorizerEquality<T>>, OrdinalAndComposite<T>> sharedMap, Equality<T> equality) {
+                                         TimeBiDiscarter<String, Object[]> timedLogger, int recordCount, HasherEqualizer<T> categorizer,
+                                         Map<CategorizableEqualizable<T>, OrdinalAndComposite<T>> sharedMap, Equalizer<T> equalizer) {
         timedLogger.accept("Processed {} records so far.", new Object[]{recordCount});
-        CategorizableEqualizable<T, ? extends CategorizerEquality<T>> wrap = categorizer.wrap(thisComposite);
+        CategorizableEqualizable<T> wrap = categorizer.wrap(thisComposite);
         OrdinalAndComposite<T> otherSaC = sharedMap.putIfAbsent(wrap, new OrdinalAndComposite<>(thisOrdinal, thisComposite));
         if (otherSaC != null) {
             // we have a key matchSequential ...
             sharedMap.remove(wrap);
             final T otherComposite = otherSaC.getComposite();
-            List<Mismatch<?>> differences = equality.underlyingDiffs(thisComposite, otherComposite);
+            List<Mismatch<?>> differences = equalizer.underlyingDiffs(thisComposite, otherComposite);
             if (differences != null && !differences.isEmpty()) {
                 // ...and contents differ
                 if (thisOrdinal < otherSaC.getOrdinal())
 
-                    return new Difference<>(equality, thisComposite, otherComposite, differences);
+                    return new Difference<>(equalizer, thisComposite, otherComposite, differences);
                 else
-                    return new Difference<>(equality, otherComposite, thisComposite, differences);
+                    return new Difference<>(equalizer, otherComposite, thisComposite, differences);
             }
         }
         return null;
     }
 
     public static <T> List<Mismatch<?>> matchParallel(Stream<T> source, Object sourceID, Stream<T> target, Object targetId,
-                                                      CategorizerEquality<T> categorizer, Equality<T> equality) {
+                                                      HasherEqualizer<T> categorizer, Equalizer<T> equalizer) {
         // 1.- Build/run mapping tasks
         List<Mismatch<?>> result = Collections.synchronizedList(new ArrayList<>());
         Iterator<T> sourceIt = source.iterator();
         Iterator<T> targetIt = target.iterator();
 
         final ExecutorService executorService = Executors.newFixedThreadPool(2);
-        Map<CategorizableEqualizable<T, ? extends CategorizerEquality<T>>, OrdinalAndComposite<T>> sharedMap = new ConcurrentHashMap<>();
-        Runnable sourceMapper = new TupleMapperExt<>(sourceIt, sharedMap, result, 0, categorizer, equality);
-        Runnable targetMapper = new TupleMapperExt<>(targetIt, sharedMap, result, 1, categorizer, equality);
+        Map<CategorizableEqualizable<T>, OrdinalAndComposite<T>> sharedMap = new ConcurrentHashMap<>();
+        Runnable sourceMapper = new TupleMapperExt<>(sourceIt, sharedMap, result, 0, categorizer, equalizer);
+        Runnable targetMapper = new TupleMapperExt<>(targetIt, sharedMap, result, 1, categorizer, equalizer);
 
         executorService.submit(sourceMapper);// Map source
         executorService.submit(targetMapper);// Map target
@@ -133,22 +133,22 @@ public class MappingStreamEquality<T> implements StreamEquality<T> {
 
     private static class TupleMapperExt<TMT> implements Runnable {
         private final Iterator<TMT> source;
-        private final Map<CategorizableEqualizable<TMT, ? extends CategorizerEquality<TMT>>, OrdinalAndComposite<TMT>> sharedMap;
+        private final Map<CategorizableEqualizable<TMT>, OrdinalAndComposite<TMT>> sharedMap;
         private final List<Mismatch<?>> result;
         private final int ordinal;
-        private final CategorizerEquality<TMT> categorizer;
-        private final Equality<TMT> equality;
+        private final HasherEqualizer<TMT> categorizer;
+        private final Equalizer<TMT> equalizer;
 
         private TupleMapperExt(final Iterator<TMT> source,
-                               final Map<CategorizableEqualizable<TMT, ? extends CategorizerEquality<TMT>>, OrdinalAndComposite<TMT>> sharedMap,
-                               final List<Mismatch<?>> result, int ordinal, CategorizerEquality<TMT> categorizer,
-                               Equality<TMT> equality) {
+                               final Map<CategorizableEqualizable<TMT>, OrdinalAndComposite<TMT>> sharedMap,
+                               final List<Mismatch<?>> result, int ordinal, HasherEqualizer<TMT> categorizer,
+                               Equalizer<TMT> equalizer) {
             this.source = source;
             this.sharedMap = sharedMap;
             this.result = result;
             this.ordinal = ordinal;
             this.categorizer = categorizer;
-            this.equality = equality;
+            this.equalizer = equalizer;
         }
 
         @Override
@@ -158,7 +158,7 @@ public class MappingStreamEquality<T> implements StreamEquality<T> {
             TMT thisRecord = getNextRecordOrNull(source);
             while (thisRecord != null) {
                 recordCount++;
-                Difference<TMT> difference = map(thisRecord, ordinal, timedLogger, recordCount, categorizer, sharedMap, equality);
+                Difference<TMT> difference = map(thisRecord, ordinal, timedLogger, recordCount, categorizer, sharedMap, equalizer);
                 if (difference != null) {
                     result.add(difference);
                 }

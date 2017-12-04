@@ -5,10 +5,10 @@ import org.someth2say.taijitu.compare.equality.wrapper.ComparableEqualityWrapper
 
 import java.util.Comparator;
 
-public interface ComparatorEquality<T> extends Comparator<T>, Equality<T> {
+public interface ComparatorEqualizer<T> extends Comparator<T>, Equalizer<T> {
 
     @Override
-	default ComparableEqualizable<T, ? extends ComparatorEquality<T>> wrap(T obj) {
+	default ComparableEqualizable<T> wrap(T obj) {
         return new ComparableEqualityWrapper<>(obj, this);
     }
 

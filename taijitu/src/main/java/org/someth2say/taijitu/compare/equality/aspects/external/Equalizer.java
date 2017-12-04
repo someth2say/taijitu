@@ -8,9 +8,9 @@ import org.someth2say.taijitu.compare.result.Missing;
 
 import java.util.List;
 
-public interface Equality<T> {
+public interface Equalizer<T> {
 
-    default Equalizable<T, ? extends Equality<T>> wrap(T obj) {
+    default Equalizable<T> wrap(T obj) {
         return new EqualityWrapper<>(obj, this);
     }
 

@@ -1,7 +1,7 @@
 package org.someth2say.taijitu;
 
-import org.someth2say.taijitu.compare.equality.impl.composite.CompositeComparatorEquality;
-import org.someth2say.taijitu.compare.equality.impl.composite.CompositeEquality;
+import org.someth2say.taijitu.compare.equality.impl.composite.CompositeComparatorEqualizer;
+import org.someth2say.taijitu.compare.equality.impl.composite.CompositeEqualizer;
 import org.someth2say.taijitu.compare.equality.impl.value.ObjectToString;
 import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
 
@@ -55,10 +55,10 @@ public class TestComposite {
     }
 
 
-    public static CompositeEquality<TestComposite> testClassOneTwoEquality = new CompositeEquality.Builder<TestComposite>()
+    public static CompositeEqualizer<TestComposite> testClassOneTwoEquality = new CompositeEqualizer.Builder<TestComposite>()
             .addComponent(TestComposite::getOne, new StringCaseInsensitive())
             .addComponent(TestComposite::getTwo, new StringCaseInsensitive()).build();
 
-    public static CompositeComparatorEquality<TestComposite> testClassThreeComparer = new CompositeComparatorEquality.Builder<TestComposite>()
+    public static CompositeComparatorEqualizer<TestComposite> testClassThreeComparer = new CompositeComparatorEqualizer.Builder<TestComposite>()
             .addComponent(TestComposite::getThree, new ObjectToString<>()).build();
 }

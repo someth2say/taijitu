@@ -1,39 +1,39 @@
 package org.someth2say.taijitu.compare.result;
 
 import org.apache.commons.lang.StringUtils;
-import org.someth2say.taijitu.compare.equality.aspects.external.Equality;
+import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 
 import java.util.*;
 
 public abstract class Mismatch<MMT> {
-    private final Equality<MMT> cause;
+    private final Equalizer<MMT> cause;
     private final List<MMT> entries;
     private final List<Mismatch<?>> underlyingMismatches;
 
 
-    public Mismatch(Equality<MMT> cause, List<MMT> entries, List<Mismatch<?>> underlyingMismatches) {
+    public Mismatch(Equalizer<MMT> cause, List<MMT> entries, List<Mismatch<?>> underlyingMismatches) {
         this.cause = cause;
         this.entries = entries;
         this.underlyingMismatches = underlyingMismatches;
     }
 
-    public Mismatch(Equality<MMT> cause, List<MMT> entries) {
-        this(cause, entries, null);
+    public Mismatch(Equalizer<MMT> cause, List<MMT> entries) {
+        this(cause, entries, Collections.emptyList());
     }
 
-    public Mismatch(Equality<MMT> cause, MMT composite, List<Mismatch<?>> underlyingMismatches) {
+    public Mismatch(Equalizer<MMT> cause, MMT composite, List<Mismatch<?>> underlyingMismatches) {
         this(cause, Collections.singletonList(composite), underlyingMismatches);
     }
 
-    public Mismatch(Equality<MMT> cause, MMT composite) {
-        this(cause, composite, (List<Mismatch<?>>) null);
+    public Mismatch(Equalizer<MMT> cause, MMT composite) {
+        this(cause, composite, Collections.emptyList());
     }
 
-    public Mismatch(Equality<MMT> cause, MMT composite, MMT composite2) {
-        this(cause, composite, composite2, null);
+    public Mismatch(Equalizer<MMT> cause, MMT composite, MMT composite2) {
+        this(cause, composite, composite2, Collections.emptyList());
     }
 
-    public Mismatch(Equality<MMT> cause, MMT composite, MMT composite2, List<Mismatch<?>> underlyingMismatches) {
+    public Mismatch(Equalizer<MMT> cause, MMT composite, MMT composite2, List<Mismatch<?>> underlyingMismatches) {
         this(cause, Arrays.asList(composite, composite2), underlyingMismatches);
     }
 

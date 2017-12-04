@@ -1,11 +1,11 @@
 package org.someth2say.taijitu.compare.equality.wrapper;
 
+import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasherEqualizer;
 import org.someth2say.taijitu.compare.equality.aspects.internal.ComparableCategorizableEqualizable;
-import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorCategorizerEquality;
 
-public class ComparableCategorizerEqualityWrapper<T, EQ extends ComparatorCategorizerEquality<T>>
+public class ComparableCategorizerEqualityWrapper<T, EQ extends ComparatorHasherEqualizer<T>>
         extends EqualityWrapper<T, EQ>
-        implements ComparableCategorizableEqualizable<T, EQ> {
+        implements ComparableCategorizableEqualizable<T> {
 
     public ComparableCategorizerEqualityWrapper(T wrapped, EQ comparer) {
         super(wrapped, comparer);

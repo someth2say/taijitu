@@ -84,7 +84,7 @@ public class CLITest_CSV {
         BasicComparisonCfg comp1 = new BasicComparisonCfg("csv", compare, key, sort, Arrays.asList(sourceSrc, targetSrc));
         basicTaijituCfg.setComparisons(Collections.singletonList(comp1));
 
-        // Equality
+        // Equalizer
         BasicEqualityCfg stringEq = new BasicEqualityCfg(StringCaseInsensitive.class.getSimpleName(), String.class.getName(), null);
         BasicEqualityCfg numberEq = new BasicEqualityCfg(NumberThreshold.class.getSimpleName(), Number.class.getName(), null, "2");
         IEqualityCfg timestampEq = new BasicEqualityCfg(DateThreshold.class.getSimpleName(), Date.class.getName(), null, "100");

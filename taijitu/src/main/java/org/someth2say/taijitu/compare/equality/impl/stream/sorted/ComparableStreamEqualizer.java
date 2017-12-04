@@ -2,9 +2,9 @@ package org.someth2say.taijitu.compare.equality.impl.stream.sorted;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorEquality;
-import org.someth2say.taijitu.compare.equality.aspects.external.Equality;
-import org.someth2say.taijitu.compare.equality.impl.stream.StreamEquality;
+import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorEqualizer;
+import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
+import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Mismatch;
 import org.someth2say.taijitu.compare.result.Missing;
@@ -18,23 +18,23 @@ import java.util.stream.Stream;
 /**
  * Created by Jordi Sola on 02/03/2017.
  */
-public class ComparableStreamEquality<T> implements StreamEquality<T> {
+public class ComparableStreamEqualizer<T> implements StreamEqualizer<T> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ComparableStreamEquality.class);
-    private final Equality<T> equality;
-    private final ComparatorEquality<T> categorizer;
+    private static final Logger logger = LoggerFactory.getLogger(ComparableStreamEqualizer.class);
+    private final Equalizer<T> equalizer;
+    private final ComparatorEqualizer<T> categorizer;
 
-    public ComparableStreamEquality(Equality<T> equality, ComparatorEquality<T> categorizer) {
-        this.equality = equality;
+    public ComparableStreamEqualizer(Equalizer<T> equalizer, ComparatorEqualizer<T> categorizer) {
+        this.equalizer = equalizer;
         this.categorizer = categorizer;
     }
 
     @Override
     public List<Mismatch<?>> underlyingDiffs(Stream<T> source, Stream<T> target) {
-        return compare(source, target, categorizer, equality);
+        return compare(source, target, categorizer, equalizer);
     }
 
-    public static <T> List<Mismatch<?>> compare(Stream<T> source, Stream<T> target, ComparatorEquality<T> comparer, Equality<T> equality) {
+    public static <T> List<Mismatch<?>> compare(Stream<T> source, Stream<T> target, ComparatorEqualizer<T> comparer, Equalizer<T> equalizer) {
         List<Mismatch<?>> newresult = new ArrayList<>();
         Iterator<T> sourceIt = source.iterator();
         Iterator<T> targetIt = target.iterator();
@@ -61,7 +61,7 @@ public class ComparableStreamEquality<T> implements StreamEquality<T> {
                 recordCount++;
             } else {
                 // same Keys
-                Difference<T> difference = equality.asDifference(sourceRecord, targetRecord);
+                Difference<T> difference = equalizer.asDifference(sourceRecord, targetRecord);
                 if (difference!=null) {
                     // Records are different
                     newresult.add(difference);
@@ -81,7 +81,7 @@ public class ComparableStreamEquality<T> implements StreamEquality<T> {
         return newresult;
     }
 
-    private static <T> int flushMissings(ComparatorEquality<T> comparer, List<Mismatch<?>> newresult,
+    private static <T> int flushMissings(ComparatorEqualizer<T> comparer, List<Mismatch<?>> newresult,
                                          Iterator<T> sourceIt, int recordCount, TimeBiDiscarter<String, Object[]> timedLogger, Iterator<T> it) {
         while (it.hasNext()) {
             Missing<T> missing = comparer.asMissing(sourceIt.next());

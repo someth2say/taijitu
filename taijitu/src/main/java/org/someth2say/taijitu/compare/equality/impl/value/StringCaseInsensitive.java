@@ -1,11 +1,11 @@
 package org.someth2say.taijitu.compare.equality.impl.value;
 
 import org.apache.commons.lang.StringUtils;
-import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorCategorizerEquality;
+import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasherEqualizer;
 
 import java.util.Locale;
 
-public class StringCaseInsensitive extends AbstractConfigurableEquality<String> implements ComparatorCategorizerEquality<String> {
+public class StringCaseInsensitive extends AbstractConfigurableEqualizer<String> implements ComparatorHasherEqualizer<String> {
 
     private final Locale locale;
 

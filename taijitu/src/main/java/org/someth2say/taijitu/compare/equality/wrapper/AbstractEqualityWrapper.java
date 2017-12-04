@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.compare.equality.wrapper;
 
-public abstract class AbstractEqualityWrapper<T, EQ> implements Wrapper<T,EQ> {
+public abstract class AbstractEqualityWrapper<T, EQ> {
     protected final T wrapped;
     protected final EQ equality;
 
@@ -9,12 +9,10 @@ public abstract class AbstractEqualityWrapper<T, EQ> implements Wrapper<T,EQ> {
         this.wrapped = wrapped;
     }
 
-    @Override
 	public T getWrapped() {
         return wrapped;
     }
 
-    @Override
 	public EQ getEquality() {
         return equality;
     }

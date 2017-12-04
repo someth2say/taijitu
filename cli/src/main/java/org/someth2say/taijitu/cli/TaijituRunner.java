@@ -2,16 +2,16 @@ package org.someth2say.taijitu.cli;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.someth2say.taijitu.compare.equality.impl.composite.CompositeCategorizerEquality;
-import org.someth2say.taijitu.compare.equality.impl.composite.CompositeComparatorEquality;
-import org.someth2say.taijitu.compare.equality.impl.composite.CompositeEquality;
-import org.someth2say.taijitu.compare.equality.aspects.external.CategorizerEquality;
-import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorEquality;
-import org.someth2say.taijitu.compare.equality.aspects.external.Equality;
-import org.someth2say.taijitu.compare.equality.impl.stream.StreamEquality;
-import org.someth2say.taijitu.compare.equality.impl.stream.mapping.MappingStreamEquality;
-import org.someth2say.taijitu.compare.equality.impl.stream.simple.SimpleStreamEquality;
-import org.someth2say.taijitu.compare.equality.impl.stream.sorted.ComparableStreamEquality;
+import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorEqualizer;
+import org.someth2say.taijitu.compare.equality.aspects.external.HasherEqualizer;
+import org.someth2say.taijitu.compare.equality.impl.composite.CompositeComparatorEqualizer;
+import org.someth2say.taijitu.compare.equality.impl.composite.CompositeHasherEqualizer;
+import org.someth2say.taijitu.compare.equality.impl.composite.CompositeEqualizer;
+import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
+import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
+import org.someth2say.taijitu.compare.equality.impl.stream.mapping.MappingStreamEqualizer;
+import org.someth2say.taijitu.compare.equality.impl.stream.simple.SimpleStreamEqualizer;
+import org.someth2say.taijitu.compare.equality.impl.stream.sorted.ComparableStreamEqualizer;
 import org.someth2say.taijitu.compare.result.Mismatch;
 import org.someth2say.taijitu.cli.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.cli.config.interfaces.IEqualityCfg;
@@ -102,44 +102,44 @@ class TaijituRunner implements Callable<List<Mismatch>> {
         // A. Get fields for each comparison:
         // A.1.- Identity
 //        List<FieldDescription<?>> identityFDs = commonFDs.stream().filter(fd -> iComparisonCfg.getKeyFields().contains(fd.getName())).collect(Collectors.toList());
-        // A.2.- CategoryEquality (for mapping) and ComparatorEquality (for sorted) we just use all non-key fields
+        // A.2.- CategoryEquality (for mapping) and ComparatorEqualizer (for sorted) we just use all non-key fields
 //        List<FieldDescription<?>> nonIdentityFDs = commonFDs.stream().filter(fd -> !identityFDs.contains(fd)).collect(Collectors.toList());
 
         // 3.- Create comparators:
         // 3.1.- If Key fields present, build categorizer
-        CompositeCategorizerEquality<T> categorizer = null;
+        CompositeHasherEqualizer<T> categorizer = null;
         List<FieldDescription<?>> keyFDs = iComparisonCfg.getKeyFields().stream().map(commonFDs::get).collect(Collectors.toList());
         if (!keyFDs.isEmpty()) {
-            CompositeCategorizerEquality.Builder<T> categorizerBuilder = new CompositeCategorizerEquality.Builder<>();
+            CompositeHasherEqualizer.Builder<T> categorizerBuilder = new CompositeHasherEqualizer.Builder<>();
             keyFDs.forEach(fd -> addCategorizerComponent(iComparisonCfg, sourceDatas, categorizerBuilder, fd));
             categorizer = categorizerBuilder.build();
         }
 
         // 3.2.- If Sort fields present, build comparator
-        CompositeComparatorEquality<T> sorter = null;
+        CompositeComparatorEqualizer<T> sorter = null;
         List<FieldDescription<?>> sortFDs = iComparisonCfg.getSortFields().stream().map(commonFDs::get).collect(Collectors.toList());
         if (!sortFDs.isEmpty()) {
-            CompositeComparatorEquality.Builder<T> comparerBuilder = new CompositeComparatorEquality.Builder<>();
+            CompositeComparatorEqualizer.Builder<T> comparerBuilder = new CompositeComparatorEqualizer.Builder<>();
             sortFDs.forEach(fd -> addComparerComponent(iComparisonCfg, sourceDatas, comparerBuilder, fd));
             sorter = comparerBuilder.build();
         }
 
         // 3.3.a.- If Compare fields present, build equality
         // 3.3.b.- If no compare fields, use fields not key nor sort.
-        CompositeEquality<T> equality = null;
+        CompositeEqualizer<T> equality = null;
         List<String> compareFDS = iComparisonCfg.getCompareFields();
         List<FieldDescription<?>> compareFDs =
                 (!compareFDS.isEmpty()
                         ? commonFDs.values().stream().filter(commonFD -> compareFDS.contains(commonFD.getName())) //TODO: Check that all compare fields actually are provided
                         : commonFDs.values().stream().filter(commonFD -> !keyFDs.contains(commonFD) && !sortFDs.contains(commonFD))).collect(Collectors.toList());
         if (!compareFDs.isEmpty()) {
-            CompositeEquality.Builder<T> equalityBuilder = new CompositeEquality.Builder<>();
+            CompositeEqualizer.Builder<T> equalityBuilder = new CompositeEqualizer.Builder<>();
             compareFDs.forEach(fd -> addComponent(iComparisonCfg, sourceDatas, equalityBuilder, fd));
             equality = equalityBuilder.build();
         }
 
-        // 6. Run SteamEquality given CategorizerEquality and MappedStreams
-        final StreamEquality<T> streamEquality;
+        // 6. Run SteamEquality given HasherEqualizer and MappedStreams
+        final StreamEqualizer<T> streamEquality;
         if (equality == null) {
             throw new RuntimeException("Unable to define comparison fields!");
         } else {
@@ -147,11 +147,11 @@ class TaijituRunner implements Callable<List<Mismatch>> {
                 throw new RuntimeException("Hybrid equality not supported yet");
             } else {
                 if (sorter == null) {
-                    streamEquality = new MappingStreamEquality<>(equality, categorizer);
+                    streamEquality = new MappingStreamEqualizer<>(equality, categorizer);
                 } else if (categorizer == null) {
-                    streamEquality = new ComparableStreamEquality<>(equality, sorter);
+                    streamEquality = new ComparableStreamEqualizer<>(equality, sorter);
                 } else {
-                    streamEquality = new SimpleStreamEquality<>(equality);
+                    streamEquality = new SimpleStreamEqualizer<>(equality);
                 }
             }
         }
@@ -162,24 +162,24 @@ class TaijituRunner implements Callable<List<Mismatch>> {
         return runStreamEquality(streamEquality, sourceDatas);
     }
 
-    private <T, V> void addComponent(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, CompositeEquality.Builder<T> equalityBuilder, FieldDescription<V> fd) {
+    private <T, V> void addComponent(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, CompositeEqualizer.Builder<T> equalityBuilder, FieldDescription<V> fd) {
         Source<T> mappedSource = sourceDatas.get(0).mappedSource;
         Function<T, V> extractor = mappedSource.getExtractor(fd);
-        Equality<V> vEquality = getEquality(fd, iComparisonCfg.getEqualityConfigs());
-        equalityBuilder.addComponent(extractor, vEquality);
+        Equalizer<V> vEqualizer = getEquality(fd, iComparisonCfg.getEqualityConfigs());
+        equalityBuilder.addComponent(extractor, vEqualizer);
     }
 
-    private <T, V> void addCategorizerComponent(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, CompositeCategorizerEquality.Builder<T> categorizerBuilder, FieldDescription<V> fd) {
+    private <T, V> void addCategorizerComponent(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, CompositeHasherEqualizer.Builder<T> categorizerBuilder, FieldDescription<V> fd) {
         Source<T> mappedSource = sourceDatas.get(0).mappedSource;
         Function<T, V> extractor = mappedSource.getExtractor(fd);
-        CategorizerEquality<V> vEquality = getCategorizerEquality(fd, iComparisonCfg.getEqualityConfigs());
+        HasherEqualizer<V> vEquality = getCategorizerEquality(fd, iComparisonCfg.getEqualityConfigs());
         categorizerBuilder.addComponent(extractor, vEquality);
     }
 
-    private <T, V> void addComparerComponent(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, CompositeComparatorEquality.Builder<T> comparerBuilder, FieldDescription<V> fd) {
+    private <T, V> void addComparerComponent(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, CompositeComparatorEqualizer.Builder<T> comparerBuilder, FieldDescription<V> fd) {
         Source<T> mappedSource = sourceDatas.get(0).mappedSource;
         Function<T, V> extractor = mappedSource.getExtractor(fd);
-        ComparatorEquality<V> vEquality = getComparableEquality(fd, iComparisonCfg.getEqualityConfigs());
+        ComparatorEqualizer<V> vEquality = getComparableEquality(fd, iComparisonCfg.getEqualityConfigs());
         comparerBuilder.addComponent(extractor, vEquality);
     }
 
@@ -287,7 +287,7 @@ class TaijituRunner implements Callable<List<Mismatch>> {
         sourceData.source = source;
     }
 
-    private <T> List<Mismatch> runStreamEquality(StreamEquality<T> streamEquality, List<SourceData<?, T>> sourceDatas) {
+    private <T> List<Mismatch> runStreamEquality(StreamEqualizer<T> streamEquality, List<SourceData<?, T>> sourceDatas) {
         List<Mismatch> comparisonResult = null;
         SourceData<?, T> sourceData0 = sourceDatas.get(0);
         SourceData<?, T> sourceData1 = sourceDatas.get(1);
@@ -301,18 +301,18 @@ class TaijituRunner implements Callable<List<Mismatch>> {
         }
     }
 
-    private <V> Equality<V> getEquality(FieldDescription<V> fd, List<IEqualityCfg> equalityConfigs) {
+    private <V> Equalizer<V> getEquality(FieldDescription<V> fd, List<IEqualityCfg> equalityConfigs) {
         IEqualityCfg iEqualityCfg = getEqualityConfigFor(fd, equalityConfigs);
         return ValueEqualityRegistry.getInstance(iEqualityCfg.getName(), iEqualityCfg.getEqualityParameters());
     }
 
-    private <V> ComparatorEquality<V> getComparableEquality(FieldDescription<V> fd, List<IEqualityCfg> equalityConfigs) {
+    private <V> ComparatorEqualizer<V> getComparableEquality(FieldDescription<V> fd, List<IEqualityCfg> equalityConfigs) {
         List<IEqualityCfg> compatibleEqualityConfigs = getEqualityConfigsFor(fd, equalityConfigs);
 
-        Optional<ComparatorEquality<V>> first = compatibleEqualityConfigs.stream()
+        Optional<ComparatorEqualizer<V>> first = compatibleEqualityConfigs.stream()
                 .map(cfg -> ValueEqualityRegistry.getInstance(cfg.getName(), cfg.getEqualityParameters()))
-                .filter(eq -> eq instanceof ComparatorEquality)
-                .map(eq -> (ComparatorEquality<V>) eq).findFirst();
+                .filter(eq -> eq instanceof ComparatorEqualizer)
+                .map(eq -> (ComparatorEqualizer<V>) eq).findFirst();
         if (first.isPresent()) {
             return first.get();
         }
@@ -320,13 +320,13 @@ class TaijituRunner implements Callable<List<Mismatch>> {
         throw new RuntimeException("Can't find any comparable equality for field " + fd);
     }
 
-    private <V> CategorizerEquality<V> getCategorizerEquality(FieldDescription<V> fd, List<IEqualityCfg> equalityConfigs) {
+    private <V> HasherEqualizer<V> getCategorizerEquality(FieldDescription<V> fd, List<IEqualityCfg> equalityConfigs) {
         List<IEqualityCfg> compatibleEqualityConfigs = getEqualityConfigsFor(fd, equalityConfigs);
 
-        Optional<CategorizerEquality<V>> first = compatibleEqualityConfigs.stream()
+        Optional<HasherEqualizer<V>> first = compatibleEqualityConfigs.stream()
                 .map(cfg -> ValueEqualityRegistry.getInstance(cfg.getName(), cfg.getEqualityParameters()))
-                .filter(eq -> eq instanceof CategorizerEquality)
-                .map(eq -> (CategorizerEquality<V>) eq).findFirst();
+                .filter(eq -> eq instanceof HasherEqualizer)
+                .map(eq -> (HasherEqualizer<V>) eq).findFirst();
         if (first.isPresent()) {
             return first.get();
         }

@@ -1,13 +1,13 @@
 package org.someth2say.taijitu.compare.equality.wrapper;
 
+import org.someth2say.taijitu.compare.equality.aspects.external.HasherEqualizer;
 import org.someth2say.taijitu.compare.equality.aspects.internal.CategorizableEqualizable;
-import org.someth2say.taijitu.compare.equality.aspects.external.CategorizerEquality;
 
 public class CategorizerEqualityWrapper<T>
-        extends EqualityWrapper<T, CategorizerEquality<T>>
-        implements CategorizableEqualizable<T, CategorizerEquality<T>> {
+        extends EqualityWrapper<T, HasherEqualizer<T>>
+        implements CategorizableEqualizable<T> {
 
-    public CategorizerEqualityWrapper(T wrapped, CategorizerEquality<T> categorizer) {
+    public CategorizerEqualityWrapper(T wrapped, HasherEqualizer<T> categorizer) {
         super(wrapped, categorizer);
     }
 
