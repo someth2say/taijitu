@@ -147,9 +147,9 @@ class TaijituRunner implements Callable<List<Mismatch>> {
                 throw new RuntimeException("Hybrid equality not supported yet");
             } else {
                 if (sorter == null) {
-                    streamEquality = new MappingStreamEquality<T>(equality, categorizer);
+                    streamEquality = new MappingStreamEquality<>(equality, categorizer);
                 } else if (categorizer == null) {
-                    streamEquality = new ComparableStreamEquality<T>(equality, sorter);
+                    streamEquality = new ComparableStreamEquality<>(equality, sorter);
                 } else {
                     streamEquality = new SimpleStreamEquality<>(equality);
                 }

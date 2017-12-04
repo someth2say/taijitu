@@ -30,7 +30,8 @@ public class SimpleStreamEqualityTest {
         Stream<TestComposite> stream1 = Stream.of(differentFrom1, equalsFrom1, missingFrom1);
         Stream<TestComposite> stream2 = Stream.of(differentFrom2, equalsFrom2);
 
-        SimpleStreamEquality<TestComposite> streamEquality = new SimpleStreamEquality<>(testClassOneTwoEquality);
+        SimpleStreamEquality<TestComposite> streamEquality
+                = new SimpleStreamEquality<>(testClassOneTwoEquality);
         List<Mismatch<?>> mismatches = streamEquality.underlyingDiffs(stream1, stream2);
 
         // Test results
