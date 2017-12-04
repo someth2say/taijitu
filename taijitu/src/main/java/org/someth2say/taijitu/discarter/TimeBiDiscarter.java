@@ -8,7 +8,7 @@ import java.util.function.BiConsumer;
 public class TimeBiDiscarter<T, Q> implements BiConsumer<T, Q> {
     private final long delayTime;
     private final BiConsumer<T, Q> consumer;
-    private long lastTimeExecuted = 0L;
+    private long lastTimeExecuted;
 
     public TimeBiDiscarter(long _delayTime, BiConsumer<T, Q> function) {
         delayTime = _delayTime;
