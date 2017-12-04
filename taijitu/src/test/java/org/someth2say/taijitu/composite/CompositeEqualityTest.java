@@ -2,7 +2,7 @@ package org.someth2say.taijitu.composite;
 
 import org.junit.Test;
 import org.someth2say.taijitu.TestComposite;
-import org.someth2say.taijitu.compare.equality.value.StringCaseInsensitive;
+import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
 import org.someth2say.taijitu.compare.result.Difference;
 
 import java.util.Arrays;

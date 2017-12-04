@@ -1,9 +1,9 @@
 package org.someth2say.taijitu;
 
-import org.someth2say.taijitu.compare.equality.composite.CompositeComparatorEquality;
-import org.someth2say.taijitu.compare.equality.composite.CompositeEquality;
-import org.someth2say.taijitu.compare.equality.value.ObjectToString;
-import org.someth2say.taijitu.compare.equality.value.StringCaseInsensitive;
+import org.someth2say.taijitu.compare.equality.impl.composite.CompositeComparatorEquality;
+import org.someth2say.taijitu.compare.equality.impl.composite.CompositeEquality;
+import org.someth2say.taijitu.compare.equality.impl.value.ObjectToString;
+import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
 
 import java.util.Objects;
 

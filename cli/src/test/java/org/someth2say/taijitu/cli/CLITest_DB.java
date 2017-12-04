@@ -24,9 +24,9 @@ import org.someth2say.taijitu.cli.config.interfaces.ITaijituCfg;
 import org.someth2say.taijitu.cli.source.mapper.ResultSetTupleMapper;
 import org.someth2say.taijitu.cli.source.query.ConnectionManager;
 import org.someth2say.taijitu.cli.source.query.QuerySource;
-import org.someth2say.taijitu.compare.equality.value.DateThreshold;
-import org.someth2say.taijitu.compare.equality.value.NumberThreshold;
-import org.someth2say.taijitu.compare.equality.value.StringCaseInsensitive;
+import org.someth2say.taijitu.compare.equality.impl.value.DateThreshold;
+import org.someth2say.taijitu.compare.equality.impl.value.NumberThreshold;
+import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
 import org.someth2say.taijitu.compare.result.Mismatch;
 
 import java.io.IOException;

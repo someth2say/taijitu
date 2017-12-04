@@ -13,9 +13,9 @@ import org.someth2say.taijitu.cli.config.impl.TaijituCfg;
 import org.someth2say.taijitu.cli.config.interfaces.IEqualityCfg;
 import org.someth2say.taijitu.cli.source.csv.CSVResourceSource;
 import org.someth2say.taijitu.cli.source.mapper.CSVTupleMapper;
-import org.someth2say.taijitu.compare.equality.value.DateThreshold;
-import org.someth2say.taijitu.compare.equality.value.NumberThreshold;
-import org.someth2say.taijitu.compare.equality.value.StringCaseInsensitive;
+import org.someth2say.taijitu.compare.equality.impl.value.DateThreshold;
+import org.someth2say.taijitu.compare.equality.impl.value.NumberThreshold;
+import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
 import org.someth2say.taijitu.compare.result.Mismatch;
 
 import java.util.*;
