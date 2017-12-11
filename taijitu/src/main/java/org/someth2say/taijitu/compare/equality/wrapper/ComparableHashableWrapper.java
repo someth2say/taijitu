@@ -11,7 +11,7 @@ public class ComparableHashableWrapper<T, EQ extends ComparatorHasher<T>>
         super(wrapped, equality);
     }
 
-    // Unluckily, this can not be pushed up to Hashable interface, as java.lang.Object methods can not be defaulted.
+    // Unluckily, this can not be pushed up to interface, as java.lang.Object methods can not be defaulted.
     @Override
     public int hashCode() {
         return getEquality().hashCode(unwrap());

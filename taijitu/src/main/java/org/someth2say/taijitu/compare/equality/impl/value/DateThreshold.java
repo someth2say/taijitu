@@ -18,7 +18,10 @@ public class DateThreshold<T extends Date> extends AbstractConfigurableEqualizer
 
     @Override
     public int hashCode(T object) {
-        return object.hashCode();
+        double rest = object.getTime() % getThreshold();
+        Double roundTime = object.getTime() - rest;
+        System.out.println(roundTime.toString());
+        return roundTime.hashCode();
     }
 
     @Override

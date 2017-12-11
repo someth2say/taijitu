@@ -3,7 +3,6 @@ package org.someth2say.taijitu.stream;
 import org.junit.Test;
 import org.someth2say.taijitu.TestComposite;
 import org.someth2say.taijitu.compare.equality.impl.stream.mapping.HashingStreamEqualizer;
-import org.someth2say.taijitu.compare.equality.impl.stream.sorted.ComparableStreamEqualizer;
 import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Missing;
@@ -16,7 +15,6 @@ import java.util.stream.Stream;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.someth2say.taijitu.TestComposite.testClassOneTwoEquality;
-import static org.someth2say.taijitu.TestComposite.testClassThreeComparer;
 import static org.someth2say.taijitu.TestComposite.testClassThreeHasher;
 
 public class HashingStreamEqualizerTest {

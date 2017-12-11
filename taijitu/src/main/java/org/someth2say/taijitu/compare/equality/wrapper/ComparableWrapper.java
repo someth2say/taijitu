@@ -10,7 +10,6 @@ public class ComparableWrapper<T,EQ extends Comparator<T>>
         super(wrapped, equality);
     }
 
-
     @Override
     public int compareTo(IWraper<T, ?> other) {
         return getEquality().compare(unwrap(), other.unwrap());

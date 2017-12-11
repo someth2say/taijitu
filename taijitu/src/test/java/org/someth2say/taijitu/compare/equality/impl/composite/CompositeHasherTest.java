@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.composite;
+package org.someth2say.taijitu.compare.equality.impl.composite;
 
 import org.junit.Test;
 import org.someth2say.taijitu.TestComposite;

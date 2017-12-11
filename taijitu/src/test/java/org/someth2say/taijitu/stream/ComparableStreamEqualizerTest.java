@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.someth2say.taijitu.TestComposite.testClassOneTwoEquality;
-import static org.someth2say.taijitu.TestComposite.testClassThreeComparer;
+import static org.someth2say.taijitu.TestComposite.testClassThreeComparator;
 
 public class ComparableStreamEqualizerTest {
     @Test
@@ -30,12 +30,12 @@ public class ComparableStreamEqualizerTest {
         Stream<TestComposite> stream1 = Stream.of(differentFrom1, missingFrom1, equalsFrom1);
         Stream<TestComposite> stream2 = Stream.of(differentFrom2, equalsFrom2);
 
-        ComparableStreamEqualizer<TestComposite> equality = new ComparableStreamEqualizer<>(testClassOneTwoEquality, testClassThreeComparer);
+        ComparableStreamEqualizer<TestComposite> equality = new ComparableStreamEqualizer<>(testClassOneTwoEquality, testClassThreeComparator);
         List<Difference<?>> differences = equality.underlyingDiffs(stream1, stream2);
 
         // Test results
         differences.forEach(System.out::println);
-        Missing<TestComposite> missing = new Missing<>(testClassThreeComparer, missingFrom1);
+        Missing<TestComposite> missing = new Missing<>(testClassThreeComparator, missingFrom1);
         assertEquals(2, differences.size());
         assertTrue(differences.contains(missing));
         List<Difference<?>> underlyingCauses = Collections.singletonList(new Unequal<>(new StringCaseInsensitive(), "aaa", "aa"));
