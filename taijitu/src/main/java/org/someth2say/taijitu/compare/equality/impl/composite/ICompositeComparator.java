@@ -1,11 +1,11 @@
 package org.someth2say.taijitu.compare.equality.impl.composite;
 
-import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorEqualizer;
-import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasherEqualizer;
+import org.someth2say.taijitu.compare.equality.aspects.external.Comparator;
+import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasher;
 
 import java.util.function.Function;
 
-public interface ICompositeComparatorEqualizer<T> extends ICompositeEqualizer<T>, ComparatorEqualizer<T> {
+public interface ICompositeComparator<T> extends ICompositeEqualizer<T>, Comparator<T> {
 
     @Override
     default int compare(T first, T second) {
@@ -18,9 +18,9 @@ public interface ICompositeComparatorEqualizer<T> extends ICompositeEqualizer<T>
         return 0;
     }
 
-    default <V> int valueCompareTo(T first, T second, ExtractorAndEquality<T, V, ComparatorHasherEqualizer<V>> eae) {
+    default <V> int valueCompareTo(T first, T second, ExtractorAndEquality<T, V, ComparatorHasher<V>> eae) {
         Function<T, V> extractor = eae.getExtractor();
-        ComparatorHasherEqualizer<V> equality = eae.getEquality();
+        ComparatorHasher<V> equality = eae.getEquality();
         V firstValue = extractor.apply(first);
         V secondValue = extractor.apply(second);
         int compare = equality.compare(firstValue, secondValue);

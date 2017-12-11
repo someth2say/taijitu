@@ -2,12 +2,12 @@ package org.someth2say.taijitu.composite;
 
 import org.junit.Test;
 import org.someth2say.taijitu.TestComposite;
-import org.someth2say.taijitu.compare.equality.aspects.internal.ComparableEqualizable;
+import org.someth2say.taijitu.compare.equality.aspects.internal.Comparable;
 
 import static org.junit.Assert.assertTrue;
 import static org.someth2say.taijitu.TestComposite.testClassThreeComparer;
 
-public class CompositeComparatorEqualizerTest {
+public class CompositeComparatorTest {
 
     @Test
     public void testCompositeEquality() {
@@ -19,7 +19,7 @@ public class CompositeComparatorEqualizerTest {
         assertTrue(testClassThreeComparer.compare(differentFrom1, differentFrom2) == 0);
         assertTrue(testClassThreeComparer.equals(differentFrom1, differentFrom2));
 
-        ComparableEqualizable<TestComposite> wrap1 = testClassThreeComparer.wrap(differentFrom1);
+        Comparable<TestComposite> wrap1 = testClassThreeComparer.wrap(differentFrom1);
         assertTrue(wrap1.compareTo(differentFrom3) < 0);
         assertTrue(wrap1.compareTo(differentFrom2) == 0);
         assertTrue(wrap1.equals(testClassThreeComparer.wrap(differentFrom2)));

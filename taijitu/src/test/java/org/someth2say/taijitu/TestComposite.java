@@ -1,8 +1,8 @@
 package org.someth2say.taijitu;
 
-import org.someth2say.taijitu.compare.equality.impl.composite.CompositeComparatorEqualizer;
+import org.someth2say.taijitu.compare.equality.impl.composite.CompositeComparator;
 import org.someth2say.taijitu.compare.equality.impl.composite.CompositeEqualizer;
-import org.someth2say.taijitu.compare.equality.impl.composite.CompositeHasherEqualizer;
+import org.someth2say.taijitu.compare.equality.impl.composite.CompositeHasher;
 import org.someth2say.taijitu.compare.equality.impl.value.ObjectToString;
 import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
 
@@ -60,9 +60,9 @@ public class TestComposite {
             .addComponent(TestComposite::getOne, new StringCaseInsensitive())
             .addComponent(TestComposite::getTwo, new StringCaseInsensitive()).build();
 
-    public static final CompositeComparatorEqualizer<TestComposite> testClassThreeComparer = new CompositeComparatorEqualizer.Builder<TestComposite>()
+    public static final CompositeComparator<TestComposite> testClassThreeComparer = new CompositeComparator.Builder<TestComposite>()
             .addComponent(TestComposite::getThree, new ObjectToString<>()).build();
 
-    public static final CompositeHasherEqualizer<TestComposite> testClassThreeHasher = new CompositeHasherEqualizer.Builder<TestComposite>()
+    public static final CompositeHasher<TestComposite> testClassThreeHasher = new CompositeHasher.Builder<TestComposite>()
             .addComponent(TestComposite::getThree, new ObjectToString<>()).build();
 }

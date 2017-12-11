@@ -1,6 +1,9 @@
 package org.someth2say.taijitu.compare.equality.aspects.internal;
 
-public interface Equalizable {
+public interface Equalizable<T> {
     @Override
 	boolean equals(Object obj);
+
+    boolean equalsTo(T obj);
+
 }

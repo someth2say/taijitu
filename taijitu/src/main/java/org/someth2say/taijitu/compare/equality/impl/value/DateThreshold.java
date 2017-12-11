@@ -1,10 +1,10 @@
 package org.someth2say.taijitu.compare.equality.impl.value;
 
-import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasherEqualizer;
+import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasher;
 
 import java.util.Date;
 
-public class DateThreshold<T extends Date> extends AbstractConfigurableEqualizer<T> implements ComparatorHasherEqualizer<T> {
+public class DateThreshold<T extends Date> extends AbstractConfigurableEqualizer<T> implements ComparatorHasher<T> {
 
     private static final int DEFAULT_THRESHOLD = 1000;
 

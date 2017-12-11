@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface Equalizer<T> {
 
-    default Equalizable wrap(T obj) {
+    default Equalizable<T> wrap(T obj) {
         return new EqualizableWrapper<>(obj, this);
     }
 

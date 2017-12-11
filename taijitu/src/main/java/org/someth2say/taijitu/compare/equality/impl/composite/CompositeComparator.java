@@ -2,7 +2,7 @@ package org.someth2say.taijitu.compare.equality.impl.composite;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorEqualizer;
+import org.someth2say.taijitu.compare.equality.aspects.external.Comparator;
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.impl.value.JavaComparable;
 
@@ -18,19 +18,19 @@ import java.util.function.Function;
  *
  * @param <T>
  */
-public class CompositeComparatorEqualizer<T> extends AbstractCompositeEquality implements ICompositeEqualizer<T>, ICompositeComparatorEqualizer<T> {
-    private static final Logger logger = LoggerFactory.getLogger(CompositeComparatorEqualizer.class);
+public class CompositeComparator<T> extends AbstractCompositeEquality implements ICompositeEqualizer<T>, ICompositeComparator<T> {
+    private static final Logger logger = LoggerFactory.getLogger(CompositeComparator.class);
 
     @Override
 	public Logger getLogger() {
         return logger;
     }
 
-    protected CompositeComparatorEqualizer(List<ExtractorAndEquality> eaes) {
+    protected CompositeComparator(List<ExtractorAndEquality> eaes) {
         super(eaes);
     }
 
-    protected <V> CompositeComparatorEqualizer(Function<T, V> extractor, Equalizer<V> equalizer) {
+    protected <V> CompositeComparator(Function<T, V> extractor, Equalizer<V> equalizer) {
         this(Collections.singletonList(new ExtractorAndEquality<>(extractor, equalizer)));
     }
 
@@ -41,14 +41,14 @@ public class CompositeComparatorEqualizer<T> extends AbstractCompositeEquality i
             return addComponent(extractor, new JavaComparable<>());
         }
 
-        public <V> Builder<T> addComponent(Function<T, V> extractor, ComparatorEqualizer<V> equality) {
+        public <V> Builder<T> addComponent(Function<T, V> extractor, Comparator<V> equality) {
             ExtractorAndEquality<T, V, Equalizer<V>> eae = new ExtractorAndEquality<>(extractor, equality);
             eaes.add(eae);
             return this;
         }
 
-        public CompositeComparatorEqualizer<T> build() {
-            return new CompositeComparatorEqualizer<>(eaes);
+        public CompositeComparator<T> build() {
+            return new CompositeComparator<>(eaes);
         }
     }
 

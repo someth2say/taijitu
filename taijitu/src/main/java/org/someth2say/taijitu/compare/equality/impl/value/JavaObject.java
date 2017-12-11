@@ -1,8 +1,8 @@
 package org.someth2say.taijitu.compare.equality.impl.value;
 
-import org.someth2say.taijitu.compare.equality.aspects.external.HasherEqualizer;
+import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
 
-public class JavaObject<T> extends AbstractConfigurableEqualizer<T> implements HasherEqualizer<T> {
+public class JavaObject<T> extends AbstractConfigurableEqualizer<T> implements Hasher<T> {
 
     public JavaObject() {
         this(null);

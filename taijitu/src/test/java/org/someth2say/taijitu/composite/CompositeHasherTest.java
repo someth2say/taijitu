@@ -2,15 +2,13 @@ package org.someth2say.taijitu.composite;
 
 import org.junit.Test;
 import org.someth2say.taijitu.TestComposite;
-import org.someth2say.taijitu.compare.equality.aspects.internal.ComparableEqualizable;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.someth2say.taijitu.TestComposite.testClassThreeComparer;
 import static org.someth2say.taijitu.TestComposite.testClassThreeHasher;
 
-public class CompositeHasherEqualizerTest {
+public class CompositeHasherTest {
 
     @Test
     public void testCompositeEquality() {

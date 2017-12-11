@@ -1,11 +1,11 @@
 package org.someth2say.taijitu.compare.equality.impl.value;
 
-import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasherEqualizer;
+import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasher;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class NumberThreshold<T extends Number> extends AbstractConfigurableEqualizer<T> implements ComparatorHasherEqualizer<T> {
+public class NumberThreshold<T extends Number> extends AbstractConfigurableEqualizer<T> implements ComparatorHasher<T> {
 
     private static final int DEFAULT_SCALE = 2;
 

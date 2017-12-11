@@ -6,19 +6,19 @@ import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasherEqualizer;
+import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasher;
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.impl.value.JavaComparable;
 
-public class CompositeComparatorHasherEqualizer<T> extends AbstractCompositeEquality implements ICompositeHasherComparatorEqualizer<T> {
-    private static final Logger logger = LoggerFactory.getLogger(CompositeComparatorHasherEqualizer.class);
+public class CompositeComparatorHasher<T> extends AbstractCompositeEquality implements ICompositeHasherComparator<T> {
+    private static final Logger logger = LoggerFactory.getLogger(CompositeComparatorHasher.class);
 
     @Override
 	public Logger getLogger() {
         return logger;
     }
 
-	protected CompositeComparatorHasherEqualizer(List<ExtractorAndEquality> extractorsAndEqualities) {
+	protected CompositeComparatorHasher(List<ExtractorAndEquality> extractorsAndEqualities) {
         super(extractorsAndEqualities);
     }
 
@@ -29,14 +29,14 @@ public class CompositeComparatorHasherEqualizer<T> extends AbstractCompositeEqua
             return addComponent(extractor, new JavaComparable<>());
         }
 
-        public <V> Builder<T> addComponent(Function<T, V> extractor, ComparatorHasherEqualizer<V> equality) {
+        public <V> Builder<T> addComponent(Function<T, V> extractor, ComparatorHasher<V> equality) {
             ExtractorAndEquality<T, V, Equalizer<V>> eae = new ExtractorAndEquality<>(extractor, equality);
             eaes.add(eae);
             return this;
         }
 
-        public CompositeComparatorHasherEqualizer<T> build() {
-            return new CompositeComparatorHasherEqualizer<>(eaes);
+        public CompositeComparatorHasher<T> build() {
+            return new CompositeComparatorHasher<>(eaes);
         }
     }
 }
