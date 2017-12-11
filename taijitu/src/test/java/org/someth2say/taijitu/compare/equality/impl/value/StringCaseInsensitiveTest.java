@@ -2,13 +2,17 @@ package org.someth2say.taijitu.compare.equality.impl.value;
 
 import org.junit.Test;
 import org.someth2say.taijitu.compare.equality.aspects.internal.ComparableHashable;
+import org.someth2say.taijitu.compare.equality.wrapper.AbstractWrapper;
+import org.someth2say.taijitu.compare.equality.wrapper.IComparableHashableWrapper;
 
 import static org.junit.Assert.*;
 
 public class StringCaseInsensitiveTest {
 
     StringCaseInsensitive instance = new StringCaseInsensitive();
-    ComparableHashable<String> aaa = instance.wrap("aaa");
+    IComparableHashableWrapper<String, ?> aaa = instance.wrap("aaa");
+    IComparableHashableWrapper<String, ?> aAA = instance.wrap("aAA");
+    IComparableHashableWrapper<String, ?> aa = instance.wrap("aa");
 
     @Test
     public void hashCodeTest() {
@@ -24,10 +28,8 @@ public class StringCaseInsensitiveTest {
         assertTrue(instance.equals("aaa", "aAA"));
         assertFalse(instance.equals("aaa", "aa"));
 
-        //TODO: This is awkward, objects should only be compared to other objects on the same type hierarchy...
-        assertTrue(aaa.equalsTo("aaa"));
-
-        assertTrue(aaa.equals(instance.wrap("aAA")));
+        assertTrue(aaa.equalsTo(aAA));
+        assertFalse(aaa.equals(aa));
     }
 
     @Test
@@ -36,8 +38,8 @@ public class StringCaseInsensitiveTest {
         assertFalse(instance.compare("aaa", "aa") < 0);
         assertFalse(instance.compare("aa", "aaA") > 0);
 
-        assertTrue(aaa.compareTo("aAA") == 0);
-        assertFalse(aaa.compareTo("aa") < 0);
-        assertFalse(instance.wrap("aa").compareTo("aa") > 0);
+        assertTrue(aaa.compareTo(aAA) == 0);
+        assertFalse(aaa.compareTo(aa) < 0);
+        assertFalse(aa.compareTo(aAA) > 0);
     }
 }

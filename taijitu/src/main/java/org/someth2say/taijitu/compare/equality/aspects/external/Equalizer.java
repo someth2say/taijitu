@@ -1,16 +1,16 @@
 package org.someth2say.taijitu.compare.equality.aspects.external;
 
-import org.someth2say.taijitu.compare.equality.aspects.internal.Equalizable;
 import org.someth2say.taijitu.compare.equality.wrapper.EqualizableWrapper;
-import org.someth2say.taijitu.compare.result.Unequal;
+import org.someth2say.taijitu.compare.equality.wrapper.IEqualizableWraper;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Missing;
+import org.someth2say.taijitu.compare.result.Unequal;
 
 import java.util.List;
 
 public interface Equalizer<T> {
 
-    default Equalizable<T> wrap(T obj) {
+    default IEqualizableWraper<T,?> wrap(T obj) {
         return new EqualizableWrapper<>(obj, this);
     }
 

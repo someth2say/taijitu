@@ -20,6 +20,8 @@ import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.aspects.internal.Hashable;
 import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
+import org.someth2say.taijitu.compare.equality.wrapper.AbstractWrapper;
+import org.someth2say.taijitu.compare.equality.wrapper.IHashableWraper;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Unequal;
 import org.someth2say.taijitu.compare.result.Missing;
@@ -49,7 +51,7 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
 
     private static <T> List<Difference<?>> matchSequential(Stream<T> source, Stream<T> target, Hasher<T> categorizer, Equalizer<T> equalizer) {
 
-        Map<Hashable<T>, OrdinalAndComposite<T>> sharedMap = new ConcurrentHashMap<>();
+        Map<IHashableWraper<T, ?>, OrdinalAndComposite<T>> sharedMap = getSharedMap();
         final int recordCount = 0;
         final TimeBiDiscarter<String, Object[]> timedLogger = new TimeBiDiscarter<>(1000, logger::debug);
 
@@ -57,7 +59,7 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         Stream<Unequal<T>> differences = StreamUtil
                 .zip(source.map(c -> new OrdinalAndComposite<>(0, c)),
                         target.map(c -> new OrdinalAndComposite<>(1, c)))
-                .map(sac -> map(sac, timedLogger, recordCount, categorizer, sharedMap, equalizer))
+                .map(sac -> TupleMapper.map(sac, timedLogger, recordCount, categorizer, sharedMap, equalizer))
                 .filter(Objects::nonNull);
         List<Unequal<T>> diffs = differences.collect(Collectors.toList());
 
@@ -73,34 +75,8 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         return result;
     }
 
-
-    private static <T> Unequal<T> map(T composite, int ordinal, TimeBiDiscarter<String, Object[]> timedLogger, int recordCount, Hasher<T> mapper, Map<Hashable<T>, OrdinalAndComposite<T>> sharedMap, Equalizer<T> equalizer) {
-        OrdinalAndComposite<T> oac = new OrdinalAndComposite<>(ordinal, composite);
-        return map(oac, timedLogger, recordCount, mapper, sharedMap, equalizer);
-    }
-
-    private static <T> Unequal<T> map(OrdinalAndComposite<T> thisOaC,
-                                      TimeBiDiscarter<String, Object[]> timedLogger, int recordCount, Hasher<T> categorizer,
-                                      Map<Hashable<T>, OrdinalAndComposite<T>> sharedMap, Equalizer<T> equalizer) {
-        timedLogger.accept("Processed {} records so far.", new Object[]{recordCount});
-        Hashable<T> wraped = categorizer.wrap(thisOaC.getComposite());
-        OrdinalAndComposite<T> otherOaC = sharedMap.putIfAbsent(wraped, new OrdinalAndComposite<>(thisOaC.getOrdinal(), thisOaC.getComposite()));
-        if (otherOaC != null) {
-            // we have a key match ...
-            sharedMap.remove(wraped);
-            return getUnequal(equalizer, thisOaC, otherOaC);
-        }
-        return null;
-    }
-
-    private static <T> Unequal<T> getUnequal(Equalizer<T> equalizer, OrdinalAndComposite<T> first, OrdinalAndComposite<T> second) {
-        Unequal<T> unequal;
-        if (first.getOrdinal() < second.getOrdinal()) {
-            unequal = equalizer.asDifference(first.getComposite(), second.getComposite());
-        } else {
-            unequal = equalizer.asDifference(second.getComposite(), first.getComposite());
-        }
-        return unequal;
+    private static <T> Map<IHashableWraper<T,?>, OrdinalAndComposite<T>> getSharedMap() {
+        return new ConcurrentHashMap<>();
     }
 
     public static <T> List<Difference<?>> matchParallel(Stream<T> source, Stream<T> target,
@@ -111,9 +87,9 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         Iterator<T> targetIt = target.iterator();
 
         final ExecutorService executorService = Executors.newFixedThreadPool(2);
-        Map<Hashable<T>, OrdinalAndComposite<T>> sharedMap = new ConcurrentHashMap<>();
-        Runnable sourceMapper = new TupleMapperExt<>(sourceIt, sharedMap, result, 0, categorizer, equalizer);
-        Runnable targetMapper = new TupleMapperExt<>(targetIt, sharedMap, result, 1, categorizer, equalizer);
+        Map<IHashableWraper<T, ?>, OrdinalAndComposite<T>> sharedMap = getSharedMap();
+        Runnable sourceMapper = new TupleMapper<>(sourceIt, sharedMap, result, 0, categorizer, equalizer);
+        Runnable targetMapper = new TupleMapper<>(targetIt, sharedMap, result, 1, categorizer, equalizer);
 
         executorService.submit(sourceMapper);// Map source
         executorService.submit(targetMapper);// Map target
@@ -143,44 +119,4 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         }
     }
 
-    private static class TupleMapperExt<TMT> implements Runnable {
-        private final Iterator<TMT> source;
-        private final Map<Hashable<TMT>, OrdinalAndComposite<TMT>> sharedMap;
-        private final List<Difference<?>> result;
-        private final int ordinal;
-        private final Hasher<TMT> categorizer;
-        private final Equalizer<TMT> equalizer;
-
-        private TupleMapperExt(final Iterator<TMT> source,
-                               final Map<Hashable<TMT>, OrdinalAndComposite<TMT>> sharedMap,
-                               final List<Difference<?>> result, int ordinal, Hasher<TMT> categorizer,
-                               Equalizer<TMT> equalizer) {
-            this.source = source;
-            this.sharedMap = sharedMap;
-            this.result = result;
-            this.ordinal = ordinal;
-            this.categorizer = categorizer;
-            this.equalizer = equalizer;
-        }
-
-        @Override
-        public void run() {
-            TimeBiDiscarter<String, Object[]> timedLogger = new TimeBiDiscarter<>(1000, logger::debug);
-            int recordCount = 0;
-            TMT thisRecord = getNextRecordOrNull(source);
-            while (thisRecord != null) {
-                recordCount++;
-                Unequal<TMT> unequal = map(thisRecord, ordinal, timedLogger, recordCount, categorizer, sharedMap, equalizer);
-                if (unequal != null) {
-                    result.add(unequal);
-                }
-                thisRecord = getNextRecordOrNull(source);
-            }
-        }
-
-    }
-
-    private static <T> T getNextRecordOrNull(Iterator<T> resultSetSource) {
-        return resultSetSource.hasNext() ? resultSetSource.next() : null;
-    }
 }
