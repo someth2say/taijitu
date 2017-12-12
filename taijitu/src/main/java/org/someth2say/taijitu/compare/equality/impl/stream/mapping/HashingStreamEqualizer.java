@@ -18,9 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
-import org.someth2say.taijitu.compare.equality.aspects.internal.Hashable;
 import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
-import org.someth2say.taijitu.compare.equality.wrapper.AbstractWrapper;
 import org.someth2say.taijitu.compare.equality.wrapper.IHashableWraper;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Unequal;
@@ -35,18 +33,21 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(HashingStreamEqualizer.class);
     final private Equalizer<T> equalizer;
-    final private Hasher<T> categorizer;
+    final private Hasher<T> hasher;
 
-    public HashingStreamEqualizer(Equalizer<T> equalizer, Hasher<T> categorizer) {
+    private boolean parallel = false;
+
+    public HashingStreamEqualizer(Equalizer<T> equalizer, Hasher<T> hasher) {
         this.equalizer = equalizer;
-        this.categorizer = categorizer;
+        this.hasher = hasher;
     }
 
     @Override
     public List<Difference<?>> underlyingDiffs(Stream<T> source, Stream<T> target) {
-        // TODO: Find a way to discriminate (config)?
-        // return matchParallel(source, sourceID, target, targetId, categorizer, equalizer);
-        return matchSequential(source, target, categorizer, equalizer);
+        if (parallel)
+            return matchParallel(source, target, hasher, equalizer);
+        else
+            return matchSequential(source, target, hasher, equalizer);
     }
 
     private static <T> List<Difference<?>> matchSequential(Stream<T> source, Stream<T> target, Hasher<T> categorizer, Equalizer<T> equalizer) {
@@ -56,26 +57,22 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         final TimeBiDiscarter<String, Object[]> timedLogger = new TimeBiDiscarter<>(1000, logger::debug);
 
         //TODO: This exploits a side effect of manipulating input (filling the map). Should find a different way.
-        Stream<Unequal<T>> differences = StreamUtil
+        List<Unequal<T>> diffs = StreamUtil
                 .zip(source.map(c -> new OrdinalAndComposite<>(0, c)),
                         target.map(c -> new OrdinalAndComposite<>(1, c)))
                 .map(sac -> TupleMapper.map(sac, timedLogger, recordCount, categorizer, sharedMap, equalizer))
-                .filter(Objects::nonNull);
-        List<Unequal<T>> diffs = differences.collect(Collectors.toList());
+                .filter(Objects::nonNull).collect(Collectors.toList());
 
         // 2.- When both mapping tasks are completed, remaining data are source/target
         // only
-        Stream<Missing<T>> missings = sharedMap.values().stream()
-                .map(sac -> categorizer.asMissing(sac.getComposite()));
-
-        List<Missing<T>> miss = missings.collect(Collectors.toList());
+        List<Missing<T>> miss = sharedMap.values().stream().map(sac -> categorizer.asMissing(sac.getComposite())).collect(Collectors.toList());
         List<Difference<?>> result = new ArrayList<>(diffs.size() + miss.size());
         result.addAll(diffs);
         result.addAll(miss);
         return result;
     }
 
-    private static <T> Map<IHashableWraper<T,?>, OrdinalAndComposite<T>> getSharedMap() {
+    private static <T> Map<IHashableWraper<T, ?>, OrdinalAndComposite<T>> getSharedMap() {
         return new ConcurrentHashMap<>();
     }
 
@@ -119,4 +116,7 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         }
     }
 
+    public void setParallel(boolean parallel) {
+        this.parallel = parallel;
+    }
 }

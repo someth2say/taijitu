@@ -13,12 +13,13 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.someth2say.taijitu.TestComposite.testClassOneTwoEquality;
 
 public class SimpleStreamEqualizerTest {
     @Test
-    public void testSimpleStreamEquality() {
+    public void testSimpleStreamDifferences() {
 
         // Build Streams
         TestComposite differentFrom1 = new TestComposite("aaa", "aaa", 1);
@@ -41,5 +42,22 @@ public class SimpleStreamEqualizerTest {
         assertTrue(differences.contains(missing));
         List<Difference<?>> underlyingCauses = Collections.singletonList(new Unequal<>(new StringCaseInsensitive(), "aaa", "aa"));
         assertTrue(differences.contains(new Unequal<>(testClassOneTwoEquality, differentFrom1, differentFrom2, underlyingCauses)));
+    }
+
+    @Test
+    public void testSimpleStreamEquals() {
+
+        // Build Streams
+        TestComposite differentFrom1 = new TestComposite("aaa", "aaa", 1);
+        TestComposite differentFrom2 = new TestComposite("aaa", "aa", 1);
+        TestComposite equalsFrom1 = new TestComposite("bBb", "bbb", 3);
+        TestComposite equalsFrom2 = new TestComposite("bbb", "bbB", 3);
+
+        Stream<TestComposite> stream1 = Stream.of(differentFrom1, equalsFrom1);
+        Stream<TestComposite> stream2 = Stream.of(differentFrom2, equalsFrom2);
+
+        SimpleStreamEqualizer<TestComposite> streamEquality= new SimpleStreamEqualizer<>(testClassOneTwoEquality);
+        assertFalse(streamEquality.equals(stream1, stream2));
+
     }
 }

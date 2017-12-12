@@ -41,8 +41,8 @@ public class CompositeComparator<T> extends AbstractCompositeEquality implements
             return addComponent(extractor, new JavaComparable<>());
         }
 
-        public <V> Builder<T> addComponent(Function<T, V> extractor, Comparator<V> equality) {
-            ExtractorAndEquality<T, V, Equalizer<V>> eae = new ExtractorAndEquality<>(extractor, equality);
+        public <V> Builder<T> addComponent(Function<T, V> extractor, Comparator<V> comparator) {
+            ExtractorAndEquality<T, V, Equalizer<V>> eae = new ExtractorAndEquality<>(extractor, comparator);
             eaes.add(eae);
             return this;
         }
