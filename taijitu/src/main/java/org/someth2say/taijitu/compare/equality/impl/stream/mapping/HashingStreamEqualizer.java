@@ -43,41 +43,48 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
     }
 
     @Override
-    public List<Difference<?>> underlyingDiffs(Stream<T> source, Stream<T> target) {
+    public Stream<Difference<?>> underlyingDiffs(Stream<T> source, Stream<T> target) {
+        // TODO: Find a way to discriminate (config)?
         if (parallel)
             return matchParallel(source, target, hasher, equalizer);
         else
             return matchSequential(source, target, hasher, equalizer);
     }
 
-    private static <T> List<Difference<?>> matchSequential(Stream<T> source, Stream<T> target, Hasher<T> categorizer, Equalizer<T> equalizer) {
+    private static <T> Stream<Difference<?>> matchSequential(Stream<T> source, Stream<T> target, Hasher<T> categorizer, Equalizer<T> equalizer) {
 
         Map<IHashableWraper<T, ?>, OrdinalAndComposite<T>> sharedMap = getSharedMap();
         final int recordCount = 0;
         final TimeBiDiscarter<String, Object[]> timedLogger = new TimeBiDiscarter<>(1000, logger::debug);
 
         //TODO: This exploits a side effect of manipulating input (filling the map). Should find a different way.
-        List<Unequal<T>> diffs = StreamUtil
+        Stream<Unequal<T>> differences = StreamUtil
                 .zip(source.map(c -> new OrdinalAndComposite<>(0, c)),
                         target.map(c -> new OrdinalAndComposite<>(1, c)))
                 .map(sac -> TupleMapper.map(sac, timedLogger, recordCount, categorizer, sharedMap, equalizer))
-                .filter(Objects::nonNull).collect(Collectors.toList());
+                .filter(Objects::nonNull);
+        List<Unequal<T>> diffs = differences.collect(Collectors.toList());
 
         // 2.- When both mapping tasks are completed, remaining data are source/target
         // only
-        List<Missing<T>> miss = sharedMap.values().stream().map(sac -> categorizer.asMissing(sac.getComposite())).collect(Collectors.toList());
+        Stream<Missing<T>> missings = sharedMap.values().stream()
+                .map(sac -> categorizer.asMissing(sac.getComposite()));
+
+        List<Missing<T>> miss = missings.collect(Collectors.toList());
         List<Difference<?>> result = new ArrayList<>(diffs.size() + miss.size());
         result.addAll(diffs);
         result.addAll(miss);
-        return result;
+
+        //TODO: Make it actually a lazy stream
+        return result.stream();
     }
 
     private static <T> Map<IHashableWraper<T, ?>, OrdinalAndComposite<T>> getSharedMap() {
         return new ConcurrentHashMap<>();
     }
 
-    public static <T> List<Difference<?>> matchParallel(Stream<T> source, Stream<T> target,
-                                                        Hasher<T> categorizer, Equalizer<T> equalizer) {
+    public static <T> Stream<Difference<?>> matchParallel(Stream<T> source, Stream<T> target,
+                                                          Hasher<T> categorizer, Equalizer<T> equalizer) {
         // 1.- Build/run mapping tasks
         List<Difference<?>> result = Collections.synchronizedList(new ArrayList<>());
         Iterator<T> sourceIt = source.iterator();
@@ -98,7 +105,8 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         final Collection<OrdinalAndComposite<T>> entries = sharedMap.values();
         entries.stream().forEach(sc -> result.add(categorizer.asMissing(sc.getComposite())));
 
-        return result;
+        //TODO: Make it actually a lazy stream
+        return result.stream();
     }
 
     private static void shutdownAndAwaitTermination(ExecutorService pool) {

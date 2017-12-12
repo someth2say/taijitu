@@ -40,12 +40,12 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //            int[] sourceFieldToColumnsMap = ColumnDescriptionUtils.getFieldPositions(fields, comparisonResult.getSourceColumnDescriptions());
 //            int[] targetFieldToColumnsMap = ColumnDescriptionUtils.getFieldPositions(fields, comparisonResult.getTargetColumnDescriptions());
 //            // Contents
-//            for (Pair<Object[], Object[]> difference : different) {
+//            for (Pair<Object[], Object[]> differenceOrNull : different) {
 //
 //                final int sourceRowIdx = createRow(result, fieldCount, ++rowIdx, SOURCE_LABEL);
 //                final int targetRowIdx = createRow(result, fieldCount, ++rowIdx, TARGET_LABEL);
 //
-//                copyDifferencesAndKeys(difference, result[sourceRowIdx], result[targetRowIdx], sourceFieldToColumnsMap, targetFieldToColumnsMap, keyFieldsMap, compareFieldsMap);
+//                copyDifferencesAndKeys(differenceOrNull, result[sourceRowIdx], result[targetRowIdx], sourceFieldToColumnsMap, targetFieldToColumnsMap, keyFieldsMap, compareFieldsMap);
 //            }
 //        }
 //        return null;
@@ -65,9 +65,9 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //        return rowIdx;
 //    }
 //
-//    private void copyDifferencesAndKeys(Pair<Object[], Object[]> difference, String[] sourceRow, String[] targetRow, int[] sourceFieldToColumnsMap, int[] targetFieldToColumnsMap, boolean[] keyFieldsMap, boolean[] compareFieldsMap) {
-//        final Object[] sourceObjs = difference.getLeft();
-//        final Object[] targetObjs = difference.getRight();
+//    private void copyDifferencesAndKeys(Pair<Object[], Object[]> differenceOrNull, String[] sourceRow, String[] targetRow, int[] sourceFieldToColumnsMap, int[] targetFieldToColumnsMap, boolean[] keyFieldsMap, boolean[] compareFieldsMap) {
+//        final Object[] sourceObjs = differenceOrNull.getLeft();
+//        final Object[] targetObjs = differenceOrNull.getRight();
 //
 //        for (int fieldIdx = 0; fieldIdx < sourceObjs.length; fieldIdx++) {
 //            if (isKeyField(keyFieldsMap, fieldIdx) || (isCompareColumn(compareFieldsMap, fieldIdx) && isDifferent(sourceObjs, targetObjs, fieldIdx, sourceFieldToColumnsMap))) {
@@ -162,7 +162,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //
 //            final String targetOnlyFile = testName + ".target.only";
 //            final String sourceOnlyFile = testName + ".source.only";
-//            final String diffsFile = testName + ".difference";
+//            final String diffsFile = testName + ".differenceOrNull";
 //            try {
 //                writeResults(result, taijituData, targetOnlyFile, sourceOnlyFile, diffsFile, testName, outputFolder);
 //            } catch (CommandException e) {

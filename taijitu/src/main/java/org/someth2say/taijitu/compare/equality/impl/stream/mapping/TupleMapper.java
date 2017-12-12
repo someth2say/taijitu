@@ -4,8 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
-import org.someth2say.taijitu.compare.equality.aspects.internal.Hashable;
-import org.someth2say.taijitu.compare.equality.wrapper.AbstractWrapper;
 import org.someth2say.taijitu.compare.equality.wrapper.IHashableWraper;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Unequal;
@@ -74,9 +72,9 @@ class TupleMapper<T> implements Runnable {
     private static <T> Unequal<T> getUnequal(Equalizer<T> equalizer, OrdinalAndComposite<T> first, OrdinalAndComposite<T> second) {
         Unequal<T> unequal;
         if (first.getOrdinal() < second.getOrdinal()) {
-            unequal = equalizer.asDifference(first.getComposite(), second.getComposite());
+            unequal = equalizer.asUnequal(first.getComposite(), second.getComposite());
         } else {
-            unequal = equalizer.asDifference(second.getComposite(), first.getComposite());
+            unequal = equalizer.asUnequal(second.getComposite(), first.getComposite());
         }
         return unequal;
     }

@@ -3,9 +3,12 @@ package org.someth2say.taijitu.compare.equality.impl.composite;
 import org.junit.Test;
 import org.someth2say.taijitu.TestComposite;
 import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
+import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Unequal;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -20,8 +23,8 @@ public class CompositeEqualizerTest {
 
         assertFalse(testClassOneTwoEquality.equals(differentFrom1, differentFrom2));
         assertTrue(testClassOneTwoEquality.equals(differentFrom1, differentFrom3));
-        assertTrue(testClassOneTwoEquality.underlyingDiffs(differentFrom1, differentFrom2)
-                .containsAll(Arrays.asList(
+        List<Difference<?>> differences = testClassOneTwoEquality.underlyingDiffs(differentFrom1, differentFrom2).collect(Collectors.toList());
+        assertTrue(differences.containsAll(Arrays.asList(
                         new Unequal<>(new StringCaseInsensitive(), "aaa", "bbb"),
                         new Unequal<>(new StringCaseInsensitive(), "aaa", "ccc"))));
 

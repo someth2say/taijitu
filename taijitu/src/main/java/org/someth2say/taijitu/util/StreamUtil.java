@@ -103,7 +103,6 @@ public class StreamUtil {
         public C next() {
             boolean aOrB = aIterator.hasNext() && batchStep < 0;
             batchStep = ++batchStep < batchSize ? batchStep : -batchSize;
-            // aIterator.hasNext() && bIterator.hasNext() ? flag : aIterator.hasNext();
             return aOrB ? aIterator.next() : bIterator.next();
         }
     }
@@ -155,8 +154,17 @@ public class StreamUtil {
 
         @Override
         public C next() {
-            return aIterator.hasNext() && bIterator.hasNext() ? zipper.apply(aIterator.next(), bIterator.next())
-                    : aIterator.hasNext() ? aTailer.apply(aIterator.next()) : bTailer.apply(bIterator.next());
+            if (aIterator.hasNext() && bIterator.hasNext()) {
+                return zipper.apply(aIterator.next(), bIterator.next());
+            }
+            else {
+                if (aIterator.hasNext()) {
+                    return aTailer.apply(aIterator.next());
+                }
+                else {
+                    return bTailer.apply(bIterator.next());
+                }
+            }
         }
     }
 }

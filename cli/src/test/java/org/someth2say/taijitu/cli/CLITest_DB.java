@@ -109,7 +109,7 @@ public class CLITest_DB {
         System.out.println(secondResult);
         Assert.assertEquals(1, secondResult.size());
 
-        //TODO: Define exactly the expected difference!
+        //TODO: Define exactly the expected differenceOrNull!
 //        Collection<Pair<ComparisonResult.QueryAndTuple, ComparisonResult.QueryAndTuple>> different = secondResult.getDifferent();
 //        Pair<ComparisonResult.QueryAndTuple, ComparisonResult.QueryAndTuple> dif = different.iterator().next();
 //        dif.equals(new ImmutablePair<>(new ComparisonResult.QueryAndTuple(sourceCfg,sourceTuple), new ComparisonResult.QueryAndTuple(targetCfg,targetTuple)));
@@ -644,8 +644,8 @@ public class CLITest_DB {
 //        final SimpleComparisonResult secondResult = comparisonResults[1];
 //        assertEquals(SimpleComparisonResult.ComparisonResultStatus.SUCCESS, secondResult.getStatus());
 //
-//        assertTrue("Output csv file exists and can be deleted", (new File("test2.difference.csv")).delete());
-//        assertTrue("Output xls file exists and can be deleted", (new File("test2.difference.xls")).delete());
+//        assertTrue("Output csv file exists and can be deleted", (new File("test2.differenceOrNull.csv")).delete());
+//        assertTrue("Output xls file exists and can be deleted", (new File("test2.differenceOrNull.xls")).delete());
 //
 //    }
 

@@ -10,6 +10,7 @@ import org.someth2say.taijitu.compare.result.Missing;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
@@ -33,15 +34,15 @@ public class SimpleStreamEqualizerTest {
 
         SimpleStreamEqualizer<TestComposite> streamEquality
                 = new SimpleStreamEqualizer<>(testClassOneTwoEquality);
-        List<Difference<?>> differences = streamEquality.underlyingDiffs(stream1, stream2);
+        List<Difference<?>> differences = streamEquality.underlyingDiffs(stream1, stream2).collect(Collectors.toList());
 
         // Test results
         differences.forEach(System.out::println);
         assertEquals(2, differences.size());
         Missing<TestComposite> missing = new Missing<>(testClassOneTwoEquality, missingFrom1);
         assertTrue(differences.contains(missing));
-        List<Difference<?>> underlyingCauses = Collections.singletonList(new Unequal<>(new StringCaseInsensitive(), "aaa", "aa"));
-        assertTrue(differences.contains(new Unequal<>(testClassOneTwoEquality, differentFrom1, differentFrom2, underlyingCauses)));
+//        Stream<Difference<?>> underlyingCauses = Stream.of(new Unequal<>(new StringCaseInsensitive(), "aaa", "aa"));
+        assertTrue(differences.contains(new Unequal<>(testClassOneTwoEquality, differentFrom1, differentFrom2)));
     }
 
     @Test

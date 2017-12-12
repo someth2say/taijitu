@@ -17,13 +17,6 @@ public interface ICompositeEqualizer<T> extends IComposite, Equalizer<T> {
         return getExtractorsAndEqualities().stream().allMatch(eae -> valueEquals(first, second, eae));
     }
 
-    @Override
-    default List<Difference<?>> underlyingDiffs(T t1, T t2) {
-        Stream<Difference<?>> mismatchStream1 = getExtractorsAndEqualities().stream().map(eae -> difference(t1, t2, eae));
-        Stream<Difference<?>> mismatchStream = mismatchStream1.filter(Objects::nonNull);
-        return mismatchStream.collect(Collectors.toList());
-    }
-
     default <V> boolean valueEquals(T first, T second, ExtractorAndEquality<T, V, ?> eae) {
         Function<T, V> extractors = eae.getExtractor();
         Equalizer<V> equalizer = eae.getEquality();
@@ -34,7 +27,13 @@ public interface ICompositeEqualizer<T> extends IComposite, Equalizer<T> {
         return equals;
     }
 
-    default <V> Difference<V> difference(T first, T second, ExtractorAndEquality<T, V, ?> eae) {
+    @Override
+    default Stream<Difference<?>> underlyingDiffs(T t1, T t2) {
+        List<Difference<?>> differenceStream = getExtractorsAndEqualities().stream().<Difference<?>>map(eae -> differenceOrNull(t1, t2, eae)).filter(Objects::nonNull).collect(Collectors.toList());
+        return differenceStream.isEmpty() ? null : differenceStream.stream();
+    }
+
+    default <V> Difference<V> differenceOrNull(T first, T second, ExtractorAndEquality<T, V, ?> eae) {
         Function<T, V> extractors = eae.getExtractor();
         Equalizer<V> equalizer = eae.getEquality();
         V firstValue = extractors.apply(first);

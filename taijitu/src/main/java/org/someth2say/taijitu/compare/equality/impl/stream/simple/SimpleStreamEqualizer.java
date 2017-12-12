@@ -7,9 +7,7 @@ import org.someth2say.taijitu.compare.result.Unequal;
 import org.someth2say.taijitu.compare.result.Missing;
 import org.someth2say.taijitu.util.StreamUtil;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -25,19 +23,15 @@ public class SimpleStreamEqualizer<T> implements StreamEqualizer<T> {
     }
 
     @Override
-    public List<Difference<?>> underlyingDiffs(Stream<T> source, Stream<T> target) {
-        return compare(source, target, equalizer);
-    }
-
-    public List<Difference<?>> compare(Stream<T> source, Stream<T> target, Equalizer<T> equalizer) {
+    public Stream<Difference<?>> underlyingDiffs(Stream<T> source, Stream<T> target) {
         return StreamUtil.biMapTail(source, target,
                 (t, t2) -> differenceOrNull(equalizer, t, t2),
-                t -> new Missing<>(equalizer, t)).filter(Objects::nonNull).collect(Collectors.toList());
+                t -> new Missing<>(equalizer, t)).filter(Objects::nonNull);
     }
 
-    private static <T> Unequal<T> differenceOrNull(Equalizer<T> equalizer, T sourceRecord, T targetRecord) {
-        List<Difference<?>> differences = equalizer.underlyingDiffs(sourceRecord, targetRecord);
-        if (differences != null && !differences.isEmpty()) {
+    private static <T> Unequal<?> differenceOrNull(Equalizer<T> equalizer, T sourceRecord, T targetRecord) {
+        Stream<Difference<?>> differences = equalizer.underlyingDiffs(sourceRecord, targetRecord);
+        if (differences != null) {
             return new Unequal<>(equalizer, sourceRecord, targetRecord, differences);
         }
         return null;

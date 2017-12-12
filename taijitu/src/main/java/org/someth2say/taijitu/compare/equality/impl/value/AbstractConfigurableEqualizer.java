@@ -5,8 +5,8 @@ import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Unequal;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public abstract class AbstractConfigurableEqualizer<T> implements Equalizer<T> {
 
@@ -26,8 +26,9 @@ public abstract class AbstractConfigurableEqualizer<T> implements Equalizer<T> {
     }
 
     @Override
-    public List<Difference<?>> underlyingDiffs(T t1, T t2) {
-        return this.equals(t1, t2) ? Collections.emptyList() : Collections.singletonList(new Unequal<>(this, t1, t2));
+    public Stream<Difference<?>> underlyingDiffs(T t1, T t2) {
+        //Warning: cyclic dependency (unless equals is overwritten in subclasses)
+        return equals(t1, t2) ? null : Stream.of(new Unequal<>(this, t1, t2));
     }
 
     @Override
