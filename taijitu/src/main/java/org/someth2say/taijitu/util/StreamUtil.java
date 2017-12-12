@@ -1,9 +1,6 @@
 package org.someth2say.taijitu.util;
 
-import java.util.Iterator;
-import java.util.Objects;
-import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -32,6 +29,56 @@ public class StreamUtil {
 
     }
 
+    public static <A, B, C> Stream<C> biMap(Stream<? extends A> a, Stream<? extends B> b,
+                                            BiFunction<? super A, ? super B, ? extends C> biFunction) {
+        Objects.requireNonNull(biFunction);
+        Spliterator<? extends A> aSpliterator = Objects.requireNonNull(a).spliterator();
+        Spliterator<? extends B> bSpliterator = Objects.requireNonNull(b).spliterator();
+
+        Iterator<A> aIterator = Spliterators.iterator(aSpliterator);
+        Iterator<B> bIterator = Spliterators.iterator(bSpliterator);
+        Iterator<C> cIterator = new BiMapIterator<>(aIterator, bIterator, biFunction);
+        return getStreamFromIterator(a, b, aSpliterator, bSpliterator, cIterator, Math::min);
+
+    }
+
+    public static <A, C> Stream<C> biMapTail(Stream<? extends A> a, Stream<? extends A> b,
+                                             BiFunction<? super A, ? super A, ? extends C> biFunction, Function<? super A, ? extends C> tailer) {
+        return biMapTail(a, b, biFunction, tailer, tailer);
+    }
+
+    public static <A, B, C> Stream<C> biMapTail(Stream<? extends A> a, Stream<? extends B> b,
+                                                BiFunction<? super A, ? super B, ? extends C> biFunction, Function<? super A, ? extends C> aTailer,
+                                                Function<? super B, ? extends C> bTailer) {
+        Objects.requireNonNull(biFunction);
+        Objects.requireNonNull(aTailer);
+        Objects.requireNonNull(bTailer);
+
+        Spliterator<? extends A> aSpliterator = Objects.requireNonNull(a).spliterator();
+        Spliterator<? extends B> bSpliterator = Objects.requireNonNull(b).spliterator();
+
+        Iterator<A> aIterator = Spliterators.iterator(aSpliterator);
+        Iterator<B> bIterator = Spliterators.iterator(bSpliterator);
+        Iterator<C> cIterator = new BiMapTailIterator<>(aIterator, bIterator, biFunction, aTailer, bTailer);
+        return getStreamFromIterator(a, b, aSpliterator, bSpliterator, cIterator, Math::max);
+    }
+
+    public static <A, B, C> Stream<C> steppingBiMapTail(Stream<? extends A> a, Stream<? extends B> b,
+                                                        BiFunction<? super A, ? super B, ? extends C> biFunction, BiFunction<? super A, ? super B, Integer> biComparator, Function<? super A, ? extends C> aTailer,
+                                                        Function<? super B, ? extends C> bTailer) {
+        Objects.requireNonNull(biFunction);
+        Objects.requireNonNull(aTailer);
+        Objects.requireNonNull(bTailer);
+
+        Spliterator<? extends A> aSpliterator = Objects.requireNonNull(a).spliterator();
+        Spliterator<? extends B> bSpliterator = Objects.requireNonNull(b).spliterator();
+
+        Iterator<A> aIterator = Spliterators.iterator(aSpliterator);
+        Iterator<B> bIterator = Spliterators.iterator(bSpliterator);
+        Iterator<C> cIterator = new SteppingBiMapTailIterator<>(aIterator, bIterator, biFunction, biComparator, aTailer, bTailer);
+        return getStreamFromIterator(a, b, aSpliterator, bSpliterator, cIterator, Math::max);
+    }
+
     private static <C, A, B> Stream<C> getStreamFromIterator(Stream<? extends A> a, Stream<? extends B> b,
                                                              Spliterator<? extends A> aSpliterator, Spliterator<? extends B> bSpliterator, Iterator<C> zipIterator,
                                                              BinaryOperator<Long> sizeOperator) {
@@ -47,39 +94,6 @@ public class StreamUtil {
         return StreamSupport.stream(split, a.isParallel() || b.isParallel());
     }
 
-    public static <A, B, C> Stream<C> biMap(Stream<? extends A> a, Stream<? extends B> b,
-                                            BiFunction<? super A, ? super B, ? extends C> zipper) {
-        Objects.requireNonNull(zipper);
-        Spliterator<? extends A> aSpliterator = Objects.requireNonNull(a).spliterator();
-        Spliterator<? extends B> bSpliterator = Objects.requireNonNull(b).spliterator();
-
-        Iterator<A> aIterator = Spliterators.iterator(aSpliterator);
-        Iterator<B> bIterator = Spliterators.iterator(bSpliterator);
-        Iterator<C> cIterator = new BiMapIterator<>(aIterator, bIterator, zipper);
-        return getStreamFromIterator(a, b, aSpliterator, bSpliterator, cIterator, Math::min);
-
-    }
-
-    public static <A, C> Stream<C> biMapTail(Stream<? extends A> a, Stream<? extends A> b,
-                                             BiFunction<? super A, ? super A, ? extends C> zipper, Function<? super A, ? extends C> tailer) {
-        return biMapTail(a, b, zipper, tailer, tailer);
-    }
-
-    public static <A, B, C> Stream<C> biMapTail(Stream<? extends A> a, Stream<? extends B> b,
-                                                BiFunction<? super A, ? super B, ? extends C> zipper, Function<? super A, ? extends C> aTailer,
-                                                Function<? super B, ? extends C> bTailer) {
-        Objects.requireNonNull(zipper);
-        Objects.requireNonNull(aTailer);
-        Objects.requireNonNull(bTailer);
-
-        Spliterator<? extends A> aSpliterator = Objects.requireNonNull(a).spliterator();
-        Spliterator<? extends B> bSpliterator = Objects.requireNonNull(b).spliterator();
-
-        Iterator<A> aIterator = Spliterators.iterator(aSpliterator);
-        Iterator<B> bIterator = Spliterators.iterator(bSpliterator);
-        Iterator<C> cIterator = new BiMapTailIterator<>(aIterator, bIterator, zipper, aTailer, bTailer);
-        return getStreamFromIterator(a, b, aSpliterator, bSpliterator, cIterator, Math::max);
-    }
 
     public static class ZipIterator<C, A extends C, B extends C> implements Iterator<C> {
         private final Iterator<A> aIterator;
@@ -110,13 +124,13 @@ public class StreamUtil {
     public static class BiMapIterator<C, A, B> implements Iterator<C> {
         private final Iterator<A> aIterator;
         private final Iterator<B> bIterator;
-        private final BiFunction<? super A, ? super B, ? extends C> zipper;
+        private final BiFunction<? super A, ? super B, ? extends C> biFunction;
 
         public BiMapIterator(Iterator<A> aIterator, Iterator<B> bIterator,
-                             BiFunction<? super A, ? super B, ? extends C> zipper) {
+                             BiFunction<? super A, ? super B, ? extends C> biFunction) {
             this.aIterator = aIterator;
             this.bIterator = bIterator;
-            this.zipper = zipper;
+            this.biFunction = biFunction;
         }
 
         @Override
@@ -126,23 +140,23 @@ public class StreamUtil {
 
         @Override
         public C next() {
-            return zipper.apply(aIterator.next(), bIterator.next());
+            return biFunction.apply(aIterator.next(), bIterator.next());
         }
     }
 
     public static class BiMapTailIterator<C, A, B> implements Iterator<C> {
         private final Iterator<A> aIterator;
         private final Iterator<B> bIterator;
-        private final BiFunction<? super A, ? super B, ? extends C> zipper;
+        private final BiFunction<? super A, ? super B, ? extends C> biFunction;
         private final Function<? super A, ? extends C> aTailer;
         private final Function<? super B, ? extends C> bTailer;
 
         public BiMapTailIterator(Iterator<A> aIterator, Iterator<B> bIterator,
-                                 BiFunction<? super A, ? super B, ? extends C> zipper, Function<? super A, ? extends C> aTailer,
+                                 BiFunction<? super A, ? super B, ? extends C> biFunction, Function<? super A, ? extends C> aTailer,
                                  Function<? super B, ? extends C> bTailer) {
             this.aIterator = aIterator;
             this.bIterator = bIterator;
-            this.zipper = zipper;
+            this.biFunction = biFunction;
             this.aTailer = aTailer;
             this.bTailer = bTailer;
         }
@@ -155,16 +169,102 @@ public class StreamUtil {
         @Override
         public C next() {
             if (aIterator.hasNext() && bIterator.hasNext()) {
-                return zipper.apply(aIterator.next(), bIterator.next());
-            }
-            else {
+                return biFunction.apply(aIterator.next(), bIterator.next());
+            } else {
                 if (aIterator.hasNext()) {
                     return aTailer.apply(aIterator.next());
-                }
-                else {
+                } else {
                     return bTailer.apply(bIterator.next());
                 }
             }
         }
     }
+
+    public static class SteppingBiMapTailIterator<C, A, B> implements Iterator<C> {
+        private final Iterator<A> aIterator;
+        private final Iterator<B> bIterator;
+        private final BiFunction<? super A, ? super B, ? extends C> biFunction;
+        private final BiFunction<? super A, ? super B, Integer> biComparator;
+        private final Function<? super A, ? extends C> aTailer;
+        private final Function<? super B, ? extends C> bTailer;
+        private A currentA;
+        private B currentB;
+        private boolean initializedA = false;
+        private boolean initializedB = false;
+
+        public SteppingBiMapTailIterator(Iterator<A> aIterator, Iterator<B> bIterator,
+                                         BiFunction<? super A, ? super B, ? extends C> biFunction,
+                                         BiFunction<? super A, ? super B, Integer> biComparator,
+                                         Function<? super A, ? extends C> aTailer,
+                                         Function<? super B, ? extends C> bTailer) {
+            this.aIterator = aIterator;
+            this.bIterator = bIterator;
+            this.biFunction = biFunction;
+            this.biComparator = biComparator;
+            this.aTailer = aTailer;
+            this.bTailer = bTailer;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return canStepA() && shouldStepA() || canStepB() && shouldStepB();
+        }
+
+        public boolean canStepB() {
+            return bIterator.hasNext();
+        }
+
+        public boolean canStepA() {
+            return aIterator.hasNext();
+        }
+
+        public boolean shouldStepB() {
+            return !initializedB || biComparator.apply(currentA, currentB) >= 0;
+        }
+
+        public boolean shouldStepA() {
+            return !initializedA || biComparator.apply(currentA, currentB) <= 0;
+        }
+
+        @Override
+        public C next() {
+            if (canStepA() && canStepB()) {
+                return step(shouldStepA(), shouldStepB());
+            } else if (canStepA() && !canStepB()) {
+                return tailA();
+            } else if (!canStepA() && canStepB()) {
+                return tailB();
+            }
+
+            // This should never happen (protected by hasNext)
+            return null;
+        }
+
+        private C step(boolean a, boolean b) {
+            if (a) getNextA();
+            if (b) getNextB();
+            return biFunction.apply(currentA, currentB);
+        }
+
+        private B getNextB() {
+            currentB = bIterator.next();
+            initializedB = true;
+            return currentB;
+        }
+
+        private A getNextA() {
+            currentA = aIterator.next();
+            initializedB = true;
+            return currentA;
+        }
+
+        private C tailA() {
+            return aTailer.apply(getNextA());
+        }
+
+        private C tailB() {
+            return bTailer.apply(getNextB());
+        }
+    }
 }
+
