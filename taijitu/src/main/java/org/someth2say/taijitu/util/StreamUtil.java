@@ -189,8 +189,8 @@ public class StreamUtil {
         private final Function<? super B, ? extends C> bTailer;
         private A currentA;
         private B currentB;
-        private boolean initializedA = false;
-        private boolean initializedB = false;
+        private boolean haveA = false;
+        private boolean haveB = false;
 
         public SteppingBiMapTailIterator(Iterator<A> aIterator, Iterator<B> bIterator,
                                          BiFunction<? super A, ? super B, ? extends C> biFunction,
@@ -203,67 +203,66 @@ public class StreamUtil {
             this.biComparator = biComparator;
             this.aTailer = aTailer;
             this.bTailer = bTailer;
+            init();
         }
 
         @Override
         public boolean hasNext() {
-            return canStepA() && shouldStepA() || canStepB() && shouldStepB();
+            return (shouldUseA() || shouldUseB());
         }
 
-        public boolean canStepB() {
-            return bIterator.hasNext();
+        public boolean shouldUseB() {
+            return (haveA && haveB &&biComparator.apply(currentA, currentB) >= 0) || (!haveA && haveB);
         }
 
-        public boolean canStepA() {
-            return aIterator.hasNext();
-        }
-
-        public boolean shouldStepB() {
-            return !initializedB || biComparator.apply(currentA, currentB) >= 0;
-        }
-
-        public boolean shouldStepA() {
-            return !initializedA || biComparator.apply(currentA, currentB) <= 0;
+        public boolean shouldUseA() {
+            return (haveA && haveB && biComparator.apply(currentA, currentB) <= 0) || (haveA && !haveB);
         }
 
         @Override
         public C next() {
-            if (canStepA() && canStepB()) {
-                return step(shouldStepA(), shouldStepB());
-            } else if (canStepA() && !canStepB()) {
-                return tailA();
-            } else if (!canStepA() && canStepB()) {
-                return tailB();
+            // 1.- Fetch next values, **based on biComparator**
+
+            C result;
+            if (shouldUseA() && shouldUseB()) {
+                result = biFunction.apply(currentA, currentB);
+                haveA = stepA();
+                haveB = stepB();
+            } else if (shouldUseA()) {
+                result = aTailer.apply(currentA);
+                haveA = stepA();
+            } else if (shouldUseB()) {
+                result = bTailer.apply(currentB);
+                haveB = stepB();
+            } else {
+                //Should never happen (protected by hasNext);
+                result = null;
             }
+            return result;
 
-            // This should never happen (protected by hasNext)
-            return null;
         }
 
-        private C step(boolean a, boolean b) {
-            if (a) getNextA();
-            if (b) getNextB();
-            return biFunction.apply(currentA, currentB);
+        public void init() {
+            haveA = stepA();
+            haveB = stepB();
         }
 
-        private B getNextB() {
-            currentB = bIterator.next();
-            initializedB = true;
-            return currentB;
+        public boolean stepA() {
+            if (aIterator.hasNext()) {
+                currentA = aIterator.next();
+                return true;
+            } else {
+                return false;
+            }
         }
 
-        private A getNextA() {
-            currentA = aIterator.next();
-            initializedB = true;
-            return currentA;
-        }
-
-        private C tailA() {
-            return aTailer.apply(getNextA());
-        }
-
-        private C tailB() {
-            return bTailer.apply(getNextB());
+        private boolean stepB() {
+            if (bIterator.hasNext()) {
+                currentB = bIterator.next();
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 }
