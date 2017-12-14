@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.util;
+package org.someth2say.taijitu.cli.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;

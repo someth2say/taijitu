@@ -14,7 +14,7 @@ import org.someth2say.taijitu.cli.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.cli.config.interfaces.ITaijituCfg;
 import org.someth2say.taijitu.cli.plugins.TaijituPlugin;
 import org.someth2say.taijitu.cli.source.query.ConnectionManager;
-import org.someth2say.taijitu.util.FileUtil;
+import org.someth2say.taijitu.cli.util.FileUtil;
 
 import java.util.ArrayList;
 import java.util.List;

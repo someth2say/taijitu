@@ -1,14 +1,12 @@
-package org.someth2say.taijitu.stream;
+package org.someth2say.taijitu.compare.equality.impl.stream;
 
 import org.junit.Test;
 import org.someth2say.taijitu.TestComposite;
 import org.someth2say.taijitu.compare.equality.impl.stream.sorted.ComparableStreamEqualizer;
-import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
 import org.someth2say.taijitu.compare.result.Unequal;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Missing;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

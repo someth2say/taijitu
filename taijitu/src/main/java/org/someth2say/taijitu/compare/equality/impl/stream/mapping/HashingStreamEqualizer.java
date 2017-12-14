@@ -54,14 +54,12 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
     private static <T> Stream<Difference<?>> matchSequential(Stream<T> source, Stream<T> target, Hasher<T> categorizer, Equalizer<T> equalizer) {
 
         Map<IHashableWraper<T, ?>, OrdinalAndComposite<T>> sharedMap = getSharedMap();
-        final int recordCount = 0;
-        final TimeBiDiscarter<String, Object[]> timedLogger = new TimeBiDiscarter<>(1000, logger::debug);
 
         //TODO: This exploits a side effect of manipulating input (filling the map). Should find a different way.
         Stream<Unequal<T>> differences = StreamUtil
                 .zip(source.map(c -> new OrdinalAndComposite<>(0, c)),
                         target.map(c -> new OrdinalAndComposite<>(1, c)))
-                .map(sac -> TupleMapper.map(sac, timedLogger, recordCount, categorizer, sharedMap, equalizer))
+                .map(sac -> Mapper.map(sac, categorizer, sharedMap, equalizer))
                 .filter(Objects::nonNull);
         List<Unequal<T>> diffs = differences.collect(Collectors.toList());
 
@@ -92,8 +90,8 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
 
         final ExecutorService executorService = Executors.newFixedThreadPool(2);
         Map<IHashableWraper<T, ?>, OrdinalAndComposite<T>> sharedMap = getSharedMap();
-        Runnable sourceMapper = new TupleMapper<>(sourceIt, sharedMap, result, 0, categorizer, equalizer);
-        Runnable targetMapper = new TupleMapper<>(targetIt, sharedMap, result, 1, categorizer, equalizer);
+        Runnable sourceMapper = new Mapper<>(sourceIt, sharedMap, result, 0, categorizer, equalizer);
+        Runnable targetMapper = new Mapper<>(targetIt, sharedMap, result, 1, categorizer, equalizer);
 
         executorService.submit(sourceMapper);// Map source
         executorService.submit(targetMapper);// Map target
