@@ -6,13 +6,13 @@ import org.someth2say.taijitu.compare.equality.wrapper.IComparableHashableWrappe
 import static org.junit.Assert.*;
 
 public class NumberThresholdTest {
-    NumberThreshold<Number> instance = new NumberThreshold<>();
-    private Number one = 1.000;
-    private Number oneOOtwo = 1.002;
-    private Number two = 2.000;
-    private IComparableHashableWrapper<Number, ?> oneWrap = instance.wrap(one);
-    private IComparableHashableWrapper<Number, ?> oneOOTwoWrap = instance.wrap(oneOOtwo);
-    private IComparableHashableWrapper<Number, ?> twoWrap = instance.wrap(two);
+    final NumberThreshold<Number> instance = new NumberThreshold<>();
+    private final Number one = 1.000;
+    private final Number oneOOtwo = 1.002;
+    private final Number two = 2.000;
+    private final IComparableHashableWrapper<Number, ?> oneWrap = instance.wrap(one);
+    private final IComparableHashableWrapper<Number, ?> oneOOTwoWrap = instance.wrap(oneOOtwo);
+    private final IComparableHashableWrapper<Number, ?> twoWrap = instance.wrap(two);
 
 
     @Test

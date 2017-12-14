@@ -1,7 +1,5 @@
 package org.someth2say.taijitu.compare.equality.impl.stream.sorted;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.aspects.external.Comparator;
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
@@ -16,7 +14,6 @@ import java.util.stream.Stream;
  */
 public class ComparableStreamEqualizer<T> implements StreamEqualizer<T> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ComparableStreamEqualizer.class);
     private final Equalizer<T> equalizer;
     private final Comparator<T> categorizer;
 

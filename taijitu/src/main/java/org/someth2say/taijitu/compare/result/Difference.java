@@ -2,12 +2,10 @@ package org.someth2say.taijitu.compare.result;
 
 import org.apache.commons.lang.StringUtils;
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
-import org.someth2say.taijitu.util.StreamUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public abstract class Difference<MMT> {
     private final Equalizer<MMT> cause;

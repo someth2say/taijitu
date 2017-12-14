@@ -1,18 +1,16 @@
 package org.someth2say.taijitu.compare.equality.impl.value;
 
 import org.junit.Test;
-import org.someth2say.taijitu.compare.equality.aspects.internal.ComparableHashable;
-import org.someth2say.taijitu.compare.equality.wrapper.AbstractWrapper;
 import org.someth2say.taijitu.compare.equality.wrapper.IComparableHashableWrapper;
 
 import static org.junit.Assert.*;
 
 public class StringCaseInsensitiveTest {
 
-    StringCaseInsensitive instance = new StringCaseInsensitive();
-    IComparableHashableWrapper<String, ?> aaa = instance.wrap("aaa");
-    IComparableHashableWrapper<String, ?> aAA = instance.wrap("aAA");
-    IComparableHashableWrapper<String, ?> aa = instance.wrap("aa");
+    final StringCaseInsensitive instance = new StringCaseInsensitive();
+    final IComparableHashableWrapper<String, ?> aaa = instance.wrap("aaa");
+    final IComparableHashableWrapper<String, ?> aAA = instance.wrap("aAA");
+    final IComparableHashableWrapper<String, ?> aa = instance.wrap("aa");
 
     @Test
     public void hashCodeTest() {

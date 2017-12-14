@@ -1,7 +1,6 @@
 package org.someth2say.taijitu.compare.equality.wrapper;
 
 import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasher;
-import org.someth2say.taijitu.compare.equality.aspects.internal.ComparableHashable;
 
 public class ComparableHashableWrapper<T, EQ extends ComparatorHasher<T>>
         extends EqualizableWrapper<T, EQ>

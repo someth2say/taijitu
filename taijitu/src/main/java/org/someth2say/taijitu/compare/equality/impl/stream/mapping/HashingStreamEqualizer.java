@@ -12,10 +12,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
@@ -23,7 +22,6 @@ import org.someth2say.taijitu.compare.equality.wrapper.IHashableWraper;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Unequal;
 import org.someth2say.taijitu.compare.result.Missing;
-import org.someth2say.taijitu.discarter.TimeBiDiscarter;
 import org.someth2say.taijitu.util.StreamUtil;
 
 /**
@@ -31,7 +29,6 @@ import org.someth2say.taijitu.util.StreamUtil;
  */
 public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
 
-    private static final Logger logger = LoggerFactory.getLogger(HashingStreamEqualizer.class);
     final private Equalizer<T> equalizer;
     final private Hasher<T> hasher;
 
@@ -44,7 +41,6 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
 
     @Override
     public Stream<Difference<?>> underlyingDiffs(Stream<T> source, Stream<T> target) {
-        // TODO: Find a way to discriminate (config)?
         if (parallel)
             return matchParallel(source, target, hasher, equalizer);
         else
@@ -58,7 +54,7 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         //TODO: This exploits a side effect of manipulating input (filling the map). Should find a different way.
         Stream<Unequal<T>> differences = StreamUtil
                 .zip(source.map(c -> new OrdinalAndComposite<>(0, c)),
-                        target.map(c -> new OrdinalAndComposite<>(1, c)))
+                        target.map(c -> new OrdinalAndComposite<>(1, c)), true)
                 .map(sac -> Mapper.map(sac, categorizer, sharedMap, equalizer))
                 .filter(Objects::nonNull);
         List<Unequal<T>> diffs = differences.collect(Collectors.toList());
@@ -82,16 +78,33 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
     }
 
     public static <T> Stream<Difference<?>> matchParallel(Stream<T> source, Stream<T> target,
-                                                          Hasher<T> categorizer, Equalizer<T> equalizer) {
-        // 1.- Build/run mapping tasks
+                                                          Hasher<T> hasher, Equalizer<T> equalizer) {
+        Map<IHashableWraper<T, ?>, OrdinalAndComposite<T>> sharedMap = getSharedMap();
+
+//        return newWay(source, target, hasher, equalizer, sharedMap);
+
+        return oldWay(source, target, hasher, equalizer, sharedMap);
+
+    }
+
+    public static <T> Stream<Difference<?>> newWay(Stream<T> source, Stream<T> target, Hasher<T> hasher, Equalizer<T> equalizer, Map<IHashableWraper<T, ?>, OrdinalAndComposite<T>> sharedMap) {
+        Stream<Unequal<T>> unequals = StreamUtil.zip(source.map(t -> new OrdinalAndComposite<>(1, t)), target.map(t -> new OrdinalAndComposite<>(2, t)), 1, true)
+                .map(oac -> Mapper.map(oac, hasher, sharedMap, equalizer)).filter(Objects::nonNull);
+
+        Stream<Missing<T>> missing = sharedMap.values().stream().map(oac -> hasher.asMissing(oac.getComposite()));
+
+        return Stream.concat(unequals, missing);
+    }
+
+    public static <T> Stream<Difference<?>> oldWay(Stream<T> source, Stream<T> target, Hasher<T> hasher, Equalizer<T> equalizer, Map<IHashableWraper<T, ?>, OrdinalAndComposite<T>> sharedMap) {
         List<Difference<?>> result = Collections.synchronizedList(new ArrayList<>());
+        // 1.- Build/run mapping tasks
         Iterator<T> sourceIt = source.iterator();
         Iterator<T> targetIt = target.iterator();
 
         final ExecutorService executorService = Executors.newFixedThreadPool(2);
-        Map<IHashableWraper<T, ?>, OrdinalAndComposite<T>> sharedMap = getSharedMap();
-        Runnable sourceMapper = new Mapper<>(sourceIt, sharedMap, result, 0, categorizer, equalizer);
-        Runnable targetMapper = new Mapper<>(targetIt, sharedMap, result, 1, categorizer, equalizer);
+        Runnable sourceMapper = new Mapper<>(sourceIt, sharedMap, result, 0, hasher, equalizer);
+        Runnable targetMapper = new Mapper<>(targetIt, sharedMap, result, 1, hasher, equalizer);
 
         executorService.submit(sourceMapper);// Map source
         executorService.submit(targetMapper);// Map target
@@ -101,7 +114,7 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
 // 2.- When both mapping tasks are completed, remaining data are source/target
 // only
         final Collection<OrdinalAndComposite<T>> entries = sharedMap.values();
-        entries.stream().forEach(sc -> result.add(categorizer.asMissing(sc.getComposite())));
+        entries.stream().forEach(sc -> result.add(hasher.asMissing(sc.getComposite())));
 
         //TODO: Make it actually a lazy stream
         return result.stream();
@@ -112,7 +125,7 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         try {
             // Wait a while for existing tasks to terminate
             while (!pool.awaitTermination(60, TimeUnit.SECONDS)) {
-                logger.info("Waiting for mapping stream to complete.");
+                pool.shutdownNow();
             }
         } catch (InterruptedException ie) {
             // (Re-)Cancel if current thread also interrupted

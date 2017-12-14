@@ -3,7 +3,6 @@ package org.someth2say.taijitu.discarter;
 import org.junit.Test;
 
 import java.util.stream.IntStream;
-import java.util.stream.StreamSupport;
 
 import static org.junit.Assert.*;
 

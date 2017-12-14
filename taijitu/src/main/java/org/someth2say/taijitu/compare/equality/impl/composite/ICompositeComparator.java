@@ -23,8 +23,6 @@ public interface ICompositeComparator<T> extends ICompositeEqualizer<T>, Compara
         ComparatorHasher<V> equality = eae.getEquality();
         V firstValue = extractor.apply(first);
         V secondValue = extractor.apply(second);
-        int compare = equality.compare(firstValue, secondValue);
-        getLogger().trace("{}<={}=>{} ({}({}))", firstValue, compare, secondValue, equality.getClass().getSimpleName(), firstValue.getClass().getName());
-        return compare;
+        return equality.compare(firstValue, secondValue);
     }
 }

@@ -16,50 +16,53 @@ public class StreamUtil {
     /**
      * `zip` method, with `batchSize` defaulted to `1`
      *
-     * @param a
-     * @param b
      * @param <C>
      * @param <A>
      * @param <B>
+     * @param a
+     * @param b
+     * @param keepTail
      * @return
      */
-    public static <C, A extends C, B extends C> Stream<C> zip(Stream<? extends A> a, Stream<? extends B> b) {
-        return zip(a, b, 1);
+    public static <C, A extends C, B extends C> Stream<C> zip(Stream<? extends A> a, Stream<? extends B> b, boolean keepTail) {
+        return zip(a, b, 1, keepTail);
     }
 
     /**
      * Given two streams, produces a new stream that contains alternatively elements from first and second streams.
      * That is, given a `batchSize` of N, the resulting stream will produce, in order, first N elements from first stream.
      * Then, first N elements from second stream, then, following N elements from fists stream, and so on until ANY stream is deplete.
-     * <pre>
+     * Finally, the remaining elements for the other stream will be provided or not based on 'keepTail' parameter.
+     *  <pre>
      *     Stream<String> s1 = Stream.of("a", "b", "c");
      *     Stream<String> s2 = Stream.of("1", "2", "3", "4");
      *     Stream<String> zip = zip(s1, s2, 2);
      *     assertEquals(Arrays.asList("a", "b", "1", "2", "c"), zip.collect(Collectors.toList()));
      * </pre>
      *
-     * @param first
-     * @param second
-     * @param batchSize
      * @param <C>
      * @param <A>
      * @param <B>
+     * @param first
+     * @param second
+     * @param batchSize
+     * @param keepTail
      * @return
      */
-    public static <C, A extends C, B extends C> Stream<C> zip(Stream<? extends A> first, Stream<? extends B> second, int batchSize) {
+    public static <C, A extends C, B extends C> Stream<C> zip(Stream<? extends A> first, Stream<? extends B> second, int batchSize, boolean keepTail) {
         Spliterator<? extends A> aSpliterator = Objects.requireNonNull(first).spliterator();
         Spliterator<? extends B> bSpliterator = Objects.requireNonNull(second).spliterator();
 
         Iterator<A> aIterator = Spliterators.iterator(aSpliterator);
         Iterator<B> bIterator = Spliterators.iterator(bSpliterator);
 
-        Iterator<C> zipIterator = new ZipIterator<>(aIterator, bIterator, batchSize);
+        Iterator<C> zipIterator = new ZipIterator<>(aIterator, bIterator, batchSize, keepTail);
         boolean parallel = first.isParallel() || second.isParallel();
         int lostCharacteristics = Spliterator.DISTINCT | Spliterator.SORTED | Spliterator.SIZED;
         BinaryOperator<Long> sizeOperator = null;
         // SIZE characteristic is only retained both streams are sized,
         if (aSpliterator.hasCharacteristics(Spliterator.SIZED) && bSpliterator.hasCharacteristics(Spliterator.SIZED)) { // A
-        // Result stream size will be the common batchSize for both streams, and up to one more if available in first stream.
+            // Result stream size will be the common batchSize for both streams, and up to one more if available in first stream.
             lostCharacteristics = Spliterator.DISTINCT | Spliterator.SORTED;
             sizeOperator = (aSize, bSize) -> Math.min(aSize % batchSize, bSize % batchSize) + aSize > bSize ? Math.min(aSize - bSize, batchSize) : 0;
         }
@@ -243,24 +246,26 @@ public class StreamUtil {
         private final Iterator<A> aIterator;
         private final Iterator<B> bIterator;
         private final int batchSize;
-        int batchStep;
+        private int batchStep;
+        private final boolean keepTail;
 
-        public ZipIterator(Iterator<A> aIterator, Iterator<B> bIterator, int batchSize) {
+        public ZipIterator(Iterator<A> aIterator, Iterator<B> bIterator, int batchSize, boolean keepTail) {
             this.aIterator = aIterator;
             this.bIterator = bIterator;
             this.batchSize = batchSize;
             batchStep = -batchSize;
+            this.keepTail = keepTail;
         }
 
         @Override
         public boolean hasNext() {
-            return aIterator.hasNext() && batchStep < 0
-                    || bIterator.hasNext() && batchStep >= 0;
+            return (keepTail && (aIterator.hasNext() || bIterator.hasNext())) ||
+                    (!keepTail && (aIterator.hasNext() && batchStep < 0 || bIterator.hasNext() && batchStep >= 0));
         }
 
         @Override
         public C next() {
-            boolean aOrB = aIterator.hasNext() && batchStep < 0;
+            boolean aOrB = (aIterator.hasNext() && batchStep < 0) || (batchStep > 0 && !bIterator.hasNext() && keepTail);
             batchStep = ++batchStep < batchSize ? batchStep : -batchSize;
             return aOrB ? aIterator.next() : bIterator.next();
         }

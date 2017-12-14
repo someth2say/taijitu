@@ -1,7 +1,5 @@
 package org.someth2say.taijitu.compare.equality.impl.composite;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.aspects.external.Comparator;
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.impl.value.JavaComparable;
@@ -19,12 +17,6 @@ import java.util.function.Function;
  * @param <T>
  */
 public class CompositeComparator<T> extends AbstractCompositeEquality implements ICompositeEqualizer<T>, ICompositeComparator<T> {
-    private static final Logger logger = LoggerFactory.getLogger(CompositeComparator.class);
-
-    @Override
-	public Logger getLogger() {
-        return logger;
-    }
 
     protected CompositeComparator(List<ExtractorAndEquality> eaes) {
         super(eaes);

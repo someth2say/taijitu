@@ -1,7 +1,7 @@
 package org.someth2say.taijitu.compare.equality.impl.stream;
 
 import org.junit.Test;
-import org.someth2say.taijitu.TestComposite;
+import org.someth2say.taijitu.compare.equality.impl.composite.TestComposite;
 import org.someth2say.taijitu.compare.equality.impl.stream.sorted.ComparableStreamEqualizer;
 import org.someth2say.taijitu.compare.result.Unequal;
 import org.someth2say.taijitu.compare.result.Difference;
@@ -13,8 +13,8 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.someth2say.taijitu.TestComposite.testClassOneTwoEquality;
-import static org.someth2say.taijitu.TestComposite.testClassThreeComparator;
+import static org.someth2say.taijitu.compare.equality.impl.composite.TestComposite.testClassOneTwoEquality;
+import static org.someth2say.taijitu.compare.equality.impl.composite.TestComposite.testClassThreeComparator;
 
 public class ComparableStreamEqualizerTest {
     @Test

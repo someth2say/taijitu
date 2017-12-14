@@ -23,7 +23,6 @@ public interface ICompositeEqualizer<T> extends IComposite, Equalizer<T> {
         V firstValue = extractors.apply(first);
         V secondValue = extractors.apply(second);
         boolean equals = equalizer.equals(firstValue, secondValue);
-        getLogger().trace("{}<={}=>{} ({}({}))", firstValue, equals ? "=" : "/", secondValue, equalizer.getClass().getSimpleName(), firstValue.getClass().getName());
         return equals;
     }
 
@@ -39,7 +38,6 @@ public interface ICompositeEqualizer<T> extends IComposite, Equalizer<T> {
         V firstValue = extractors.apply(first);
         V secondValue = extractors.apply(second);
         boolean equals = equalizer.equals(firstValue, secondValue);
-        getLogger().trace("{}<={}=>{} ({}({}))", firstValue, equals ? "=" : "/", secondValue, equalizer.getClass().getSimpleName(), firstValue.getClass().getName());
         return equals ? null : new Unequal<>(equalizer, firstValue, secondValue);
     }
 

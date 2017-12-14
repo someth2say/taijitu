@@ -1,7 +1,6 @@
 package org.someth2say.taijitu.compare.equality.impl.value;
 
 import org.someth2say.taijitu.compare.equality.aspects.external.Comparator;
-import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasher;
 
 import java.util.Date;
 

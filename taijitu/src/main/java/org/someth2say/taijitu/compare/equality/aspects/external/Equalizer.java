@@ -6,7 +6,6 @@ import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Missing;
 import org.someth2say.taijitu.compare.result.Unequal;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 public interface Equalizer<T> {

@@ -28,7 +28,7 @@ public class CSVResourceSource extends AbstractSource<String[]> {
     private List<FieldDescription<?>> providedFields;
 
     @Override
-    public void close() throws ClosingException {
+    public void close() {
         if (lines != null) lines.close();
     }
 

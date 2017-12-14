@@ -18,8 +18,16 @@ public class StreamUtilTest {
     public void zipTest() {
         Stream<String> s1 = of("a", "b", "c");
         Stream<String> s2 = of("1", "2", "3", "4");
-        Stream<String> zip = zip(s1, s2, 2);
+        Stream<String> zip = zip(s1, s2, 2, false);
         assertEquals(Arrays.asList("a", "b", "1", "2", "c"), zip.collect(toList()));
+    }
+
+    @Test
+    public void zipTailTest() {
+        Stream<String> s1 = of("a", "b", "c");
+        Stream<String> s2 = of("1", "2", "3", "4");
+        Stream<String> zip = zip(s1, s2, 2, true);
+        assertEquals(Arrays.asList("a", "b", "1", "2", "c", "3", "4"), zip.collect(toList()));
     }
 
     @Test

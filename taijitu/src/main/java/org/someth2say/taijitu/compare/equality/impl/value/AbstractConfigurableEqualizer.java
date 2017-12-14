@@ -4,7 +4,6 @@ import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Unequal;
 
-import java.util.Collections;
 import java.util.Objects;
 import java.util.stream.Stream;
 

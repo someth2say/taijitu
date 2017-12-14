@@ -1,12 +1,11 @@
 package org.someth2say.taijitu.compare.equality.impl.composite;
 
 import org.junit.Test;
-import org.someth2say.taijitu.TestComposite;
 import org.someth2say.taijitu.compare.equality.wrapper.IComparableWraper;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.someth2say.taijitu.TestComposite.testClassThreeComparatorHasher;
+import static org.someth2say.taijitu.compare.equality.impl.composite.TestComposite.testClassThreeComparatorHasher;
 
 public class CompositeComparatorHasherTest {
 

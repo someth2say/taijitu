@@ -1,7 +1,6 @@
 package org.someth2say.taijitu.compare.equality.impl.composite;
 
 import org.junit.Test;
-import org.someth2say.taijitu.TestComposite;
 import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Unequal;
@@ -12,7 +11,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.someth2say.taijitu.TestComposite.testClassOneTwoEquality;
+import static org.someth2say.taijitu.compare.equality.impl.composite.TestComposite.testClassOneTwoEquality;
 
 public class CompositeEqualizerTest {
     @Test

@@ -1,20 +1,16 @@
 package org.someth2say.taijitu.compare.equality.impl.stream.mapping;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
 import org.someth2say.taijitu.compare.equality.wrapper.IHashableWraper;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Unequal;
-import org.someth2say.taijitu.discarter.TimeBiDiscarter;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 class Mapper<T> implements Runnable {
-    private static final Logger logger = LoggerFactory.getLogger(Mapper.class);
 
     private final Iterator<T> source;
     private final Map<IHashableWraper<T, ?>, OrdinalAndComposite<T>> sharedMap;
