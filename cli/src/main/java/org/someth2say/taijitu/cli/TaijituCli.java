@@ -19,30 +19,31 @@ import org.someth2say.taijitu.cli.util.FileUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.stream.Stream;
 
 import static org.someth2say.taijitu.cli.config.DefaultConfig.DEFAULT_CONFIG_FILE;
 
 /**
  * @author Jordi Sola
  */
-public final class Taijitu {
+public final class TaijituCli {
 
-    private static final Logger logger = LoggerFactory.getLogger(Taijitu.class);
+    private static final Logger logger = LoggerFactory.getLogger(TaijituCli.class);
 
     private static ITaijituCfg configFromApache(final ImmutableHierarchicalConfiguration properties) {
         return TaijituCfg.fromApacheConfig(properties);
     }
 
 
-    private static ITaijituCfg configFromFile(final String fileName) throws TaijituException {
+    private static ITaijituCfg configFromFile(final String fileName) throws TaijituCliException {
         return TaijituCfg.fromFile(fileName);
     }
 
-    private static void performSetup(final ITaijituCfg config) throws TaijituException {
+    private static void performSetup(final ITaijituCfg config) throws TaijituCliException {
         try {
             setupRegistries(config);
         } catch (Exception e) {
-            throw new TaijituException("Unable to prepare Taijitu.", e);
+            throw new TaijituCliException("Unable to prepare TaijituCli.", e);
         }
     }
 
@@ -67,28 +68,28 @@ public final class Taijitu {
         } else {
             // run comparison with default values
             try {
-                Taijitu.compare(args[0]);
-            } catch (TaijituException e) {
+                TaijituCli.compare(args[0]);
+            } catch (TaijituCliException e) {
                 logger.error("Unable to start: ", e);
             }
         }
     }
 
-    public static List<List<Difference>> compare() throws TaijituException {
+    public static List<Stream<Difference<?>>> compare() throws TaijituCliException {
         return compare(DEFAULT_CONFIG_FILE);
     }
 
-    private static List<List<Difference>> compare(final String fileName) throws TaijituException {
+    private static List<Stream<Difference<?>>> compare(final String fileName) throws TaijituCliException {
         return compare(configFromFile(fileName));
     }
 
 
-    public static List<List<Difference>> compare(final ImmutableHierarchicalConfiguration properties) throws TaijituException {
+    public static List<Stream<Difference<?>>> compare(final ImmutableHierarchicalConfiguration properties) throws TaijituCliException {
         return compare(configFromApache(properties));
     }
 
 
-    public static List<List<Difference>> compare(final ITaijituCfg config) throws TaijituException {
+    public static List<Stream<Difference<?>>> compare(final ITaijituCfg config) throws TaijituCliException {
         logger.info("Start comparisons.");
         performSetup(config);
 
@@ -96,10 +97,10 @@ public final class Taijitu {
 
         startPlugins(config);
 
-        final CompletionService<List<Difference>> completionService = runComparisons(config);
+        final CompletionService<Stream<Difference<?>>> completionService = runComparisons(config);
 
         // Collect results
-        final List<List<Difference>> result = getComparisonResults(completionService, comparisons);
+        final List<Stream<Difference<?>>> result = getComparisonResults(completionService, comparisons);
 
         endPlugins(config);
 
@@ -110,11 +111,11 @@ public final class Taijitu {
 
     }
 
-    private static CompletionService<List<Difference>> runComparisons(final ITaijituCfg config) {
+    private static CompletionService<Stream<Difference<?>>> runComparisons(final ITaijituCfg config) {
         final ExecutorService executorService = Executors.newFixedThreadPool(config.getThreads());
-        CompletionService<List<Difference>> completionService = new ExecutorCompletionService<>(executorService);
+        CompletionService<Stream<Difference<?>>> completionService = new ExecutorCompletionService<>(executorService);
 
-        config.getComparisons().forEach(comparison -> completionService.submit(new TaijituRunner(comparison)));
+        config.getComparisons().forEach(comparison -> completionService.submit(new TaijituCliRunner(comparison)));
 
         executorService.shutdown();
 
@@ -138,13 +139,13 @@ public final class Taijitu {
         }
     }
 
-    private static List<List<Difference>> getComparisonResults(CompletionService<List<Difference>> completionService,
-                                                               List<IComparisonCfg> iComparisonCfgs) {
-        final List<List<Difference>> result = new ArrayList<>(iComparisonCfgs.size());
+    private static List<Stream<Difference<?>>> getComparisonResults(CompletionService<Stream<Difference<?>>> completionService,
+                                                                    List<IComparisonCfg> iComparisonCfgs) {
+        final List<Stream<Difference<?>>> result = new ArrayList<>(iComparisonCfgs.size());
 
         for (int i = 0; i < iComparisonCfgs.size(); i++) {
             try {
-                Future<List<Difference>> future = completionService.take();
+                Future<Stream<Difference<?>>> future = completionService.take();
                 try {
                     result.add(future.get());
                 } catch (ExecutionException e) {

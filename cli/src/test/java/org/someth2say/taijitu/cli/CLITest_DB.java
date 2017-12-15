@@ -35,6 +35,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -67,7 +68,6 @@ public class CLITest_DB {
         );
     }
 
-
     @After
     public void dropTables() throws SQLException {
         Connection conn = ConnectionManager.getConnection(TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD));
@@ -75,45 +75,39 @@ public class CLITest_DB {
     }
 
     @Test
-    public void basicDBTest() throws TaijituException, SQLException {
+    public void basicDBTest() throws TaijituCliException, SQLException {
         // Create the tables and test data
         final Properties databaseProps = buildDbSampleData();
 
         final ITaijituCfg configuration = getTaijituConfig(databaseProps);
 
-        final List<List<Difference>> comparisonResults = Taijitu.compare(configuration);
+        final List<Stream<Difference<?>>> comparisonResults = TaijituCli.compare(configuration);
 
         Assert.assertEquals(2, comparisonResults.size());
-        final List<Difference> firstResult = comparisonResults.get(0);
-        System.out.println(firstResult);
+        final List<Difference> firstResult = comparisonResults.get(0).collect(Collectors.toList());
+        //System.out.println(firstResult);
         Assert.assertEquals(0, firstResult.size());
-        final List<Difference> secondResult = comparisonResults.get(1);
-        System.out.println(secondResult);
+        final List<Difference> secondResult = comparisonResults.get(1).collect(Collectors.toList());
+        //System.out.println(secondResult);
         Assert.assertEquals(1, secondResult.size());
     }
 
     @Test
-    public void apacheDBTest() throws TaijituException, SQLException, ConfigurationException {
+    public void apacheDBTest() throws TaijituCliException, SQLException, ConfigurationException {
         // Create the tables and test data
         final Properties sourceBuildProperties = buildDbSampleData();
 
         final ImmutableHierarchicalConfiguration configuration = getApacheConfiguration(sourceBuildProperties);
 
-        final List<List<Difference>> comparisonResults = Taijitu.compare(configuration);
+        final List<Stream<Difference<?>>> comparisonResults = TaijituCli.compare(configuration);
 
         Assert.assertEquals(2, comparisonResults.size());
-        final List<Difference> firstResult = comparisonResults.get(0);
-        System.out.println(firstResult);
+        final List<Difference> firstResult = comparisonResults.get(0).collect(Collectors.toList());
         Assert.assertEquals(0, firstResult.size());
-        final List<Difference> secondResult = comparisonResults.get(1);
-        System.out.println(secondResult);
+        final List<Difference> secondResult = comparisonResults.get(1).collect(Collectors.toList());
         Assert.assertEquals(1, secondResult.size());
 
         //TODO: Define exactly the expected differenceOrNull!
-//        Collection<Pair<ComparisonResult.QueryAndTuple, ComparisonResult.QueryAndTuple>> different = secondResult.getDifferent();
-//        Pair<ComparisonResult.QueryAndTuple, ComparisonResult.QueryAndTuple> dif = different.iterator().next();
-//        dif.equals(new ImmutablePair<>(new ComparisonResult.QueryAndTuple(sourceCfg,sourceTuple), new ComparisonResult.QueryAndTuple(targetCfg,targetTuple)));
-
 
     }
 
@@ -152,11 +146,9 @@ public class CLITest_DB {
         final PropertiesConfiguration properties = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).getConfiguration();
 
         properties.setListDelimiterHandler(new DefaultListDelimiterHandler(DefaultConfig.DEFAULT_LIST_DELIMITER));
-        //Databases
-        //putAll(properties, sourceBuildProperties, DATABASE + ".");
 
         // Comparisons
-        //TODO: ResultSet are transient objects, so Difference objects will have references to invalid objects!
+        // ResultSet are transient objects, so we need to use mappers to keep a copy before they are dismissed. Else, we will be able to reach difference objects, but not its underlying causes.
         Properties sourceProps1 = makeQuerySourceProps("select * from test", sourceBuildProperties, ResultSetTupleMapper.NAME);
         Properties sourceProps2 = makeQuerySourceProps("select * from test2", sourceBuildProperties, ResultSetTupleMapper.NAME);
         String compareStr = compare != null ? String.join(",", compare) : "";
@@ -177,7 +169,7 @@ public class CLITest_DB {
 
         final ImmutableHierarchicalConfiguration configuration = ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(properties));
 
-        dumpConfig(configuration);
+//        dumpConfig(configuration);
 
         return configuration;
     }
@@ -233,7 +225,7 @@ public class CLITest_DB {
 
     //
 //    @Test
-//    public void missingStrategyTest() throws TaijituException, QueryUtilsException, SQLException {
+//    public void missingStrategyTest() throws TaijituCliException, QueryUtilsException, SQLException {
 //
 //        // Create the tables and test data
 //        final HProperties databaseProps = TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD);
@@ -264,7 +256,7 @@ public class CLITest_DB {
 //     * Test for databases with equalsFields content.
 //     */
 //    @Test
-//    public void equalsTest() throws TaijituException, QueryUtilsException, SQLException {
+//    public void equalsTest() throws TaijituCliException, QueryUtilsException, SQLException {
 //
 //        // Create the tables and test data
 //        final HProperties databaseProps = TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD);
@@ -303,7 +295,7 @@ public class CLITest_DB {
 //     * Test for databases elements not present in source.
 //     */
 //    @Test
-//    public void missingInSourceTest() throws SQLException, TaijituException, QueryUtilsException {
+//    public void missingInSourceTest() throws SQLException, TaijituCliException, QueryUtilsException {
 //
 //        // Create the tables and test data
 //        final HProperties databaseProps = TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD);
@@ -347,7 +339,7 @@ public class CLITest_DB {
 //     * Test for databases elements not present in target.
 //     */
 //    @Test
-//    public void missingInTargetTest() throws SQLException, TaijituException, QueryUtilsException {
+//    public void missingInTargetTest() throws SQLException, TaijituCliException, QueryUtilsException {
 //
 //        // Create the tables and test data
 //        final HProperties databaseProps = TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD);
@@ -390,7 +382,7 @@ public class CLITest_DB {
 //     * Test for databases elements with different contents.
 //     */
 //    @Test
-//    public void differenceTest() throws SQLException, TaijituException, QueryUtilsException {
+//    public void differenceTest() throws SQLException, TaijituCliException, QueryUtilsException {
 //
 //        // Create the tables and test data
 //        final HProperties databaseProps = TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD);
@@ -433,7 +425,7 @@ public class CLITest_DB {
 //     * Test for databases elements not present in target.
 //     */
 //    @Test
-//    public void duplicatedKeyTest() throws SQLException, TaijituException, QueryUtilsException {
+//    public void duplicatedKeyTest() throws SQLException, TaijituCliException, QueryUtilsException {
 //
 //        // Create the tables and test data
 //        final HProperties databaseProps = TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD);
@@ -476,7 +468,7 @@ public class CLITest_DB {
 //     * Test for default values when fields parameters are not set. KEY, COMPARE
 //     */
 //    @Test
-//    public void testFieldsFallback() throws SQLException, TaijituException, QueryUtilsException {
+//    public void testFieldsFallback() throws SQLException, TaijituCliException, QueryUtilsException {
 //
 //        // Create the tables and test data
 //        final HProperties databaseProps = TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD);
@@ -513,7 +505,7 @@ public class CLITest_DB {
 //     * Test for fields to be detected automatically based on RecordSet Meta
 //     */
 //    @Test
-//    public void testFieldsFromMeta() throws SQLException, TaijituException, QueryUtilsException {
+//    public void testFieldsFromMeta() throws SQLException, TaijituCliException, QueryUtilsException {
 //
 //        // Create the tables and test data
 //        final HProperties databaseProps = TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD);
@@ -547,7 +539,7 @@ public class CLITest_DB {
 //    }
 //
 //    @Test
-//    public void testParameters() throws SQLException, TaijituException, QueryUtilsException {
+//    public void testParameters() throws SQLException, TaijituCliException, QueryUtilsException {
 //
 //        // Create the tables and test data
 //        final HProperties databaseProps = TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD);
@@ -593,7 +585,7 @@ public class CLITest_DB {
 //    }
 //
 //    @Test
-//    public void pluginsTest() throws QueryUtilsException, TaijituException, SQLException {
+//    public void pluginsTest() throws QueryUtilsException, TaijituCliException, SQLException {
 //        // Create the tables and test data
 //        final Properties databaseProps = TestUtils.makeH2DatabaseProps(DB_NAME, DB_USER, DB_PWD);
 //        Connection conn = getConnection(DB_NAME, databaseProps); // This generate the DB in H2

@@ -29,21 +29,18 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
 
     @Override
     public Stream<Difference<?>> underlyingDiffs(Stream<T> source, Stream<T> target) {
-
-
         Iterator<Difference<?>> it = new Iterator<Difference<?>>() {
-            Map<IHashableWraper<T, ?>, OrdinalAndComposite<T>> sharedMap = new ConcurrentHashMap<>();
+            Map<IHashableWraper<T, ?>, OrdinalAndComposite<T>> sharedMap1 = new ConcurrentHashMap<>();
 
             // Using zip, so we can alternate both streams, and produce differences even one of them is infinite.
             private Stream<Unequal<T>> stream = StreamUtil.zip(source.map(t -> new OrdinalAndComposite<>(1, t)), target.map(t -> new OrdinalAndComposite<>(2, t)), 1, true)
-                    .map(oac -> Mapper.map(oac, hasher, sharedMap, equalizer)).filter(Objects::nonNull);
+                    .map(oac -> Mapper.map(oac, hasher, sharedMap1, equalizer)).filter(Objects::nonNull);
 
             private Iterator<Unequal<T>> unequals = stream.iterator();
 
             @Override
             public boolean hasNext() {
-                // This 'unequals.hasNext' can be infinite!!
-                return unequals.hasNext() || !sharedMap.isEmpty();
+                return unequals.hasNext() || !sharedMap1.isEmpty();
             }
 
             @Override
@@ -51,7 +48,7 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
                 if (unequals.hasNext()) {
                     return unequals.next();
                 } else {
-                    OrdinalAndComposite<T> oac = sharedMap.remove(sharedMap.entrySet().iterator().next().getKey());
+                    OrdinalAndComposite<T> oac = sharedMap1.remove(sharedMap1.entrySet().iterator().next().getKey());
                     return hasher.asMissing(oac.getComposite());
                 }
             }

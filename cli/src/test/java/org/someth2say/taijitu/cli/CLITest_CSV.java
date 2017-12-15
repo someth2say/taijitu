@@ -19,6 +19,8 @@ import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
 import org.someth2say.taijitu.compare.result.Difference;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -49,15 +51,14 @@ public class CLITest_CSV {
 
 
     @Test
-    public void CSVTest() throws TaijituException {
+    public void CSVTest() throws TaijituCliException {
         // Create the tables and test data
         final TaijituCfg configuration = getCSVConfiguration();
 
-        final List<List<Difference>> comparisonResults = Taijitu.compare(configuration);
+        final List<Stream<Difference<?>>> comparisonResults = TaijituCli.compare(configuration);
 
         Assert.assertEquals(1, comparisonResults.size());
-        final List<Difference> firstResult = comparisonResults.get(0);
-        firstResult.forEach(System.out::println);
+        final List<Difference<?>> firstResult = comparisonResults.get(0).collect(Collectors.toList());
         Assert.assertEquals(0, firstResult.size());
     }
 

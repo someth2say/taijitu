@@ -111,7 +111,8 @@ public class CSVResourceSource extends AbstractSource<String[]> {
     public Stream<String[]> stream() {
         lines = getLines();
         if (lines != null) {
-            return lines.skip(1).map(l -> l.split(FIELD_SEPARATOR));
+            Stream<String[]> stream = lines.skip(1).map(l -> l.split(FIELD_SEPARATOR));
+            return stream.onClose(() -> System.out.println("Closing file stream!!!!!!!!"));
         } else {
             return null;
         }

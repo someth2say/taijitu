@@ -116,18 +116,18 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
         return !comparisonResult.isEmpty();
     }
 //
-//    private File createOutputFolder() throws TaijituException {
+//    private File createOutputFolder() throws TaijituCliException {
 //        final File result = config.getOutputFolderFile();
 //        if (!result.exists()) {
 //            final boolean dirCreated = result.mkdirs();
 //            if (!dirCreated) {
-//                throw new TaijituException("Error while trying to create output folder: " + result.getAbsolutePath());
+//                throw new TaijituCliException("Error while trying to create output folder: " + result.getAbsolutePath());
 //            }
 //        }
 //        return result;
 //    }
 //
-//    private void writeResults(final ComparisonResult result, final ComparisonContext comparison, final String targetOnlyFile, final String sourceOnlyFile, final String diffsFile, final String testName, final File outputFolder) throws TaijituException, CommandException {
+//    private void writeResults(final ComparisonResult result, final ComparisonContext comparison, final String targetOnlyFile, final String sourceOnlyFile, final String diffsFile, final String testName, final File outputFolder) throws TaijituCliException, CommandException {
 //        if (!result.getTargetOnly().isEmpty()) {
 //            logger.debug("Writing entries only in target for " + testName);
 //            final String[][] reportableStrings = printMissing(comparison, result.getTargetOnly());
@@ -149,12 +149,12 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //    protected abstract FileCommand getFileCommand(String fileNameSource, String sheetName, File outputFolder) throws CommandException;
 
 //    @Override
-//    public void preComparison(ComparisonContext taijituData) throws TaijituException {
+//    public void preComparison(ComparisonContext taijituData) throws TaijituCliException {
 //        outputFolder = createOutputFolder();
 //    }
 //
 //    @Override
-//    public void postComparison(ComparisonContext taijituData) throws TaijituException {
+//    public void postComparison(ComparisonContext taijituData) throws TaijituCliException {
 //        final ComparisonResult result = taijituData.getResult();
 //        final String testName = taijituData.getTestName();
 //
@@ -166,7 +166,7 @@ public abstract class AbstractWriterPlugin implements TaijituPlugin {
 //            try {
 //                writeResults(result, taijituData, targetOnlyFile, sourceOnlyFile, diffsFile, testName, outputFolder);
 //            } catch (CommandException e) {
-//                throw new TaijituException("Unable to write results to " + getName(), e);
+//                throw new TaijituCliException("Unable to write results to " + getName(), e);
 //            }
 //
 //        }

@@ -28,27 +28,28 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Jordi Sola
  */
-class TaijituRunner implements Callable<List<Difference>> {
+class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
 
-    private static final Logger logger = LoggerFactory.getLogger(TaijituRunner.class);
+    private static final Logger logger = LoggerFactory.getLogger(TaijituCliRunner.class);
 
     private final IComparisonCfg comparisonCfg;
 
-    public TaijituRunner(final IComparisonCfg comparisonCfg) {
+    public TaijituCliRunner(final IComparisonCfg comparisonCfg) {
         this.comparisonCfg = comparisonCfg;
     }
 
     @Override
-    public List<Difference> call() {
+    public Stream<Difference<?>> call() {
         List<IPluginCfg> pluginConfigs = comparisonCfg.getPluginConfigs();
 
         runPluginsPreComparison(pluginConfigs, comparisonCfg);
 
-        List<Difference> result = runComparison(comparisonCfg);
+        Stream<Difference<?>> result = runComparison(comparisonCfg);
 
         runPluginsPostComparison(pluginConfigs, comparisonCfg);
 
@@ -78,7 +79,7 @@ class TaijituRunner implements Callable<List<Difference>> {
         }
     }
 
-    private <T> List<Difference> runComparison(IComparisonCfg iComparisonCfg) {
+    private <T> Stream<Difference<?>> runComparison(IComparisonCfg iComparisonCfg) {
 
         List<ISourceCfg> sourceConfigs = iComparisonCfg.getSourceConfigs();
         if (sourceConfigs.size() < 2) {
@@ -89,22 +90,21 @@ class TaijituRunner implements Callable<List<Difference>> {
             logger.warn("More than 2 sources found ({}}). Only first two will be considered!", sourceConfigs.size());
         }
 
-        // XD SourceData<T,T>... T.T Hate type erasure...
-        List<SourceData<?, T>> sourceDatas = sourceConfigs.stream().limit(2).map(SourceData<T, T>::new)
-                .collect(Collectors.toList());
-
         // 0. Build and map sources
-        buildMappedSources(sourceDatas);
+        List<SourceData<?, T>> sourceDatas = buildSourceDatas(sourceConfigs);
 
         // 2. Calculate common fields (gives all sources)
         Map<String, FieldDescription<?>> commonFDs = getCommonFields(sourceDatas.stream().map(sd -> sd.mappedSource).collect(Collectors.toList()));
+        final StreamEqualizer<T> streamEquality = getStreamEqualizer(iComparisonCfg, sourceDatas, commonFDs);
 
-        // A. Get fields for each comparison:
-        // A.1.- Identity
-//        List<FieldDescription<?>> identityFDs = commonFDs.stream().filter(fd -> iComparisonCfg.getKeyFields().contains(fd.getName())).collect(Collectors.toList());
-        // A.2.- CategoryEquality (for mapping) and Comparator (for sorted) we just use all non-key fields
-//        List<FieldDescription<?>> nonIdentityFDs = commonFDs.stream().filter(fd -> !identityFDs.contains(fd)).collect(Collectors.toList());
 
+        // Shall we use the same matcher for canonical source? No, we should use
+        // identity matcher....
+        logger.info("Comparison {} ready to run.", iComparisonCfg.getName());
+        return runStreamEquality(streamEquality, sourceDatas);
+    }
+
+    private <T> StreamEqualizer<T> getStreamEqualizer(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, Map<String, FieldDescription<?>> commonFDs) {
         // 3.- Create comparators:
         // 3.1.- If Key fields present, build categorizer
         CompositeHasher<T> categorizer = null;
@@ -155,11 +155,7 @@ class TaijituRunner implements Callable<List<Difference>> {
                 }
             }
         }
-
-        // Shall we use the same matcher for canonical source? No, we should use
-        // identity matcher....
-        logger.info("Comparison {} ready to run.", iComparisonCfg.getName());
-        return runStreamEquality(streamEquality, sourceDatas);
+        return streamEquality;
     }
 
     private <T, V> void addComponent(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, CompositeEqualizer.Builder<T> equalityBuilder, FieldDescription<V> fd) {
@@ -183,7 +179,9 @@ class TaijituRunner implements Callable<List<Difference>> {
         comparerBuilder.addComponent(extractor, vEquality);
     }
 
-    private <T> void buildMappedSources(List<SourceData<?, T>> sourceDatas) {
+    private <T> List<SourceData<?, T>> buildSourceDatas(List<ISourceCfg> sourceConfigs) {
+        List<SourceData<?, T>> sourceDatas = sourceConfigs.stream().limit(2).map(SourceData<Object, T>::new).collect(Collectors.toList());
+
         buildSources(sourceDatas);
 
         buildMappers(sourceDatas);
@@ -191,6 +189,8 @@ class TaijituRunner implements Callable<List<Difference>> {
         Class<T> commonClass = checkCommonGeneratedClass(sourceDatas);
 
         mapSources(sourceDatas, commonClass);
+
+        return sourceDatas;
     }
 
     private <T> void mapSources(List<SourceData<?, T>> sourceDatas, Class<T> commonClass) {
@@ -287,18 +287,23 @@ class TaijituRunner implements Callable<List<Difference>> {
         sourceData.source = source;
     }
 
-    private <T> List<Difference> runStreamEquality(StreamEqualizer<T> streamEquality, List<SourceData<?, T>> sourceDatas) {
-        List<Difference> comparisonResult = null;
+    private <T> Stream<Difference<?>> runStreamEquality(StreamEqualizer<T> streamEquality, List<SourceData<?, T>> sourceDatas) {
+        Stream<Difference<?>> comparisonResult = null;
         SourceData<?, T> sourceData0 = sourceDatas.get(0);
         SourceData<?, T> sourceData1 = sourceDatas.get(1);
-        try (Source sourceSrc = sourceData0.mappedSource; Source targetSrc = sourceData1.mappedSource) {
-            comparisonResult = streamEquality.underlyingDiffs(sourceSrc.stream(), targetSrc.stream());
+        //try (
+                Source<T> sourceSrc = sourceData0.mappedSource;
+                Source<T> targetSrc = sourceData1.mappedSource;
+        //        ){
+            Stream<T> sourceStream = sourceSrc.stream();
+            Stream<T> targetStream = targetSrc.stream();
+            comparisonResult = streamEquality.underlyingDiffs(sourceStream, targetStream);
             return comparisonResult;
-        } catch (Source.ClosingException e) {
-            logger.warn("Unable to close sources.", e);
-            // Misleading warning in Intellij. See https://youtrack.jetbrains.com/issue/IDEA-181860
-            return comparisonResult;
-        }
+//        } catch (Source.ClosingException e) {
+//            logger.warn("Unable to close sources.", e);
+//            // Misleading warning in Intellij. See https://youtrack.jetbrains.com/issue/IDEA-181860
+//            return comparisonResult;
+//        }
     }
 
     private <V> Equalizer<V> getEquality(FieldDescription<V> fd, List<IEqualityCfg> equalityConfigs) {

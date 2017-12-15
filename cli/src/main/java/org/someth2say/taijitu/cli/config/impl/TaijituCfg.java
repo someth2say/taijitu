@@ -9,7 +9,7 @@ import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.builder.fluent.PropertiesBuilderParameters;
 import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
 import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.someth2say.taijitu.cli.TaijituException;
+import org.someth2say.taijitu.cli.TaijituCliException;
 import org.someth2say.taijitu.cli.config.delegates.apache.ApacheTaijitu;
 import org.someth2say.taijitu.cli.config.impl.defaults.ITaijituCfgDefaults;
 import org.someth2say.taijitu.cli.config.interfaces.ITaijituCfg;
@@ -26,7 +26,7 @@ public class TaijituCfg
 
     /**** UTILITIES *********************************************************************/
 
-    public static TaijituCfg fromFile(final String file) throws TaijituException {
+    public static TaijituCfg fromFile(final String file) throws TaijituCliException {
         ImmutableHierarchicalConfiguration config = load(file);
         return new TaijituCfg(new ApacheTaijitu(config));
     }
@@ -40,7 +40,7 @@ public class TaijituCfg
      *
      * @param configFile ConfigurationLabels file to load
      */
-    private static ImmutableHierarchicalConfiguration load(final String configFile) throws TaijituException {
+    private static ImmutableHierarchicalConfiguration load(final String configFile) throws TaijituCliException {
         final PropertiesBuilderParameters builderParameters = new Parameters().properties().setFileName(configFile);
         //TODO: Discriminate different types of files (properties, YAML, XML...)
         FileBasedConfigurationBuilder<PropertiesConfiguration> builder = new FileBasedConfigurationBuilder<>(PropertiesConfiguration.class)
@@ -48,7 +48,7 @@ public class TaijituCfg
         return buildConfiguration(configFile, builder);
     }
 
-    private static ImmutableHierarchicalConfiguration buildConfiguration(String configFile, FileBasedConfigurationBuilder<PropertiesConfiguration> builder) throws TaijituException {
+    private static ImmutableHierarchicalConfiguration buildConfiguration(String configFile, FileBasedConfigurationBuilder<PropertiesConfiguration> builder) throws TaijituCliException {
         try {
             final PropertiesConfiguration pConfig = builder.getConfiguration();
             pConfig.setListDelimiterHandler(new DefaultListDelimiterHandler(DEFAULT_LIST_DELIMITER));
@@ -56,7 +56,7 @@ public class TaijituCfg
             return ConfigurationUtils.unmodifiableConfiguration(hConfig);
         } catch (ConfigurationException e) {
             // loading of the configuration file failed
-            throw new TaijituException("Unable to load properties from " + configFile, e);
+            throw new TaijituCliException("Unable to load properties from " + configFile, e);
         }
     }
 }
