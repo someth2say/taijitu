@@ -16,7 +16,6 @@ public class BasicTaijituCfg implements ITaijituCfg {
 
     private List<IEqualityCfg> equalityConfigs;
     private List<ISourceCfg> sourceConfigs;
-    private List<IPluginCfg> comparisonPluginConfigs;
 
     //TODO: Maybe we should only allow to default the whole equalityCfg, not every field....
     private String fieldName;
@@ -59,10 +58,6 @@ public class BasicTaijituCfg implements ITaijituCfg {
 
     public void setSourceConfigs(List<ISourceCfg> sourceConfigs) {
         this.sourceConfigs = sourceConfigs;
-    }
-
-    public void setComparisonPluginConfigs(List<IPluginCfg> comparisonPluginConfigs) {
-        this.comparisonPluginConfigs = comparisonPluginConfigs;
     }
 
     public void setFieldName(String fieldName) {
@@ -137,11 +132,6 @@ public class BasicTaijituCfg implements ITaijituCfg {
     }
 
     @Override
-    public List<IPluginCfg> getPluginConfigs() {
-        return this.comparisonPluginConfigs;
-    }
-
-    @Override
     public String getFieldName() {
         return this.fieldName;
     }
@@ -199,5 +189,9 @@ public class BasicTaijituCfg implements ITaijituCfg {
     @Override
     public String getMapper() {
         return mapper;
+    }
+
+    public IStrategyCfg getStrategyConfig() {
+        return strategyConfig;
     }
 }

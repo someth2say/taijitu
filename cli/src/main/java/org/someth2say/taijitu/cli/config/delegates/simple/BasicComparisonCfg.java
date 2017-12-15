@@ -2,7 +2,6 @@ package org.someth2say.taijitu.cli.config.delegates.simple;
 
 import org.someth2say.taijitu.cli.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.cli.config.interfaces.IEqualityCfg;
-import org.someth2say.taijitu.cli.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.cli.config.interfaces.ISourceCfg;
 
 import java.util.List;
@@ -12,7 +11,6 @@ public class BasicComparisonCfg implements IComparisonCfg {
 
     private List<IEqualityCfg> equalityConfigs;
     private List<ISourceCfg> sourceConfigs;
-    private List<IPluginCfg> comparisonPluginConfigs;
 
     private final String name;
 
@@ -104,11 +102,6 @@ public class BasicComparisonCfg implements IComparisonCfg {
     }
 
     @Override
-    public List<IPluginCfg> getPluginConfigs() {
-        return this.comparisonPluginConfigs;
-    }
-
-    @Override
     public String getName() {
         return this.name;
     }
@@ -162,10 +155,6 @@ public class BasicComparisonCfg implements IComparisonCfg {
 
     public void setSourceConfigs(List<ISourceCfg> sourceConfigs) {
         this.sourceConfigs = sourceConfigs;
-    }
-
-    public void setComparisonPluginConfigs(List<IPluginCfg> comparisonPluginConfigs) {
-        this.comparisonPluginConfigs = comparisonPluginConfigs;
     }
 
 	public void setMapper(String mapper) {

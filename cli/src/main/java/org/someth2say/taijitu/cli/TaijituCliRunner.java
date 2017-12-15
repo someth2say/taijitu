@@ -15,7 +15,6 @@ import org.someth2say.taijitu.compare.equality.impl.stream.sorted.ComparableStre
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.cli.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.cli.config.interfaces.IEqualityCfg;
-import org.someth2say.taijitu.cli.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.cli.config.interfaces.ISourceCfg;
 import org.someth2say.taijitu.cli.registry.*;
 import org.someth2say.taijitu.cli.source.FieldDescription;
@@ -45,28 +44,28 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
 
     @Override
     public Stream<Difference<?>> call() {
-        List<IPluginCfg> pluginConfigs = comparisonCfg.getPluginConfigs();
+//        List<IPluginCfg> pluginConfigs = comparisonCfg.getPluginConfigs();
 
-        runPluginsPreComparison(pluginConfigs, comparisonCfg);
+//        runPluginsPreComparison(pluginConfigs, comparisonCfg);
 
         Stream<Difference<?>> result = runComparison(comparisonCfg);
 
-        runPluginsPostComparison(pluginConfigs, comparisonCfg);
+//        runPluginsPostComparison(pluginConfigs, comparisonCfg);
 
         return result;
     }
 
-    private void runPluginsPostComparison(List<IPluginCfg> plugins, IComparisonCfg comparisonConfig) {
-        for (IPluginCfg plugin : plugins) {
-            PluginRegistry.getPlugin(plugin.getName()).postComparison(plugin, comparisonConfig);
-        }
-    }
-
-    private void runPluginsPreComparison(List<IPluginCfg> plugins, IComparisonCfg comparisonCfg) {
-        for (IPluginCfg plugin : plugins) {
-            PluginRegistry.getPlugin(plugin.getName()).preComparison(plugin, comparisonCfg);
-        }
-    }
+//    private void runPluginsPostComparison(List<IPluginCfg> plugins, IComparisonCfg comparisonConfig) {
+//        for (IPluginCfg plugin : plugins) {
+//            PluginRegistry.getPlugin(plugin.getName()).postComparison(plugin, comparisonConfig);
+//        }
+//    }
+//
+//    private void runPluginsPreComparison(List<IPluginCfg> plugins, IComparisonCfg comparisonCfg) {
+//        for (IPluginCfg plugin : plugins) {
+//            PluginRegistry.getPlugin(plugin.getName()).preComparison(plugin, comparisonCfg);
+//        }
+//    }
 
     private class SourceData<R, T> {
         final ISourceCfg sourceCfg;
@@ -105,29 +104,45 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
     }
 
     private <T> StreamEqualizer<T> getStreamEqualizer(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, Map<String, FieldDescription<?>> commonFDs) {
-        // 3.- Create comparators:
-        // 3.1.- If Key fields present, build categorizer
-        CompositeHasher<T> categorizer = null;
         List<FieldDescription<?>> keyFDs = iComparisonCfg.getKeyFields().stream().map(commonFDs::get).collect(Collectors.toList());
-        if (!keyFDs.isEmpty()) {
-            CompositeHasher.Builder<T> categorizerBuilder = new CompositeHasher.Builder<>();
-            keyFDs.forEach(fd -> addCategorizerComponent(iComparisonCfg, sourceDatas, categorizerBuilder, fd));
-            categorizer = categorizerBuilder.build();
-        }
+        List<FieldDescription<?>> sortFDs = iComparisonCfg.getSortFields().stream().map(commonFDs::get).collect(Collectors.toList());
+        List<String> compareFDS = iComparisonCfg.getCompareFields();
+
+        // 3.1.- If Key fields present, build hasher
+        CompositeHasher<T> hasher = getHasher(iComparisonCfg, sourceDatas, keyFDs);
 
         // 3.2.- If Sort fields present, build comparator
-        CompositeComparator<T> sorter = null;
-        List<FieldDescription<?>> sortFDs = iComparisonCfg.getSortFields().stream().map(commonFDs::get).collect(Collectors.toList());
-        if (!sortFDs.isEmpty()) {
-            CompositeComparator.Builder<T> comparerBuilder = new CompositeComparator.Builder<>();
-            sortFDs.forEach(fd -> addComparerComponent(iComparisonCfg, sourceDatas, comparerBuilder, fd));
-            sorter = comparerBuilder.build();
-        }
+        CompositeComparator<T> sorter = getComparator(iComparisonCfg, sourceDatas, sortFDs);
 
-        // 3.3.a.- If Compare fields present, build equality
-        // 3.3.b.- If no compare fields, use fields not key nor sort.
+        // 3.3.- If Compare fields present, use for equality. Else, use all fields not in hasher/comparator
+        CompositeEqualizer<T> equality = getEquality(iComparisonCfg, sourceDatas, commonFDs, keyFDs, sortFDs, compareFDS);
+
+        // 4. Run SteamEquality given Hasher and MappedStreams
+        return buildEqualizer(hasher, sorter, equality);
+    }
+
+    private <T> StreamEqualizer<T> buildEqualizer(CompositeHasher<T> hasher, CompositeComparator<T> sorter, CompositeEqualizer<T> equality) {
+        final StreamEqualizer<T> streamEquality;
+        if (equality == null) {
+            throw new RuntimeException("Unable to define comparison fields!");
+        } else {
+            if (sorter != null && hasher != null) {
+                throw new RuntimeException("Hybrid equality not supported yet. Please use only Keys or Sort fields");
+            } else {
+                if (hasher != null) {
+                    streamEquality = new HashingStreamEqualizer<>(equality, hasher);
+                } else if (sorter != null) {
+                    streamEquality = new ComparableStreamEqualizer<>(equality, sorter);
+                } else {
+                    streamEquality = new SimpleStreamEqualizer<>(equality);
+                }
+            }
+        }
+        return streamEquality;
+    }
+
+    private <T> CompositeEqualizer<T> getEquality(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, Map<String, FieldDescription<?>> commonFDs, List<FieldDescription<?>> keyFDs, List<FieldDescription<?>> sortFDs, List<String> compareFDS) {
         CompositeEqualizer<T> equality = null;
-        List<String> compareFDS = iComparisonCfg.getCompareFields();
         List<FieldDescription<?>> compareFDs =
                 (!compareFDS.isEmpty()
                         ? commonFDs.values().stream().filter(commonFD -> compareFDS.contains(commonFD.getName())) //TODO: Check that all compare fields actually are provided
@@ -137,25 +152,27 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
             compareFDs.forEach(fd -> addComponent(iComparisonCfg, sourceDatas, equalityBuilder, fd));
             equality = equalityBuilder.build();
         }
+        return equality;
+    }
 
-        // 6. Run SteamEquality given Hasher and MappedStreams
-        final StreamEqualizer<T> streamEquality;
-        if (equality == null) {
-            throw new RuntimeException("Unable to define comparison fields!");
-        } else {
-            if (sorter == null && categorizer == null) {
-                throw new RuntimeException("Hybrid equality not supported yet");
-            } else {
-                if (sorter == null) {
-                    streamEquality = new HashingStreamEqualizer<>(equality, categorizer);
-                } else if (categorizer == null) {
-                    streamEquality = new ComparableStreamEqualizer<>(equality, sorter);
-                } else {
-                    streamEquality = new SimpleStreamEqualizer<>(equality);
-                }
-            }
+    private <T> CompositeComparator<T> getComparator(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, List<FieldDescription<?>> sortFDs) {
+        CompositeComparator<T> sorter = null;
+        if (!sortFDs.isEmpty()) {
+            CompositeComparator.Builder<T> comparerBuilder = new CompositeComparator.Builder<>();
+            sortFDs.forEach(fd -> addComparerComponent(iComparisonCfg, sourceDatas, comparerBuilder, fd));
+            sorter = comparerBuilder.build();
         }
-        return streamEquality;
+        return sorter;
+    }
+
+    private <T> CompositeHasher<T> getHasher(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, List<FieldDescription<?>> keyFDs) {
+        CompositeHasher<T> hasher = null;
+        if (!keyFDs.isEmpty()) {
+            CompositeHasher.Builder<T> categorizerBuilder = new CompositeHasher.Builder<>();
+            keyFDs.forEach(fd -> addCategorizerComponent(iComparisonCfg, sourceDatas, categorizerBuilder, fd));
+            hasher = categorizerBuilder.build();
+        }
+        return hasher;
     }
 
     private <T, V> void addComponent(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, CompositeEqualizer.Builder<T> equalityBuilder, FieldDescription<V> fd) {
@@ -292,13 +309,13 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
         SourceData<?, T> sourceData0 = sourceDatas.get(0);
         SourceData<?, T> sourceData1 = sourceDatas.get(1);
         //try (
-                Source<T> sourceSrc = sourceData0.mappedSource;
-                Source<T> targetSrc = sourceData1.mappedSource;
+        Source<T> sourceSrc = sourceData0.mappedSource;
+        Source<T> targetSrc = sourceData1.mappedSource;
         //        ){
-            Stream<T> sourceStream = sourceSrc.stream();
-            Stream<T> targetStream = targetSrc.stream();
-            comparisonResult = streamEquality.underlyingDiffs(sourceStream, targetStream);
-            return comparisonResult;
+        Stream<T> sourceStream = sourceSrc.stream();
+        Stream<T> targetStream = targetSrc.stream();
+        comparisonResult = streamEquality.underlyingDiffs(sourceStream, targetStream);
+        return comparisonResult;
 //        } catch (Source.ClosingException e) {
 //            logger.warn("Unable to close sources.", e);
 //            // Misleading warning in Intellij. See https://youtrack.jetbrains.com/issue/IDEA-181860

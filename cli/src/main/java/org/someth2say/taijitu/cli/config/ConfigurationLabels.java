@@ -12,7 +12,6 @@ public final class ConfigurationLabels {
 	public static final String THREADS = "threads";
 	public static final String SCAN_CLASSPATH = "scanClasspath";
 	public static final String STATEMENT = "sql";
-	public static final String STRATEGY = "stream";
 	public static final String QUERY_PARAMETERS = "queryParameters";
 	public static final String EQUALITY_PARAMS = "parameters";
 	public static final String FIELD_CLASS_STRICT = "exactClass";
@@ -26,7 +25,6 @@ public final class ConfigurationLabels {
 	public static final String EQUALITY ="equality";
 	public static final String MAPPER_TYPE = "mapper";
 	public static final String COMPARISON = "comparison";
-	public static final String PLUGINS = "plugin";
 
 	private ConfigurationLabels() {    }
 

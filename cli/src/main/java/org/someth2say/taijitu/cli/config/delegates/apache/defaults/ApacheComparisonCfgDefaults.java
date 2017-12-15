@@ -4,18 +4,18 @@ import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.commons.configuration2.ex.ConfigurationRuntimeException;
 import org.someth2say.taijitu.cli.config.ConfigurationLabels;
 import org.someth2say.taijitu.cli.config.delegates.apache.ApacheEquality;
-import org.someth2say.taijitu.cli.config.delegates.apache.ApachePlugin;
 import org.someth2say.taijitu.cli.config.delegates.apache.ApacheSource;
+import org.someth2say.taijitu.cli.config.interfaces.ICfg;
 import org.someth2say.taijitu.cli.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.cli.config.interfaces.IEqualityCfg;
-import org.someth2say.taijitu.cli.config.interfaces.IPluginCfg;
 import org.someth2say.taijitu.cli.config.interfaces.ISourceCfg;
+import org.someth2say.taijitu.cli.util.Named;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public interface ApacheComparisonCfgDefaults extends ApacheNamedCfgDefaults, IComparisonCfg, ApacheEqualityCfgDefaults, ApacheSourceCfgDefaults, ApacheStrategyCfgDefaults, ApachePluginCfgDefaults {
+public interface ApacheComparisonCfgDefaults extends ApacheNamedCfgDefaults, IComparisonCfg, ApacheEqualityCfgDefaults, ApacheSourceCfgDefaults, ApacheStrategyCfgDefaults, ApacheCfgDefaults, ICfg, Named {
 
 
     @Override
@@ -48,12 +48,6 @@ public interface ApacheComparisonCfgDefaults extends ApacheNamedCfgDefaults, ICo
     default List<ISourceCfg> getSourceConfigs() {
         final List<ImmutableHierarchicalConfiguration> sourceConfigs = this.getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.SOURCES);
         return sourceConfigs.stream().map(ApacheSource::new).collect(Collectors.toList());
-    }
-
-    @Override
-    default List<IPluginCfg> getPluginConfigs() {
-        final List<ImmutableHierarchicalConfiguration> pluginConfigs = getConfiguration().immutableChildConfigurationsAt(ConfigurationLabels.PLUGINS);
-        return pluginConfigs.stream().map(ApachePlugin::new).collect(Collectors.toList());
     }
 
 }

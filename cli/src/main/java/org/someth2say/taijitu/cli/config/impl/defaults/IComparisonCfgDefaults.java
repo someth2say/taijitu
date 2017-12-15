@@ -2,19 +2,16 @@ package org.someth2say.taijitu.cli.config.impl.defaults;
 
 import org.someth2say.taijitu.cli.config.DefaultConfig;
 import org.someth2say.taijitu.cli.config.impl.EqualityCfg;
-import org.someth2say.taijitu.cli.config.impl.PluginCfg;
 import org.someth2say.taijitu.cli.config.impl.SourceCfg;
-import org.someth2say.taijitu.cli.config.interfaces.IComparisonCfg;
-import org.someth2say.taijitu.cli.config.interfaces.IEqualityCfg;
-import org.someth2say.taijitu.cli.config.interfaces.IPluginCfg;
-import org.someth2say.taijitu.cli.config.interfaces.ISourceCfg;
+import org.someth2say.taijitu.cli.config.interfaces.*;
+import org.someth2say.taijitu.cli.util.Named;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.someth2say.taijitu.cli.util.ListUtil.safeUnion;
 
-public interface IComparisonCfgDefaults<T extends IComparisonCfg> extends IComparisonCfg, INamedCfgDefaults<T>, IEqualityCfgDefaults<T>, ISourceCfgDefaults<T>, IStrategyCfgDefaults<T>, IPluginCfgDefaults<T> {
+public interface IComparisonCfgDefaults<T extends IComparisonCfg> extends IComparisonCfg, INamedCfgDefaults<T>, IEqualityCfgDefaults<T>, ISourceCfgDefaults<T>, IStrategyCfgDefaults<T>, ICfgDefaults<T>, ICfg, Named {
 
     @Override
     default List<String> getKeyFields() {
@@ -69,25 +66,6 @@ public interface IComparisonCfgDefaults<T extends IComparisonCfg> extends ICompa
         }
 
         return safeUnion(equalityCfgs, parentCfgs);
-    }
-
-    @Override
-    default List<IPluginCfg> getPluginConfigs() {
-        List<IPluginCfg> delegates = getDelegate().getPluginConfigs();
-        List<IPluginCfg> plugins = null;
-        if (delegates != null) {
-            plugins = delegates.stream().map(dele -> new PluginCfg(dele, this)).collect(Collectors.toList());
-        }
-        List<IPluginCfg> parentPlugins;
-        if (getParent() != null) {
-            parentPlugins = getParent().getPluginConfigs();
-        } else {
-            parentPlugins = DefaultConfig.DEFAULT_PLUGINS_CONFIG;
-        }
-
-        return safeUnion(plugins, parentPlugins);
-
-
     }
 
 }
