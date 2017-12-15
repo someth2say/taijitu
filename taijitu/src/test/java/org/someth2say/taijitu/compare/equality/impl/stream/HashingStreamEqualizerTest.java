@@ -8,11 +8,14 @@ import org.someth2say.taijitu.compare.equality.impl.stream.mapping.HashingStream
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Missing;
 import org.someth2say.taijitu.compare.result.Unequal;
+import org.someth2say.taijitu.util.StreamUtil;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
@@ -20,24 +23,11 @@ import static org.junit.Assert.assertTrue;
 import static org.someth2say.taijitu.compare.equality.impl.composite.TestComposite.testClassOneTwoEquality;
 import static org.someth2say.taijitu.compare.equality.impl.composite.TestComposite.testClassThreeHasher;
 
-@RunWith(Parameterized.class)
 public class HashingStreamEqualizerTest {
 
-    private final boolean parallel;
-
-    @Parameterized.Parameters(name = "Parallel: {0}")
-    public static Collection<Boolean> fields() {
-        return Arrays.asList(
-                true, false
-        );
-    }
-
-    public HashingStreamEqualizerTest(boolean parallel) {
-        this.parallel = parallel;
-    }
 
     @Test
-    public void testComparableStreamEquality() {
+    public void hashingStreamEqualizerTest() {
         // Build Streams
         TestComposite differentFrom1 = new TestComposite("aaa", "aaa", 1);
         TestComposite differentFrom2 = new TestComposite("aaa", "aa", 1);
@@ -48,15 +38,34 @@ public class HashingStreamEqualizerTest {
         Stream<TestComposite> stream1 = Stream.of(differentFrom1, missingFrom1, equalsFrom1);
         Stream<TestComposite> stream2 = Stream.of(differentFrom2, equalsFrom2);
 
+        Missing<TestComposite> expectedMissing = new Missing<>(testClassThreeHasher, missingFrom1);
+        Unequal<TestComposite> expectedDifference = new Unequal<>(testClassOneTwoEquality, differentFrom1, differentFrom2);
+
         HashingStreamEqualizer<TestComposite> streamEqualizer = new HashingStreamEqualizer<>(testClassOneTwoEquality, testClassThreeHasher);
-        streamEqualizer.setParallel(parallel);
         List<Difference<?>> differences = streamEqualizer.underlyingDiffs(stream1, stream2).collect(Collectors.toList());
 
         // Test results
-        Missing<TestComposite> missing = new Missing<>(testClassThreeHasher, missingFrom1);
         assertEquals(2, differences.size());
-        assertTrue(differences.contains(missing));
-        Unequal<TestComposite> unequal = new Unequal<>(testClassOneTwoEquality, differentFrom1, differentFrom2);
-        assertTrue(differences.contains(unequal));
+        assertTrue(differences.contains(expectedMissing));
+        assertTrue(differences.contains(expectedDifference));
+    }
+
+    @Test
+    public void hashingStreamEqualizerInfiniteTest() {
+        TestComposite differentTD1 = new TestComposite("", "", 100);
+        TestComposite differentTD2 = new TestComposite("a", "a", 100);
+        Unequal<TestComposite> expectedDifference = new Unequal<>(testClassOneTwoEquality, differentTD1, differentTD2);
+
+        // Build Streams
+        Stream<TestComposite> stream1 = Stream.iterate(0, i -> i + 1).map(i -> new TestComposite("", "", i));
+        Stream<TestComposite> stream2 = Stream.iterate(0, i -> i + 1).map(i -> new TestComposite("", "", i)).map(tc -> tc.equals(differentTD1) ? differentTD2 : tc);
+
+        HashingStreamEqualizer<TestComposite> streamEqualizer = new HashingStreamEqualizer<>(testClassOneTwoEquality, testClassThreeHasher);
+        Stream<Difference<?>> differences = streamEqualizer.underlyingDiffs(stream1, stream2);
+
+        // Test results
+        Optional<Difference<?>> firstFound = differences.findAny();
+        assertTrue(firstFound.isPresent());
+        assertEquals(expectedDifference, firstFound.get());
     }
 }
