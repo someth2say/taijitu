@@ -12,7 +12,7 @@ public class EqualizableWrapper<T, EQ extends Equalizer<T>>
 
     @Override
     public boolean equals(Object obj) {
-        if (unwrap() == null) {
+        if (getWraped() == null) {
             return obj == null;
         }
         if (obj instanceof EqualizableWrapper) {
@@ -25,7 +25,7 @@ public class EqualizableWrapper<T, EQ extends Equalizer<T>>
 
     @Override
     public boolean equalsTo(IWraper<T, ?> other) {
-        return getEquality().equals(unwrap(), other.unwrap());
+        return getEquality().equals(getWraped(), other.getWraped());
     }
 
 }

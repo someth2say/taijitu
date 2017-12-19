@@ -12,7 +12,7 @@ public class HashableWrapper<T>
 
     @Override
     public int hashCode() {
-        return getEquality().hashCode(unwrap());
+        return getEquality().hashCode(getWraped());
     }
 
 }

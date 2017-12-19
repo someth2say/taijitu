@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 public interface Equalizer<T> {
 
+    //TODO: This should not be here! SRP!
     default IEqualizableWraper<T, ?> wrap(T obj) {
         return new EqualizableWrapper<>(obj, this);
     }

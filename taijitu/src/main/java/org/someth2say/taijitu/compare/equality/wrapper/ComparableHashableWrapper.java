@@ -13,12 +13,12 @@ public class ComparableHashableWrapper<T, EQ extends ComparatorHasher<T>>
     // Unluckily, this can not be pushed up to interface, as java.lang.Object methods can not be defaulted.
     @Override
     public int hashCode() {
-        return getEquality().hashCode(unwrap());
+        return getEquality().hashCode(getWraped());
     }
 
     @Override
     public int compareTo(IWraper<T, ?> other) {
-        return getEquality().compare(unwrap(), other.unwrap());
+        return getEquality().compare(getWraped(), other.getWraped());
     }
 
 }

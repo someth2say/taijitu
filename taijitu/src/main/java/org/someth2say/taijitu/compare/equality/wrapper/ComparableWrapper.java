@@ -12,6 +12,6 @@ public class ComparableWrapper<T,EQ extends Comparator<T>>
 
     @Override
     public int compareTo(IWraper<T, ?> other) {
-        return getEquality().compare(unwrap(), other.unwrap());
+        return getEquality().compare(getWraped(), other.getWraped());
     }
 }

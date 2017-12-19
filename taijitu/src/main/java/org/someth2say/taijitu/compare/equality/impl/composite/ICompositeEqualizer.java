@@ -22,14 +22,15 @@ public interface ICompositeEqualizer<T> extends IComposite, Equalizer<T> {
         Equalizer<V> equalizer = eae.getEquality();
         V firstValue = extractors.apply(first);
         V secondValue = extractors.apply(second);
-        boolean equals = equalizer.equals(firstValue, secondValue);
-        return equals;
+        return equalizer.equals(firstValue, secondValue);
     }
 
+    //TODO: This is actually a piece of shit!!! Need to work out to the iterator not to be consumed (but then, how filter out non-different elements?)
     @Override
     default Stream<Difference<?>> underlyingDiffs(T t1, T t2) {
-        List<Difference<?>> differenceStream = getExtractorsAndEqualities().stream().<Difference<?>>map(eae -> differenceOrNull(t1, t2, eae)).filter(Objects::nonNull).collect(Collectors.toList());
-        return differenceStream.isEmpty() ? null : differenceStream.stream();
+        Stream<Difference<?>> differenceStream = getExtractorsAndEqualities().stream().<Difference<?>>map(eae -> differenceOrNull(t1, t2, eae)).filter(Objects::nonNull);
+        List<Difference<?>> differences = differenceStream.collect(Collectors.toList());
+        return differences.isEmpty() ? null : differences.stream();
     }
 
     default <V> Difference<V> differenceOrNull(T first, T second, ExtractorAndEquality<T, V, ?> eae) {

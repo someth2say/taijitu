@@ -18,7 +18,6 @@ public class SimpleStreamEqualizer<T> implements StreamEqualizer<T> {
     private final Equalizer<T> equalizer;
 
     public SimpleStreamEqualizer(Equalizer<T> equalizer) {
-
         this.equalizer = equalizer;
     }
 
