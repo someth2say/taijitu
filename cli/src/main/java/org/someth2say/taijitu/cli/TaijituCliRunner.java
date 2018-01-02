@@ -2,24 +2,26 @@ package org.someth2say.taijitu.cli;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.someth2say.taijitu.cli.config.interfaces.IComparisonCfg;
+import org.someth2say.taijitu.cli.config.interfaces.IEqualityCfg;
+import org.someth2say.taijitu.cli.config.interfaces.ISourceCfg;
+import org.someth2say.taijitu.cli.registry.MapperRegistry;
+import org.someth2say.taijitu.cli.registry.SourceRegistry;
+import org.someth2say.taijitu.cli.registry.ValueEqualityRegistry;
+import org.someth2say.taijitu.cli.source.FieldDescription;
+import org.someth2say.taijitu.cli.source.Source;
+import org.someth2say.taijitu.cli.source.mapper.SourceMapper;
 import org.someth2say.taijitu.compare.equality.aspects.external.Comparator;
+import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
 import org.someth2say.taijitu.compare.equality.impl.composite.CompositeComparator;
-import org.someth2say.taijitu.compare.equality.impl.composite.CompositeHasher;
 import org.someth2say.taijitu.compare.equality.impl.composite.CompositeEqualizer;
-import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
+import org.someth2say.taijitu.compare.equality.impl.composite.CompositeHasher;
 import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
 import org.someth2say.taijitu.compare.equality.impl.stream.mapping.HashingStreamEqualizer;
 import org.someth2say.taijitu.compare.equality.impl.stream.simple.SimpleStreamEqualizer;
 import org.someth2say.taijitu.compare.equality.impl.stream.sorted.ComparableStreamEqualizer;
 import org.someth2say.taijitu.compare.result.Difference;
-import org.someth2say.taijitu.cli.config.interfaces.IComparisonCfg;
-import org.someth2say.taijitu.cli.config.interfaces.IEqualityCfg;
-import org.someth2say.taijitu.cli.config.interfaces.ISourceCfg;
-import org.someth2say.taijitu.cli.registry.*;
-import org.someth2say.taijitu.cli.source.FieldDescription;
-import org.someth2say.taijitu.cli.source.Source;
-import org.someth2say.taijitu.cli.source.mapper.SourceMapper;
 
 import java.util.List;
 import java.util.Map;
@@ -44,28 +46,8 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
 
     @Override
     public Stream<Difference<?>> call() {
-//        List<IPluginCfg> pluginConfigs = comparisonCfg.getPluginConfigs();
-
-//        runPluginsPreComparison(pluginConfigs, comparisonCfg);
-
-        Stream<Difference<?>> result = runComparison(comparisonCfg);
-
-//        runPluginsPostComparison(pluginConfigs, comparisonCfg);
-
-        return result;
+        return runComparison(comparisonCfg);
     }
-
-//    private void runPluginsPostComparison(List<IPluginCfg> plugins, IComparisonCfg comparisonConfig) {
-//        for (IPluginCfg plugin : plugins) {
-//            PluginRegistry.getPlugin(plugin.getName()).postComparison(plugin, comparisonConfig);
-//        }
-//    }
-//
-//    private void runPluginsPreComparison(List<IPluginCfg> plugins, IComparisonCfg comparisonCfg) {
-//        for (IPluginCfg plugin : plugins) {
-//            PluginRegistry.getPlugin(plugin.getName()).preComparison(plugin, comparisonCfg);
-//        }
-//    }
 
     private class SourceData<R, T> {
         final ISourceCfg sourceCfg;
@@ -78,7 +60,7 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
         }
     }
 
-    private <T> Stream<Difference<?>> runComparison(IComparisonCfg iComparisonCfg) {
+    public <T> Stream<Difference<?>> runComparison(IComparisonCfg iComparisonCfg) {
 
         List<ISourceCfg> sourceConfigs = iComparisonCfg.getSourceConfigs();
         if (sourceConfigs.size() < 2) {
@@ -95,7 +77,6 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
         // 2. Calculate common fields (gives all sources)
         Map<String, FieldDescription<?>> commonFDs = getCommonFields(sourceDatas.stream().map(sd -> sd.mappedSource).collect(Collectors.toList()));
         final StreamEqualizer<T> streamEquality = getStreamEqualizer(iComparisonCfg, sourceDatas, commonFDs);
-
 
         // Shall we use the same matcher for canonical source? No, we should use
         // identity matcher....
@@ -357,13 +338,13 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
     }
 
     private List<IEqualityCfg> getEqualityConfigsFor(FieldDescription fd, final List<IEqualityCfg> equalityCfgs) {
-        final String fieldClass = fd.getClazz();
+        final String fieldClass = fd.getClazz().getName();
         final String fieldName = fd.getName();
-        List<IEqualityCfg> perfectMatchesEqualities = equalityCfgs.stream()
+        List<IEqualityCfg> perfectMatchEqualities = equalityCfgs.stream()
                 .filter(eq -> fieldNameMatch(fieldName, eq) && fieldClassMatch(fieldClass, eq))
                 .collect(Collectors.toList());
-        if (!perfectMatchesEqualities.isEmpty())
-            return perfectMatchesEqualities;
+        if (!perfectMatchEqualities.isEmpty())
+            return perfectMatchEqualities;
         List<IEqualityCfg> byNameEqualities = equalityCfgs.stream()
                 .filter(eq -> fieldNameMatch(fieldName, eq) && eq.getFieldClass() == null).collect(Collectors.toList());
         if (!byNameEqualities.isEmpty())
@@ -379,7 +360,7 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
     }
 
     private IEqualityCfg getEqualityConfigFor(FieldDescription fieldDescription, final List<IEqualityCfg> equalityConfigIfaces) {
-        final String fieldClass = fieldDescription.getClazz();
+        final String fieldClass = fieldDescription.getClazz().getName();
         final String fieldName = fieldDescription.getName();
         Optional<IEqualityCfg> perfectMatchesEqualities = equalityConfigIfaces.stream()
                 .filter(eq -> fieldNameMatch(fieldName, eq) && fieldClassMatch(fieldClass, eq)).findFirst();

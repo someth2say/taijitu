@@ -27,6 +27,14 @@ public class CSVResourceSource extends AbstractSource<String[]> {
     private Stream<String> lines;
     private List<FieldDescription<?>> providedFields;
 
+    //TODO: this properties should be created externally to the source
+    private final CSVBuildProperties buildProperties;
+
+    public CSVResourceSource(String name, Properties buildProperties, Properties fetchProperties) {
+        super(name, buildProperties, fetchProperties);
+        this.buildProperties = new CSVBuildProperties(buildProperties);
+    }
+
     @Override
     public void close() {
         if (lines != null) lines.close();
@@ -37,21 +45,18 @@ public class CSVResourceSource extends AbstractSource<String[]> {
         return String[].class;
     }
 
-    private static class BuildProperties {
+    private static class CSVBuildProperties {
         final String path;
 
-        BuildProperties(Properties properties) {
+        CSVBuildProperties(Properties properties) {
             this.path = properties.getProperty(ConfigurationLabels.RESOURCE);
         }
     }
 
-    //TODO: this properties should be created externally to the source
-    private final BuildProperties buildProperties;
-
-    public CSVResourceSource(final ISourceCfg iSource) {
+/*    public CSVResourceSource(final ISourceCfg iSource) {
         super(iSource);
-        this.buildProperties = new BuildProperties(iSource.getBuildProperties());
-    }
+        this.buildProperties = new CSVBuildProperties(iSource.getBuildProperties());
+    }*/
 
     private Stream<String> getLines() {
         try {
@@ -85,9 +90,9 @@ public class CSVResourceSource extends AbstractSource<String[]> {
                         String header = headerOpt.get();
                         String[] split = header.split(FIELD_SEPARATOR);
                         this.providedFields = new ArrayList<>(split.length);
-                        for (String s : split) {
+                        for (String column : split) {
                             //TODO: Maybe we can try somehow to provide a class (i.e. by parsing the header...), or use String instead of null...
-                            this.providedFields.add(new FieldDescription(s, null));
+                            this.providedFields.add(new FieldDescription<>(column, String.class));
                         }
                         return this.providedFields;
                     }
@@ -97,7 +102,6 @@ public class CSVResourceSource extends AbstractSource<String[]> {
             }
         }
         return this.providedFields;
-
     }
 
     @Override

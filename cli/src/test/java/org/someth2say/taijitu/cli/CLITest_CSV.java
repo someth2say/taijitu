@@ -6,16 +6,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.someth2say.taijitu.cli.config.ConfigurationLabels;
 import org.someth2say.taijitu.cli.config.delegates.simple.BasicComparisonCfg;
-import org.someth2say.taijitu.cli.config.delegates.simple.BasicEqualityCfg;
 import org.someth2say.taijitu.cli.config.delegates.simple.BasicSourceCfg;
 import org.someth2say.taijitu.cli.config.delegates.simple.BasicTaijituCfg;
 import org.someth2say.taijitu.cli.config.impl.TaijituCfg;
-import org.someth2say.taijitu.cli.config.interfaces.IEqualityCfg;
 import org.someth2say.taijitu.cli.source.csv.CSVResourceSource;
-import org.someth2say.taijitu.cli.source.mapper.CSVTupleMapper;
-import org.someth2say.taijitu.compare.equality.impl.value.DateThreshold;
-import org.someth2say.taijitu.compare.equality.impl.value.NumberThreshold;
-import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
 import org.someth2say.taijitu.compare.result.Difference;
 
 import java.util.*;
@@ -53,7 +47,7 @@ public class CLITest_CSV {
     @Test
     public void CSVTest() throws TaijituCliException {
         // Create the tables and test data
-        final TaijituCfg configuration = getCSVConfiguration();
+        final TaijituCfg configuration = buildCSVConfiguration();
 
         final List<Stream<Difference<?>>> comparisonResults = TaijituCli.compare(configuration);
 
@@ -62,34 +56,25 @@ public class CLITest_CSV {
         Assert.assertEquals(0, firstResult.size());
     }
 
-    private TaijituCfg getCSVConfiguration() {
+    private TaijituCfg buildCSVConfiguration() {
         BasicTaijituCfg basicTaijituCfg = new BasicTaijituCfg("");
 
-        // Comparisons
-
-        Properties s1buildProperties = new Properties();
         //URL Scheme
+        Properties s1buildProperties = new Properties();
         s1buildProperties.setProperty(ConfigurationLabels.RESOURCE, "http://samplecsvs.s3.amazonaws.com/Sacramentorealestatetransactions.csv");
 
+        // File scheme: File source (should be in classpath)
         Properties s2buildProperties = new Properties();
-        // No scheme: File source (should be in classpath)
         s2buildProperties.setProperty(ConfigurationLabels.RESOURCE, "/csv/Sacramentorealestatetransactions.csv");
         // File scheme (must be absolute)
-//        s2buildProperties.setProperty(ConfigurationLabels.Comparison.RESOUCE, "file:///"+ ClassLoader.getSystemResource(".").getPath() +"/csv/Sacramentorealestatetransactions.csv");
+        // s2buildProperties.setProperty(ConfigurationLabels.Comparison.RESOURCE, "file:///"+ ClassLoader.getSystemResource(".").getPath() +"/csv/Sacramentorealestatetransactions.csv");
 
         // We don't actually need a mapper here, we can compare directly the strings provided by the source.
-        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", CSVResourceSource.NAME, null, s1buildProperties, null);//CSVTupleMapper.NAME);
-        BasicSourceCfg targetSrc = new BasicSourceCfg("target", CSVResourceSource.NAME, null, s2buildProperties, CSVTupleMapper.NAME);
-
+        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", CSVResourceSource.NAME, null, s1buildProperties, null);
+        BasicSourceCfg targetSrc = new BasicSourceCfg("target", CSVResourceSource.NAME, null, s2buildProperties, null);
 
         BasicComparisonCfg comp1 = new BasicComparisonCfg("csv", compare, key, sort, Arrays.asList(sourceSrc, targetSrc));
         basicTaijituCfg.setComparisons(Collections.singletonList(comp1));
-
-        // Equalizer
-        BasicEqualityCfg stringEq = new BasicEqualityCfg(StringCaseInsensitive.class.getSimpleName(), String.class.getName(), null);
-        BasicEqualityCfg numberEq = new BasicEqualityCfg(NumberThreshold.class.getSimpleName(), Number.class.getName(), null, "2");
-        IEqualityCfg timestampEq = new BasicEqualityCfg(DateThreshold.class.getSimpleName(), Date.class.getName(), null, "100");
-        basicTaijituCfg.setEqualityConfigs(Arrays.asList(stringEq, numberEq, timestampEq));
 
         return new TaijituCfg(basicTaijituCfg);
     }

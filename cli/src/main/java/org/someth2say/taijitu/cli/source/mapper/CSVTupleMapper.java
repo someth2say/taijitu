@@ -38,16 +38,6 @@ public class CSVTupleMapper extends AbstractSourceMapper<String[], Object[]> {
                 return source.stream().map(this::mapItem);
             }
 
-            @Override
-            public void close() throws ClosingException {
-                source.close();
-            }
-
-            @Override
-            public List<FieldDescription<?>> getProvidedFields() {
-                return source.getProvidedFields();
-            }
-
         };
     }
 }

@@ -94,6 +94,7 @@ public class ClassScanUtils {
                     //TODO: Find a type-safer way...
                     Method namingMethod = clazz.getDeclaredMethod("getName");
                     if (namingMethod != null) {
+                        //TODO: WTF!! We can't use 'getName' unless static!
                         Object getNameResult = namingMethod.invoke(null);
                         String name = getNameResult.toString();
 

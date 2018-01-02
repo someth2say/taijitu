@@ -3,7 +3,6 @@ package org.someth2say.taijitu.cli.config;
 /**
  * Created by Jordi Sola on 24/01/2017.
  */
-//TODO: Use an ENUM
 public final class ConfigurationLabels {
     public static final String KEYS = "keys";
     public static final String SORT= "sort";
@@ -15,7 +14,7 @@ public final class ConfigurationLabels {
 	public static final String QUERY_PARAMETERS = "queryParameters";
 	public static final String EQUALITY_PARAMS = "parameters";
 	public static final String FIELD_CLASS_STRICT = "exactClass";
-	public static final String RESOURCE = "resouce";
+	public static final String RESOURCE = "resource";
 	public static final String SOURCES = "sources";
 	public static final String SOURCE_TYPE = "type";
 	public static final String SOURCE_FETCH_PROPERTIES = "fetchProperties";

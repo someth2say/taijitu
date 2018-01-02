@@ -134,9 +134,11 @@ public class BasicComparisonCfg implements IComparisonCfg {
     public void setKeyFields(List<String> keyFields) {
         this.keyFields = keyFields;
     }
+
     public void setSortFields(List<String> sortFields) {
         this.sortFields=sortFields;
     }
+
     public void setCompareFields(List<String> compareFields) {
         this.compareFields = compareFields;
     }

@@ -4,9 +4,15 @@ import java.util.Objects;
 
 public class FieldDescription<V> {
     private final String name;
-    private final String clazz;
+    private final Class<V> clazz;
 
-    public FieldDescription(String name, String clazz) {
+    @Deprecated
+    public FieldDescription(String name, String clazzName) throws ClassNotFoundException {
+        this.name = name;
+        this.clazz = (Class<V>) Class.forName(clazzName);
+    }
+
+    public FieldDescription(String name, Class<V> clazz)  {
         this.name = name;
         this.clazz = clazz;
     }
@@ -29,13 +35,17 @@ public class FieldDescription<V> {
         return name;
     }
 
-    public String getClazz() {
-        return clazz;
-    }
+//    @Deprecated
+//    public String getClazzName() {
+//        return clazzName;
+//    }
 
     @Override
     public String toString() {
-        return name + "(" + clazz + ")";
+        return name + "(" + clazz.getName() + ")";
     }
 
+    public Class<V> getClazz() {
+        return clazz;
+    }
 }

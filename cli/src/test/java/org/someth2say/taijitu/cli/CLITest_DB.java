@@ -62,10 +62,12 @@ public class CLITest_DB {
     //FIELDS, in the form of [COMPARE, KEY, SORT]
     @Parameterized.Parameters(name = "{index}: {0}")
     public static Collection<String[]> fields() {
-        //return Arrays.asList(
-        return Collections.singletonList(
-                new String[]{"", "KEY", ""}
-        );
+        return Arrays.asList(
+        //return Collections.singletonList(
+                new String[]{"", "KEY", ""} //Compare everything, hash by KEY, sort by nothing
+                ,new String[]{"", "", "KEY"} //Compare everything, hash by nothing, sort by KEY
+                ,new String[]{"", "", ""} //Compare everything, hash by nothing, sort by nothing (use stream order)
+                );
     }
 
     @After

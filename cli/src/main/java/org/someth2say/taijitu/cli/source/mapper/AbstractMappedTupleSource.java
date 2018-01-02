@@ -5,15 +5,18 @@ import org.someth2say.taijitu.cli.source.FieldDescription;
 import org.someth2say.taijitu.cli.source.Source;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
 public abstract class AbstractMappedTupleSource extends AbstractSource<Object[]> {
 
     private final Map<FieldDescription, Integer> fieldPositions = new HashMap<>();
+    private final Source<?> source;
 
     AbstractMappedTupleSource(Source<?> source) {
-        super(source.getName());
+        super(source.getName(), null, null);
+        this.source = source;
     }
 
     @Override
@@ -32,4 +35,13 @@ public abstract class AbstractMappedTupleSource extends AbstractSource<Object[]>
         return Object[].class;
     }
 
+    @Override
+    public void close() throws ClosingException {
+        source.close();
+    }
+
+    @Override
+    public List<FieldDescription<?>> getProvidedFields() {
+        return source.getProvidedFields();
+    }
 }

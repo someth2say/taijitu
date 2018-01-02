@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.cli.config.ConfigurationLabels;
 import org.someth2say.taijitu.cli.config.DefaultConfig;
-import org.someth2say.taijitu.cli.config.interfaces.ISourceCfg;
 import org.someth2say.taijitu.cli.source.AbstractSource;
 import org.someth2say.taijitu.cli.source.FieldDescription;
 
@@ -23,24 +22,24 @@ public class QuerySource extends AbstractSource<ResultSet> {
     private final Connection connection;
 
     //TODO: this properties should be created externally to the source
-    private final FetchProperties fetchProperties;
+    private final FetchData fetchData;
 
     private ResultSet resultSet;
     private PreparedStatement preparedStatement;
     private List<FieldDescription<?>> providedFields;
 
-    public QuerySource(final ISourceCfg iSource) throws SQLException {
-        super(iSource);
-        this.fetchProperties = new FetchProperties(iSource.getFetchProperties());
-        this.connection = ConnectionManager.getConnection(iSource.getBuildProperties());
-    }
+    public QuerySource(String name, Properties buildProperties, Properties fetchProperties) throws SQLException {
+        super(name, buildProperties, fetchProperties);
+        this.connection = ConnectionManager.getConnection(buildProperties);
+        this.fetchData = new FetchData(fetchProperties);
+}
 
-    private static class FetchProperties {
+    private static class FetchData {
         private final String statement;
         private final int fetchSize;
         private final List<Object> queryParameters;
 
-        FetchProperties(Properties properties) {
+        FetchData(Properties properties) {
             this.statement = properties.getProperty(ConfigurationLabels.STATEMENT);
             String property = properties.getProperty(ConfigurationLabels.FETCH_SIZE);
 
@@ -71,27 +70,24 @@ public class QuerySource extends AbstractSource<ResultSet> {
         List<Object> getQueryParameters() {
             return queryParameters;
         }
-
     }
-
 
     private void init() {
         try {
             this.preparedStatement = getPreparedStatement();
             this.resultSet = preparedStatement.executeQuery();
             this.providedFields = buildFieldDescriptions();
-
-        } catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             close();
         }
     }
 
     private PreparedStatement getPreparedStatement() throws SQLException {
         PreparedStatement preparedStatement;
-        preparedStatement = connection.prepareStatement(fetchProperties.getStatement());
-        preparedStatement.setFetchSize(fetchProperties.getFetchSize());
+        preparedStatement = connection.prepareStatement(fetchData.getStatement());
+        preparedStatement.setFetchSize(fetchData.getFetchSize());
         //TODO: Here we lost type-safety because we went through Properties... consider using a `Map<String,Object>` instead.
-        List<Object> sqlParameters = fetchProperties.getQueryParameters();
+        List<Object> sqlParameters = fetchData.getQueryParameters();
         for (int paramIdx = 0; paramIdx < sqlParameters.size(); paramIdx++) {
             Object object = sqlParameters.get(paramIdx);
             if (object instanceof java.util.Date) {
@@ -103,7 +99,7 @@ public class QuerySource extends AbstractSource<ResultSet> {
         return preparedStatement;
     }
 
-    private ArrayList<FieldDescription<?>> buildFieldDescriptions() {
+    private ArrayList<FieldDescription<?>> buildFieldDescriptions() throws ClassNotFoundException {
         try {
             ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
             int rsColumnCount = resultSetMetaData.getColumnCount();
@@ -111,7 +107,7 @@ public class QuerySource extends AbstractSource<ResultSet> {
             for (int columnIdx = 1; columnIdx <= rsColumnCount; ++columnIdx) {
                 String columnName = resultSetMetaData.getColumnName(columnIdx);
                 final String columnClassName = resultSetMetaData.getColumnClassName(columnIdx);
-                result.add(new FieldDescription(columnName, columnClassName));
+                result.add(new FieldDescription<>(columnName, columnClassName));
             }
             return result;
         } catch (SQLException e) {
