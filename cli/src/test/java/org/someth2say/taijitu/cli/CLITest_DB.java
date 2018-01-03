@@ -126,9 +126,9 @@ public class CLITest_DB {
         Properties s2fetchProperties = new Properties();
         s2fetchProperties.setProperty(ConfigurationLabels.STATEMENT, "select * from test2");
 
-        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", QuerySource.NAME, s1fetchProperties, null, ResultSetTupleMapper.NAME);
-        BasicSourceCfg source2Src = new BasicSourceCfg("source2", QuerySource.NAME, s1fetchProperties, null, ResultSetTupleMapper.NAME);
-        BasicSourceCfg targetSrc = new BasicSourceCfg("target", QuerySource.NAME, s2fetchProperties, null, ResultSetTupleMapper.NAME);
+        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", QuerySource.class.getSimpleName(), s1fetchProperties, null, ResultSetTupleMapper.class.getSimpleName());
+        BasicSourceCfg source2Src = new BasicSourceCfg("source2", QuerySource.class.getSimpleName(), s1fetchProperties, null, ResultSetTupleMapper.class.getSimpleName());
+        BasicSourceCfg targetSrc = new BasicSourceCfg("target", QuerySource.class.getSimpleName(), s2fetchProperties, null, ResultSetTupleMapper.class.getSimpleName());
 
         BasicComparisonCfg comp1 = new BasicComparisonCfg("test1", compare, key, sort, Arrays.asList(sourceSrc, source2Src));
         BasicComparisonCfg comp2 = new BasicComparisonCfg("test2", compare, key, sort, Arrays.asList(sourceSrc, targetSrc));
@@ -151,8 +151,8 @@ public class CLITest_DB {
 
         // Comparisons
         // ResultSet are transient objects, so we need to use mappers to keep a copy before they are dismissed. Else, we will be able to reach difference objects, but not its underlying causes.
-        Properties sourceProps1 = makeQuerySourceProps("select * from test", sourceBuildProperties, ResultSetTupleMapper.NAME);
-        Properties sourceProps2 = makeQuerySourceProps("select * from test2", sourceBuildProperties, ResultSetTupleMapper.NAME);
+        Properties sourceProps1 = makeQuerySourceProps("select * from test", sourceBuildProperties, ResultSetTupleMapper.class.getSimpleName());
+        Properties sourceProps2 = makeQuerySourceProps("select * from test2", sourceBuildProperties, ResultSetTupleMapper.class.getSimpleName());
         String compareStr = compare != null ? String.join(",", compare) : "";
         String keyStr = key != null ? String.join(",", key) : "";
         String sortStr = sort != null ? String.join(",", sort) : "";
@@ -674,7 +674,7 @@ public class CLITest_DB {
 
     private Properties makeQuerySourceProps(String query, Properties databaseProperties, String mapperName) {
         Properties result = new Properties();
-        result.put(ConfigurationLabels.SOURCE_TYPE, QuerySource.NAME);
+        result.put(ConfigurationLabels.SOURCE_TYPE, QuerySource.class.getSimpleName());
 
         Properties fetchProperties = new Properties();
         fetchProperties.put(ConfigurationLabels.STATEMENT, query);

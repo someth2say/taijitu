@@ -11,6 +11,7 @@ import org.someth2say.taijitu.cli.registry.ValueEqualityRegistry;
 import org.someth2say.taijitu.cli.source.FieldDescription;
 import org.someth2say.taijitu.cli.source.Source;
 import org.someth2say.taijitu.cli.source.mapper.SourceMapper;
+import org.someth2say.taijitu.cli.util.ClassScanUtils;
 import org.someth2say.taijitu.compare.equality.aspects.external.Comparator;
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
@@ -209,7 +210,7 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
                         + sourceTypeParameter.getName() + " (need " + commonClass.getName() + ")");
             }
         } else {
-            logger.debug("Applying mapper {} to source {} to produce composite type {}", mapper.getName(),
+            logger.debug("Applying mapper {} to source {} to produce composite type {}", ClassScanUtils.getClassName(mapper.getClass()),
                     sourceData.source.getName(), mapper.getTypeParameter().getSimpleName());
             sourceData.mappedSource = mapper.apply(sourceData.source);
         }

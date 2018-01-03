@@ -30,12 +30,12 @@ public class MapperRegistry {
 		final Class<SourceMapper> implementedInterface = SourceMapper.class;
 		classes = ClassScanUtils.getNamedClassesImplementing(implementedInterface);
 
-		logger.info("Registered value equalities: {}", classes.keySet().toString());
+		logger.info("Registered source mappers: {}", classes.keySet().toString());
 	}
 
 	public static void useDefaults() {
-		addMapper(CSVTupleMapper.NAME, CSVTupleMapper.class);
-		addMapper(ResultSetTupleMapper.NAME, ResultSetTupleMapper.class);
+		addMapper(ClassScanUtils.getClassName(CSVTupleMapper.class), CSVTupleMapper.class);
+		addMapper(ClassScanUtils.getClassName(ResultSetTupleMapper.class), ResultSetTupleMapper.class);
 	}
 
 	private static void addMapper(String name, Class<? extends SourceMapper<?, ?>> clazz) {

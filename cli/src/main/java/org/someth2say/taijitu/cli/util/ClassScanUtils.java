@@ -8,11 +8,12 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by Jordi Sola on 22/02/2017.
@@ -23,92 +24,53 @@ public class ClassScanUtils {
     private ClassScanUtils() {
     }
 
-    public static <T> Collection<T> getInstancesForClassesImplementing(Class<? extends T> implementedInterface) {
-        Collection<T> result = new ArrayList<>();
-        final FastClasspathScanner fcs = new FastClasspathScanner();
-        final ScanResult scanResult = fcs.scan();
-        final List<String> classNames = scanResult.getNamesOfClassesImplementing(implementedInterface);
-        final List<Class<?>> clazzes = scanResult.classNamesToClassRefs(classNames);
-        for (Class<?> clazz : clazzes) {
-            try {
-                if (!Modifier.isAbstract(clazz.getModifiers())) {
-                    @SuppressWarnings("unchecked")
-                    T clazzInstance = (T) clazz.getDeclaredConstructor().newInstance();
-                    result.add(clazzInstance);
-                }
-            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-                logger.error("Unable to instantiate plugin class " + clazz.getName(), e);
-            }
-        }
-        return result;
-    }
-
-    public static <T extends Named> Map<String, T> getInstancesForNamedClassesImplementing(Class<? extends T> implementedInterface) {
-        Map<String, T> result = new ConcurrentHashMap<>();
-        final FastClasspathScanner fcs = new FastClasspathScanner();
-        final ScanResult scanResult = fcs.scan();
-        final List<String> classNames = scanResult.getNamesOfClassesImplementing(implementedInterface);
-        final List<Class<?>> clazzes = scanResult.classNamesToClassRefs(classNames);
-        for (Class<?> clazz : clazzes) {
-            try {
-                if (!Modifier.isAbstract(clazz.getModifiers())) {
-                    @SuppressWarnings("unchecked")
-                    T clazzInstance = (T) clazz.getDeclaredConstructor().newInstance();
-                    result.put(clazzInstance.getName(), clazzInstance);
-                }
-            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-                logger.error("Unable to instantiate plugin class " + clazz.getName(), e);
-            }
-        }
-        return result;
-    }
 
     public static <T> Collection<Class<? extends T>> getClassesImplementing(Class<T> clazzOrInterface) {
-        Collection<Class<? extends T>> result = new ArrayList<>();
-        final FastClasspathScanner fcs = new FastClasspathScanner();
-        final ScanResult scanResult = fcs.scan();
-
-        final List<String> classNames = clazzOrInterface.isInterface() ? scanResult.getNamesOfClassesImplementing(clazzOrInterface) : scanResult.getNamesOfSubclassesOf(clazzOrInterface);
-        final List<Class<?>> classes = scanResult.classNamesToClassRefs(classNames);
-        for (Class<?> clazz : classes) {
-            if (!Modifier.isAbstract(clazz.getModifiers())) {
-                @SuppressWarnings("unchecked")
-                Class<? extends T> tClazz = (Class<? extends T>) clazz;
-                result.add(tClazz);
-            }
-        }
-        return result;
+        Stream<Class<? extends T>> classes = getClassesFor(clazzOrInterface)
+                .filter(ClassScanUtils::isNotAbstract)
+                .filter(ClassScanUtils::isNotAnonimous);
+        return classes.collect(Collectors.toList());
     }
 
-
-    public static <T extends Named> Map<String, Class<? extends T>> getNamedClassesImplementing(Class<T> clazzOrInterface) {
-        Map<String, Class<? extends T>> result = new ConcurrentHashMap<>();
-        final FastClasspathScanner fcs = new FastClasspathScanner();
-        final ScanResult scanResult = fcs.scan();
-
-        final List<String> classNames = clazzOrInterface.isInterface() ? scanResult.getNamesOfClassesImplementing(clazzOrInterface) : scanResult.getNamesOfSubclassesOf(clazzOrInterface);
-        final List<Class<?>> clazzes = scanResult.classNamesToClassRefs(classNames);
-        for (Class<?> clazz : clazzes) {
-            if (!Modifier.isAbstract(clazz.getModifiers())) {
-                try {
-                    //TODO: Find a type-safer way...
-                    Method namingMethod = clazz.getDeclaredMethod("getName");
-                    if (namingMethod != null) {
-                        //TODO: WTF!! We can't use 'getName' unless static!
-                        Object getNameResult = namingMethod.invoke(null);
-                        String name = getNameResult.toString();
-
-                        @SuppressWarnings("unchecked")
-                        Class<? extends T> named = (Class<? extends T>) clazz;
-                        result.put(name, named);
-                    }
-                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                    logger.error("Unable to invoke `getName` from class {}", clazz.getName());
-                }
-            }
-        }
-        return result;
+    public static <T> Map<String, Class<? extends T>> getNamedClassesImplementing(Class<T> clazzOrInterface) {
+        Stream<Class<? extends T>> classes = getClassesFor(clazzOrInterface)
+                .filter(ClassScanUtils::isNotAbstract)
+                .filter(ClassScanUtils::isNotAnonimous);
+        return classes.collect(Collectors.toConcurrentMap(ClassScanUtils::getClassName, Function.identity()));
     }
 
+    private static <T> Stream<Class<? extends T>> getClassesFor(Class<T> clazzOrInterface) {
+        final FastClasspathScanner fcs = new FastClasspathScanner();
+        final ScanResult scanResult = fcs.scan();
+        final List<String> classNames = clazzOrInterface.isInterface() ? scanResult.getNamesOfClassesImplementing(clazzOrInterface) : scanResult.getNamesOfSubclassesOf(clazzOrInterface);
+        List<Class<?>> classes = scanResult.classNamesToClassRefs(classNames);
+        return classes.stream().map(t -> (Class<? extends T>) t);
+    }
 
+    private static boolean isStatic(Method namingMethod) {
+        return (namingMethod.getModifiers() & Modifier.STATIC) != 0;
+    }
+
+    public static <T> String getClassName(Class<? extends T> clazz) {
+        String name = clazz.getSimpleName();
+        try {
+            //TODO: Find a type-safer way...
+            Method namingMethod = clazz.getDeclaredMethod("getName");
+            if ((namingMethod != null) && isStatic(namingMethod)) {
+                Object getNameResult = namingMethod.invoke(null);
+                name = getNameResult.toString();
+            }
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            //logger.error("Unable to invoke `getName` from class {}", clazz.getName());
+        }
+        return name;
+    }
+
+    private static <T> boolean isNotAbstract(Class<? extends T> clazz) {
+        return !Modifier.isAbstract(clazz.getModifiers());
+    }
+
+    private static <T> boolean isNotAnonimous(Class<? extends T> clazz) {
+        return !clazz.isAnonymousClass();
+    }
 }

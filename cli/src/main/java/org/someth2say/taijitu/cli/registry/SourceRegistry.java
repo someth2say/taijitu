@@ -11,6 +11,7 @@ import org.someth2say.taijitu.cli.source.query.QuerySource;
 import org.someth2say.taijitu.cli.util.ClassScanUtils;
 
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -27,12 +28,12 @@ public class SourceRegistry {
         // This seems fast enough for a one-shot initialization
         // If found slow, it can be changed to scan only sub-packages
         classes = ClassScanUtils.getNamedClassesImplementing(AbstractSource.class);
-        logger.info("Registered source types: {}", StringUtils.join(classes, ","));
+        logger.info("Registered sources: {}", StringUtils.join(classes.keySet(), ","));
     }
 
     public static void useDefaults() {
-        addSourceType(QuerySource.NAME, QuerySource.class);
-        addSourceType(CSVResourceSource.NAME, CSVResourceSource.class);
+        addSourceType(ClassScanUtils.getClassName(QuerySource.class), QuerySource.class);
+        addSourceType(ClassScanUtils.getClassName(CSVResourceSource.class), CSVResourceSource.class);
     }
 
     private static <T extends AbstractSource> void addSourceType(String name, Class<T> clazz) {
@@ -47,7 +48,9 @@ public class SourceRegistry {
         Class<? extends AbstractSource> sourceClass = getSourceType(type);
         try {
             //TODO: Fix this unckecked assignment
-            return sourceClass.getDeclaredConstructor(ISourceCfg.class).newInstance(sourceConfig);
+            //return sourceClass.getDeclaredConstructor(ISourceCfg.class).newInstance(sourceConfig);
+            return sourceClass.getDeclaredConstructor(String.class, Properties.class, Properties.class)
+                    .newInstance(sourceConfig.getName(),sourceConfig.getBuildProperties(), sourceConfig.getFetchProperties());
         } catch (Exception e) {
             Object[] arguments = {sourceConfig};
             logger.error("Unable to create source. Type: {}  Arguments: {}",type, StringUtils.join(arguments, ","), e);

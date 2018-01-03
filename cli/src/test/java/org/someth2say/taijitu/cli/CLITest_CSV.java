@@ -70,8 +70,8 @@ public class CLITest_CSV {
         // s2buildProperties.setProperty(ConfigurationLabels.Comparison.RESOURCE, "file:///"+ ClassLoader.getSystemResource(".").getPath() +"/csv/Sacramentorealestatetransactions.csv");
 
         // We don't actually need a mapper here, we can compare directly the strings provided by the source.
-        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", CSVResourceSource.NAME, null, s1buildProperties, null);
-        BasicSourceCfg targetSrc = new BasicSourceCfg("target", CSVResourceSource.NAME, null, s2buildProperties, null);
+        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", CSVResourceSource.class.getSimpleName(), null, s1buildProperties, null);
+        BasicSourceCfg targetSrc = new BasicSourceCfg("target", CSVResourceSource.class.getSimpleName(), null, s2buildProperties, null);
 
         BasicComparisonCfg comp1 = new BasicComparisonCfg("csv", compare, key, sort, Arrays.asList(sourceSrc, targetSrc));
         basicTaijituCfg.setComparisons(Collections.singletonList(comp1));

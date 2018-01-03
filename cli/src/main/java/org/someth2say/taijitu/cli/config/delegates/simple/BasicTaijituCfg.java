@@ -115,7 +115,6 @@ public class BasicTaijituCfg implements ITaijituCfg {
         return this.threads;
     }
 
-
     @Override
     public Boolean isUseScanClassPath() {
         return this.isUseScanClassPath;

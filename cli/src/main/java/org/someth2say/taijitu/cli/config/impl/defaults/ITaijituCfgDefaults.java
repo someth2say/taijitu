@@ -25,7 +25,6 @@ public interface ITaijituCfgDefaults<T extends ITaijituCfg> extends ITaijituCfg,
         return threads != null ? threads : DefaultConfig.DEFAULT_THREADS;
     }
 
-
     @Override
     default Boolean isUseScanClassPath() {
         Boolean useScanClassPath = getDelegate().isUseScanClassPath();

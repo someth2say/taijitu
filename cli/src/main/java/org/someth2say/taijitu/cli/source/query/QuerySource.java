@@ -17,7 +17,6 @@ import java.util.stream.StreamSupport;
 
 public class QuerySource extends AbstractSource<ResultSet> {
     private static final Logger logger = LoggerFactory.getLogger(QuerySource.class);
-    public static final String NAME = "query";
 
     private final Connection connection;
 
@@ -107,7 +106,7 @@ public class QuerySource extends AbstractSource<ResultSet> {
             for (int columnIdx = 1; columnIdx <= rsColumnCount; ++columnIdx) {
                 String columnName = resultSetMetaData.getColumnName(columnIdx);
                 final String columnClassName = resultSetMetaData.getColumnClassName(columnIdx);
-                result.add(new FieldDescription<>(columnName, columnClassName));
+                result.add(new FieldDescription<>(columnName, Class.forName(columnClassName)));
             }
             return result;
         } catch (SQLException e) {

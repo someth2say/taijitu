@@ -6,12 +6,6 @@ public class FieldDescription<V> {
     private final String name;
     private final Class<V> clazz;
 
-    @Deprecated
-    public FieldDescription(String name, String clazzName) throws ClassNotFoundException {
-        this.name = name;
-        this.clazz = (Class<V>) Class.forName(clazzName);
-    }
-
     public FieldDescription(String name, Class<V> clazz)  {
         this.name = name;
         this.clazz = clazz;

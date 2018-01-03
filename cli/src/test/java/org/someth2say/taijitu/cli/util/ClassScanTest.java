@@ -7,6 +7,7 @@ import org.someth2say.taijitu.cli.config.ConfigurationLabels;
 import org.someth2say.taijitu.cli.config.delegates.simple.BasicComparisonCfg;
 import org.someth2say.taijitu.cli.config.delegates.simple.BasicSourceCfg;
 import org.someth2say.taijitu.cli.config.delegates.simple.BasicTaijituCfg;
+import org.someth2say.taijitu.cli.config.impl.TaijituCfg;
 import org.someth2say.taijitu.cli.config.interfaces.ISourceCfg;
 import org.someth2say.taijitu.cli.source.StreamSource;
 import org.someth2say.taijitu.compare.result.Difference;
@@ -24,19 +25,21 @@ import static org.junit.Assert.assertTrue;
 public class ClassScanTest {
 
     @Test
+    //TODO: Enable this test
     public void testClassScan() throws TaijituCliException {
 
         BasicTaijituCfg config = new BasicTaijituCfg("");
         config.setUseScanClassPath(true);
         Properties buildProperties = new Properties();
         buildProperties.setProperty(ConfigurationLabels.SOURCE_BUILD_PROPERTIES,"1,2,3,4,5");
-        ISourceCfg source1 = new BasicSourceCfg("1",StreamSource.class.getName(), null, buildProperties,null);
-        ISourceCfg source2 = new BasicSourceCfg("2",StreamSource.class.getName(), null, buildProperties,null);
-        BasicComparisonCfg comparison = new BasicComparisonCfg("", null, null, null, Arrays.asList(source1, source2));
+        ISourceCfg source1 = new BasicSourceCfg("1",StreamSource.class.getSimpleName(), null, buildProperties,null);
+        ISourceCfg source2 = new BasicSourceCfg("2",StreamSource.class.getSimpleName(), null, buildProperties,null);
+        BasicComparisonCfg comparison = new BasicComparisonCfg("testClassScan", null, null, null, Arrays.asList(source1, source2));
         config.setComparisons(Collections.singletonList(comparison));
-        List<Stream<Difference<?>>> results = TaijituCli.compare(config);
+        List<Stream<Difference<?>>> results = TaijituCli.compare(new TaijituCfg(config));
         assertEquals(1,results.size());
-        assertTrue(results.get(1).collect(Collectors.toList()).isEmpty());
+        List<Difference<?>> collect = results.get(0).collect(Collectors.toList());
+        assertTrue(collect.isEmpty());
     }
 
 }

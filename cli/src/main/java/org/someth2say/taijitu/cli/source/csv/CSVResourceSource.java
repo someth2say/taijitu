@@ -22,7 +22,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class CSVResourceSource extends AbstractSource<String[]> {
-    public static final String NAME = "csv";
     private static final String FIELD_SEPARATOR = ",";
     private Stream<String> lines;
     private List<FieldDescription<?>> providedFields;

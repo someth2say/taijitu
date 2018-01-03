@@ -13,12 +13,6 @@ import java.util.stream.Stream;
 
 public class ResultSetTupleMapper extends AbstractSourceMapper<ResultSet, Object[]> {
     private static final Logger logger = LoggerFactory.getLogger(ResultSetTupleMapper.class);
-    public static final String NAME = "resultSetToTuple";
-
-    @Override
-    public String getName() {
-        return ResultSetTupleMapper.NAME;
-    }
 
     @Override
     public Source<Object[]> apply(Source<ResultSet> source) {

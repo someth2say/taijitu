@@ -9,15 +9,8 @@ import java.util.stream.Stream;
 //TODO: Maybe this is the point to add some semantics to CSV: Parse provided fields names, try to cast values to the right object
 public class CSVTupleMapper extends AbstractSourceMapper<String[], Object[]> {
 
-    public static final String NAME = "csvToTuple";
-
     public CSVTupleMapper() {
         super();
-    }
-
-    @Override
-    public String getName() {
-        return CSVTupleMapper.NAME;
     }
 
     @Override

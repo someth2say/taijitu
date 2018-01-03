@@ -27,8 +27,9 @@ public class StreamSource<T> extends AbstractSource<T> {
     public StreamSource(String name, Properties buildProperties, Properties fetchProperties) {
         super(name, buildProperties, fetchProperties);
         this.clazz= (Class<T>) String.class;
-        this.source = Stream.of((T) StringUtils.split(buildProperties.getProperty(ConfigurationLabels.SOURCE_BUILD_PROPERTIES, ""), DefaultConfig.DEFAULT_LIST_DELIMITER));
-        fd = (FieldDescription<T>) new FieldDescription<String>(null, String.class);
+        String[] strings = StringUtils.split(buildProperties.getProperty(ConfigurationLabels.SOURCE_BUILD_PROPERTIES, ""), DefaultConfig.DEFAULT_LIST_DELIMITER);
+        this.source = (Stream<T>) Stream.of(strings);
+        fd = (FieldDescription<T>) new FieldDescription<>(null, String.class);
         providedFields = Collections.singletonList(fd);
     }
 
