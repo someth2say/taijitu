@@ -25,7 +25,6 @@ import static org.junit.Assert.assertTrue;
 public class ClassScanTest {
 
     @Test
-    //TODO: Enable this test
     public void testClassScan() throws TaijituCliException {
 
         BasicTaijituCfg config = new BasicTaijituCfg("");

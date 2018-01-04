@@ -50,18 +50,18 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
         return runComparison(comparisonCfg);
     }
 
-    private class SourceData<R, T> {
+    private class SourceData<GENERATED_TYPE, MAPPED_TYPE> {
         final ISourceCfg sourceCfg;
-        Source<R> source;
-        Source<T> mappedSource;
-        SourceMapper<R, T> mapper;
+        Source<GENERATED_TYPE> source;
+        Source<MAPPED_TYPE> mappedSource;
+        SourceMapper<GENERATED_TYPE, MAPPED_TYPE> mapper;
 
         private SourceData(ISourceCfg sourceCfg) {
             this.sourceCfg = sourceCfg;
         }
     }
 
-    public <T> Stream<Difference<?>> runComparison(IComparisonCfg iComparisonCfg) {
+    public <GENERATED_TYPE, MAPPED_TYPE> Stream<Difference<?>> runComparison(IComparisonCfg iComparisonCfg) {
 
         List<ISourceCfg> sourceConfigs = iComparisonCfg.getSourceConfigs();
         if (sourceConfigs.size() < 2) {
@@ -73,38 +73,39 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
         }
 
         // 0. Build and map sources
-        List<SourceData<?, T>> sourceDatas = buildSourceDatas(sourceConfigs);
+        List<SourceData<GENERATED_TYPE, MAPPED_TYPE>> sourceDatas = buildSourceDatas(sourceConfigs);
 
-        // 2. Calculate common fields (gives all sources)
-        Map<String, FieldDescription<?>> commonFDs = getCommonFields(sourceDatas.stream().map(sd -> sd.mappedSource).collect(Collectors.toList()));
-        final StreamEqualizer<T> streamEquality = getStreamEqualizer(iComparisonCfg, sourceDatas, commonFDs);
+        // 2. Calculate common fields (given all sources)
+        List<Source<MAPPED_TYPE>> mappedSources = sourceDatas.stream().map(sd -> sd.mappedSource).collect(Collectors.toList());
+        final StreamEqualizer<MAPPED_TYPE> streamEquality = getStreamEqualizer(iComparisonCfg, mappedSources);
 
-        // Shall we use the same matcher for canonical source? No, we should use
-        // identity matcher....
         logger.info("Comparison {} ready to run.", iComparisonCfg.getName());
         return runStreamEquality(streamEquality, sourceDatas);
     }
 
-    private <T> StreamEqualizer<T> getStreamEqualizer(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, Map<String, FieldDescription<?>> commonFDs) {
+    private <MAPPED_TYPE> StreamEqualizer<MAPPED_TYPE> getStreamEqualizer(IComparisonCfg iComparisonCfg,
+                                                                          List<Source<MAPPED_TYPE>> mappedSources) {
+        Map<String, FieldDescription<?>> commonFDs = getCommonFields(mappedSources);
         List<FieldDescription<?>> keyFDs = iComparisonCfg.getKeyFields().stream().map(commonFDs::get).collect(Collectors.toList());
         List<FieldDescription<?>> sortFDs = iComparisonCfg.getSortFields().stream().map(commonFDs::get).collect(Collectors.toList());
         List<String> compareFDS = iComparisonCfg.getCompareFields();
+        List<IEqualityCfg> equalityConfigs = iComparisonCfg.getEqualityConfigs();
 
         // 3.1.- If Key fields present, build hasher
-        CompositeHasher<T> hasher = getHasher(iComparisonCfg, sourceDatas, keyFDs);
+        CompositeHasher<MAPPED_TYPE> hasher = getHasher(keyFDs, mappedSources, equalityConfigs);
 
         // 3.2.- If Sort fields present, build comparator
-        CompositeComparator<T> sorter = getComparator(iComparisonCfg, sourceDatas, sortFDs);
+        CompositeComparator<MAPPED_TYPE> sorter = getComparator(sortFDs, mappedSources, equalityConfigs);
 
         // 3.3.- If Compare fields present, use for equality. Else, use all fields not in hasher/comparator
-        CompositeEqualizer<T> equality = getEquality(iComparisonCfg, sourceDatas, commonFDs, keyFDs, sortFDs, compareFDS);
+        CompositeEqualizer<MAPPED_TYPE> equality = getEquality(commonFDs, keyFDs, sortFDs, compareFDS, mappedSources, equalityConfigs);
 
         // 4. Run SteamEquality given Hasher and MappedStreams
         return buildEqualizer(hasher, sorter, equality);
     }
 
-    private <T> StreamEqualizer<T> buildEqualizer(CompositeHasher<T> hasher, CompositeComparator<T> sorter, CompositeEqualizer<T> equality) {
-        final StreamEqualizer<T> streamEquality;
+    private <MAPPED_TYPE> StreamEqualizer<MAPPED_TYPE> buildEqualizer(CompositeHasher<MAPPED_TYPE> hasher, CompositeComparator<MAPPED_TYPE> sorter, CompositeEqualizer<MAPPED_TYPE> equality) {
+        final StreamEqualizer<MAPPED_TYPE> streamEquality;
         if (equality == null) {
             throw new RuntimeException("Unable to define comparison fields!");
         } else {
@@ -123,200 +124,145 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
         return streamEquality;
     }
 
-    private <T> CompositeEqualizer<T> getEquality(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, Map<String, FieldDescription<?>> commonFDs, List<FieldDescription<?>> keyFDs, List<FieldDescription<?>> sortFDs, List<String> compareFDS) {
-        CompositeEqualizer<T> equality = null;
-        List<FieldDescription<?>> compareFDs =
+    private <MAPPED_TYPE> CompositeEqualizer<MAPPED_TYPE> getEquality(Map<String, FieldDescription<?>> commonFDs,
+                                                                      List<FieldDescription<?>> keyFDs,
+                                                                      List<FieldDescription<?>> sortFDs,
+                                                                      List<String> compareFDS,
+                                                                      List<Source<MAPPED_TYPE>> mappedSources,
+                                                                      List<IEqualityCfg> equalityConfigs) {
+        CompositeEqualizer<MAPPED_TYPE> equality = null;
+        List<FieldDescription<?>> actualCompareFDs =
                 (!compareFDS.isEmpty()
                         ? commonFDs.values().stream().filter(commonFD -> compareFDS.contains(commonFD.getName())) //TODO: Check that all compare fields actually are provided
                         : commonFDs.values().stream().filter(commonFD -> !keyFDs.contains(commonFD) && !sortFDs.contains(commonFD))).collect(Collectors.toList());
-        if (!compareFDs.isEmpty()) {
-            CompositeEqualizer.Builder<T> equalityBuilder = new CompositeEqualizer.Builder<>();
-            compareFDs.forEach(fd -> addComponent(iComparisonCfg, sourceDatas, equalityBuilder, fd));
+        if (!actualCompareFDs.isEmpty()) {
+            CompositeEqualizer.Builder<MAPPED_TYPE> equalityBuilder = new CompositeEqualizer.Builder<>();
+            actualCompareFDs.forEach(fd -> addEqualityComponent(equalityBuilder, fd, mappedSources, equalityConfigs));
             equality = equalityBuilder.build();
         }
         return equality;
     }
 
-    private <T> CompositeComparator<T> getComparator(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, List<FieldDescription<?>> sortFDs) {
-        CompositeComparator<T> sorter = null;
+    private <GENERATED_TYPE, MAPPED_TYPE> CompositeComparator<MAPPED_TYPE> getComparator(List<FieldDescription<?>> sortFDs,
+                                                                                         List<Source<MAPPED_TYPE>> mappedSources,
+                                                                                         List<IEqualityCfg> equalityConfigs) {
+        CompositeComparator<MAPPED_TYPE> sorter = null;
         if (!sortFDs.isEmpty()) {
-            CompositeComparator.Builder<T> comparerBuilder = new CompositeComparator.Builder<>();
-            sortFDs.forEach(fd -> addComparerComponent(iComparisonCfg, sourceDatas, comparerBuilder, fd));
+            CompositeComparator.Builder<MAPPED_TYPE> comparerBuilder = new CompositeComparator.Builder<>();
+            sortFDs.forEach(fd -> addComparerComponent(comparerBuilder, fd, mappedSources, equalityConfigs));
             sorter = comparerBuilder.build();
         }
         return sorter;
     }
 
-    private <T> CompositeHasher<T> getHasher(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, List<FieldDescription<?>> keyFDs) {
-        CompositeHasher<T> hasher = null;
+    private <MAPPED_TYPE> CompositeHasher<MAPPED_TYPE> getHasher(List<FieldDescription<?>> keyFDs,
+                                                                 List<Source<MAPPED_TYPE>> mappedSources,
+                                                                 List<IEqualityCfg> equalityConfigs) {
+        CompositeHasher<MAPPED_TYPE> hasher = null;
         if (!keyFDs.isEmpty()) {
-            CompositeHasher.Builder<T> categorizerBuilder = new CompositeHasher.Builder<>();
-            keyFDs.forEach(fd -> addCategorizerComponent(iComparisonCfg, sourceDatas, categorizerBuilder, fd));
+            CompositeHasher.Builder<MAPPED_TYPE> categorizerBuilder = new CompositeHasher.Builder<>();
+            keyFDs.forEach(fd -> addCategorizerComponent(categorizerBuilder, fd, mappedSources, equalityConfigs));
             hasher = categorizerBuilder.build();
         }
         return hasher;
     }
 
-    private <T, V> void addComponent(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, CompositeEqualizer.Builder<T> equalityBuilder, FieldDescription<V> fd) {
-        Source<T> mappedSource = sourceDatas.get(0).mappedSource;
-        Function<T, V> extractor = mappedSource.getExtractor(fd);
-        Equalizer<V> vEqualizer = getEquality(fd, iComparisonCfg.getEqualityConfigs());
+    private <MAPPED_TYPE, VALUE_TYPE> void addEqualityComponent(CompositeEqualizer.Builder<MAPPED_TYPE> equalityBuilder,
+                                                                FieldDescription<VALUE_TYPE> fd,
+                                                                List<Source<MAPPED_TYPE>> mappedSources,
+                                                                List<IEqualityCfg> equalityConfigs) {
+        Source<MAPPED_TYPE> mappedSource = mappedSources.get(0);
+        Function<MAPPED_TYPE, VALUE_TYPE> extractor = mappedSource.getExtractor(fd);
+        Equalizer<VALUE_TYPE> vEqualizer = getEquality(fd, equalityConfigs);
         equalityBuilder.addComponent(extractor, vEqualizer);
     }
 
-    private <T, V> void addCategorizerComponent(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, CompositeHasher.Builder<T> categorizerBuilder, FieldDescription<V> fd) {
-        Source<T> mappedSource = sourceDatas.get(0).mappedSource;
-        Function<T, V> extractor = mappedSource.getExtractor(fd);
-        Hasher<V> vEquality = getCategorizerEquality(fd, iComparisonCfg.getEqualityConfigs());
+    private <MAPPED_TYPE, VALUE_TYPE> void addCategorizerComponent(CompositeHasher.Builder<MAPPED_TYPE> categorizerBuilder,
+                                                                   FieldDescription<VALUE_TYPE> fd,
+                                                                   List<Source<MAPPED_TYPE>> mappedSources,
+                                                                   List<IEqualityCfg> equalityConfigs) {
+        Source<MAPPED_TYPE> mappedSource = mappedSources.get(0); // Here we are assuming the all same extractor can be used for all sources (a.k.a. non-hybrid equality)
+        Function<MAPPED_TYPE, VALUE_TYPE> extractor = mappedSource.getExtractor(fd);
+        Hasher<VALUE_TYPE> vEquality = getCategorizerEquality(fd, equalityConfigs);
         categorizerBuilder.addComponent(extractor, vEquality);
     }
 
-    private <T, V> void addComparerComponent(IComparisonCfg iComparisonCfg, List<SourceData<?, T>> sourceDatas, CompositeComparator.Builder<T> comparerBuilder, FieldDescription<V> fd) {
-        Source<T> mappedSource = sourceDatas.get(0).mappedSource;
-        Function<T, V> extractor = mappedSource.getExtractor(fd);
-        Comparator<V> vEquality = getComparableEquality(fd, iComparisonCfg.getEqualityConfigs());
+    private <MAPPED_TYPE, VALUE_TYPE> void addComparerComponent(CompositeComparator.Builder<MAPPED_TYPE> comparerBuilder,
+                                                                FieldDescription<VALUE_TYPE> fd,
+                                                                List<Source<MAPPED_TYPE>> mappedSources,
+                                                                List<IEqualityCfg> equalityConfigs) {
+        Source<MAPPED_TYPE> mappedSource = mappedSources.get(0); // Here we are assuming the all same extractor can be used for all sources (a.k.a. non-hybrid equality)
+        Function<MAPPED_TYPE, VALUE_TYPE> extractor = mappedSource.getExtractor(fd);
+        Comparator<VALUE_TYPE> vEquality = getComparableEquality(fd, equalityConfigs);
         comparerBuilder.addComponent(extractor, vEquality);
     }
 
-    private <T> List<SourceData<?, T>> buildSourceDatas(List<ISourceCfg> sourceConfigs) {
-        List<SourceData<?, T>> sourceDatas = sourceConfigs.stream().limit(2).map(SourceData<Object, T>::new).collect(Collectors.toList());
-
-        buildSources(sourceDatas);
-
-        buildMappers(sourceDatas);
-
-        Class<T> commonClass = checkCommonGeneratedClass(sourceDatas);
-
-        mapSources(sourceDatas, commonClass);
-
-        return sourceDatas;
+    private <GENERATED_TYPE, MAPPED_TYPE> List<SourceData<GENERATED_TYPE, MAPPED_TYPE>> buildSourceDatas(List<ISourceCfg> sourceConfigs) {
+        return sourceConfigs.stream().limit(2)
+                .map(sourceConfig -> {
+                    SourceData<GENERATED_TYPE, MAPPED_TYPE> sourceData = new SourceData<>(sourceConfig);
+                    sourceData.source = buildSource(sourceConfig);
+                    sourceData.mapper = buildMapper(sourceConfig);
+                    sourceData.mappedSource = mapSource(sourceData.source, sourceData.mapper);
+                    return sourceData;
+                }).collect(Collectors.toList());
     }
 
-    private <T> void mapSources(List<SourceData<?, T>> sourceDatas, Class<T> commonClass) {
-        for (SourceData<?, T> sourceData : sourceDatas) {
-            mapSource(sourceData, commonClass);
-        }
-    }
-
-    private <R, T> void mapSource(SourceData<R, T> sourceData, Class<T> commonClass) {
-        SourceMapper<R, T> mapper = sourceData.mapper;
+    private <GENERATED_TYPE, MAPPED_TYPE> Source<MAPPED_TYPE> mapSource(Source<GENERATED_TYPE> source, SourceMapper<GENERATED_TYPE, MAPPED_TYPE> mapper) {
         if (mapper == null) {
-            Class<R> sourceTypeParameter = sourceData.source.getTypeParameter();
-            if (commonClass.isAssignableFrom(sourceTypeParameter)) {
-                // TODO: What should we do with this unchecked cast?
-                sourceData.mappedSource = (Source<T>) sourceData.source;
-            } else {
-                throw new RuntimeException("Source " + sourceData.source.getName() + " generate incompatible class "
-                        + sourceTypeParameter.getName() + " (need " + commonClass.getName() + ")");
-            }
+            // TODO: What should we do with this unchecked cast?
+            return (Source<MAPPED_TYPE>) source;
         } else {
             logger.debug("Applying mapper {} to source {} to produce composite type {}", ClassScanUtils.getClassName(mapper.getClass()),
-                    sourceData.source.getName(), mapper.getTypeParameter().getSimpleName());
-            sourceData.mappedSource = mapper.apply(sourceData.source);
+                    source.getName(), mapper.getTypeParameter().getSimpleName());
+            return mapper.apply(source);
         }
     }
 
-    private <T> Class<T> checkCommonGeneratedClass(List<SourceData<?, T>> sourceDatas) {
-        Class<T> expectedClass = null;
-        for (SourceData<?, T> sd : sourceDatas) {
-            expectedClass = checkGeneratedClass(expectedClass, sd);
-        }
-        return expectedClass;
-    }
-
-    private <R, T> Class<T> checkGeneratedClass(Class<T> commonClass, SourceData<R, T> sd) {
-        SourceMapper<R, T> mapper = sd.mapper;
-
-        Class<R> sourceTypeParameter = sd.source.getTypeParameter();
-
-        // TODO: What should we do with this unchecked cast?
-        Class<T> sourceMappedClass = mapper != null ? mapper.getTypeParameter() : (Class<T>) sourceTypeParameter;
-
-        if (commonClass != sourceMappedClass) {
-            if (commonClass == null) {
-                logger.debug("Setting sources common class to {} due to {} ", sourceMappedClass, sd.source.getName());
-                commonClass = sourceMappedClass;
-
-            } else if (sourceMappedClass.isAssignableFrom(commonClass)) {
-                logger.debug("Upcasting sources common class to {} due to {}", sourceMappedClass, sd.source.getName());
-                commonClass = sourceMappedClass;
-            } else {
-                logger.error("Unable to find a common class for all sources! Was {}, but source {} generates {}",
-                        commonClass, sd.source.getName(), sourceMappedClass);
-                throw new RuntimeException("Unable to find a common class for all sources!");
-            }
-        }
-        return commonClass;
-    }
-
-    private <T> void buildMappers(List<SourceData<?, T>> sourceDatas) {
-        for (SourceData<?, T> sourceData : sourceDatas) {
-            buildMapper(sourceData);
-        }
-    }
-
-    private <R, T> void buildMapper(SourceData<R, T> sourceData) {
-        String mapperName = sourceData.sourceCfg.getMapper();
-        Source<R> source = sourceData.source;
+    private <GENERATED_TYPE, MAPPED_TYPE> SourceMapper<GENERATED_TYPE, MAPPED_TYPE> buildMapper(ISourceCfg sourceCfg) {
+        String mapperName = sourceCfg.getMapper();
         if (mapperName != null) {
-            SourceMapper<R, T> mapper = MapperRegistry.getInstance(mapperName);
+            SourceMapper<GENERATED_TYPE, MAPPED_TYPE> mapper = MapperRegistry.getInstance(mapperName);
             if (mapper == null) {
                 throw new RuntimeException(
-                        "Can't find mapper instance: " + mapperName + " for source " + source.getName());
+                        "Can't find mapper instance: " + mapperName);
             }
-            sourceData.mapper = mapper;
+            return mapper;
         } else {
-            logger.trace("Source {} have no mapper defined, so will directly generate composite type {}",
-                    source.getName(), source.getTypeParameter().getName());
-            sourceData.mapper = null;
+            return null;
         }
     }
 
-    private <T> void buildSources(List<SourceData<?, T>> sourceDatas) {
-        for (SourceData<?, T> sourceData : sourceDatas) {
-            buildSource(sourceData);
-        }
-    }
-
-    private <R, T> void buildSource(SourceData<R, T> sourceData) {
-        Source<R> source = SourceRegistry.getInstance(sourceData.sourceCfg.getType(), sourceData.sourceCfg);
+    private <GENERATED_TYPE> Source<GENERATED_TYPE> buildSource(ISourceCfg sourceCfg) {
+        Source<GENERATED_TYPE> source = SourceRegistry.getInstance(sourceCfg.getType(), sourceCfg);
         if (source == null) {
-            throw new RuntimeException("Can't find source type " + sourceData.sourceCfg.getType());
+            throw new RuntimeException("Can't find source type " + sourceCfg.getType());
         }
-        sourceData.source = source;
+        return source;
     }
 
-    private <T> Stream<Difference<?>> runStreamEquality(StreamEqualizer<T> streamEquality, List<SourceData<?, T>> sourceDatas) {
-        Stream<Difference<?>> comparisonResult = null;
-        SourceData<?, T> sourceData0 = sourceDatas.get(0);
-        SourceData<?, T> sourceData1 = sourceDatas.get(1);
-        //try (
-        Source<T> sourceSrc = sourceData0.mappedSource;
-        Source<T> targetSrc = sourceData1.mappedSource;
-        //        ){
-        Stream<T> sourceStream = sourceSrc.stream();
-        Stream<T> targetStream = targetSrc.stream();
-        comparisonResult = streamEquality.underlyingDiffs(sourceStream, targetStream);
-        return comparisonResult;
-//        } catch (Source.ClosingException e) {
-//            logger.warn("Unable to close sources.", e);
-//            // Misleading warning in Intellij. See https://youtrack.jetbrains.com/issue/IDEA-181860
-//            return comparisonResult;
-//        }
+    private <GENERATED_TYPE, MAPPED_TYPE> Stream<Difference<?>> runStreamEquality(StreamEqualizer<MAPPED_TYPE> streamEquality, List<SourceData<GENERATED_TYPE, MAPPED_TYPE>> sourceDatas) {
+        SourceData<?, MAPPED_TYPE> sourceData0 = sourceDatas.get(0);
+        SourceData<?, MAPPED_TYPE> sourceData1 = sourceDatas.get(1);
+        Source<MAPPED_TYPE> sourceSrc = sourceData0.mappedSource;
+        Source<MAPPED_TYPE> targetSrc = sourceData1.mappedSource;
+        Stream<MAPPED_TYPE> sourceStream = sourceSrc.stream();
+        Stream<MAPPED_TYPE> targetStream = targetSrc.stream();
+        return streamEquality.underlyingDiffs(sourceStream, targetStream);
     }
 
-    private <V> Equalizer<V> getEquality(FieldDescription<V> fd, List<IEqualityCfg> equalityConfigs) {
+    private <VALUE_TYPE> Equalizer<VALUE_TYPE> getEquality(FieldDescription<VALUE_TYPE> fd, List<IEqualityCfg> equalityConfigs) {
         IEqualityCfg iEqualityCfg = getEqualityConfigFor(fd, equalityConfigs);
         return ValueEqualityRegistry.getInstance(iEqualityCfg.getName(), iEqualityCfg.getEqualityParameters());
     }
 
-    private <V> Comparator<V> getComparableEquality(FieldDescription<V> fd, List<IEqualityCfg> equalityConfigs) {
+    private <VALUE_TYPE> Comparator<VALUE_TYPE> getComparableEquality(FieldDescription<VALUE_TYPE> fd, List<IEqualityCfg> equalityConfigs) {
         List<IEqualityCfg> compatibleEqualityConfigs = getEqualityConfigsFor(fd, equalityConfigs);
 
-        Optional<Comparator<V>> first = compatibleEqualityConfigs.stream()
+        Optional<Comparator<VALUE_TYPE>> first = compatibleEqualityConfigs.stream()
                 .map(cfg -> ValueEqualityRegistry.getInstance(cfg.getName(), cfg.getEqualityParameters()))
                 .filter(eq -> eq instanceof Comparator)
-                .map(eq -> (Comparator<V>) eq).findFirst();
+                .map(eq -> (Comparator<VALUE_TYPE>) eq).findFirst();
         if (first.isPresent()) {
             return first.get();
         }
@@ -324,13 +270,13 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
         throw new RuntimeException("Can't find any comparable equality for field " + fd);
     }
 
-    private <V> Hasher<V> getCategorizerEquality(FieldDescription<V> fd, List<IEqualityCfg> equalityConfigs) {
+    private <VALUE_TYPE> Hasher<VALUE_TYPE> getCategorizerEquality(FieldDescription<VALUE_TYPE> fd, List<IEqualityCfg> equalityConfigs) {
         List<IEqualityCfg> compatibleEqualityConfigs = getEqualityConfigsFor(fd, equalityConfigs);
 
-        Optional<Hasher<V>> first = compatibleEqualityConfigs.stream()
+        Optional<Hasher<VALUE_TYPE>> first = compatibleEqualityConfigs.stream()
                 .map(cfg -> ValueEqualityRegistry.getInstance(cfg.getName(), cfg.getEqualityParameters()))
                 .filter(eq -> eq instanceof Hasher)
-                .map(eq -> (Hasher<V>) eq).findFirst();
+                .map(eq -> (Hasher<VALUE_TYPE>) eq).findFirst();
         if (first.isPresent()) {
             return first.get();
         }
@@ -338,7 +284,7 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
         throw new RuntimeException("Can't find any categorizer equality for field " + fd);
     }
 
-    private List<IEqualityCfg> getEqualityConfigsFor(FieldDescription fd, final List<IEqualityCfg> equalityCfgs) {
+    private <VALUE_TYPE> List<IEqualityCfg> getEqualityConfigsFor(FieldDescription<VALUE_TYPE> fd, final List<IEqualityCfg> equalityCfgs) {
         final String fieldClass = fd.getClazz().getName();
         final String fieldName = fd.getName();
         List<IEqualityCfg> perfectMatchEqualities = equalityCfgs.stream()
@@ -360,7 +306,7 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
         return anythingMatchEqualities;
     }
 
-    private IEqualityCfg getEqualityConfigFor(FieldDescription fieldDescription, final List<IEqualityCfg> equalityConfigIfaces) {
+    private <VALUE_TYPE> IEqualityCfg getEqualityConfigFor(FieldDescription<VALUE_TYPE> fieldDescription, final List<IEqualityCfg> equalityConfigIfaces) {
         final String fieldClass = fieldDescription.getClazz().getName();
         final String fieldName = fieldDescription.getName();
         Optional<IEqualityCfg> perfectMatchesEqualities = equalityConfigIfaces.stream()
@@ -400,14 +346,14 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
         }
     }
 
-    private <T> Map<String, FieldDescription<?>> getCommonFields(List<Source<T>> sources) {
+    private <MAPPED_TYPE> Map<String, FieldDescription<?>> getCommonFields(List<Source<MAPPED_TYPE>> sources) {
         return getCanonicalFDs(sources).stream().collect(Collectors.toMap(FieldDescription::getName, Function.identity()));
     }
 
-    private <T> List<FieldDescription<?>> getCanonicalFDs(List<Source<T>> sources) {
+    private <MAPPED_TYPE> List<FieldDescription<?>> getCanonicalFDs(List<Source<MAPPED_TYPE>> sources) {
         List<FieldDescription<?>> canonicalFDs = sources.get(0).getProvidedFields();
         // Retain only canonicalFields that are also provided by other streams.
-        for (Source<T> source : sources.stream().skip(1).collect(Collectors.toList())) {
+        for (Source<MAPPED_TYPE> source : sources.stream().skip(1).collect(Collectors.toList())) {
             List<FieldDescription<?>> sourceFDs = source.getProvidedFields();
             canonicalFDs.retainAll(sourceFDs);
         }
