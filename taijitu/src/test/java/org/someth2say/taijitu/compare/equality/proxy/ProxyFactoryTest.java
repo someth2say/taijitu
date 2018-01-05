@@ -23,11 +23,11 @@ public class ProxyFactoryTest {
         assertEquals(proxy, otherDate); // Test equality is actually applied
         assertEquals(date.toString(), proxy.toString()); // Test non-equality methods are kept
 
-        //Equality Proxy can not ensure equality reflexivenes... and this may be a real pain!
+        //Equality Proxy can not ensure equality reflexiveness... and this may be a real pain!
         assertNotEquals(otherDate, proxy);
     }
 
-    //@Test  //Can't make it work, too many dificulties for binding Stream/BaseStream methods... I give up :(
+    //@Test  //Can't make it work, too many difficulties for binding Stream/BaseStream methods... I give up :(
     public void proxyEqualizerInterfaceTest() {
         Stream<String> instance = Stream.of("Hello","world!");
         Stream<String> otherInstance = Stream.of("HELLO","WORLD!");

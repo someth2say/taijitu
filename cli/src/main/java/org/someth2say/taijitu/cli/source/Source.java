@@ -40,6 +40,4 @@ public interface Source<T> extends Named, AutoCloseable {
             super(message, cause, enableSuppression, writableStackTrace);
         }
     }
-
-    Class<T> getTypeParameter();
 }

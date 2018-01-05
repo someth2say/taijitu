@@ -37,11 +37,6 @@ public class FilterMapper<ORIG_TYPE> extends AbstractSourceMapper<ORIG_TYPE, ORI
             public Stream<ORIG_TYPE> stream() {
                 return source.stream().filter(predicate);
             }
-
-            @Override
-            public Class<ORIG_TYPE> getTypeParameter() {
-                return source.getTypeParameter();
-            }
         };
     }
 }

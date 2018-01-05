@@ -1,10 +1,10 @@
 package org.someth2say.taijitu.compare.equality.impl.composite;
 
-import org.junit.Test;
-import org.someth2say.taijitu.compare.equality.wrapper.IComparableWraper;
-
 import static org.junit.Assert.assertTrue;
 import static org.someth2say.taijitu.compare.equality.impl.composite.TestComposite.testClassThreeComparator;
+
+import org.junit.Test;
+import org.someth2say.taijitu.compare.equality.wrapper.IComparableWraper;
 
 public class CompositeComparatorTest {
 
@@ -18,9 +18,10 @@ public class CompositeComparatorTest {
         assertTrue(testClassThreeComparator.compare(differentFrom1, differentFrom2) == 0);
         assertTrue(testClassThreeComparator.equals(differentFrom1, differentFrom2));
 
-        IComparableWraper<TestComposite, ?> wrap1 = testClassThreeComparator.wrap(differentFrom1);
-        IComparableWraper<TestComposite, ?> wrap3 = testClassThreeComparator.wrap(differentFrom3);
-        IComparableWraper<TestComposite, ?> wrap2 = testClassThreeComparator.wrap(differentFrom2);
+        // TODO: Those casts seems only to be needed in Java8 ...
+        IComparableWraper<TestComposite, ?> wrap1 = (IComparableWraper<TestComposite, ?>) testClassThreeComparator.wrap(differentFrom1);
+        IComparableWraper<TestComposite, ?> wrap3 = (IComparableWraper<TestComposite, ?>) testClassThreeComparator.wrap(differentFrom3);
+        IComparableWraper<TestComposite, ?> wrap2 = (IComparableWraper<TestComposite, ?>) testClassThreeComparator.wrap(differentFrom2);
 
         assertTrue(wrap1.compareTo(wrap3) < 0);
         assertTrue(wrap1.compareTo(wrap2) == 0);

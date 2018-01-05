@@ -39,11 +39,6 @@ public class CSVResourceSource extends AbstractSource<String[]> {
         if (lines != null) lines.close();
     }
 
-    @Override
-    public Class<String[]> getTypeParameter() {
-        return String[].class;
-    }
-
     private static class CSVBuildProperties {
         final String path;
 

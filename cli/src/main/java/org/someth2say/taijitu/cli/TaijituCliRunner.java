@@ -205,8 +205,7 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
             return (Source<MAPPED_TYPE>) source;
         } else {
             Source<MAPPED_TYPE> mappedSource = mapper.apply(source);
-            logger.debug("Applying mapper {} to source {} to produce composite type {}", ClassScanUtils.getClassName(mapper.getClass()),
-                    source.getName(), mappedSource.getTypeParameter().getSimpleName());
+            logger.debug("Applying mapper {} to source {}", ClassScanUtils.getClassName(mapper.getClass()),source.getName());
             return mappedSource;
         }
     }

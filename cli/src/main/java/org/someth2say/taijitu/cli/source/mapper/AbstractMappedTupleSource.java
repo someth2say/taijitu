@@ -11,7 +11,7 @@ import java.util.function.Function;
 
 public abstract class AbstractMappedTupleSource extends AbstractSource<Object[]> {
 
-    private final Map<FieldDescription, Integer> fieldPositions = new HashMap<>();
+    private final Map<FieldDescription<?>, Integer> fieldPositions = new HashMap<>();
     private final Source<?> source;
 
     AbstractMappedTupleSource(Source<?> source) {
@@ -19,7 +19,8 @@ public abstract class AbstractMappedTupleSource extends AbstractSource<Object[]>
         this.source = source;
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public <V> Function<Object[], V> getExtractor(FieldDescription<V> fd) {
         int index = getFieldPosition(fd);
         if (index < 0) return null;
@@ -28,11 +29,6 @@ public abstract class AbstractMappedTupleSource extends AbstractSource<Object[]>
 
     private <V> int getFieldPosition(FieldDescription<V> fd) {
         return fieldPositions.computeIfAbsent(fd, field -> getProvidedFields().indexOf(field));
-    }
-
-    @Override
-    public Class<Object[]> getTypeParameter() {
-        return Object[].class;
     }
 
     @Override

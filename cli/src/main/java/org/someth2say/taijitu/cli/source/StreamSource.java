@@ -22,11 +22,9 @@ public class StreamSource<T> extends AbstractSource<T> {
     private final List<FieldDescription<?>> providedFields;
     private final Stream<T> source;
     private final FieldDescription<T> fd;
-    private final Class<T> clazz;
 
     public StreamSource(String name, Properties buildProperties, Properties fetchProperties) {
         super(name, buildProperties, fetchProperties);
-        this.clazz= (Class<T>) String.class;
         String[] strings = StringUtils.split(buildProperties.getProperty(ConfigurationLabels.SOURCE_BUILD_PROPERTIES, ""), DefaultConfig.DEFAULT_LIST_DELIMITER);
         this.source = (Stream<T>) Stream.of(strings);
         fd = (FieldDescription<T>) new FieldDescription<>(null, String.class);
@@ -38,7 +36,6 @@ public class StreamSource<T> extends AbstractSource<T> {
         this.source = source;
         fd = new FieldDescription<>(null, clazz);
         providedFields = Collections.singletonList(fd);
-        this.clazz = clazz;
     }
 
     @Override
@@ -56,8 +53,4 @@ public class StreamSource<T> extends AbstractSource<T> {
         return source;
     }
 
-    @Override
-    public Class<T> getTypeParameter() {
-        return clazz;
-    }
 }

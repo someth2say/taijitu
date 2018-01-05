@@ -6,7 +6,7 @@ import org.someth2say.taijitu.compare.equality.wrapper.IComparableWraper;
 public interface Comparator<T> extends java.util.Comparator<T>, Equalizer<T> {
 
     @Override
-    default IComparableWraper<T, ?> wrap(T obj) {
+    default IComparableWraper<T, ? extends Comparator<T>> wrap(T obj) {
         return new ComparableWrapper<>(obj, this);
     }
 

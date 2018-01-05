@@ -8,7 +8,7 @@ public interface Hasher<T> extends Equalizer<T> {
     int hashCode(T t);
 
     @Override
-	default IHashableWraper<T,?> wrap(T obj) {
+	default IHashableWraper<T,? extends Hasher<T>> wrap(T obj) {
         return new HashableWrapper<>(obj, this);
     }
 

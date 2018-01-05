@@ -127,11 +127,6 @@ public class QuerySource extends AbstractSource<ResultSet> {
     }
 
     @Override
-    public Class<ResultSet> getTypeParameter() {
-        return ResultSet.class;
-    }
-
-    @Override
     public List<FieldDescription<?>> getProvidedFields() {
         if (preparedStatement == null) {
             init();
