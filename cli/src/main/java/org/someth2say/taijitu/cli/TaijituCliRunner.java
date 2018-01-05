@@ -101,10 +101,13 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
                 throw new RuntimeException("Hybrid stream equality not supported yet. Please use only Keys or Sort fields");
             } else {
                 if (hasher != null) {
+                    logger.debug("Hashing composites using " + hasher);
                     streamEquality = new HashingStreamEqualizer<>(equality, hasher);
                 } else if (sorter != null) {
+                    logger.debug("Assuming composites ordered by using " + sorter);
                     streamEquality = new ComparableStreamEqualizer<>(equality, sorter);
                 } else {
+                    logger.debug("No sort/hash fields provided, so applying positional comparison.");
                     streamEquality = new SimpleStreamEqualizer<>(equality);
                 }
             }
@@ -121,9 +124,9 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
         CompositeEqualizer<MAPPED_TYPE> equality = null;
         Stream<FieldDescription<?>> commonFDsStream = commonFDs.values().stream();
         List<FieldDescription<?>> actualCompareFDs = (!compareFDS.isEmpty()
-                        ? commonFDsStream.filter(commonFD -> compareFDS.contains(commonFD.getName()))
-                        : commonFDsStream.filter(commonFD -> !keyFDs.contains(commonFD) && !sortFDs.contains(commonFD)))
-                        .collect(Collectors.toList());
+                ? commonFDsStream.filter(commonFD -> compareFDS.contains(commonFD.getName()))
+                : commonFDsStream.filter(commonFD -> !keyFDs.contains(commonFD) && !sortFDs.contains(commonFD)))
+                .collect(Collectors.toList());
         if (!actualCompareFDs.isEmpty()) {
             CompositeEqualizer.Builder<MAPPED_TYPE> equalityBuilder = new CompositeEqualizer.Builder<>();
             actualCompareFDs.forEach(fd -> addEqualityComponent(equalityBuilder, fd, mappedSources, equalityConfigs));
@@ -201,9 +204,10 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
             // TODO: What should we do with this unchecked cast?
             return (Source<MAPPED_TYPE>) source;
         } else {
+            Source<MAPPED_TYPE> mappedSource = mapper.apply(source);
             logger.debug("Applying mapper {} to source {} to produce composite type {}", ClassScanUtils.getClassName(mapper.getClass()),
-                    source.getName(), mapper.getTypeParameter().getSimpleName());
-            return mapper.apply(source);
+                    source.getName(), mappedSource.getTypeParameter().getSimpleName());
+            return mappedSource;
         }
     }
 
@@ -342,6 +346,7 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
         // Retain only canonicalFields that are also provided by other streams.
         for (Source<MAPPED_TYPE> source : sources.stream().skip(1).collect(Collectors.toList())) {
             List<FieldDescription<?>> sourceFDs = source.getProvidedFields();
+            // TODO: This sometimes drop a NPE... should investigate.
             canonicalFDs.retainAll(sourceFDs);
         }
         return canonicalFDs;
@@ -349,7 +354,7 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
 
 }
 
-class Duo<T> extends Pair<T,T> {
+class Duo<T> extends Pair<T, T> {
     private final T left;
     private final T right;
 

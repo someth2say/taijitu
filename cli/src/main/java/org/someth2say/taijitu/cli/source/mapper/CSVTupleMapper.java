@@ -14,11 +14,6 @@ public class CSVTupleMapper extends AbstractSourceMapper<String[], Object[]> {
     }
 
     @Override
-    public Class<Object[]> getTypeParameter() {
-        return Object[].class;
-    }
-
-    @Override
     public Source<Object[]> apply(Source<String[]> source) {
         return new AbstractMappedTupleSource(source) {
 

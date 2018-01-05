@@ -40,4 +40,5 @@ public class StringCaseInsensitiveTest {
         assertFalse(aaa.compareTo(aa) < 0);
         assertFalse(aa.compareTo(aAA) > 0);
     }
+
 }

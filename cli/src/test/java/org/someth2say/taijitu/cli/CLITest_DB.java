@@ -169,11 +169,7 @@ public class CLITest_DB {
         properties.setProperty(ConfigurationLabels.EQUALITY + "." + DateThreshold.class.getSimpleName() + "." + ConfigurationLabels.FIELD_CLASS, Date.class.getName());
         properties.setProperty(ConfigurationLabels.EQUALITY + "." + DateThreshold.class.getSimpleName() + "." + ConfigurationLabels.EQUALITY_PARAMS, "100");
 
-        final ImmutableHierarchicalConfiguration configuration = ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(properties));
-
-//        dumpConfig(configuration);
-
-        return configuration;
+        return ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(properties));
     }
 
     private Properties buildDbSampleData() throws SQLException {

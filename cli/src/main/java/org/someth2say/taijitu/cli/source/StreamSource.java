@@ -34,7 +34,6 @@ public class StreamSource<T> extends AbstractSource<T> {
     }
 
     public StreamSource(String name, Stream<T> source, Class<T> clazz) {
-        //super(new BasicSourceCfg(name,StreamSource.class.getName(),null,null,null));
         super(name, null,null);
         this.source = source;
         fd = new FieldDescription<>(null, clazz);

@@ -47,7 +47,10 @@ public class CLITest_CSV {
     @Test
     public void CSVTest() throws TaijituCliException {
         // Create the tables and test data
-        final TaijituCfg configuration = buildCSVConfiguration();
+        final TaijituCfg configuration = buildCSVConfiguration(
+                "http://samplecsvs.s3.amazonaws.com/Sacramentorealestatetransactions.csv",
+                "/csv/Sacramentorealestatetransactions.csv"
+        );
 
         final List<Stream<Difference<?>>> comparisonResults = TaijituCli.compare(configuration);
 
@@ -56,16 +59,16 @@ public class CLITest_CSV {
         Assert.assertEquals(0, firstResult.size());
     }
 
-    private TaijituCfg buildCSVConfiguration() {
+    private TaijituCfg buildCSVConfiguration(String resource1, String resource2) {
         BasicTaijituCfg basicTaijituCfg = new BasicTaijituCfg("");
 
         //URL Scheme
         Properties s1buildProperties = new Properties();
-        s1buildProperties.setProperty(ConfigurationLabels.RESOURCE, "http://samplecsvs.s3.amazonaws.com/Sacramentorealestatetransactions.csv");
+        s1buildProperties.setProperty(ConfigurationLabels.RESOURCE, resource1);
 
         // File scheme: File source (should be in classpath)
         Properties s2buildProperties = new Properties();
-        s2buildProperties.setProperty(ConfigurationLabels.RESOURCE, "/csv/Sacramentorealestatetransactions.csv");
+        s2buildProperties.setProperty(ConfigurationLabels.RESOURCE, resource2);
         // File scheme (must be absolute)
         // s2buildProperties.setProperty(ConfigurationLabels.Comparison.RESOURCE, "file:///"+ ClassLoader.getSystemResource(".").getPath() +"/csv/Sacramentorealestatetransactions.csv");
 

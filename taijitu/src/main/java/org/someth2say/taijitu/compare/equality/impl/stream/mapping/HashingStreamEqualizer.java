@@ -21,6 +21,10 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
     final private Equalizer<T> equalizer;
     final private Hasher<T> hasher;
 
+    public HashingStreamEqualizer(Hasher<T> hasher) {
+        this.equalizer = hasher;
+        this.hasher = hasher;
+    }
 
     public HashingStreamEqualizer(Equalizer<T> equalizer, Hasher<T> hasher) {
         this.equalizer = equalizer;

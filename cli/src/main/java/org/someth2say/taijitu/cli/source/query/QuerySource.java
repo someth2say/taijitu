@@ -19,10 +19,7 @@ public class QuerySource extends AbstractSource<ResultSet> {
     private static final Logger logger = LoggerFactory.getLogger(QuerySource.class);
 
     private final Connection connection;
-
-    //TODO: this properties should be created externally to the source
     private final FetchData fetchData;
-
     private ResultSet resultSet;
     private PreparedStatement preparedStatement;
     private List<FieldDescription<?>> providedFields;
@@ -118,12 +115,12 @@ public class QuerySource extends AbstractSource<ResultSet> {
     @Override
 	public void close() {
         try {
-            resultSet.close();
-            try {
-                preparedStatement.close();
-            } catch (SQLException e) {
-                //nothing we can do here
-            }
+            preparedStatement.close(); // This also closes the result-set
+        } catch (SQLException e) {
+            //nothing we can do here
+        }
+        try {
+            connection.close();
         } catch (SQLException e) {
             //nothing we can do here
         }

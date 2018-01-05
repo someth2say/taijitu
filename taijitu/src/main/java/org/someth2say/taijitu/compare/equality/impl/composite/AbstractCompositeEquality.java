@@ -1,6 +1,7 @@
 package org.someth2say.taijitu.compare.equality.impl.composite;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class AbstractCompositeEquality {
 
@@ -16,6 +17,6 @@ public abstract class AbstractCompositeEquality {
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName();
+        return this.getClass().getSimpleName() +"("+ extractorsAndEqualities.stream().map(ExtractorAndEquality::toString).collect(Collectors.joining(",")) +")";
     }
 }

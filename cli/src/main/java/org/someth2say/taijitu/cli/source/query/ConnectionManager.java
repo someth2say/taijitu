@@ -28,6 +28,7 @@ public final class ConnectionManager {
 
     public static Connection getConnection(Properties properties) throws SQLException {
         HikariDataSource dataSource = datasourceMap.computeIfAbsent(properties, config -> new HikariDataSource(new HikariConfig(properties)));
+
         return dataSource.getConnection();
     }
 

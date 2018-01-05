@@ -45,9 +45,4 @@ public class ResultSetTupleMapper extends AbstractSourceMapper<ResultSet, Object
             }
         };
     }
-
-    @Override
-    public Class<Object[]> getTypeParameter() {
-        return Object[].class;
-    }
 }

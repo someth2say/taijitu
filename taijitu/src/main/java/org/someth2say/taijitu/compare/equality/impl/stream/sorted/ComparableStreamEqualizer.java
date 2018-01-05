@@ -15,16 +15,21 @@ import java.util.stream.Stream;
 public class ComparableStreamEqualizer<T> implements StreamEqualizer<T> {
 
     private final Equalizer<T> equalizer;
-    private final Comparator<T> categorizer;
+    private final Comparator<T> comparator;
 
-    public ComparableStreamEqualizer(Equalizer<T> equalizer, Comparator<T> categorizer) {
+    public ComparableStreamEqualizer(Comparator<T> comparator) {
+        this.equalizer = comparator;
+        this.comparator = comparator;
+    }
+
+    public ComparableStreamEqualizer(Equalizer<T> equalizer, Comparator<T> comparator) {
         this.equalizer = equalizer;
-        this.categorizer = categorizer;
+        this.comparator = comparator;
     }
 
     @Override
     public Stream<Difference<?>> underlyingDiffs(Stream<T> source, Stream<T> target) {
-        return compare(source, target, categorizer, equalizer);
+        return compare(source, target, comparator, equalizer);
     }
 
     public static <T> Stream<Difference<?>> compare(Stream<T> source, Stream<T> target, Comparator<T> comparator, Equalizer<T> equalizer) {
