@@ -27,7 +27,9 @@ public class ClassScanTest {
     @Test
     public void testClassScan() throws TaijituCliException {
         BasicTaijituCfg config = new BasicTaijituCfg("");
+        
         config.setUseScanClassPath(true);
+        
         Properties buildProperties = new Properties();
         buildProperties.setProperty(ConfigurationLabels.SOURCE_BUILD_PROPERTIES,"1,2,3,4,5");
         ISourceCfg source1 = new BasicSourceCfg("1",StreamSource.class.getSimpleName(), null, buildProperties,null);

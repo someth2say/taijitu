@@ -12,7 +12,6 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by Jordi Sola on 16/02/2017.
  */
-@SuppressWarnings("rawtypes")
 public class ValueEqualityRegistry {
     private static final Logger logger = LoggerFactory.getLogger(ValueEqualityRegistry.class);
     private static Map<String, Class<? extends AbstractConfigurableEqualizer>> classes = new ConcurrentHashMap<>();
@@ -31,7 +30,7 @@ public class ValueEqualityRegistry {
 
         Collection<Class<? extends AbstractConfigurableEqualizer>> equalityClasses = ClassScanUtils.getClassesImplementing(implementedInterface);
         equalityClasses.forEach(ValueEqualityRegistry::addEqualityStrategy);
-        logger.info("Registered value equalities: {}", classes.keySet().toString());
+        logger.info("Registered value equalities: {}", classes.values().stream().map(c->ClassScanUtils.getClassName(c)));
     }
 
     public static void useDefaults() {
@@ -44,7 +43,7 @@ public class ValueEqualityRegistry {
     }
 
     private static void addEqualityStrategy(Class<? extends AbstractConfigurableEqualizer> clazz) {
-        classes.put(clazz.getSimpleName(), clazz);
+        classes.put(ClassScanUtils.getClassName(clazz), clazz);
     }
 
     public static <T> AbstractConfigurableEqualizer<T> getInstance(String type, Object equalityConfig) {

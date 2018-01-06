@@ -4,12 +4,9 @@ import org.junit.Test;
 import org.someth2say.taijitu.cli.source.Source;
 import org.someth2say.taijitu.cli.source.StreamSource;
 import org.someth2say.taijitu.compare.equality.aspects.external.Comparator;
-import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
-import org.someth2say.taijitu.compare.equality.impl.stream.simple.SimpleStreamEqualizer;
 import org.someth2say.taijitu.compare.equality.impl.stream.sorted.ComparableStreamEqualizer;
 import org.someth2say.taijitu.compare.equality.impl.value.JavaComparable;
-import org.someth2say.taijitu.compare.equality.impl.value.JavaObject;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Missing;
 

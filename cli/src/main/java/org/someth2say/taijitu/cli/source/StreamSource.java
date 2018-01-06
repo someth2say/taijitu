@@ -3,9 +3,6 @@ package org.someth2say.taijitu.cli.source;
 import org.apache.commons.lang3.StringUtils;
 import org.someth2say.taijitu.cli.config.ConfigurationLabels;
 import org.someth2say.taijitu.cli.config.DefaultConfig;
-import org.someth2say.taijitu.cli.config.delegates.simple.BasicSourceCfg;
-import org.someth2say.taijitu.cli.config.interfaces.ISourceCfg;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;

@@ -19,7 +19,7 @@ public abstract class AbstractMappedTupleSource extends AbstractSource<Object[]>
         this.source = source;
     }
 
-    @SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked")
 	@Override
     public <V> Function<Object[], V> getExtractor(FieldDescription<V> fd) {
         int index = getFieldPosition(fd);

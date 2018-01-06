@@ -34,12 +34,12 @@ public class MapperRegistry {
 	}
 
 	public static void useDefaults() {
-		addMapper(ClassScanUtils.getClassName(CSVTupleMapper.class), CSVTupleMapper.class);
-		addMapper(ClassScanUtils.getClassName(ResultSetTupleMapper.class), ResultSetTupleMapper.class);
+		addMapper(CSVTupleMapper.class);
+		addMapper(ResultSetTupleMapper.class);
 	}
 
-	private static void addMapper(String name, Class<? extends SourceMapper<?, ?>> clazz) {
-		classes.put(name, clazz);
+	private static void addMapper(Class<? extends SourceMapper<?, ?>> clazz) {
+		classes.put(ClassScanUtils.getClassName(clazz), clazz);
 	}
 	
 	@SuppressWarnings("unchecked")

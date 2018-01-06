@@ -12,7 +12,6 @@ public class BasicTaijituCfg implements ITaijituCfg {
     private Integer threads;
 
     private Boolean isUseScanClassPath;
-    private IStrategyCfg strategyConfig;
 
     private List<IEqualityCfg> equalityConfigs;
     private List<ISourceCfg> sourceConfigs;
@@ -42,10 +41,6 @@ public class BasicTaijituCfg implements ITaijituCfg {
 
     public void setUseScanClassPath(Boolean useScanClassPath) {
         isUseScanClassPath = useScanClassPath;
-    }
-
-    public void setStrategyConfig(IStrategyCfg strategyConfig) {
-        this.strategyConfig = strategyConfig;
     }
 
     public void setEqualityConfigs(List<IEqualityCfg> equalityConfigs) {
@@ -188,9 +183,5 @@ public class BasicTaijituCfg implements ITaijituCfg {
     @Override
     public String getMapper() {
         return mapper;
-    }
-
-    public IStrategyCfg getStrategyConfig() {
-        return strategyConfig;
     }
 }

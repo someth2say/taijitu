@@ -4,8 +4,7 @@ import org.someth2say.taijitu.cli.util.Named;
 
 import java.util.List;
 
-public interface IComparisonCfg extends ISourceCfg, IStrategyCfg, IEqualityCfg, Named, ICfg {
-
+public interface IComparisonCfg extends ISourceCfg, IEqualityCfg, Named, ICfg {
 
     List<String> getKeyFields();
 

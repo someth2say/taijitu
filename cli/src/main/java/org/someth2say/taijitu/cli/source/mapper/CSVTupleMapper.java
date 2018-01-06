@@ -1,9 +1,7 @@
 package org.someth2say.taijitu.cli.source.mapper;
 
-import org.someth2say.taijitu.cli.source.FieldDescription;
 import org.someth2say.taijitu.cli.source.Source;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 //TODO: Maybe this is the point to add some semantics to CSV: Parse provided fields names, try to cast values to the right object

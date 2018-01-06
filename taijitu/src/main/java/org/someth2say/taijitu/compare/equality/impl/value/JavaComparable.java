@@ -25,4 +25,8 @@ public class JavaComparable<T extends Comparable<T>> extends AbstractConfigurabl
     public boolean equals(T object1, T other) {
         return object1.equals(other);
     }
+    
+	public static String getName() {
+		return "JavaComparableComparatorHasher";
+	}
 }

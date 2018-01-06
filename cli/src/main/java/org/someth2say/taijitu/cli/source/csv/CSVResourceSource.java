@@ -1,7 +1,6 @@
 package org.someth2say.taijitu.cli.source.csv;
 
 import org.someth2say.taijitu.cli.config.ConfigurationLabels;
-import org.someth2say.taijitu.cli.config.interfaces.ISourceCfg;
 import org.someth2say.taijitu.cli.source.AbstractSource;
 import org.someth2say.taijitu.cli.source.FieldDescription;
 
@@ -22,6 +21,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class CSVResourceSource extends AbstractSource<String[]> {
+	
     private static final String FIELD_SEPARATOR = ",";
     private Stream<String> lines;
     private List<FieldDescription<?>> providedFields;

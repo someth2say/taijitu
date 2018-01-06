@@ -32,12 +32,12 @@ public class SourceRegistry {
     }
 
     public static void useDefaults() {
-        addSourceType(ClassScanUtils.getClassName(QuerySource.class), QuerySource.class);
-        addSourceType(ClassScanUtils.getClassName(CSVResourceSource.class), CSVResourceSource.class);
+        addSourceType(QuerySource.class);
+        addSourceType(CSVResourceSource.class);
     }
 
-    private static <T extends AbstractSource> void addSourceType(String name, Class<T> clazz) {
-        classes.put(name, clazz);
+    private static <T extends AbstractSource> void addSourceType(Class<T> clazz) {
+        classes.put(ClassScanUtils.getClassName(clazz), clazz);
     }
 
     private static Class<? extends AbstractSource> getSourceType(String type) {

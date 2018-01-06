@@ -3,7 +3,7 @@ package org.someth2say.taijitu.cli.util;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ListUtil {
+public abstract class ListUtil {
 
     @SafeVarargs
 	public static <T> List<T> safeUnion(List<T>... lists) {

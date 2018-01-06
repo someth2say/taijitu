@@ -18,14 +18,9 @@ import java.util.stream.Stream;
 /**
  * Created by Jordi Sola on 22/02/2017.
  */
-public class ClassScanUtils {
-    private static final Logger logger = LoggerFactory.getLogger(ClassScanUtils.class);
-
-    private ClassScanUtils() {
-    }
-
-
-    public static <T> Collection<Class<? extends T>> getClassesImplementing(Class<T> clazzOrInterface) {
+public abstract class ClassScanUtils {
+    
+	public static <T> Collection<Class<? extends T>> getClassesImplementing(Class<T> clazzOrInterface) {
         Stream<Class<? extends T>> classes = getClassesFor(clazzOrInterface)
                 .filter(ClassScanUtils::isNotAbstract)
                 .filter(ClassScanUtils::isNotAnonimous);
@@ -39,7 +34,8 @@ public class ClassScanUtils {
         return classes.collect(Collectors.toConcurrentMap(ClassScanUtils::getClassName, Function.identity()));
     }
 
-    private static <T> Stream<Class<? extends T>> getClassesFor(Class<T> clazzOrInterface) {
+    @SuppressWarnings("unchecked")
+	private static <T> Stream<Class<? extends T>> getClassesFor(Class<T> clazzOrInterface) {
         final FastClasspathScanner fcs = new FastClasspathScanner();
         final ScanResult scanResult = fcs.scan();
         final List<String> classNames = clazzOrInterface.isInterface() ? scanResult.getNamesOfClassesImplementing(clazzOrInterface) : scanResult.getNamesOfSubclassesOf(clazzOrInterface);

@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import static org.someth2say.taijitu.cli.util.ListUtil.safeUnion;
 
-public interface IComparisonCfgDefaults<T extends IComparisonCfg> extends IComparisonCfg, INamedCfgDefaults<T>, IEqualityCfgDefaults<T>, ISourceCfgDefaults<T>, IStrategyCfgDefaults<T>, ICfgDefaults<T>, ICfg, Named {
+public interface IComparisonCfgDefaults<T extends IComparisonCfg> extends IComparisonCfg, INamedCfgDefaults<T>, IEqualityCfgDefaults<T>, ISourceCfgDefaults<T>, ICfgDefaults<T>, ICfg, Named {
 
     @Override
     default List<String> getKeyFields() {
