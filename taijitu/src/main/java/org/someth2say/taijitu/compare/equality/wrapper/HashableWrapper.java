@@ -2,17 +2,17 @@ package org.someth2say.taijitu.compare.equality.wrapper;
 
 import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
 
-public class HashableWrapper<T>
-        extends EqualizableWrapper<T, Hasher<T>>
-        implements IHashableWraper<T, Hasher<T>> {
+public class HashableWrapper<WRAPPED>
+        extends EqualizableWrapper<WRAPPED, Hasher<WRAPPED>>
+        implements IHashableWraper<WRAPPED, Hasher<WRAPPED>> {
 
-    public HashableWrapper(T wrapped, Hasher<T> categorizer) {
+    public HashableWrapper(WRAPPED wrapped, Hasher<WRAPPED> categorizer) {
         super(wrapped, categorizer);
     }
 
     @Override
     public int hashCode() {
-        return getEquality().hashCode(getWraped());
+        return getEquality().hash(getWraped());
     }
 
 }

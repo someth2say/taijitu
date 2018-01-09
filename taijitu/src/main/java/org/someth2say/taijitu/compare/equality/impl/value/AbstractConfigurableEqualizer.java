@@ -26,8 +26,8 @@ public abstract class AbstractConfigurableEqualizer<T> implements Equalizer<T> {
 
     @Override
     public Stream<Difference<?>> underlyingDiffs(T t1, T t2) {
-        //Warning: cyclic dependency (unless equals is overwritten in subclasses)
-        return equals(t1, t2) ? null : Stream.of(new Unequal<>(this, t1, t2));
+        //Warning: cyclic dependency (unless areEquals is overwritten in subclasses)
+        return areEquals(t1, t2) ? null : Stream.of(new Unequal<>(this, t1, t2));
     }
 
     @Override

@@ -3,9 +3,193 @@
 [![Quality Gate](https://sonarqube.com/api/badges/measure?key=org.someth2say.taijitu%3Aroot&metric=alert_status)](https://sonarqube.com/dashboard?id=org.someth2say.taijitu%3Aroot)
 
 TL;DR;
-Utility for comparing the contents returned from different SQL queries, and provide differences and missing entries.
+Equality in JVM based languages is incomplete, as well as many equality-related contracts. 
+Taijitu provides an implementation for both external and internal equality contracts that enforce 
+completeness for equality-based contracts.
 
-# The basis
+Also, based on this implementation, Taitiju provides:
+- A standalone comparison implementation for several data source formats (SQL queries, CSV files...)
+- Several implementations for value and composite equaality contracts
+- Versatile implementations for stream equality
+
+
+# The basis (and a bit of theory)
+The basic idea behind Taijitu is that `equality` in JVM-based languages is usually limited, if not wrong, in several ways:
+- Equality is not (always) a responsibility for the object/class
+- Equality do not enforce equality-based contracts. 
+
+Lets go deep into those concepts:
+
+#### Equality is not (always) a responsibility for the object/class
+There is a simple question you can ask yourself to understand this concept: 
+**When two instances are 'equals'?**
+
+That simple question generated hundred discussions. Some people talk about object identity and key fields. 
+Some others, refer to object interchangeability or equivalence. Others introduce object references and reference trees.
+
+Who is right? Who is wrong? *They all are both right and wrong.*
+
+Wait, what?! How can they be at the same time right and wrong? The answer is `context`. Depending on the context you are
+interpreting the objects, equality have one meaning or another.
+
+Let's place an example: When are two `Person`s "equal"?
+- For **administrative purposes**, two `Person`s are *the same* if they have the same ID#.
+- For a **facial recognition** system, they will be the same if they same *approximately* the same facial attributes.
+- For **themselves**, they will be the same if they share the same memories and feelings.
+- For **religion**, they will be the same if they have the same `soul` or `spirit` (even after reincarnating, they can be tha same)  
+
+As you can see, equality is based not on the object itself, but the context defines the equality.
+
+> Note: Understanding equality is context-based does not mean objects can not define their own equality (where the context
+is the object itself). This is the so-called *default equality*, and this is the one actually implemented in most JVM-based languages.
+
+#### Equality do not enforce equality-based contracts. 
+Probably the following paragraph will be familiar for you:
+
+     The general contract of hashCode is:
+     
+     - Whenever it is invoked on the same object more than once during an execution of a Java application, the hashCode method must consistently return the same integer, provided no information used in equals comparisons on the object is modified. This integer need not remain consistent from one execution of an application to another execution of the same application.
+     - If two objects are equal according to the equals(Object) method, then calling the hashCode method on each of the two objects must produce the same integer result.
+     - It is not required that if two objects are unequal according to the equals(java.lang.Object) method, then calling the hashCode method on each of the two objects must produce distinct integer results. However, the programmer should be aware that producing distinct integer results for unequal objects may improve the performance of hash tables. 
+
+Yes, this is the contract defined for `hashCode` in Java. Nothing wrong with it, but this contract can just be ignored.
+You can write down your `hashCode` implementation for your class, completely ignoring the `equals` implementation (if any!).
+Probably, forget implementing `hashCode`, or faulty implementations are one of the most common errors for Java developers.
+
+Another equality-based contract is the one for Java `Comparable` class:
+
+      The natural ordering for a class C is said to be consistent with equals if and only if e1.compareTo(e2) == 0 has the same boolean value as e1.equals(e2) for every e1 and e2 of class C. 
+
+The same applies here: implementing `Comparable` interface just provides the methods, not the contract.
+
+### External equality
+Now we understand the problems with equality-contracts... how we can face it?
+Taijitu is based on the following idea: **Equality and equality-based contracts should be external to the class being compared**, so different equality 
+concepts can be applied to same objects in different context.
+
+For implementing this idea, Taijitu define the following interfaces (aspects):
+##### Equalizer
+The root for equality aspects structure. An `Equalizer` is an (external) object being able to compare two instances for equality, in a given context. 
+`Equalizer` defines the signature for the method that (externally) compare two instances:
+
+        boolean areEquals(EQUALIZED equalized1, EQUALIZED equalized2) { ... }
+
+Simple, isn't it? Just defines a method for checking if objects are equals.
+
+##### Hasher
+A `Hasher` is an object that can provide a `hashCode` for other instance. The only method defined by this interface is:
+
+    int hash(HASHED hashed);
+ 
+Several considerations about `Hasher`:
+- `Hasher` interface extends `Equalizer` interfaces. That means, all `Hasher` instances should be also `Equalizer`s. 
+This enforces the fact that `hashCode` contract is based on `equals`, and forces the developer to implement both methods.
+
+##### Comparator
+Wait! Comparator interface already exists in Java!
+
+That's true. In fact, Taijitu's `Comparator` interface directly extends from Java's `Comparator`, and add no methods.
+The only difference is that Taijitu's `Comparator` also extends from `Equalizer`, forcing the developer to also implements
+equality methods (and protecting the contract).
+
+##### Internal Equality
+The same way external equality has been defined as an external way to "compare" instances, we also introduced the concept for "default equality".
+Java (and many other JVM-languajes) define the default equality inside the class itself (with no more context that the class itself).
+When equality is defined inside the class (with or without context), we have internal equality.
+
+Also, the same way we defined aspects (interfaces) for external equality contracts, we can define aspects for internal equality contracts,
+strengthening it to avoid miss-implementations. Parallel to external equalities, we define three interfaces:
+
+- `Equalizable`: Classes that define a default internal equality. 
+
+Java language forces the signature for the `equals` method to:
+
+
+    boolean equals(Object obj);
+
+Despite this is enough for all cases, Taijitu adds a second method, restricting the class for the parameter:
+
+    boolean equalsTo(T obj);
+
+This methods is not absolutely required, but useful for skipping the infamous `instanceOf` checks.
+
+- `Hashable`: Classes that define both internal equality AND hash.
+
+Again, Java language forces the signature:
+
+
+    int hashCode();
+    
+
+- `Comparable`: Classes that define both internal equality AND instance comparison.
+
+Taijitu `Comparable` extends Java `Comparable`, for compatibility purposes. But Taijitu's comparable
+extends `Equalizable`, forcing classes to define both `equals` and  `compareTo` methods.
+
+##### Mixing equalities
+One last idea, before getting our feet wet.
+
+Can't a class be both `Comparable` and `Hashable`?
+
+Of course they can! Both `Comparable` and `Hashable` are interfaces, so you only need to implement both.
+
+But Java language have a limitation in this situation: You can not reference multiple aspects (interfaces) in parameters or return types!
+In other words, you can not write:
+
+    Comparable<Person>&Hashable<Person> getComparableAndHashablePerson(); 
+
+The solution, despite a bit clumpy, is creating an interface extending both `Comparable` and `Hashable`: `ComparableHashable`
+
+This way, you can refer to both aspects in a single name:
+
+    ComparableHashable<Person> getComparableAndHashablePerson();
+
+Luckily, we only have two equality-based contracts! Else, combinations will explode exponentially!
+
+By the way, the same mixing can be done for external equalities, obtaining the `ComparatorHasher` interface.  
+
+## Real life examples.
+Ok, we have now the external and internal equality defined... what can we do with it?
+Let's place a real world example.
+
+> Manager: We have a List of `String` objects. We need to sort them. How you do that?
+
+> Developer: Easy. `Collections.sort`
+
+> Manager: Oh, sorry, I forgot to mention... I want to sort the Strings, but case is not important (and you can not create new upper/lower-cased instances)
+
+> Developer: Ok... `Collections.sort` also accepts a `Comparator`... so we can create a `CaseInsensitiveComparator` for `String`s, and provide it.
+
+> Manager: Well, I said sort? In fact, I was thinking about sorting so we can easily remove duplicates... but maybe there is a better approach.
+
+> Developer: Grr... We can not use a `Set`, because it will only use the default string equality (that is case sensitive). 
+We can use the `CaseInsensitiveComparator` I just created to compare every pair of `String`s, but this will be really costly (O(n^2)).
+
+> Manager: And why don't you provide this "comparator" thing to the `Set`? It will take care of de-duplicating elements, isn't it?
+
+Manager is actually right! If you can provide an external comparator to sort a collection, why can't you provide an external `equalizer` to build a set?
+
+But currently, you can't...
+
+With Taijitu, you have three ways to face this situation:
+1. Create a wrapper for the object to be "equalized" that actually uses the `Equalizer` as the natural equality.
+2. Create a proxy object (subclass for the "equalized" class) that delegates all methods to the original instance but equals/hashCode/compareTo, that will delegate to the right `Equalizer`
+3. Use an alternative collection class that allow using external equality, instead of default equality.
+   
+### External Equality wrappers
+Taijitu offers 
+### External Equality proxies
+
+### External Equality collections
+ 
+
+
+
+
+
+
+
+
 taijitu is based on the following concepts:
 - Comparing tables it complex enough to not fitting into a CLI interface. So everything should be provided prior usage into properties files.
 - Despite it is called `taijitu`, in fact it does compare the results from queries. So the whole power of _SQL_ can be used to obtain the data to be compared.

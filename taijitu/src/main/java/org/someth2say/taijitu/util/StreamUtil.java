@@ -174,7 +174,7 @@ public class StreamUtil {
      *     if "comparator" function returns >0 value, `mapper` function is applied to the element from the second stream, and next element is picked from second stream
      * </pre>
      * In other words, the "comparator" function is a `comparator` for stream elements.
-     * If both elements are "equals" given that comparator, then `biMapper` is applied to both. Else, `mapper` is applied to the 'minor' element.
+     * If both elements are "areEquals" given that comparator, then `biMapper` is applied to both. Else, `mapper` is applied to the 'minor' element.
      * Note that this behaviour assumes elements on both streams are somehow 'sorted' given the comparator/comparator function.
      *
      * @param first
@@ -358,30 +358,29 @@ public class StreamUtil {
 
         @Override
         public boolean hasNext() {
-            return (shouldUseA() || shouldUseB());
+            return (availableA() || availableB());
         }
 
-        private boolean shouldUseB() {
+        private boolean availableB() {
             return (haveA && haveB && stepper.apply(currentA, currentB) >= 0) || (!haveA && haveB);
         }
 
-        private boolean shouldUseA() {
+        private boolean availableA() {
             return (haveA && haveB && stepper.apply(currentA, currentB) <= 0) || (haveA && !haveB);
         }
 
         @Override
         public C next() {
             // 1.- Fetch next values, **based on biComparator**
-
             C result;
-            if (shouldUseA() && shouldUseB()) {
+            if (availableA() && availableB()) {
                 result = mapper.apply(currentA, currentB);
                 haveA = stepA();
                 haveB = stepB();
-            } else if (shouldUseA()) {
+            } else if (availableA()) {
                 result = aTailer.apply(currentA);
                 haveA = stepA();
-            } else if (shouldUseB()) {
+            } else if (availableB()) {
                 result = bTailer.apply(currentB);
                 haveB = stepB();
             } else {

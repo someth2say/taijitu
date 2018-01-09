@@ -17,12 +17,12 @@ public class JavaComparable<T extends Comparable<T>> extends AbstractConfigurabl
     }
 
     @Override
-    public int hashCode(T keyValue) {
+    public int hash(T keyValue) {
         return keyValue.hashCode();
     }
 
     @Override
-    public boolean equals(T object1, T other) {
+    public boolean areEquals(T object1, T other) {
         return object1.equals(other);
     }
     

@@ -1,6 +1,7 @@
 package org.someth2say.taijitu.compare.equality.impl.value;
 
 import org.junit.Test;
+import org.someth2say.taijitu.compare.equality.wrapper.ComparableHashableWrapper;
 import org.someth2say.taijitu.compare.equality.wrapper.IComparableHashableWrapper;
 
 import static org.junit.Assert.*;
@@ -8,23 +9,23 @@ import static org.junit.Assert.*;
 public class StringCaseInsensitiveTest {
 
     final StringCaseInsensitive instance = new StringCaseInsensitive();
-    final IComparableHashableWrapper<String, ?> aaa = instance.wrap("aaa");
-    final IComparableHashableWrapper<String, ?> aAA = instance.wrap("aAA");
-    final IComparableHashableWrapper<String, ?> aa = instance.wrap("aa");
+    final IComparableHashableWrapper<String, ?> aaa = new ComparableHashableWrapper<>("aaa", instance);
+    final IComparableHashableWrapper<String, ?> aAA = new ComparableHashableWrapper<>("aAA", instance);
+    final IComparableHashableWrapper<String, ?> aa = new ComparableHashableWrapper<>("aa", instance);
 
     @Test
     public void hashCodeTest() {
-        assertEquals(instance.hashCode("aaa"), instance.hashCode("aAA"));
-        assertNotEquals(instance.hashCode("aaa"), instance.hashCode("aa"));
+        assertEquals(instance.hash("aaa"), instance.hash("aAA"));
+        assertNotEquals(instance.hash("aaa"), instance.hash("aa"));
 
-        assertEquals(aaa.hashCode(), instance.hashCode("aaa"));
+        assertEquals(aaa.hashCode(), instance.hash("aaa"));
 
     }
 
     @Test
     public void equalsTest() {
-        assertTrue(instance.equals("aaa", "aAA"));
-        assertFalse(instance.equals("aaa", "aa"));
+        assertTrue(instance.areEquals("aaa", "aAA"));
+        assertFalse(instance.areEquals("aaa", "aa"));
 
         assertTrue(aaa.equalsTo(aAA));
         assertFalse(aaa.equals(aa));

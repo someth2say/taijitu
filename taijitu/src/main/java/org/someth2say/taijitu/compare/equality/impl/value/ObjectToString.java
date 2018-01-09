@@ -13,12 +13,12 @@ public class ObjectToString<T> extends AbstractConfigurableEqualizer<T> implemen
     }
 
     @Override
-    public int hashCode(T object) {
+    public int hash(T object) {
         return object.toString().hashCode();
     }
 
     @Override
-    public boolean equals(T object1, T object2) {
+    public boolean areEquals(T object1, T object2) {
         return object1.toString().equals(object2.toString());
     }
 

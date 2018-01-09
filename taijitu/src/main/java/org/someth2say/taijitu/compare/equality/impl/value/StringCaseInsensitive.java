@@ -19,12 +19,12 @@ public class StringCaseInsensitive extends AbstractConfigurableEqualizer<String>
     }
 
     @Override
-    public int hashCode(String object) {
+    public int hash(String object) {
         return object.toUpperCase(locale).hashCode();
     }
 
     @Override
-    public boolean equals(String object1, String object2) {
+    public boolean areEquals(String object1, String object2) {
         return object1.toUpperCase().equals(object2.toUpperCase(locale));
     }
 

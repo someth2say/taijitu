@@ -1,6 +1,7 @@
 package org.someth2say.taijitu.compare.equality.impl.value;
 
 import org.junit.Test;
+import org.someth2say.taijitu.compare.equality.wrapper.ComparableWrapper;
 import org.someth2say.taijitu.compare.equality.wrapper.IComparableWraper;
 
 import java.util.Date;
@@ -13,15 +14,15 @@ public class DateThresholdTest {
     final Date now = new Date();
     final Date sameSecond = new Date(now.getTime()+900);
     final Date tomorrow = new Date(now.getTime()-1000*60*24);
-    final IComparableWraper<Date, ?> nowWrap = instance.wrap(now);
-    final IComparableWraper<Date, ?> sameWrap = instance.wrap(sameSecond);
-    final IComparableWraper<Date, ?> tomWrap = instance.wrap(tomorrow);
+    final IComparableWraper<Date, ?> nowWrap = new ComparableWrapper<>(now, instance);
+    final IComparableWraper<Date, ?> sameWrap = new ComparableWrapper<>(sameSecond, instance);
+    final IComparableWraper<Date, ?> tomWrap = new ComparableWrapper<>(tomorrow, instance);
 
 
     @Test
     public void equalsTest() {
-        assertTrue(instance.equals(now, sameSecond));
-        assertFalse(instance.equals(now, tomorrow));
+        assertTrue(instance.areEquals(now, sameSecond));
+        assertFalse(instance.areEquals(now, tomorrow));
 
         assertTrue(nowWrap.equalsTo(sameWrap));
         assertFalse(nowWrap.equals(tomWrap));

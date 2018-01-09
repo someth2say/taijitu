@@ -13,12 +13,12 @@ public class JavaObject<T> extends AbstractConfigurableEqualizer<T> implements H
     }
 
     @Override
-    public int hashCode(T object) {
+    public int hash(T object) {
         return object.hashCode();
     }
 
     @Override
-    public boolean equals(T object1, T object2) {
+    public boolean areEquals(T object1, T object2) {
         return object1.equals(object2);
     }
 

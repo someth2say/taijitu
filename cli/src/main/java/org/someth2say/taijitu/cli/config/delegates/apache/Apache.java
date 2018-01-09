@@ -22,7 +22,7 @@ public abstract class Apache implements ApacheCfgDefaults {
         if (this == o) return true;
         if (!(o instanceof Apache)) return false;
         Apache other = (Apache) o;
-        //Apache Configuration does not defines equals/hashcode! :'(
+        //Apache Configuration does not defines areEquals/hashcode! :'(
         return getConfiguration().equals(other.getConfiguration());
     }
 

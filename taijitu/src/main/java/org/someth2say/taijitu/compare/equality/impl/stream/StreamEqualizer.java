@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 /**
  * Created by Jordi Sola on 16/02/2017.
  */
+//TODO: What about StreamComparer<T> or StreamHasher<T>?
 public interface StreamEqualizer<T> extends Equalizer<Stream<T>> {
 
 }

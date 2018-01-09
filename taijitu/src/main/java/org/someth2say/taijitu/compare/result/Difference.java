@@ -57,7 +57,7 @@ public abstract class Difference<MMT> {
         Difference<?> difference = (Difference<?>) o;
         return Objects.equals(cause, difference.cause) &&
                 Objects.equals(entries, difference.entries);
-        //&& Objects.equals(underlyingDifferences, difference.underlyingDifferences);
+        //&& Objects.areEquals(underlyingDifferences, difference.underlyingDifferences);
     }
 
     @Override

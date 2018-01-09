@@ -18,7 +18,7 @@ public class NumberThreshold<T extends Number> extends AbstractConfigurableEqual
     }
 
     @Override
-    public int hashCode(T object) {
+    public int hash(T object) {
         int scale = getScale();
         double doubleValue = object.doubleValue();
         double rounded = round(doubleValue, scale);
@@ -38,7 +38,7 @@ public class NumberThreshold<T extends Number> extends AbstractConfigurableEqual
     }
 
     @Override
-    public boolean equals(T object1, T object2) {
+    public boolean areEquals(T object1, T object2) {
         int scale = getScale();
         double diff = object1.doubleValue() - object2.doubleValue();
         double scaleRange = getScaleRange(scale);

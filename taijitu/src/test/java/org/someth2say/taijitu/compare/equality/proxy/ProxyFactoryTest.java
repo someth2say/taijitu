@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 import static org.junit.Assert.*;
 
 public class ProxyFactoryTest {
-    @Test
+    //@Test
     public void proxyEqualizerTest() {
         Date date = new Date();
         Date otherDate = new Date(date.getTime() + 400);

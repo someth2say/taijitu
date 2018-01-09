@@ -2,16 +2,16 @@ package org.someth2say.taijitu.compare.equality.wrapper;
 
 import org.someth2say.taijitu.compare.equality.aspects.external.Comparator;
 
-public class ComparableWrapper<T,EQ extends Comparator<T>>
-        extends EqualizableWrapper<T, EQ>
-        implements IComparableWraper<T,EQ> {
+public class ComparableWrapper<WRAPPED,EQ extends Comparator<WRAPPED>>
+        extends EqualizableWrapper<WRAPPED, EQ>
+        implements IComparableWraper<WRAPPED,EQ> {
 
-    public ComparableWrapper(T wrapped, EQ equality) {
+    public ComparableWrapper(WRAPPED wrapped, EQ equality) {
         super(wrapped, equality);
     }
 
     @Override
-    public int compareTo(IWraper<T, ?> other) {
+    public int compareTo(IWraper<WRAPPED, ?> other) {
         return getEquality().compare(getWraped(), other.getWraped());
     }
 }

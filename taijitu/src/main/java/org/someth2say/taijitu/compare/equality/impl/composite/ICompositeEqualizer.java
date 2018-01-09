@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 public interface ICompositeEqualizer<T> extends IComposite, Equalizer<T> {
 
     @Override
-    default boolean equals(T first, T second) {
+    default boolean areEquals(T first, T second) {
         return getExtractorsAndEqualities().stream().allMatch(eae -> valueEquals(first, second, eae));
     }
 
@@ -22,7 +22,7 @@ public interface ICompositeEqualizer<T> extends IComposite, Equalizer<T> {
         Equalizer<V> equalizer = eae.getEquality();
         V firstValue = extractors.apply(first);
         V secondValue = extractors.apply(second);
-        return equalizer.equals(firstValue, secondValue);
+        return equalizer.areEquals(firstValue, secondValue);
     }
 
     //TODO: This is actually a piece of shit!!! Need to work out to the iterator not to be consumed (but then, how filter out non-different elements?)
@@ -38,7 +38,7 @@ public interface ICompositeEqualizer<T> extends IComposite, Equalizer<T> {
         Equalizer<V> equalizer = eae.getEquality();
         V firstValue = extractors.apply(first);
         V secondValue = extractors.apply(second);
-        boolean equals = equalizer.equals(firstValue, secondValue);
+        boolean equals = equalizer.areEquals(firstValue, secondValue);
         return equals ? null : new Unequal<>(equalizer, firstValue, secondValue);
     }
 

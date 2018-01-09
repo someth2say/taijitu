@@ -56,7 +56,7 @@ public class SimpleStreamEqualizerTest {
         Stream<TestComposite> stream2 = Stream.of(differentFrom2, equalsFrom2);
 
         SimpleStreamEqualizer<TestComposite> streamEquality= new SimpleStreamEqualizer<>(testClassOneTwoEquality);
-        assertFalse(streamEquality.equals(stream1, stream2));
+        assertFalse(streamEquality.areEquals(stream1, stream2));
 
     }
 }

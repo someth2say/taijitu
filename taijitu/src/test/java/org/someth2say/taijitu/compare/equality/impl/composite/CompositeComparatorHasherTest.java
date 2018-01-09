@@ -1,6 +1,7 @@
 package org.someth2say.taijitu.compare.equality.impl.composite;
 
 import org.junit.Test;
+import org.someth2say.taijitu.compare.equality.wrapper.ComparableHashableWrapper;
 import org.someth2say.taijitu.compare.equality.wrapper.IComparableWraper;
 
 import static org.junit.Assert.assertFalse;
@@ -17,20 +18,20 @@ public class CompositeComparatorHasherTest {
 
         assertTrue(testClassThreeComparatorHasher.compare(differentFrom1, differentFrom3) < 0);
         assertTrue(testClassThreeComparatorHasher.compare(differentFrom1, differentFrom2) == 0);
-        assertTrue(testClassThreeComparatorHasher.equals(differentFrom1, differentFrom2));
+        assertTrue(testClassThreeComparatorHasher.areEquals(differentFrom1, differentFrom2));
 
-        IComparableWraper<TestComposite, ?> wrap1 = testClassThreeComparatorHasher.wrap(differentFrom1);
-        IComparableWraper<TestComposite, ?> wrap3 = testClassThreeComparatorHasher.wrap(differentFrom3);
-        IComparableWraper<TestComposite, ?> wrap2 = testClassThreeComparatorHasher.wrap(differentFrom2);
+        IComparableWraper<TestComposite, ?> wrap1 = new ComparableHashableWrapper<>(differentFrom1, testClassThreeComparatorHasher);
+        IComparableWraper<TestComposite, ?> wrap3 = new ComparableHashableWrapper<>(differentFrom3, testClassThreeComparatorHasher);
+        IComparableWraper<TestComposite, ?> wrap2 = new ComparableHashableWrapper<>(differentFrom2, testClassThreeComparatorHasher);
 
         assertTrue(wrap1.compareTo(wrap3) < 0);
         assertTrue(wrap1.compareTo(wrap2) == 0);
         assertTrue(wrap1.equals(wrap2));
 
-        assertTrue(testClassThreeComparatorHasher.hashCode(differentFrom1)== testClassThreeComparatorHasher.hashCode(differentFrom2));
-        assertFalse(testClassThreeComparatorHasher.hashCode(differentFrom1)==testClassThreeComparatorHasher.hashCode(differentFrom3));
-        assertTrue(testClassThreeComparatorHasher.wrap(differentFrom1).hashCode() == testClassThreeComparatorHasher.wrap(differentFrom2).hashCode());
-        assertFalse(testClassThreeComparatorHasher.wrap(differentFrom1).hashCode()==testClassThreeComparatorHasher.wrap(differentFrom3).hashCode());
+        assertTrue(testClassThreeComparatorHasher.hash(differentFrom1)== testClassThreeComparatorHasher.hash(differentFrom2));
+        assertFalse(testClassThreeComparatorHasher.hash(differentFrom1)==testClassThreeComparatorHasher.hash(differentFrom3));
+        assertTrue(new ComparableHashableWrapper<>(differentFrom1, testClassThreeComparatorHasher).hashCode() == new ComparableHashableWrapper<>(differentFrom2, testClassThreeComparatorHasher).hashCode());
+        assertFalse(new ComparableHashableWrapper<>(differentFrom1, testClassThreeComparatorHasher).hashCode()== new ComparableHashableWrapper<>(differentFrom3, testClassThreeComparatorHasher).hashCode());
 
     }
 }
