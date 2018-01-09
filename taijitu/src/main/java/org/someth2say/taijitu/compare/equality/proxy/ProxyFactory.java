@@ -85,7 +85,7 @@ public class ProxyFactory {
     private static <T> Builder<? extends T> interceptEqualizableMethods(Class<? extends T> clazz, IEqualizableInterceptor<T, ?> interceptor, Builder<? extends T> builder) {
         return builder
                 //TODO: evaluate with approach is more performant: defineMethod or just intercept method (despite can't intercept equality methods...)
-                .defineMethod("areEquals", boolean.class, Visibility.PUBLIC).withParameters(Object.class).intercept(to(interceptor))
+                .defineMethod("equals", boolean.class, Visibility.PUBLIC).withParameters(Object.class).intercept(to(interceptor))
                 .defineMethod("equalsTo", boolean.class, Visibility.PUBLIC).withParameters(clazz).intercept(to(interceptor));
         //.method(named("areEquals")).intercept(to(interceptor))
         //.method(named("equalsTo")).intercept(to(interceptor))

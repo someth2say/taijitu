@@ -181,17 +181,59 @@ Taijitu offers a set of specialized wrapper for each kind of equalities.
 Those wrappers use provided external equality as default internal equality, so wrappers can be used in standard Java collections.
 
 Example: Wrapping String so we can use `StringCaseInsensitive` external equality. 
-> Set<HashableWrapper<String>> set = new HashSet<HashableWrapper<String>>>();
-StringCaseInsensitive equality = new StringCaseInsensitive(); // Default equality implementation
-set.add(new HashableWrapper<>("hola",equality));
-set.add(new HashableWrapper<>("Hola",equality));
-set.add(new HashableWrapper<>("adios",equality);
-set.add(new HashableWrapper<>("."),equality);
+```
+    Set<HashableWrapper<String>> set = new HashSet<HashableWrapper<String>>>();
+    StringCaseInsensitive equality = new StringCaseInsensitive(); // Default equality implementation
+    HashableWrapper.Factory<String> factory = new HashableWrapper.Factory<>(equality)); 
+    set.add(factory.wrapp("hola"));
+    set.add(factory.wrapp("Hola"));
+    assertEquals(1,set.size());
+    String unwrapped = set.iterator().next().getWrapped();
+    assertTrue(equality.areEquals(unwrapped, "hola");
+```
+
+This approach allows to use external equality (of all kinds) with any collection class, and that's good.
+
+But this does not came for free (unluckily). Objects used on the collection are not the same objects we had, but another object (wrappers). 
+This implies some overhead when creating the collection (new instances created for each object) and when retrieving (objects should be unwrapped before being used).
 
 ### External Equality proxies
+There is a similar approach that faces some of the wrapper problems.
+Instead of creating a Wrapper object, why can't we extend the original class, 
+delegating all methods to the original instance, but delegating equality methods to the equalizer?
 
-### External Equality collections
+In fact, we can. Those are the so-called *dynamic proxies*, and Taijitu relies on BiteBuddy library for creating them.
+
+```
+    Date date = new Date();
+    Date otherDate = new Date(date.getTime() + 400); // Make sure dates have a small time difference...
+    DateThreshold<Date> equalizer = new DateThreshold<>(1000); // ... but threshold will shallow it.
+    Date proxy = ProxyFactory.proxyEqualizer(date, equalizer, Date.class);    
+    assertEquals(proxy, otherDate); // proxy.equals(otherDate)==true \o/   
+```
+
+This capability allows us to keep the object's class (`Date`, in the example), while "re-writing" the equality to our needs.
+Now, we can use collections without fear!
+
+But again, that is not a perfect solution. Despite we re-wrote equality for one of the objects (`date`), the other object may stay intact.
+This means that, while `proxy.equals(otherDate)` will be *true*, `otherDate.equals(proxy)` will return *false*. This is a break for *transitive*
+and *symmetric* properties for `equals` contract. 
+
+For collections, this will not be a big deal, as long as we can assure ALL objects send to the collection are actually proxies.
+But asserting so is depending on the situation.  
+  
+ > Note: Proxy capabilities are still experimental, and there are some cases proxies can not be easily created (i.e. for Streams). Use with caution.
  
+### External Equality collections
+There is a third alternative, that should not be impacted by caveats from wrappers or proxies: that all collections and methods based on equality
+accept an external equality (the same way most of them already do with `Comparator` in Java).
+
+
+
+
+
+
+
 
 
 
