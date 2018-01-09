@@ -1,10 +1,11 @@
 package org.someth2say.taijitu.compare.equality.wrapper;
 
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
+import org.someth2say.taijitu.compare.equality.aspects.internal.Equalizable;
 
 public class EqualizableWrapper<WRAPPED, EQ extends Equalizer<WRAPPED>>
         extends AbstractWrapper<WRAPPED, EQ>
-        implements IEqualizableWraper<WRAPPED, EQ> {
+        implements Equalizable<IWraper<WRAPPED,?>>,IWraper<WRAPPED,EQ> {
 
     public EqualizableWrapper(WRAPPED wrapped, EQ equality) {
         super(wrapped, equality);

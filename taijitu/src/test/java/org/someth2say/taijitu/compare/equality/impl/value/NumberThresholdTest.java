@@ -2,7 +2,6 @@ package org.someth2say.taijitu.compare.equality.impl.value;
 
 import org.junit.Test;
 import org.someth2say.taijitu.compare.equality.wrapper.ComparableHashableWrapper;
-import org.someth2say.taijitu.compare.equality.wrapper.IComparableHashableWrapper;
 
 import static org.junit.Assert.*;
 
@@ -11,9 +10,9 @@ public class NumberThresholdTest {
     private final Number one = 1.000;
     private final Number oneOOtwo = 1.002;
     private final Number two = 2.000;
-    private final IComparableHashableWrapper<Number, ?> oneWrap = new ComparableHashableWrapper<>(one, instance);
-    private final IComparableHashableWrapper<Number, ?> oneOOTwoWrap = new ComparableHashableWrapper<>(oneOOtwo, instance);
-    private final IComparableHashableWrapper<Number, ?> twoWrap = new ComparableHashableWrapper<>(two, instance);
+    private final ComparableHashableWrapper<Number, ?> oneWrap = new ComparableHashableWrapper<>(one, instance);
+    private final ComparableHashableWrapper<Number, ?> oneOOTwoWrap = new ComparableHashableWrapper<>(oneOOtwo, instance);
+    private final ComparableHashableWrapper<Number, ?> twoWrap = new ComparableHashableWrapper<>(two, instance);
 
 
     @Test

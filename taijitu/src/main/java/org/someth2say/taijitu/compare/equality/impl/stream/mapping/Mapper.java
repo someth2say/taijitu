@@ -3,7 +3,6 @@ package org.someth2say.taijitu.compare.equality.impl.stream.mapping;
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
 import org.someth2say.taijitu.compare.equality.wrapper.HashableWrapper;
-import org.someth2say.taijitu.compare.equality.wrapper.IHashableWraper;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Unequal;
 
@@ -14,14 +13,14 @@ import java.util.Map;
 class Mapper<T> implements Runnable {
 
     private final Iterator<T> source;
-    private final Map<IHashableWraper<T, ?>, OrdinalAndComposite<T>> sharedMap;
+    private final Map<HashableWrapper<T>, OrdinalAndComposite<T>> sharedMap;
     private final List<Difference<?>> result;
     private final int ordinal;
     private final Hasher<T> categorizer;
     private final Equalizer<T> equalizer;
 
     public Mapper(final Iterator<T> source,
-                  final Map<IHashableWraper<T, ?>, OrdinalAndComposite<T>> sharedMap,
+                  final Map<HashableWrapper<T>, OrdinalAndComposite<T>> sharedMap,
                   final List<Difference<?>> result, int ordinal, Hasher<T> categorizer,
                   Equalizer<T> equalizer) {
         this.source = source;
@@ -44,18 +43,18 @@ class Mapper<T> implements Runnable {
         }
     }
 
-    public static <T> Unequal<T> map(T composite, int ordinal, Hasher<T> hasher, Map<IHashableWraper<T, ?>, OrdinalAndComposite<T>> sharedMap, Equalizer<T> equalizer) {
+    public static <T> Unequal<T> map(T composite, int ordinal, Hasher<T> hasher, Map<HashableWrapper<T>, OrdinalAndComposite<T>> sharedMap, Equalizer<T> equalizer) {
         OrdinalAndComposite<T> oac = new OrdinalAndComposite<>(ordinal, composite);
         return map(oac, hasher, sharedMap, equalizer);
     }
 
     public static <T> Unequal<T> map(OrdinalAndComposite<T> thisOaC, Hasher<T> hasher,
-                                     Map<IHashableWraper<T, ?>, OrdinalAndComposite<T>> sharedMap, Equalizer<T> equalizer) {
-        IHashableWraper<T, ?> wraped = new HashableWrapper<>(thisOaC.getComposite(), hasher);
-        OrdinalAndComposite<T> otherOaC = sharedMap.putIfAbsent(wraped, new OrdinalAndComposite<>(thisOaC.getOrdinal(), thisOaC.getComposite()));
+                                     Map<HashableWrapper<T>, OrdinalAndComposite<T>> sharedMap, Equalizer<T> equalizer) {
+        HashableWrapper<T> wrapper = new HashableWrapper<>(thisOaC.getComposite(), hasher);
+        OrdinalAndComposite<T> otherOaC = sharedMap.putIfAbsent(wrapper, new OrdinalAndComposite<>(thisOaC.getOrdinal(), thisOaC.getComposite()));
         if (otherOaC != null) {
             // we have a key match ...
-            sharedMap.remove(wraped);
+            sharedMap.remove(wrapper);
             return getUnequal(equalizer, thisOaC, otherOaC);
         }
         return null;

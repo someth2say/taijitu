@@ -2,7 +2,7 @@ package org.someth2say.taijitu.compare.equality.impl.composite;
 
 import org.junit.Test;
 import org.someth2say.taijitu.compare.equality.wrapper.ComparableHashableWrapper;
-import org.someth2say.taijitu.compare.equality.wrapper.IComparableWraper;
+import org.someth2say.taijitu.compare.equality.wrapper.ComparableWrapper;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -20,9 +20,9 @@ public class CompositeComparatorHasherTest {
         assertTrue(testClassThreeComparatorHasher.compare(differentFrom1, differentFrom2) == 0);
         assertTrue(testClassThreeComparatorHasher.areEquals(differentFrom1, differentFrom2));
 
-        IComparableWraper<TestComposite, ?> wrap1 = new ComparableHashableWrapper<>(differentFrom1, testClassThreeComparatorHasher);
-        IComparableWraper<TestComposite, ?> wrap3 = new ComparableHashableWrapper<>(differentFrom3, testClassThreeComparatorHasher);
-        IComparableWraper<TestComposite, ?> wrap2 = new ComparableHashableWrapper<>(differentFrom2, testClassThreeComparatorHasher);
+        ComparableHashableWrapper<TestComposite, ?> wrap1 = new ComparableHashableWrapper<>(differentFrom1, testClassThreeComparatorHasher);
+        ComparableHashableWrapper<TestComposite, ?> wrap3 = new ComparableHashableWrapper<>(differentFrom3, testClassThreeComparatorHasher);
+        ComparableHashableWrapper<TestComposite, ?> wrap2 = new ComparableHashableWrapper<>(differentFrom2, testClassThreeComparatorHasher);
 
         assertTrue(wrap1.compareTo(wrap3) < 0);
         assertTrue(wrap1.compareTo(wrap2) == 0);
