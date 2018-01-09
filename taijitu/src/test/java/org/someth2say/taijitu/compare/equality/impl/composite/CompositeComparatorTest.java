@@ -19,9 +19,9 @@ public class CompositeComparatorTest {
         assertTrue(testClassThreeComparator.areEquals(differentFrom1, differentFrom2));
 
         // TODO: Those casts seems only to be needed in Java8 ...
-        ComparableWrapper<TestComposite, ?> wrap1 = (ComparableWrapper<TestComposite, ?>) new ComparableWrapper<>(differentFrom1, testClassThreeComparator);
-        ComparableWrapper<TestComposite, ?> wrap3 = (ComparableWrapper<TestComposite, ?>) new ComparableWrapper<>(differentFrom3, testClassThreeComparator);
-        ComparableWrapper<TestComposite, ?> wrap2 = (ComparableWrapper<TestComposite, ?>) new ComparableWrapper<>(differentFrom2, testClassThreeComparator);
+        ComparableWrapper<TestComposite,?> wrap1 = (ComparableWrapper<TestComposite,?>) new ComparableWrapper<>(differentFrom1, testClassThreeComparator);
+        ComparableWrapper<TestComposite,?> wrap3 = (ComparableWrapper<TestComposite,?>) new ComparableWrapper<>(differentFrom3, testClassThreeComparator);
+        ComparableWrapper<TestComposite,?> wrap2 = (ComparableWrapper<TestComposite,?>) new ComparableWrapper<>(differentFrom2, testClassThreeComparator);
 
         assertTrue(wrap1.compareTo(wrap3) < 0);
         assertTrue(wrap1.compareTo(wrap2) == 0);

@@ -23,4 +23,15 @@ public class ComparableHashableWrapper<WRAPPED, EQ extends ComparatorHasher<WRAP
         return getEquality().compare(getWraped(), other.getWraped());
     }
 
+    public static class Factory<FWRAPPED> {
+        private final ComparatorHasher<FWRAPPED> comparatorHasher;
+
+        public Factory(ComparatorHasher<FWRAPPED> comparatorHasher){
+            this.comparatorHasher = comparatorHasher;
+        }
+
+        public ComparableHashableWrapper<FWRAPPED, ComparatorHasher<FWRAPPED>> wrapp(FWRAPPED wrapped){
+            return new ComparableHashableWrapper<>(wrapped, comparatorHasher);
+        }
+    }
 }

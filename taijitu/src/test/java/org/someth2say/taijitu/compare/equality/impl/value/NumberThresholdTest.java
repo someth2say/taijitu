@@ -7,13 +7,13 @@ import static org.junit.Assert.*;
 
 public class NumberThresholdTest {
     final NumberThreshold<Number> instance = new NumberThreshold<>();
+    final ComparableHashableWrapper.Factory<Number> factory = new ComparableHashableWrapper.Factory<>(instance);
     private final Number one = 1.000;
     private final Number oneOOtwo = 1.002;
     private final Number two = 2.000;
-    private final ComparableHashableWrapper<Number, ?> oneWrap = new ComparableHashableWrapper<>(one, instance);
-    private final ComparableHashableWrapper<Number, ?> oneOOTwoWrap = new ComparableHashableWrapper<>(oneOOtwo, instance);
-    private final ComparableHashableWrapper<Number, ?> twoWrap = new ComparableHashableWrapper<>(two, instance);
-
+    private final ComparableHashableWrapper<Number, ?> oneWrap = factory.wrapp(one);
+    private final ComparableHashableWrapper<Number, ?> oneOOTwoWrap = factory.wrapp(oneOOtwo);
+    private final ComparableHashableWrapper<Number, ?> twoWrap = factory.wrapp(two);
 
     @Test
     public void hashCodeTest() {

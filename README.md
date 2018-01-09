@@ -177,7 +177,17 @@ With Taijitu, you have three ways to face this situation:
 3. Use an alternative collection class that allow using external equality, instead of default equality.
    
 ### External Equality wrappers
-Taijitu offers 
+Taijitu offers a set of specialized wrapper for each kind of equalities.
+Those wrappers use provided external equality as default internal equality, so wrappers can be used in standard Java collections.
+
+Example: Wrapping String so we can use `StringCaseInsensitive` external equality. 
+> Set<HashableWrapper<String>> set = new HashSet<HashableWrapper<String>>>();
+StringCaseInsensitive equality = new StringCaseInsensitive(); // Default equality implementation
+set.add(new HashableWrapper<>("hola",equality));
+set.add(new HashableWrapper<>("Hola",equality));
+set.add(new HashableWrapper<>("adios",equality);
+set.add(new HashableWrapper<>("."),equality);
+
 ### External Equality proxies
 
 ### External Equality collections

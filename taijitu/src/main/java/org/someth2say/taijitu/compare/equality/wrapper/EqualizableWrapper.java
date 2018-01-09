@@ -29,4 +29,15 @@ public class EqualizableWrapper<WRAPPED, EQ extends Equalizer<WRAPPED>>
         return getEquality().areEquals(getWraped(), other.getWraped());
     }
 
+    public class Factory<FWRAPPED> {
+        private final Equalizer<FWRAPPED> equalizer;
+
+        public Factory(Equalizer<FWRAPPED> equalizer){
+            this.equalizer = equalizer;
+        }
+
+        public EqualizableWrapper<FWRAPPED, Equalizer<FWRAPPED>> wrapp(FWRAPPED wrapped){
+            return new EqualizableWrapper<>(wrapped, equalizer);
+        }
+    }
 }

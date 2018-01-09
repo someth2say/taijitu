@@ -8,17 +8,16 @@ import static org.junit.Assert.*;
 public class StringCaseInsensitiveTest {
 
     final StringCaseInsensitive instance = new StringCaseInsensitive();
-    final ComparableHashableWrapper<String, ?> aaa = new ComparableHashableWrapper<>("aaa", instance);
-    final ComparableHashableWrapper<String, ?> aAA = new ComparableHashableWrapper<>("aAA", instance);
-    final ComparableHashableWrapper<String, ?> aa = new ComparableHashableWrapper<>("aa", instance);
+    final ComparableHashableWrapper.Factory<String> factory = new ComparableHashableWrapper.Factory<>(instance);
+    final ComparableHashableWrapper<String, ?> aaa = factory.wrapp("aaa");
+    final ComparableHashableWrapper<String, ?> aAA = factory.wrapp("aAA");
+    final ComparableHashableWrapper<String, ?> aa = factory.wrapp("aa");
 
     @Test
     public void hashCodeTest() {
         assertEquals(instance.hash("aaa"), instance.hash("aAA"));
         assertNotEquals(instance.hash("aaa"), instance.hash("aa"));
-
         assertEquals(aaa.hashCode(), instance.hash("aaa"));
-
     }
 
     @Test
@@ -40,5 +39,4 @@ public class StringCaseInsensitiveTest {
         assertFalse(aaa.compareTo(aa) < 0);
         assertFalse(aa.compareTo(aAA) > 0);
     }
-
 }

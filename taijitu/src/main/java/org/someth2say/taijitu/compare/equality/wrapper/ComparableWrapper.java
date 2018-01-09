@@ -15,4 +15,16 @@ public class ComparableWrapper<WRAPPED,EQ extends Comparator<WRAPPED>>
     public int compareTo(IWraper<WRAPPED, ?> other) {
         return getEquality().compare(getWraped(), other.getWraped());
     }
+
+    public class Factory<FWRAPPED> {
+        private final Comparator<FWRAPPED> comparator;
+
+        public Factory(Comparator<FWRAPPED> comparator){
+            this.comparator = comparator;
+        }
+
+        public EqualizableWrapper<FWRAPPED, Comparator<FWRAPPED>> wrapp(FWRAPPED wrapped){
+            return new ComparableWrapper<>(wrapped, comparator);
+        }
+    }
 }

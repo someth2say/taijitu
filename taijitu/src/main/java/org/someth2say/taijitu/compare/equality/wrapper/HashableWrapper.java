@@ -7,8 +7,8 @@ public class HashableWrapper<WRAPPED>
         extends EqualizableWrapper<WRAPPED, Hasher<WRAPPED>>
         implements Hashable<IWraper<WRAPPED,?>>, IWraper<WRAPPED,Hasher<WRAPPED>> {
 
-    public HashableWrapper(WRAPPED wrapped, Hasher<WRAPPED> categorizer) {
-        super(wrapped, categorizer);
+    public HashableWrapper(WRAPPED wrapped, Hasher<WRAPPED> hasher) {
+        super(wrapped, hasher);
     }
 
     @Override
@@ -16,4 +16,15 @@ public class HashableWrapper<WRAPPED>
         return getEquality().hash(getWraped());
     }
 
+    public class Factory<FWRAPPED> {
+        private final Hasher<FWRAPPED> hasher;
+
+        public Factory(Hasher<FWRAPPED> hasher){
+            this.hasher = hasher;
+        }
+
+        public HashableWrapper<FWRAPPED> wrapp(FWRAPPED wrapped){
+            return new HashableWrapper<>(wrapped,hasher);
+        }
+    }
 }
