@@ -2,7 +2,9 @@ package org.someth2say.taijitu.collections;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
+import org.someth2say.taijitu.compare.equality.impl.value.JavaObject;
 import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
 
 import java.util.Arrays;
@@ -16,14 +18,13 @@ public class HashMapTest {
 
     private Hasher<String> hasher = new StringCaseInsensitive();
     private HashMap<String, Integer> hashMap;
-
+    private Equalizer<Integer> equalizer = new JavaObject<>();
 
     @Before
-    public HashMap<String, Integer> buildHolaMundoMap() {
-        hashMap = new HashMap<>(hasher);
+    public void buildHolaMundoMap() {
+        hashMap = new HashMap<>(hasher, equalizer);
         hashMap.put("Hola", 4);
         hashMap.put("mundo", 5);
-        return hashMap;
     }
 
     @Test
@@ -37,7 +38,7 @@ public class HashMapTest {
 
     @Test
     public void isEmpty() {
-        HashMap<String, Integer> hashMap = new HashMap<>(hasher);
+        HashMap<String, Integer> hashMap = new HashMap<>(hasher, equalizer);
         assertTrue(hashMap.isEmpty());
 
         hashMap.put("hola", 4);
@@ -144,7 +145,7 @@ public class HashMapTest {
     public void putIfAbsent() {
         assertEquals(new Integer(4), hashMap.putIfAbsent("HOLA", 0));
         assertEquals(new Integer(5), hashMap.putIfAbsent("mundo", 0));
-        assertEquals(new Integer(0), hashMap.putIfAbsent("adios", 0));
+        assertNull(hashMap.putIfAbsent("adios", 0));
     }
 
     @Test
@@ -196,70 +197,61 @@ public class HashMapTest {
 
     @Test
     public void compute() {
-        // Key present, Old value not null, new value not null -> replace
-        assertEquals(new Integer(8), hashMap.compute("HOLA", HashMapTest::addOrInvertLenght));
-        assertEquals(new Integer(8), hashMap.get("HOLA"));
-        assertEquals(new Integer(10), hashMap.compute("mundo", HashMapTest::addOrInvertLenght));
-        assertEquals(new Integer(10), hashMap.get("mundo"));
-
-        // Key not present, new value null -> return null
+        hashMap.put("bye", null);
+        // Key not present, new value null -> Do nothing & return null
         assertNull(hashMap.compute("adios", (k, v) -> null));
         assertNull(hashMap.get("adios"));
-        assertEquals(2, hashMap.size());
-
+        assertEquals(3, hashMap.size());
         // Key not present, new value not null -> add
         assertEquals(new Integer(-5), hashMap.compute("adios", HashMapTest::addOrInvertLenght));
         assertEquals(new Integer(-5), hashMap.get("adios"));
-        assertEquals(3, hashMap.size());
+        assertEquals(4, hashMap.size());
 
-        // Key present, Old value null, new value not null -> add
-        hashMap.put("bye", null);
+        // Key present, new value not null, Old value not null -> replace
+        assertEquals(new Integer(8), hashMap.compute("HOLA", HashMapTest::addOrInvertLenght));
+        assertEquals(new Integer(8), hashMap.get("HOLA"));
+        assertEquals(4, hashMap.size());
+        assertEquals(new Integer(10), hashMap.compute("mundo", HashMapTest::addOrInvertLenght));
+        assertEquals(new Integer(10), hashMap.get("mundo"));
+        assertEquals(4, hashMap.size());
+        // Key present, new value not null, Old value null -> Replace
         assertEquals(new Integer(-3), hashMap.compute("BYE", HashMapTest::addOrInvertLenght));
         assertEquals(new Integer(-3), hashMap.get("BYE"));
         assertEquals(4, hashMap.size());
-
-        // Key present, Old value not null, New value null -> Remove
+        // Key present, New value null -> Remove
         assertNull(hashMap.compute("BYE", (k, v) -> null));
         assertNull(hashMap.get("BYE"));
         assertEquals(3, hashMap.size());
-
-        // Key present, Old value null,  New values null -> return null
-        hashMap.put("hello", null);
-        assertNull(hashMap.compute("HELLO", (k, v) -> null));
-        assertNull(hashMap.get("hello"));
-        assertEquals(4, hashMap.size());
-    }
-
-
-    private static Integer addOrNull(Integer oldI, Integer newI) {
-        return (newI == null) ? null : oldI + newI;
     }
 
     @Test
     public void merge() {
-        /*
-         * V oldValue = map.get(key);
-         * V newValue = (oldValue == null) ? value : remappingFunction.apply(oldValue, value);
-         * if (newValue == null)
-         *     map.remove(key);
-         * else
-         *     map.put(key, newValue);
+        /**
+         * If the specified key is not already associated with a value or is
+         * associated with null, associates it with the given non-null value.
          */
+        assertEquals(new Integer(11), hashMap.merge("hi", 11, Integer::sum));
+        assertEquals(new Integer(11), hashMap.get("hi"));
+        assertEquals(3, hashMap.size());
+        hashMap.put("bye", null);
+        assertEquals(new Integer(12), hashMap.merge("BYE", 12, Integer::sum));
+        assertEquals(new Integer(12), hashMap.get("Bye"));
+        assertEquals(4, hashMap.size());
 
-        // newValue null -> remove
-        assertNull(hashMap.merge("hello", null, HashMapTest::addOrNull));
-        assertNull(hashMap.get("hello"));
-        assertEquals(1, hashMap.size());
+        /**
+         * Otherwise, replaces the associated value with the results of the given
+         * remapping function...
+         */
+        assertEquals(new Integer(7), hashMap.merge("hola", 3, Integer::sum));
+        assertEquals(new Integer(7), hashMap.get("HOLA"));
+        assertEquals(4, hashMap.size());
 
-        // newValue not null, old value not null -> replace
-        assertEquals(new Integer(6), hashMap.merge("world", 1, HashMapTest::addOrNull));
-        assertEquals(new Integer(6), hashMap.get("world"));
-        assertEquals(1, hashMap.size());
-
-        // newValue not null, old value null -> put
-        assertEquals(new Integer(1), hashMap.merge("hi", 1, HashMapTest::addOrNull));
-        assertEquals(new Integer(1), hashMap.get("hi"));
-        assertEquals(2, hashMap.size());
+        /**
+         * ... or removes if the result is {@code null}.
+         */
+        assertNull(hashMap.merge("hola", 3, (x, y) -> null));
+        assertNull(hashMap.get("HOLA"));
+        assertEquals(3, hashMap.size());
 
     }
 }

@@ -15,12 +15,21 @@ import java.util.function.Function;
 
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
-import org.someth2say.taijitu.compare.equality.impl.value.JavaObject;
 import sun.misc.SharedSecrets;
 
 
-public class HashMap<K, V> //extends AbstractMap<K,V>
+public class HashMap<K, V>
         implements Map<K, V>, Cloneable, Serializable {
+
+    /**
+     * Hasher that provide both hashCode and equals for keys
+     */
+    final Hasher<K> hasher;
+
+    /**
+     * Equalizer that provided equality for values.
+     */
+    final Equalizer<V> equalizer;
 
     private static final long serialVersionUID = 362498820763181265L;
 
@@ -76,6 +85,8 @@ public class HashMap<K, V> //extends AbstractMap<K,V>
         final K key;
         V value;
         Node<K, V> next;
+
+        //TODO: Analize if those can be somehow delegated to the Map...
         private final Hasher<K> hasher;
         private final Equalizer<V> equalizer;
 
@@ -152,39 +163,13 @@ public class HashMap<K, V> //extends AbstractMap<K,V>
     }
 
     /**
-     * Returns x's Class if it is of the form "class C implements
-     * Comparable<C>", else null.
-     */
-    static Class<?> comparableClassFor(Object x) {
-        if (x instanceof Comparable) {
-            Class<?> c;
-            Type[] ts, as;
-            Type t;
-            ParameterizedType p;
-            if ((c = x.getClass()) == String.class) // bypass checks
-                return c;
-            if ((ts = c.getGenericInterfaces()) != null) {
-                for (int i = 0; i < ts.length; ++i) {
-                    if (((t = ts[i]) instanceof ParameterizedType) &&
-                            ((p = (ParameterizedType) t).getRawType() ==
-                                    Comparable.class) &&
-                            (as = p.getActualTypeArguments()) != null &&
-                            as.length == 1 && as[0] == c) // type arg is c
-                        return c;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Returns k.compareTo(x) if x matches kc (k's screened comparable
+     * Returns key.compareTo(otherKey) if otherKey matches kc (key's screened comparable
      * class), else 0.
      */
     @SuppressWarnings({"rawtypes", "unchecked"}) // for cast to Comparable
-    static int compareComparables(Class<?> kc, Object k, Object x) {
-        return (x == null || x.getClass() != kc ? 0 :
-                ((Comparable) k).compareTo(x));
+    static int compareComparables(Class<?> kc, Object key, Object otherKey) {
+        return (otherKey == null || otherKey.getClass() != kc ? 0 :
+                ((Comparable) key).compareTo(otherKey));
     }
 
     /**
@@ -247,30 +232,25 @@ public class HashMap<K, V> //extends AbstractMap<K,V>
      */
     final float loadFactor;
 
-    /**
-     * Hasher that provide both hashCode and equals for keys
-     */
-    final Hasher<K> hasher;
-
-    /**
-     * Equalizer that provided equality for values.
-     */
-    //TODO: provide
-    final Equalizer<V> equalizer = new JavaObject<>();
     /* ---------------- Public operations -------------- */
+
+
+    //TODO: Create constructor for default hasher and equalizer values
 
     /**
      * Constructs an empty <tt>HashMap</tt> with the specified initial
      * capacity and load factor.
      *
-     * @param hasher
      * @param initialCapacity the initial capacity
      * @param loadFactor      the load factor
+     * @param hasher
+     * @param equalizer
      * @throws IllegalArgumentException if the initial capacity is negative
      *                                  or the load factor is nonpositive
      */
-    public HashMap(Hasher<K> hasher, int initialCapacity, float loadFactor) {
+    public HashMap(int initialCapacity, float loadFactor, Hasher<K> hasher, Equalizer<V> equalizer) {
         this.hasher = hasher;
+        this.equalizer = equalizer;
         if (initialCapacity < 0)
             throw new IllegalArgumentException("Illegal initial capacity: " +
                     initialCapacity);
@@ -289,10 +269,11 @@ public class HashMap<K, V> //extends AbstractMap<K,V>
      *
      * @param initialCapacity the initial capacity.
      * @param hasher
+     * @param equalizer
      * @throws IllegalArgumentException if the initial capacity is negative.
      */
-    public HashMap(int initialCapacity, Hasher<K> hasher) {
-        this(hasher, initialCapacity, DEFAULT_LOAD_FACTOR);
+    public HashMap(int initialCapacity, Hasher<K> hasher, Equalizer<V> equalizer) {
+        this(initialCapacity, DEFAULT_LOAD_FACTOR, hasher, equalizer);
     }
 
     /**
@@ -300,9 +281,11 @@ public class HashMap<K, V> //extends AbstractMap<K,V>
      * (16) and the default load factor (0.75).
      *
      * @param hasher
+     * @param equalizer
      */
-    public HashMap(Hasher<K> hasher) {
+    public HashMap(Hasher<K> hasher, Equalizer<V> equalizer) {
         this.hasher = hasher;
+        this.equalizer = equalizer;
         this.loadFactor = DEFAULT_LOAD_FACTOR; // all other fields defaulted
     }
 
@@ -314,10 +297,12 @@ public class HashMap<K, V> //extends AbstractMap<K,V>
      *
      * @param m      the map whose mappings are to be placed in this map
      * @param hasher
+     * @param equalizer
      * @throws NullPointerException if the specified map is null
      */
-    public HashMap(Map<? extends K, ? extends V> m, Hasher<K> hasher) {
+    public HashMap(Map<? extends K, ? extends V> m, Hasher<K> hasher, Equalizer<V> equalizer) {
         this.hasher = hasher;
+        this.equalizer = equalizer;
         this.loadFactor = DEFAULT_LOAD_FACTOR;
         putMapEntries(m, false);
     }
@@ -1215,33 +1200,6 @@ public class HashMap<K, V> //extends AbstractMap<K,V>
         return value;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     @Override
     public void forEach(BiConsumer<? super K, ? super V> action) {
         Node<K, V>[] tab;
@@ -1287,7 +1245,7 @@ public class HashMap<K, V> //extends AbstractMap<K,V>
     @SuppressWarnings("unchecked")
     @Override
     public Object clone() {
-        return new HashMap<>(this, hasher);
+        return new HashMap<>(this, hasher, equalizer);
     }
 
     // These methods are also used when serializing HashSets
@@ -1708,22 +1666,22 @@ public class HashMap<K, V> //extends AbstractMap<K,V>
 
     // Create a regular (non-tree) node
     Node<K, V> newNode(int hash, K key, V value, Node<K, V> next) {
-        return new Node<>(hash, key, value, next);
+        return new Node<>(hash, key, value, next, hasher, equalizer);
     }
 
     // For conversion from TreeNodes to plain nodes
     Node<K, V> replacementNode(Node<K, V> p, Node<K, V> next) {
-        return new Node<>(p.hash, p.key, p.value, next);
+        return new Node<>(p.hash, p.key, p.value, next, hasher, equalizer);
     }
 
     // Create a tree bin node
     TreeNode<K, V> newTreeNode(int hash, K key, V value, Node<K, V> next) {
-        return new TreeNode<>(hash, key, value, next);
+        return new TreeNode<>(hash, key, value, next, hasher, equalizer);
     }
 
     // For treeifyBin
     TreeNode<K, V> replacementTreeNode(Node<K, V> p, Node<K, V> next) {
-        return new TreeNode<>(p.hash, p.key, p.value, next);
+        return new TreeNode<>(p.hash, p.key, p.value, next, hasher, equalizer);
     }
 
     /**
@@ -1765,10 +1723,8 @@ public class HashMap<K, V> //extends AbstractMap<K,V>
     /* ------------------------------------------------------------ */
     // Tree bins
     static class Entry<K, V> extends HashMap.Node<K, V> {
-        Entry<K, V> before, after;
-
-        Entry(int hash, K key, V value, Node<K, V> next) {
-            super(hash, key, value, next);
+        Entry(int hash, K key, V value, Node<K, V> next, Hasher<K> hasher, Equalizer<V> equalizer) {
+            super(hash, key, value, next, hasher, equalizer);
         }
     }
 
@@ -1778,24 +1734,28 @@ public class HashMap<K, V> //extends AbstractMap<K,V>
      * linked node.
      */
     static final class TreeNode<K, V> extends Entry<K, V> {
+        private final Hasher<K> hasher;
+        private final Equalizer<V> equalizer;
         TreeNode<K, V> parent;  // red-black tree links
         TreeNode<K, V> left;
         TreeNode<K, V> right;
         TreeNode<K, V> prev;    // needed to unlink next upon deletion
         boolean red;
 
-        TreeNode(int hash, K key, V val, Node<K, V> next) {
-            super(hash, key, val, next);
+        TreeNode(int hash, K key, V val, Node<K, V> next, Hasher<K> hasher, Equalizer<V> equalizer) {
+            super(hash, key, val, next, hasher, equalizer);
+            this.hasher = hasher;
+            this.equalizer = equalizer;
         }
 
         /**
          * Returns root of tree containing this node.
          */
         final TreeNode<K, V> root() {
-            for (TreeNode<K, V> r = this, p; ; ) {
-                if ((p = r.parent) == null)
-                    return r;
-                r = p;
+            for (TreeNode<K, V> root = this, parent; ; ) {
+                if ((parent = root.parent) == null)
+                    return root;
+                root = parent;
             }
         }
 
@@ -1826,42 +1786,74 @@ public class HashMap<K, V> //extends AbstractMap<K,V>
 
         /**
          * Finds the node starting at root p with the given hash and key.
-         * The kc argument caches comparableClassFor(key) upon first use
+         * The comparableClass argument caches comparableClassFor(key) upon first use
          * comparing keys.
          */
-        final TreeNode<K, V> find(int h, Object k, Class<?> kc) {
-            TreeNode<K, V> p = this;
+        final TreeNode<K, V> findNode(int hash, K key, Class<?> comparableClass) {
+            TreeNode<K, V> treeNode = this;
             do {
-                int ph, dir;
-                K pk;
-                TreeNode<K, V> pl = p.left, pr = p.right, q;
-                if ((ph = p.hash) > h)
-                    p = pl;
-                else if (ph < h)
-                    p = pr;
-                else if ((pk = p.key) == k || (k != null && k.equals(pk)))
-                    return p;
-                else if (pl == null)
-                    p = pr;
-                else if (pr == null)
-                    p = pl;
-                else if ((kc != null ||
-                        (kc = comparableClassFor(k)) != null) &&
-                        (dir = compareComparables(kc, k, pk)) != 0)
-                    p = (dir < 0) ? pl : pr;
-                else if ((q = pr.find(h, k, kc)) != null)
+                int nodeHash, dir;
+                K nodeKey;
+                TreeNode<K, V> leftNode = treeNode.left, rightNode = treeNode.right, q;
+                //Hash is different, so move child
+                if ((nodeHash = treeNode.hash) > hash)
+                    treeNode = leftNode;
+                else if (nodeHash < hash)
+                    treeNode = rightNode;
+                    // Same hash, then compare the key itself.
+                else if ((nodeKey = treeNode.key) == key || (key != null && hasher.areEquals(key, nodeKey)))
+                    return treeNode;
+                    // Same hash, but different key...
+                    // If some child missing, try the other one.
+                else if (leftNode == null)
+                    treeNode = rightNode;
+                else if (rightNode == null)
+                    treeNode = leftNode;
+                    //TODO: Check if the hasher is also a Comparator, so we can use the defined order.
+                    // Same hash, both children, use key Comparable interface (if available)
+                else if ((comparableClass != null || (comparableClass = comparableClassFor(key)) != null) &&
+                        (dir = compareComparables(comparableClass, key, nodeKey)) != 0)
+                    treeNode = (dir < 0) ? leftNode : rightNode;
+                    // Comparator also can't discriminate. Let's start by right...
+                else if ((q = rightNode.findNode(hash, key, comparableClass)) != null)
                     return q;
+                    // Not found in right, try left as last resort.
                 else
-                    p = pl;
-            } while (p != null);
+                    treeNode = leftNode;
+            } while (treeNode != null);
             return null;
         }
 
         /**
-         * Calls find for root node.
+         * Returns key's Class if it is of the form "class C implements
+         * Comparable<C>", else null.
          */
-        final TreeNode<K, V> getTreeNode(int h, Object k) {
-            return ((parent != null) ? root() : this).find(h, k, null);
+        Class<?> comparableClassFor(K key) {
+            if (key instanceof Comparable) {
+                Class<?> keyClass;
+                Type[] directInterfaces, typeArguments;
+                Type directInterface;
+                ParameterizedType parameterizedType;
+                if ((keyClass = key.getClass()) == String.class || key == Integer.class) // bypass checks
+                    return keyClass;
+                if ((directInterfaces = keyClass.getGenericInterfaces()) != null) {
+                    for (int idx = 0; idx < directInterfaces.length; ++idx) {
+                        if (((directInterface = directInterfaces[idx]) instanceof ParameterizedType) &&
+                                ((parameterizedType = (ParameterizedType) directInterface).getRawType() == Comparable.class) &&
+                                (typeArguments = parameterizedType.getActualTypeArguments()) != null &&
+                                typeArguments.length == 1 && typeArguments[0] == keyClass) // type arg is keyClass
+                            return keyClass;
+                    }
+                }
+            }
+            return null;
+        }
+
+        /**
+         * Calls findNode for root node.
+         */
+        final TreeNode<K, V> getTreeNode(int hash, K key) {
+            return ((parent != null) ? root() : this).findNode(hash, key, null);
         }
 
         /**
@@ -1888,37 +1880,37 @@ public class HashMap<K, V> //extends AbstractMap<K,V>
          */
         final void treeify(Node<K, V>[] tab) {
             TreeNode<K, V> root = null;
-            for (TreeNode<K, V> x = this, next; x != null; x = next) {
-                next = (TreeNode<K, V>) x.next;
-                x.left = x.right = null;
+            for (TreeNode<K, V> currentNode = this, nextNode; currentNode != null; currentNode = nextNode) {
+                nextNode = (TreeNode<K, V>) currentNode.next;
+                currentNode.left = currentNode.right = null;
                 if (root == null) {
-                    x.parent = null;
-                    x.red = false;
-                    root = x;
+                    currentNode.parent = null;
+                    currentNode.red = false;
+                    root = currentNode;
                 } else {
-                    K k = x.key;
-                    int h = x.hash;
-                    Class<?> kc = null;
-                    for (TreeNode<K, V> p = root; ; ) {
+                    K key = currentNode.key;
+                    int currentHash = currentNode.hash;
+                    Class<?> keyClass = null;
+                    for (TreeNode<K, V> node = root; ; ) {
                         int dir, ph;
-                        K pk = p.key;
-                        if ((ph = p.hash) > h)
+                        K pk = node.key;
+                        if ((ph = node.hash) > currentHash)
                             dir = -1;
-                        else if (ph < h)
+                        else if (ph < currentHash)
                             dir = 1;
-                        else if ((kc == null &&
-                                (kc = comparableClassFor(k)) == null) ||
-                                (dir = compareComparables(kc, k, pk)) == 0)
-                            dir = tieBreakOrder(k, pk);
+                        else if ((keyClass == null &&
+                                (keyClass = comparableClassFor(key)) == null) ||
+                                (dir = compareComparables(keyClass, key, pk)) == 0)
+                            dir = tieBreakOrder(key, pk);
 
-                        TreeNode<K, V> xp = p;
-                        if ((p = (dir <= 0) ? p.left : p.right) == null) {
-                            x.parent = xp;
+                        TreeNode<K, V> xp = node;
+                        if ((node = (dir <= 0) ? node.left : node.right) == null) {
+                            currentNode.parent = xp;
                             if (dir <= 0)
-                                xp.left = x;
+                                xp.left = currentNode;
                             else
-                                xp.right = x;
-                            root = balanceInsertion(root, x);
+                                xp.right = currentNode;
+                            root = balanceInsertion(root, currentNode);
                             break;
                         }
                     }
@@ -1948,47 +1940,49 @@ public class HashMap<K, V> //extends AbstractMap<K,V>
          * Tree version of putVal.
          */
         final TreeNode<K, V> putTreeVal(HashMap<K, V> map, Node<K, V>[] tab,
-                                        int h, K k, V v) {
-            Class<?> kc = null;
-            boolean searched = false;
+                                        int hash, K key, V value) {
+            Class<?> keyClass = null;
+            boolean searchedInChilds = false;
             TreeNode<K, V> root = (parent != null) ? root() : this;
-            for (TreeNode<K, V> p = root; ; ) {
-                int dir, ph;
-                K pk;
-                if ((ph = p.hash) > h)
+            for (TreeNode<K, V> currentNode = root; ; ) {
+                int dir, currentHash;
+                K currentKey;
+                // Move by hash
+                if ((currentHash = currentNode.hash) > hash)
                     dir = -1;
-                else if (ph < h)
+                else if (currentHash < hash)
                     dir = 1;
-                else if ((pk = p.key) == k || (k != null && k.equals(pk)))
-                    return p;
-                else if ((kc == null &&
-                        (kc = comparableClassFor(k)) == null) ||
-                        (dir = compareComparables(kc, k, pk)) == 0) {
-                    if (!searched) {
-                        TreeNode<K, V> q, ch;
-                        searched = true;
-                        if (((ch = p.left) != null &&
-                                (q = ch.find(h, k, kc)) != null) ||
-                                ((ch = p.right) != null &&
-                                        (q = ch.find(h, k, kc)) != null))
-                            return q;
+                // Hash Match. If key match, we got a hit
+                else if ((currentKey = currentNode.key) == key || (key != null && hasher.areEquals(key, currentKey)))
+                    return currentNode;
+                // Hash Match, key not match -> Look in children
+                else if ((keyClass == null &&
+                        (keyClass = comparableClassFor(key)) == null) ||
+                        (dir = compareComparables(keyClass, key, currentKey)) == 0) {
+                    if (!searchedInChilds) {
+                        TreeNode<K, V> foundNode, childNode;
+                        searchedInChilds = true;
+                        if (((childNode = currentNode.left) != null && (foundNode = childNode.findNode(hash, key, keyClass)) != null) ||
+                                ((childNode = currentNode.right) != null && (foundNode = childNode.findNode(hash, key, keyClass)) != null))
+                            return foundNode;
                     }
-                    dir = tieBreakOrder(k, pk);
+                    dir = tieBreakOrder(key, currentKey);
                 }
 
-                TreeNode<K, V> xp = p;
-                if ((p = (dir <= 0) ? p.left : p.right) == null) {
-                    Node<K, V> xpn = xp.next;
-                    TreeNode<K, V> x = map.newTreeNode(h, k, v, xpn);
+                // Not found, but maybe we have a direction where it should be.
+                TreeNode<K, V> oldCurrentNode = currentNode;
+                if ((currentNode = (dir <= 0) ? currentNode.left : currentNode.right) == null) {
+                    Node<K, V> oldNextNode = oldCurrentNode.next;
+                    TreeNode<K, V> newTreeNode = map.newTreeNode(hash, key, value, oldNextNode);
                     if (dir <= 0)
-                        xp.left = x;
+                        oldCurrentNode.left = newTreeNode;
                     else
-                        xp.right = x;
-                    xp.next = x;
-                    x.parent = x.prev = xp;
-                    if (xpn != null)
-                        ((TreeNode<K, V>) xpn).prev = x;
-                    moveRootToFront(tab, balanceInsertion(root, x));
+                        oldCurrentNode.right = newTreeNode;
+                    oldCurrentNode.next = newTreeNode;
+                    newTreeNode.parent = newTreeNode.prev = oldCurrentNode;
+                    if (oldNextNode != null)
+                        ((TreeNode<K, V>) oldNextNode).prev = newTreeNode;
+                    moveRootToFront(tab, balanceInsertion(root, newTreeNode));
                     return null;
                 }
             }
@@ -2030,7 +2024,7 @@ public class HashMap<K, V> //extends AbstractMap<K,V>
             TreeNode<K, V> p = this, pl = left, pr = right, replacement;
             if (pl != null && pr != null) {
                 TreeNode<K, V> s = pr, sl;
-                while ((sl = s.left) != null) // find successor
+                while ((sl = s.left) != null) // findNode successor
                     s = sl;
                 boolean c = s.red;
                 s.red = p.red;
