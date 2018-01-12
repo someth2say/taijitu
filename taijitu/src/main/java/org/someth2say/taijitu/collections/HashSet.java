@@ -17,9 +17,7 @@ public class HashSet<E>
     // Dummy value to associate with an Object in the backing Map
     private static final Object PRESENT = new Object();
 
-//    private final Hasher<E> hasher;
-
-    private static final JavaObject<Object> equalizer = new JavaObject<>();
+    private final Hasher<E> hasher;
 
     /**
      * Constructs a new, empty set; the backing <tt>HashMap</tt> instance has
@@ -28,8 +26,8 @@ public class HashSet<E>
      * @param hasher
      */
     public HashSet(Hasher<E> hasher) {
-//        this.hasher = hasher;
-        map = new HashMap<>(hasher, equalizer);
+        this.hasher = hasher;
+        map = new HashMap<>(hasher, new JavaObject<>());
     }
 
     /**
@@ -43,8 +41,8 @@ public class HashSet<E>
      * @throws NullPointerException if the specified collection is null
      */
     public HashSet(Collection<? extends E> c, Hasher<E> hasher) {
-        map = new HashMap<>(Math.max((int) (c.size() / .75f) + 1, 16), hasher, equalizer);
-//        this.hasher = hasher;
+        map = new HashMap<>(Math.max((int) (c.size() / .75f) + 1, 16), hasher, new JavaObject<>());
+        this.hasher = hasher;
         addAll(c);
     }
 
@@ -59,8 +57,8 @@ public class HashSet<E>
      *                                  than zero, or if the load factor is nonpositive
      */
     public HashSet(int initialCapacity, float loadFactor, Hasher<E> hasher) {
-//        this.hasher = hasher;
-        map = new HashMap<>(initialCapacity, loadFactor, hasher, equalizer);
+        this.hasher = hasher;
+        map = new HashMap<>(initialCapacity, loadFactor, hasher, new JavaObject<>());
     }
 
     /**
@@ -73,8 +71,8 @@ public class HashSet<E>
      *                                  than zero
      */
     public HashSet(int initialCapacity, Hasher<E> hasher) {
-        map = new HashMap<>(initialCapacity, hasher, equalizer);
-//        this.hasher = hasher;
+        map = new HashMap<>(initialCapacity, hasher, new JavaObject<>());
+        this.hasher = hasher;
     }
 
     /**
@@ -92,8 +90,8 @@ public class HashSet<E>
      *                                  than zero, or if the load factor is nonpositive
      */
     HashSet(int initialCapacity, float loadFactor, boolean dummy, Hasher<E> hasher) {
-//        this.hasher = hasher;
-        map = new LinkedHashMap<>(hasher, equalizer, initialCapacity, loadFactor);
+        map = new LinkedHashMap<>(initialCapacity, loadFactor, hasher, new JavaObject<>());
+        this.hasher=hasher;
     }
 
     /**
@@ -266,8 +264,8 @@ public class HashSet<E>
 
         // Create backing HashMap
         map = (((HashSet<?>) this) instanceof LinkedHashSet ?
-                new LinkedHashMap<E, Object>(capacity, loadFactor) :
-                new HashMap<E, Object>(capacity, loadFactor));
+                new LinkedHashMap<E, Object>(capacity, loadFactor, hasher, new JavaObject<>()) :
+                new HashMap<E, Object>(capacity, loadFactor, hasher, new JavaObject<>()));
 
         // Read in all elements in the proper order.
         for (int i = 0; i < size; i++) {

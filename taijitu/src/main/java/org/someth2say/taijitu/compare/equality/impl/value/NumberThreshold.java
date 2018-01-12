@@ -46,7 +46,7 @@ public class NumberThreshold<T extends Number> extends AbstractConfigurableEqual
     }
 
     private double getScaleRange(int scale) {
-        return 1d / (10 ^ scale);
+        return 1 / Math.pow(10, scale);
     }
 
     @Override

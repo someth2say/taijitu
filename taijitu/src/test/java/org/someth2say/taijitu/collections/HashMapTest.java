@@ -4,10 +4,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
-import org.someth2say.taijitu.compare.equality.impl.value.JavaObject;
+import org.someth2say.taijitu.compare.equality.impl.value.NumberThreshold;
 import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -17,39 +16,39 @@ import static org.junit.Assert.*;
 public class HashMapTest {
 
     private Hasher<String> hasher = new StringCaseInsensitive();
-    private HashMap<String, Integer> hashMap;
-    private Equalizer<Integer> equalizer = new JavaObject<>();
+    private HashMap<String, Float> hashMap;
+    private Equalizer<Float> equalizer = new NumberThreshold<>();
 
     @Before
     public void buildHolaMundoMap() {
         hashMap = new HashMap<>(hasher, equalizer);
-        hashMap.put("Hola", 4);
-        hashMap.put("mundo", 5);
+        hashMap.put("Hola", 4f);
+        hashMap.put("mundo", 5f);
     }
 
     @Test
     public void size() {
         assertEquals(2, hashMap.size());
 
-        hashMap.put("hola", 2);
-        hashMap.put("adios", 1);
+        hashMap.put("hola", 2f);
+        hashMap.put("adios", 1f);
         assertEquals(3, hashMap.size());
     }
 
     @Test
     public void isEmpty() {
-        HashMap<String, Integer> hashMap = new HashMap<>(hasher, equalizer);
+        HashMap<String, Float> hashMap = new HashMap<>(hasher, equalizer);
         assertTrue(hashMap.isEmpty());
 
-        hashMap.put("hola", 4);
+        hashMap.put("hola", 4f);
         assertFalse(hashMap.isEmpty());
     }
 
     @Test
     public void get() {
 
-        assertEquals(new Integer(4), hashMap.get("Hola"));
-        assertEquals(new Integer(4), hashMap.get("hola"));
+        assertEquals((Float) 4f, hashMap.get("Hola"));
+        assertEquals((Float) 4f, hashMap.get("hola"));
         assertNull(hashMap.get("adios"));
     }
 
@@ -62,31 +61,31 @@ public class HashMapTest {
 
     @Test
     public void put() {
-        assertEquals(new Integer(4), hashMap.put("Hola", 5));
-        assertEquals(new Integer(5), hashMap.put("HOLA", 4));
-        assertEquals(null, hashMap.put("adios", 0));
+        assertEquals((Float) 4f, hashMap.put("Hola", 5f));
+        assertEquals((Float) 5f, hashMap.put("HOLA", 4f));
+        assertEquals(null, hashMap.put("adios", 0f));
     }
 
     @Test
     public void putAll() {
-        Map<String, Integer> otherMap = new java.util.HashMap<String, Integer>() {{
-            put("HOLA", -4);
-            put("WORLD", -5);
+        Map<String, Float> otherMap = new java.util.HashMap<String, Float>() {{
+            put("HOLA", -4f);
+            put("WORLD", -5f);
         }};
 
         hashMap.putAll(otherMap);
 
         assertEquals(3, hashMap.size());
-        assertEquals(new Integer(-4), hashMap.get("hola"));
-        assertEquals(new Integer(5), hashMap.get("mundo"));
-        assertEquals(new Integer(-5), hashMap.get("world"));
+        assertEquals((Float) (-4f), hashMap.get("hola"));
+        assertEquals((Float) (5f), hashMap.get("mundo"));
+        assertEquals((Float) (-5f), hashMap.get("world"));
         assertNull(hashMap.get("adios"));
     }
 
     @Test
     public void remove() {
 
-        assertEquals(new Integer(4), hashMap.remove("HOLA"));
+        assertEquals((Float) (4f), hashMap.remove("HOLA"));
         assertNull(hashMap.remove("ADIOS"));
         assertEquals(1, hashMap.size());
 
@@ -103,82 +102,87 @@ public class HashMapTest {
 
     @Test
     public void containsValue() {
-        assertTrue(hashMap.containsValue(5));
-        assertFalse(hashMap.containsValue(0));
+        assertTrue(hashMap.containsValue(5f));
+        assertTrue(hashMap.containsValue(5.0006f));
+        assertFalse(hashMap.containsValue(0f));
     }
 
     @Test
     public void keySet() {
-        //TODO: KeySet should be also based on the same key equality
         Set<String> keySet = hashMap.keySet();
-        keySet.containsAll(Arrays.asList("Hola", "mundo"));
+        assertEquals(hashMap.size(), keySet.size());
+        assertTrue(keySet.contains("HOLA"));
+        assertTrue(keySet.contains("MUNDO"));
+        assertFalse(keySet.contains("adios"));
     }
 
     @Test
     public void values() {
-        Collection<Integer> values = hashMap.values();
-        assertEquals(2, values.size());
-        //TODO: Check value equality
-        assertTrue(values.containsAll(Arrays.asList(4, 5)));
+        Collection<Float> values = hashMap.values();
+        assertEquals(hashMap.size(), values.size());
+        assertEquals(hashMap.size(), values.size());
+        assertTrue(values.contains(4.0005f));
+        assertTrue(values.contains(5f));
+        assertFalse(values.contains(4.01f));
     }
 
     @Test
     public void entrySet() {
-        Set<Map.Entry<String, Integer>> entrySet = hashMap.entrySet();
-        assertEquals(2, entrySet.size());
-        //TODO: Use hasher and equality
-        assertTrue(
-                entrySet.stream().anyMatch(entry -> (entry.getKey().equals("Hola") && entry.getValue().equals(4)))
-                        &&
-                        entrySet.stream().anyMatch(entry -> (entry.getKey().equals("mundo") && entry.getValue().equals(5)))
-        );
+        Set<Map.Entry<String, Float>> entrySet = hashMap.entrySet();
+        assertEquals(hashMap.size(), entrySet.size());
+        LinkedHashMap.Entry<String, Float> holaEntry = new LinkedHashMap.Entry<>(0, "hola", 4.0001f, null, null, null);
+        LinkedHashMap.Entry<String, Float> mundoEntry = new LinkedHashMap.Entry<>(0, "hola", 4.0001f, null, null, null);
+        assertTrue(entrySet.contains(holaEntry));
+        assertTrue(entrySet.contains(mundoEntry));
+        assertTrue(entrySet.stream().noneMatch(entry -> entry.getKey().equals("bye")));
+        assertTrue(entrySet.stream().noneMatch(entry -> entry.getValue().equals(4.01f)));
     }
 
     @Test
     public void getOrDefault() {
-        assertEquals(new Integer(4), hashMap.getOrDefault("HOLA", 0));
-        assertEquals(new Integer(5), hashMap.getOrDefault("mundo", 0));
-        assertEquals(new Integer(0), hashMap.getOrDefault("adios", 0));
+        assertEquals((Float) (4f), hashMap.getOrDefault("HOLA", 0f));
+        assertEquals((Float) (5f), hashMap.getOrDefault("mundo", 0f));
+        assertEquals((Float) (0f), hashMap.getOrDefault("adios", 0f));
     }
 
     @Test
     public void putIfAbsent() {
-        assertEquals(new Integer(4), hashMap.putIfAbsent("HOLA", 0));
-        assertEquals(new Integer(5), hashMap.putIfAbsent("mundo", 0));
-        assertNull(hashMap.putIfAbsent("adios", 0));
+        assertEquals((Float) (4f), hashMap.putIfAbsent("HOLA", 0f));
+        assertEquals((Float) (5f), hashMap.putIfAbsent("mundo", 0f));
+        assertNull(hashMap.putIfAbsent("adios", 0f));
     }
 
     @Test
     public void replace() {
-        assertEquals(new Integer(4), hashMap.replace("HOLA", -4));
-        assertEquals(new Integer(-4), hashMap.get("HOLA"));
-        assertEquals(new Integer(5), hashMap.replace("mundo", -5));
-        assertEquals(new Integer(-5), hashMap.get("mundo"));
+        assertEquals((Float) (4f), hashMap.replace("HOLA", -4f));
+        assertEquals((Float) (-4f), hashMap.get("HOLA"));
+        assertEquals((Float) (5f), hashMap.replace("mundo", -5f));
+        assertEquals((Float) (-5f), hashMap.get("mundo"));
         assertEquals(2, hashMap.size());
 
-        assertFalse(hashMap.replace("hola", 6, -6));
-        assertTrue(hashMap.replace("hola", -4, 4));
-        assertTrue(hashMap.replace("mundo", -5, 5));
+        assertFalse(hashMap.replace("hola", 6f, -6f));
+        assertTrue(hashMap.replace("hola", -4f, 4f));
+        assertTrue(hashMap.replace("mundo", -5f, 5f));
         assertEquals(2, hashMap.size());
     }
 
     @Test
     public void computeIfAbsent() {
-        assertEquals(new Integer(4), hashMap.computeIfAbsent("HOLA", k -> k.length() + 1));
-        assertEquals(new Integer(5), hashMap.computeIfAbsent("mundo", k -> k.length() + 1));
+        assertEquals((Float) (4f), hashMap.computeIfAbsent("HOLA", k -> (float) k.length() + 1));
+        assertEquals((Float) (5f), hashMap.computeIfAbsent("mundo", k -> (float) k.length() + 1));
         assertEquals(2, hashMap.size());
 
-        assertEquals(new Integer(6), hashMap.computeIfAbsent("adios", k -> k.length() + 1));
+        assertEquals((Float) (6f), hashMap.computeIfAbsent("adios", k -> (float) k.length() + 1));
         assertEquals(3, hashMap.size());
-        assertEquals(new Integer(6), hashMap.get("adios"));
+        assertEquals((Float) (6f), hashMap.get("adios"));
     }
 
     @Test
     public void computeIfPresent() {
-        assertEquals(new Integer(8), hashMap.computeIfPresent("HOLA", (k, v) -> k.length() + v));
-        assertEquals(new Integer(8), hashMap.get("HOLA"));
-        assertEquals(new Integer(10), hashMap.computeIfPresent("mundo", (k, v) -> k.length() + v));
-        assertEquals(new Integer(10), hashMap.get("mundo"));
+        assertEquals((Float) (8f), hashMap.computeIfPresent("HOLA", (k, v) -> k.length() + v));
+        assertEquals((Float) (8f), hashMap.get("HOLA"));
+        assertEquals((Float) (10f), hashMap.computeIfPresent("mundo", (k, v) -> k.length() + v));
+        assertEquals((Float) (10f), hashMap.get("mundo"));
         assertEquals(2, hashMap.size());
 
         assertNull(hashMap.computeIfPresent("adios", (k, v) -> k.length() + v)); // Key not present
@@ -190,9 +194,9 @@ public class HashMapTest {
     }
 
 
-    private static Integer addOrInvertLenght(String k, Integer v) {
+    private static Float addOrInvertLenght(String k, Float v) {
         if (v != null) return k.length() + v;
-        else return -k.length();
+        else return (float) -k.length();
     }
 
     @Test
@@ -203,20 +207,20 @@ public class HashMapTest {
         assertNull(hashMap.get("adios"));
         assertEquals(3, hashMap.size());
         // Key not present, new value not null -> add
-        assertEquals(new Integer(-5), hashMap.compute("adios", HashMapTest::addOrInvertLenght));
-        assertEquals(new Integer(-5), hashMap.get("adios"));
+        assertEquals((Float) (-5f), hashMap.compute("adios", HashMapTest::addOrInvertLenght));
+        assertEquals((Float) (-5f), hashMap.get("adios"));
         assertEquals(4, hashMap.size());
 
         // Key present, new value not null, Old value not null -> replace
-        assertEquals(new Integer(8), hashMap.compute("HOLA", HashMapTest::addOrInvertLenght));
-        assertEquals(new Integer(8), hashMap.get("HOLA"));
+        assertEquals((Float) (8f), hashMap.compute("HOLA", HashMapTest::addOrInvertLenght));
+        assertEquals((Float) (8f), hashMap.get("HOLA"));
         assertEquals(4, hashMap.size());
-        assertEquals(new Integer(10), hashMap.compute("mundo", HashMapTest::addOrInvertLenght));
-        assertEquals(new Integer(10), hashMap.get("mundo"));
+        assertEquals((Float) (10f), hashMap.compute("mundo", HashMapTest::addOrInvertLenght));
+        assertEquals((Float) (10f), hashMap.get("mundo"));
         assertEquals(4, hashMap.size());
         // Key present, new value not null, Old value null -> Replace
-        assertEquals(new Integer(-3), hashMap.compute("BYE", HashMapTest::addOrInvertLenght));
-        assertEquals(new Integer(-3), hashMap.get("BYE"));
+        assertEquals((Float) (-3f), hashMap.compute("BYE", HashMapTest::addOrInvertLenght));
+        assertEquals((Float) (-3f), hashMap.get("BYE"));
         assertEquals(4, hashMap.size());
         // Key present, New value null -> Remove
         assertNull(hashMap.compute("BYE", (k, v) -> null));
@@ -226,32 +230,31 @@ public class HashMapTest {
 
     @Test
     public void merge() {
-        /**
+        /*
          * If the specified key is not already associated with a value or is
          * associated with null, associates it with the given non-null value.
          */
-        assertEquals(new Integer(11), hashMap.merge("hi", 11, Integer::sum));
-        assertEquals(new Integer(11), hashMap.get("hi"));
+        assertEquals((Float) (11f), hashMap.merge("hi", 11f, Float::sum));
+        assertEquals((Float) (11f), hashMap.get("hi"));
         assertEquals(3, hashMap.size());
         hashMap.put("bye", null);
-        assertEquals(new Integer(12), hashMap.merge("BYE", 12, Integer::sum));
-        assertEquals(new Integer(12), hashMap.get("Bye"));
+        assertEquals((Float) (12f), hashMap.merge("BYE", 12f, Float::sum));
+        assertEquals((Float) (12f), hashMap.get("Bye"));
         assertEquals(4, hashMap.size());
 
-        /**
+        /*
          * Otherwise, replaces the associated value with the results of the given
          * remapping function...
          */
-        assertEquals(new Integer(7), hashMap.merge("hola", 3, Integer::sum));
-        assertEquals(new Integer(7), hashMap.get("HOLA"));
+        assertEquals((Float) (7f), hashMap.merge("hola", 3f, Float::sum));
+        assertEquals((Float) (7f), hashMap.get("HOLA"));
         assertEquals(4, hashMap.size());
 
-        /**
+        /*
          * ... or removes if the result is {@code null}.
          */
-        assertNull(hashMap.merge("hola", 3, (x, y) -> null));
+        assertNull(hashMap.merge("hola", 3f, (x, y) -> null));
         assertNull(hashMap.get("HOLA"));
         assertEquals(3, hashMap.size());
-
     }
 }

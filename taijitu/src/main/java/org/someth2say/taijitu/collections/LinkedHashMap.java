@@ -37,7 +37,7 @@ import java.util.function.Consumer;
  * the copy.  (Clients generally appreciate having things returned in the same
  * order they were presented.)
  * <p>
- * <p>A special {@link #LinkedHashMap(int, float, boolean) constructor} is
+ * <p>A special LinkedHashMap(int, float, boolean) constructor is
  * provided to create a linked hash map whose order of iteration is the order
  * in which its entries were last accessed, from least-recently accessed to
  * most-recently (<i>access-order</i>).  This kind of map is well-suited to
@@ -229,8 +229,7 @@ public class LinkedHashMap<K, V>
     }
 
     Node<K, V> newNode(int hash, K key, V value, Node<K, V> e) {
-        LinkedHashMap.Entry<K, V> p =
-                new LinkedHashMap.Entry<K, V>(hash, key, value, e, hasher, equalizer);
+        LinkedHashMap.Entry<K, V> p = new LinkedHashMap.Entry<>(hash, key, value, e, hasher, equalizer);
         linkNodeLast(p);
         return p;
     }

@@ -87,8 +87,8 @@ public class HashMap<K, V>
         Node<K, V> next;
 
         //TODO: Analize if those can be somehow delegated to the Map...
-        private final Hasher<K> hasher;
-        private final Equalizer<V> equalizer;
+        final Hasher<K> hasher;
+        final Equalizer<V> equalizer;
 
         Node(int hash, K key, V value, Node<K, V> next, Hasher<K> hasher, Equalizer<V> equalizer) {
             this.hash = hash;
@@ -1733,9 +1733,7 @@ public class HashMap<K, V>
      * extends Node) so can be used as extension of either regular or
      * linked node.
      */
-    static final class TreeNode<K, V> extends Entry<K, V> {
-        private final Hasher<K> hasher;
-        private final Equalizer<V> equalizer;
+    static final class TreeNode<K, V> extends LinkedHashMap.Entry<K, V> {
         TreeNode<K, V> parent;  // red-black tree links
         TreeNode<K, V> left;
         TreeNode<K, V> right;
@@ -1744,8 +1742,6 @@ public class HashMap<K, V>
 
         TreeNode(int hash, K key, V val, Node<K, V> next, Hasher<K> hasher, Equalizer<V> equalizer) {
             super(hash, key, val, next, hasher, equalizer);
-            this.hasher = hasher;
-            this.equalizer = equalizer;
         }
 
         /**
