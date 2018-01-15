@@ -4,10 +4,13 @@ import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasher
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Date;
 
 public class NumberThreshold<T extends Number> extends AbstractConfigurableEqualizer<T> implements ComparatorHasher<T> {
 
     private static final int DEFAULT_SCALE = 2;
+
+    public static final NumberThreshold<Number> EQUALITY = new NumberThreshold<>();
 
     public NumberThreshold() {
         this(null);

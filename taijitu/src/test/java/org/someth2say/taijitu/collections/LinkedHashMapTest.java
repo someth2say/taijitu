@@ -16,7 +16,7 @@ public class LinkedHashMapTest {
 
     @Before
     public void init() {
-        hashMap = new LinkedHashMap<>(new StringCaseInsensitive(), new NumberThreshold<>());
+        hashMap = new LinkedHashMap<>(StringCaseInsensitive.EQUALITY, NumberThreshold.EQUALITY);
         hashMap.put("HOLA", 4f);
         hashMap.put("MUNDO", 5f);
     }

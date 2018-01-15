@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
 
 public class DateThresholdTest {
 
-    final DateThreshold<Date> instance = new DateThreshold<>();
+    final DateThreshold<Date> instance = DateThreshold.EQUALITY;
     final Date now = new Date();
     final Date sameSecond = new Date(now.getTime()+900);
     final Date tomorrow = new Date(now.getTime()-1000*60*24);

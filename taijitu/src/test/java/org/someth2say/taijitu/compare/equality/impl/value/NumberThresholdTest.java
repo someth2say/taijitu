@@ -6,7 +6,7 @@ import org.someth2say.taijitu.compare.equality.wrapper.ComparableHashableWrapper
 import static org.junit.Assert.*;
 
 public class NumberThresholdTest {
-    final NumberThreshold<Number> instance = new NumberThreshold<>();
+    final NumberThreshold<Number> instance = NumberThreshold.EQUALITY;
     final ComparableHashableWrapper.Factory<Number> factory = new ComparableHashableWrapper.Factory<>(instance);
     private final Number one = 1.000;
     private final Number oneOOtwo = 1.002;

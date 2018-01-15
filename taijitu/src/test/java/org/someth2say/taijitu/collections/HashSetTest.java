@@ -12,7 +12,7 @@ public class HashSetTest {
 
     @Before
     public void buildHashSet() {
-        hashSet = new HashSet<>(new StringCaseInsensitive());
+        hashSet = new HashSet<>(StringCaseInsensitive.EQUALITY);
         hashSet.add("HOLA");
         hashSet.add("MUNDO");
     }

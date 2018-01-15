@@ -7,7 +7,7 @@ import static org.junit.Assert.*;
 
 public class StringCaseInsensitiveTest {
 
-    final StringCaseInsensitive instance = new StringCaseInsensitive();
+    final StringCaseInsensitive instance = StringCaseInsensitive.EQUALITY;
     final ComparableHashableWrapper.Factory<String> factory = new ComparableHashableWrapper.Factory<>(instance);
     final ComparableHashableWrapper<String, ?> aaa = factory.wrapp("aaa");
     final ComparableHashableWrapper<String, ?> aAA = factory.wrapp("aAA");

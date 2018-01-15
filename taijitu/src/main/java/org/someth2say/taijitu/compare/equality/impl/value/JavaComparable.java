@@ -7,6 +7,7 @@ public class JavaComparable<T extends Comparable<T>> extends AbstractConfigurabl
     public JavaComparable() {
         this(null);
     }
+
     public JavaComparable(Object equalityConfig) {
         super(equalityConfig);
     }

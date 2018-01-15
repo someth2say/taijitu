@@ -24,12 +24,12 @@ public class HashMap<K, V>
     /**
      * Hasher that provide both hashCode and equals for keys
      */
-    final Hasher<K> hasher;
+    final Hasher<? super K> hasher;
 
     /**
      * Equalizer that provided equality for values.
      */
-    final Equalizer<V> equalizer;
+    final Equalizer<? super V> equalizer;
 
     private static final long serialVersionUID = 362498820763181265L;
 
@@ -87,10 +87,10 @@ public class HashMap<K, V>
         Node<K, V> next;
 
         //TODO: Analize if those can be somehow delegated to the Map...
-        final Hasher<K> hasher;
-        final Equalizer<V> equalizer;
+        final Hasher<? super K> hasher;
+        final Equalizer<? super V> equalizer;
 
-        Node(int hash, K key, V value, Node<K, V> next, Hasher<K> hasher, Equalizer<V> equalizer) {
+        Node(int hash, K key, V value, Node<K, V> next, Hasher<? super K> hasher, Equalizer<? super V> equalizer) {
             this.hash = hash;
             this.key = key;
             this.value = value;
@@ -283,7 +283,7 @@ public class HashMap<K, V>
      * @param hasher
      * @param equalizer
      */
-    public HashMap(Hasher<K> hasher, Equalizer<V> equalizer) {
+    public HashMap(Hasher<? super K> hasher, Equalizer<? super V> equalizer) {
         this.hasher = hasher;
         this.equalizer = equalizer;
         this.loadFactor = DEFAULT_LOAD_FACTOR; // all other fields defaulted
@@ -1740,7 +1740,7 @@ public class HashMap<K, V>
         TreeNode<K, V> prev;    // needed to unlink next upon deletion
         boolean red;
 
-        TreeNode(int hash, K key, V val, Node<K, V> next, Hasher<K> hasher, Equalizer<V> equalizer) {
+        TreeNode(int hash, K key, V val, Node<K, V> next, Hasher<? super K> hasher, Equalizer<? super V> equalizer) {
             super(hash, key, val, next, hasher, equalizer);
         }
 

@@ -27,7 +27,7 @@ public class HashSet<E>
      */
     public HashSet(Hasher<E> hasher) {
         this.hasher = hasher;
-        map = new HashMap<>(hasher, new JavaObject<>());
+        map = new HashMap<>(hasher, JavaObject.EQUALITY);
     }
 
     /**
@@ -40,8 +40,9 @@ public class HashSet<E>
      * @param hasher
      * @throws NullPointerException if the specified collection is null
      */
+    @SuppressWarnings("unchecked")
     public HashSet(Collection<? extends E> c, Hasher<E> hasher) {
-        map = new HashMap<>(Math.max((int) (c.size() / .75f) + 1, 16), hasher, new JavaObject<>());
+        map = new HashMap<>(Math.max((int) (c.size() / .75f) + 1, 16), hasher, JavaObject.EQUALITY);
         this.hasher = hasher;
         addAll(c);
     }
@@ -58,7 +59,7 @@ public class HashSet<E>
      */
     public HashSet(int initialCapacity, float loadFactor, Hasher<E> hasher) {
         this.hasher = hasher;
-        map = new HashMap<>(initialCapacity, loadFactor, hasher, new JavaObject<>());
+        map = new HashMap<>(initialCapacity, loadFactor, hasher, JavaObject.EQUALITY);
     }
 
     /**
@@ -71,7 +72,7 @@ public class HashSet<E>
      *                                  than zero
      */
     public HashSet(int initialCapacity, Hasher<E> hasher) {
-        map = new HashMap<>(initialCapacity, hasher, new JavaObject<>());
+        map = new HashMap<>(initialCapacity, hasher, JavaObject.EQUALITY);
         this.hasher = hasher;
     }
 
@@ -90,7 +91,7 @@ public class HashSet<E>
      *                                  than zero, or if the load factor is nonpositive
      */
     HashSet(int initialCapacity, float loadFactor, boolean dummy, Hasher<E> hasher) {
-        map = new LinkedHashMap<>(initialCapacity, loadFactor, hasher, new JavaObject<>());
+        map = new LinkedHashMap<>(initialCapacity, loadFactor, hasher, JavaObject.EQUALITY);
         this.hasher=hasher;
     }
 
@@ -263,9 +264,9 @@ public class HashSet<E>
                 .checkArray(s, Map.Entry[].class, HashMap.tableSizeFor(capacity));
 
         // Create backing HashMap
-        map = (((HashSet<?>) this) instanceof LinkedHashSet ?
-                new LinkedHashMap<E, Object>(capacity, loadFactor, hasher, new JavaObject<>()) :
-                new HashMap<E, Object>(capacity, loadFactor, hasher, new JavaObject<>()));
+        map = (this instanceof LinkedHashSet ?
+                new LinkedHashMap<>(capacity, loadFactor, hasher, JavaObject.EQUALITY) :
+                new HashMap<>(capacity, loadFactor, hasher, JavaObject.EQUALITY));
 
         // Read in all elements in the proper order.
         for (int i = 0; i < size; i++) {

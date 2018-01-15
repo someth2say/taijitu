@@ -8,30 +8,30 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class Difference<MMT> {
-    private final Equalizer<MMT> cause;
+    private final Equalizer<? super MMT> cause;
     private final List<MMT> entries;
     private final Stream<Difference<?>> underlyingDifferences;
 
 
-    public Difference(Equalizer<MMT> cause, List<MMT> entries, Stream<Difference<?>> underlyingDifferences) {
+    public Difference(Equalizer<? super MMT> cause, List<MMT> entries, Stream<Difference<?>> underlyingDifferences) {
         this.cause = cause;
         this.entries = entries;
         this.underlyingDifferences = underlyingDifferences;
     }
 
-    public Difference(Equalizer<MMT> cause, MMT composite, Stream<Difference<?>> underlyingDifferences) {
+    public Difference(Equalizer<? super MMT> cause, MMT composite, Stream<Difference<?>> underlyingDifferences) {
         this(cause, Collections.singletonList(composite), underlyingDifferences);
     }
 
-    public Difference(Equalizer<MMT> cause, MMT composite) {
+    public Difference(Equalizer<? super MMT> cause, MMT composite) {
         this(cause, composite, Stream.empty());
     }
 
-    public Difference(Equalizer<MMT> cause, MMT composite, MMT composite2) {
+    public Difference(Equalizer<? super MMT> cause, MMT composite, MMT composite2) {
         this(cause, composite, composite2, Stream.empty());
     }
 
-    public Difference(Equalizer<MMT> cause, MMT composite, MMT composite2, Stream<Difference<?>> underlyingDifferences) {
+    public Difference(Equalizer<? super MMT> cause, MMT composite, MMT composite2, Stream<Difference<?>> underlyingDifferences) {
         this(cause, Arrays.asList(composite, composite2), underlyingDifferences);
     }
 
@@ -57,11 +57,9 @@ public abstract class Difference<MMT> {
         Difference<?> difference = (Difference<?>) o;
         return Objects.equals(cause, difference.cause) &&
                 Objects.equals(entries, difference.entries);
-        //&& Objects.areEquals(underlyingDifferences, difference.underlyingDifferences);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(entries, cause);//), underlyingDifferences);
-    }
+        return Objects.hash(entries, cause);}
 }

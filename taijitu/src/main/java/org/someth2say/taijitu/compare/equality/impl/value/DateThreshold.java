@@ -8,6 +8,8 @@ public class DateThreshold<T extends Date> extends AbstractConfigurableEqualizer
 
     private static final int DEFAULT_THRESHOLD = 1000;
 
+    public static final DateThreshold<Date> EQUALITY = new DateThreshold<>();
+
     public DateThreshold() {
         this(null);
     }
@@ -34,5 +36,7 @@ public class DateThreshold<T extends Date> extends AbstractConfigurableEqualizer
         long diff = object1.getTime() - object2.getTime();
         return Math.abs(diff) < threshold ? 0 : diff < 0 ? -1 : 1;
     }
+
+
 
 }

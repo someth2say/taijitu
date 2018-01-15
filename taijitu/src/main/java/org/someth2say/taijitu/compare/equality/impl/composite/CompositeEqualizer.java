@@ -21,19 +21,20 @@ public class CompositeEqualizer<T> extends AbstractCompositeEquality implements 
         super(eaes);
     }
 
-    protected <V> CompositeEqualizer(Function<T, V> extractor, Equalizer<V> equalizer) {
+    protected <V> CompositeEqualizer(Function<T, V> extractor, Equalizer<? super V> equalizer) {
         this(Collections.singletonList(new ExtractorAndEquality<>(extractor, equalizer)));
     }
 
     public static class Builder<T> {
         private final List<ExtractorAndEquality> eaes = new ArrayList<>();
 
+        @SuppressWarnings("unchecked")
         public <V> Builder<T> addComponent(Function<T, V> extractor) {
-            return addComponent(extractor, new JavaObject<>());
+            return addComponent(extractor, (Equalizer<V>)JavaObject.EQUALITY);
         }
 
-        public <V> Builder<T> addComponent(Function<T, V> extractor, Equalizer<V> equalizer) {
-            ExtractorAndEquality<T, V, Equalizer<V>> eae = new ExtractorAndEquality<>(extractor, equalizer);
+        public <V> Builder<T> addComponent(Function<T, V> extractor, Equalizer<? super V> equalizer) {
+            ExtractorAndEquality<T, V, Equalizer<? super V>> eae = new ExtractorAndEquality<>(extractor, equalizer);
             eaes.add(eae);
             return this;
         }

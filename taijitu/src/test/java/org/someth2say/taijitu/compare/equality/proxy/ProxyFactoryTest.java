@@ -32,7 +32,7 @@ public class ProxyFactoryTest {
         Stream<String> instance = Stream.of("Hello","world!");
         Stream<String> otherInstance = Stream.of("HELLO","WORLD!");
 //        Equalizer<Stream<String>> equalizer = new SimpleStreamEqualizer(new StringCaseInsensitive()); //<- This makes the compiler fails to match types T.T
-        Equalizer<Stream> equalizer = new SimpleStreamEqualizer(new StringCaseInsensitive());
+        Equalizer<Stream> equalizer = new SimpleStreamEqualizer(StringCaseInsensitive.EQUALITY);
         Stream proxy = ProxyFactory.proxyEqualizer(instance, equalizer, Stream.class);
         assertEquals(proxy, otherInstance); // Test equality is actually applied
     }

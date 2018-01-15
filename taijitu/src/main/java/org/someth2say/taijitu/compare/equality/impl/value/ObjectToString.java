@@ -4,6 +4,8 @@ import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasher
 
 public class ObjectToString<T> extends AbstractConfigurableEqualizer<T> implements ComparatorHasher<T> {
 
+    public static final ObjectToString<Object> EQUALITY = new ObjectToString<>();
+
     public ObjectToString() {
         this(null);
     }

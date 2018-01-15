@@ -8,6 +8,7 @@ import java.util.Locale;
 public class StringCaseInsensitive extends AbstractConfigurableEqualizer<String> implements ComparatorHasher<String> {
 
     private final Locale locale;
+    public static final StringCaseInsensitive EQUALITY = new StringCaseInsensitive();
 
     public StringCaseInsensitive(){
         this(null);

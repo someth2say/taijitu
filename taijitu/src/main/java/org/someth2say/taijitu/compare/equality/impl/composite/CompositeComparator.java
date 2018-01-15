@@ -22,7 +22,7 @@ public class CompositeComparator<T> extends AbstractCompositeEquality implements
         super(eaes);
     }
 
-    protected <V> CompositeComparator(Function<T, V> extractor, Equalizer<V> equalizer) {
+    protected <V> CompositeComparator(Function<T, V> extractor, Equalizer<? super V> equalizer) {
         this(Collections.singletonList(new ExtractorAndEquality<>(extractor, equalizer)));
     }
 
@@ -33,8 +33,8 @@ public class CompositeComparator<T> extends AbstractCompositeEquality implements
             return addComponent(extractor, new JavaComparable<>());
         }
 
-        public <V> Builder<T> addComponent(Function<T, V> extractor, Comparator<V> comparator) {
-            ExtractorAndEquality<T, V, Equalizer<V>> eae = new ExtractorAndEquality<>(extractor, comparator);
+        public <V> Builder<T> addComponent(Function<T, V> extractor, Comparator<? super V> comparator) {
+            ExtractorAndEquality<T, V, Equalizer<? super V>> eae = new ExtractorAndEquality<>(extractor, comparator);
             eaes.add(eae);
             return this;
         }

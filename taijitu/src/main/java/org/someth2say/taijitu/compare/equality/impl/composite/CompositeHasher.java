@@ -17,12 +17,13 @@ public class CompositeHasher<T> extends AbstractCompositeEquality implements ICo
     public static class Builder<T> {
         private final List<ExtractorAndEquality> eaes = new ArrayList<>();
 
+        @SuppressWarnings("unchecked")
         public <V> Builder<T> addComponent(Function<T, V> extractor) {
-            return addComponent(extractor, new JavaObject<>());
+            return addComponent(extractor, JavaObject.EQUALITY);
         }
 
-        public <V> Builder<T> addComponent(Function<T, V> extractor, Hasher<V> equality) {
-            ExtractorAndEquality<T, V, Equalizer<V>> eae = new ExtractorAndEquality<>(extractor, equality);
+        public <V> Builder<T> addComponent(Function<T, V> extractor, Hasher<? super V> equality) {
+            ExtractorAndEquality<T, V, Equalizer<? super V>> eae = new ExtractorAndEquality<>(extractor, equality);
             eaes.add(eae);
             return this;
         }

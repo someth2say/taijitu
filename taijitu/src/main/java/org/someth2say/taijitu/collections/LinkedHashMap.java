@@ -167,7 +167,7 @@ public class LinkedHashMap<K, V>
     static class Entry<K, V> extends HashMap.Node<K, V> {
         Entry<K, V> before, after;
 
-        Entry(int hash, K key, V value, Node<K, V> next, Hasher<K> hasher, Equalizer<V> equalizer) {
+        Entry(int hash, K key, V value, Node<K, V> next, Hasher<? super K> hasher, Equalizer<? super V> equalizer) {
             super(hash, key, value, next, hasher, equalizer);
         }
     }
@@ -339,7 +339,7 @@ public class LinkedHashMap<K, V>
      * Constructs an empty insertion-ordered <tt>LinkedHashMap</tt> instance
      * with the default initial capacity (16) and load factor (0.75).
      */
-    public LinkedHashMap(Hasher<K> hasher, Equalizer<V> equalizer) {
+    public LinkedHashMap(Hasher<? super K> hasher, Equalizer<? super V> equalizer) {
         super(hasher, equalizer);
         accessOrder = false;
     }

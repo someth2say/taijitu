@@ -1,73 +1,24 @@
-# taijitu
+# Taijitu
 [![Build Status](https://travis-ci.org/someth2say/taijitu.svg?branch=master)](https://travis-ci.org/someth2say/taijitu)
 [![Quality Gate](https://sonarqube.com/api/badges/measure?key=org.someth2say.taijitu%3Aroot&metric=alert_status)](https://sonarqube.com/dashboard?id=org.someth2say.taijitu%3Aroot)
 
 TL;DR;
 Equality in JVM based languages is incomplete, as well as many equality-related contracts. 
-Taijitu provides an implementation for both external and internal equality contracts that enforce 
+Taijitu provides an implementation for both external and internal equality contracts (as defined [here](BACKGROUND.md)) that enforce 
 completeness for equality-based contracts.
 
 Also, based on this implementation, Taitiju provides:
-- A standalone comparison implementation for several data source formats (SQL queries, CSV files...)
-- Several implementations for value and composite equaality contracts
+- Several implementations for value and composite equality contracts 
 - Versatile implementations for stream equality
+- Sample implementations for Equality-aware collections: HashMap, LinkedList, etc. 
+- A standalone comparison implementation for several data source formats (SQL queries, CSV files...): [Taijitu CLI](cli/README.md)
 
+## Interfaces
+Interfaces (or aspects) used to implement concepts previously defined are classified in two: external and internal equalities:
 
-# The basis (and a bit of theory)
-The basic idea behind Taijitu is that `equality` in JVM-based languages is usually limited, if not wrong, in several ways:
-- Equality is not (always) a responsibility for the object/class
-- Equality do not enforce equality-based contracts. 
+### External Equality
+External equalities are instances able to provide equality capabilities to a different class' instances.
 
-Lets go deep into those concepts:
-
-#### Equality is not (always) a responsibility for the object/class
-There is a simple question you can ask yourself to understand this concept: 
-**When two instances are 'equals'?**
-
-That simple question generated hundred discussions. Some people talk about object identity and key fields. 
-Some others, refer to object interchangeability or equivalence. Others introduce object references and reference trees.
-
-Who is right? Who is wrong? *They all are both right and wrong.*
-
-Wait, what?! How can they be at the same time right and wrong? The answer is `context`. Depending on the context you are
-interpreting the objects, equality have one meaning or another.
-
-Let's place an example: When are two `Person`s "equal"?
-- For **administrative purposes**, two `Person`s are *the same* if they have the same ID#.
-- For a **facial recognition** system, they will be the same if they same *approximately* the same facial attributes.
-- For **themselves**, they will be the same if they share the same memories and feelings.
-- For **religion**, they will be the same if they have the same `soul` or `spirit` (even after reincarnating, they can be tha same)  
-
-As you can see, equality is based not on the object itself, but the context defines the equality.
-
-> Note: Understanding equality is context-based does not mean objects can not define their own equality (where the context
-is the object itself). This is the so-called *default equality*, and this is the one actually implemented in most JVM-based languages.
-
-#### Equality do not enforce equality-based contracts. 
-Probably the following paragraph will be familiar for you:
-
-     The general contract of hashCode is:
-     
-     - Whenever it is invoked on the same object more than once during an execution of a Java application, the hashCode method must consistently return the same integer, provided no information used in equals comparisons on the object is modified. This integer need not remain consistent from one execution of an application to another execution of the same application.
-     - If two objects are equal according to the equals(Object) method, then calling the hashCode method on each of the two objects must produce the same integer result.
-     - It is not required that if two objects are unequal according to the equals(java.lang.Object) method, then calling the hashCode method on each of the two objects must produce distinct integer results. However, the programmer should be aware that producing distinct integer results for unequal objects may improve the performance of hash tables. 
-
-Yes, this is the contract defined for `hashCode` in Java. Nothing wrong with it, but this contract can just be ignored.
-You can write down your `hashCode` implementation for your class, completely ignoring the `equals` implementation (if any!).
-Probably, forget implementing `hashCode`, or faulty implementations are one of the most common errors for Java developers.
-
-Another equality-based contract is the one for Java `Comparable` class:
-
-      The natural ordering for a class C is said to be consistent with equals if and only if e1.compareTo(e2) == 0 has the same boolean value as e1.equals(e2) for every e1 and e2 of class C. 
-
-The same applies here: implementing `Comparable` interface just provides the methods, not the contract.
-
-### External equality
-Now we understand the problems with equality-contracts... how we can face it?
-Taijitu is based on the following idea: **Equality and equality-based contracts should be external to the class being compared**, so different equality 
-concepts can be applied to same objects in different context.
-
-For implementing this idea, Taijitu define the following interfaces (aspects):
 ##### Equalizer
 The root for equality aspects structure. An `Equalizer` is an (external) object being able to compare two instances for equality, in a given context. 
 `Equalizer` defines the signature for the method that (externally) compare two instances:
@@ -92,18 +43,14 @@ That's true. In fact, Taijitu's `Comparator` interface directly extends from Jav
 The only difference is that Taijitu's `Comparator` also extends from `Equalizer`, forcing the developer to also implements
 equality methods (and protecting the contract).
 
-##### Internal Equality
-The same way external equality has been defined as an external way to "compare" instances, we also introduced the concept for "default equality".
-Java (and many other JVM-languajes) define the default equality inside the class itself (with no more context that the class itself).
-When equality is defined inside the class (with or without context), we have internal equality.
-
+### Internal Equality
 Also, the same way we defined aspects (interfaces) for external equality contracts, we can define aspects for internal equality contracts,
 strengthening it to avoid miss-implementations. Parallel to external equalities, we define three interfaces:
 
-- `Equalizable`: Classes that define a default internal equality. 
+#### `Equalizable`
+Classes that define a default internal equality. 
 
 Java language forces the signature for the `equals` method to:
-
 
     boolean equals(Object obj);
 
@@ -113,22 +60,20 @@ Despite this is enough for all cases, Taijitu adds a second method, restricting 
 
 This methods is not absolutely required, but useful for skipping the infamous `instanceOf` checks.
 
-- `Hashable`: Classes that define both internal equality AND hash.
+#### `Hashable`
+ Classes that define both internal equality AND hash.
 
 Again, Java language forces the signature:
 
-
     int hashCode();
     
-
-- `Comparable`: Classes that define both internal equality AND instance comparison.
+#### `Comparable`
+ Classes that define both internal equality AND instance comparison.
 
 Taijitu `Comparable` extends Java `Comparable`, for compatibility purposes. But Taijitu's comparable
 extends `Equalizable`, forcing classes to define both `equals` and  `compareTo` methods.
 
-##### Mixing equalities
-One last idea, before getting our feet wet.
-
+#### Mixing equalities
 Can't a class be both `Comparable` and `Hashable`?
 
 Of course they can! Both `Comparable` and `Hashable` are interfaces, so you only need to implement both.
@@ -148,8 +93,237 @@ Luckily, we only have two equality-based contracts! Else, combinations will expl
 
 By the way, the same mixing can be done for external equalities, obtaining the `ComparatorHasher` interface.  
 
+#### Equality descriptions
+Having this capacity when performing comparisons is great. 
+But sometimes it is great (ir not required) not only be able to tell if instances are equals or not, but also provide a reason for the response.
+
+Taijitu equality (and hence, all equality-based contracts) provide a set of methods and classes for providing this reasoning.
+
+First thing to be done is modeling the equality reasons responses. Taijitu bases its responses in two classes:
+- Unequal: Wraps two instances that have been reasoned to be not equal, as well as the equality instance used for that reasoning.
+- Missing: Given two containers/collections/streams, describes an instance contained in one of them, that have no "equal" element on the other container.
+- Difference: Can be an `Unequal` or a `Missing`. Understand it as a super-class for those. 
+ 
+If no differences are found between two instances, reasoning simply will provide no Unequal/Missing instances.
+
+Now the responses are modeled, need a method for reasoning the response, isn't it? Taijitu defines a method named `underlyinDiffs`.
+This method will return a (lazy) stream of `Difference` instances, explaining the differences actually found in provided instances.
+
+Note that sometimes (mainly for Value equalities), `underlyinDiffs` may return `null` for equal instances, instead of an empty stream. 
+This is done for performance reasons, so clients do not actually need to consume an empty stream to check the simplest equalities. 
+
+## Implementations
+We have now interfaces (or aspects) defining all equality concepts as per [theory](BACKGROUND.md). 
+Let's see how can we make them real.
+
+### Equalities
+For clarification purposes, Taijitu divides equalities in three levels:
+
+- Value equalities: Those computed actually onto a single value: an Integer, a String, a Date... 
+Most of the time, they define alternative equality for already-defined classes.
+
+- Composite equalities: Is the minimal definition for an equality, as defined by a) a bunch of functions extracting values from the instance, and b) value equalities to be applied to the extracted values.     
+
+- Stream equality: Generic implementations for comparing streams, depending on its characteristics.  
+
+
+#### Value equalities
+Value equalities are the simplest ones. They are just the minimal needed code needed to implement equality interfaces onto simple Java classes:
+- DateThreshold: Allow to `equalize` and `compare` two dates, ignoring differences below a defined number of miliseconds.
+- JavaComparable: Externalization for comparable methods already defined in the `Comparable` class.
+- JavaObject: Externalization for equality methods already defined in any Java class.
+- NumberThreshold: Allow to compare any `Number` class, retaining only a defined number of decimals.
+- ObjectToString: Allow to compare two different instances based only on their string representation.
+- StringCaseInsensitive: Allow to compare `String` instances, ignoring case.
+
+Following table shows capabilities for each value equality:
+
+| Equality              | Class compared | Equalizer | Hasher | Comparator |
+| --------------------- | -------------- | --------- | --------- | ---------- |
+| DateThreshold         | Date           | :heavy_check_mark: | :heavy_multiplication_x: | :heavy_check_mark: |
+| JavaComparable        | Comparable     | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| JavaObject            | Object         | :heavy_check_mark: | :heavy_check_mark: | :heavy_multiplication_x: |
+| NumberThreshold       | Number         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| StringCaseInsensitive | String         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+ 
+Many more value equalities may be introduced in a near future.
+
+#### Composite equalities
+A composite equality is the a minimal definition for equality, as it is delegating its computation to a list of:
+- Functions extracting values form each compared instance
+- Another equality (of the same type) comparing extracted values.
+- A composition function for delegated equality results.
+
+It's easier to understand with an example. 
+Let's get a look at the definition for the equality, as defined in, per example, URL (with a bit of refractor, for clarity):
+
+```Java
+public class Date {
+    //...
+    public boolean equals(Object obj) { 
+        if (!obj instanceof Date) return false;     // Casting: Make sure classes are compatible
+        Date other = ((Date) obj);                  // More casting...
+        int thisTime = this.getTime();              // Extracting: Get attributes actually relevant to comparison
+        int otherTime = other.getTime();            // More extracting...
+        boolean sameTime = (thisTime == otherTime); // Delegated comparison: Delegates to integer equality 
+        return sameTime;                            // Composition: Only will return "true" if all delegated comparisons are "true"
+    }
+    //...
+}
+```
+
+The basis of a `Composite` equality relies on the idea that every "equality" contract (even hash or comparison) can be defined given the following:
+- A list of extractors: In the example, the `getTime` method.
+- An equality contract to be applied to each extracted value: Here, the default integer equality
+- A composition for each delegated equality result: Here an "and" for all delegated equality values.
+
+Let's place another example: The infamous `HashMap.Node` class:
+```Java
+public class Node<K,V> implements Map.Entry<K,V> {
+        //...
+        public boolean equals(Object o) {
+            if (!(o instanceof Map.Entry))
+                return false;
+            Map.Entry<?,?> e = (Map.Entry<?,?>)o;
+
+            return (key==null ? e.getKey()==null : key.equals(e.getKey())) &&
+               (value==null ? e.getValue()==null : value.equals(e.getValue()));
+        }
+        //...      
+}
+```
+Here, the extractors are `getKey` and `getValue` methods, delegated equalities are `Object`s `equals` methods, 
+and composition (again) is `AND`.
+
+So, we can actually wrap all this to parameters for a class, something like the following:
+
+```java
+    new CompositeEqualizer<Node>.Builder()                  //1
+        .addComponent(Node::getKey, JavaObject.EQUALITY)    //2
+        .addComponent(Node::getValue, JavaObject.EQUALITY)  //3
+        .build();                                           //1
+``` 
+
+The extractors here are `Node::getKey` and `Node::getValue`. 
+The delegated equalities are both `JavaObject.EQUALITY`, that simply delegated to default equality.
+The equality result composition is defaulted in the equalizer class: true if all equalities actually return `true`
+
+Note that we are actually skipping the "class casting" section.
+The reason is that the design for equality:
+```java 
+public interface Equalizer<EQUALIZED> {
+    //...
+    default boolean areEquals(EQUALIZED equalized1, EQUALIZED equalized2) {
+        return underlyingDiffs(equalized1, equalized2).count() == 0;
+    }
+    //...
+}
+```
+While `Object`s `equals` method accepts an `Object` (making the cast required), the method `areEquals` actually require, 
+at compile time, that BOTH elements satisfy the EQUALIZED type. Hence, the cast is unnecessary.
+ 
+Also worth commenting, that composite equalities DO NOT PERFORM ANY null-checks! It delegates responsibility to:
+- Extractors: Should be able to extract from `null`, or fail as required.
+- Delegated equality: Should be able to handle comparison against `null` values, or fail as required.  
+
+As already said, result composition is hardcoded into equality classes.
+Here a little summary of how composition is done. 
+
+| Composite           | Composition result |
+| ------------------- | ------------------ |
+| CompositeEqualizer  | `true` iif all delegated equalities return `true`, else `false` |
+| CompositeHasher     |  Multiplies the delegated hash of each extracted value by 31, then recursively add the hash for the rest |
+| CompositeComparator |  Iterating extracted values, return the first delegated comparison not returning 0. Else returns 0  |
+ 
+
+Finally, you may be asking: Why all this complication, if we can actually write the equalizer as we need?
+ And you are right... if you actually can!
+ Sometimes, the extractor methods or the delegated equalities are undefined at compile-time, and are only known at runtime.
+ Think about an Excel-like table, where each row is an instance. You may choose to order the table given randomly chosen columns, and in a randomly chosen order.
+ Having composite equalities, you can create the `CompositeComparator` on demand, and use standard sorting algorithms on the table.
+ 
+#### Stream equalities
+Strangely, being able to define equality for streams was the initial motivation for Taijitu.
+Taijitu was initially conceived as a swiss-army-knife for comparing the results getting back from SQL queries.
+The initial problems actually faced (unknown columns or column type, relative similarity, etc..) drove to the design for composite equalities (and lately, for [Taijitu CLI](./cli/README.md).
+
+But there was still a problem: Given two streams of records, with an unknown at compile-time equality for rows, how we decide if streams are actually "equal"? 
+How can I found (in the most general way) differences between them?
+
+A lot of analysis was required, but finally we found a way to classify streams, and then face the equality problem.
+Streams were classified into three kinds:
+
+##### Positional (or basic) streams
+Streams where every single provided element have a distinct meaning, and they can not be skip.
+
+The simplest example is the stream view for an array. It is known that first element from the stream will be first element from array,
+second element for the stream came from second element from array, and so on... Stream can not skip any array element, nor provide more or 
+fewer elements than the size for the array.  
+
+So comparing positional streams is just as easy as comparing each and every generated element from both streams, 
+and generating the right `Difference` object when needed.
+ 
+This is the approach taken for comparing many current classes in Java, like `String` or `AbstractList`.
+
+Class implementing this equality is `SimpleStreamEqualizer`.
+
+##### Sorted streams
+Sorted streams (do not mix with streams with the `SORTED` characteristic), are streams that ensure all their elements will be provided in a defined order.
+In other words, that, given a defined comparison, if element A is provided **before** element B, then `compare(A,B)<=0`.
+
+Despite this may seem banal, this fact provides a huge hint for comparing two streams. Given one element provided by each stream (A,B):
+- `compare(A,B)<0`, means that A is previous to B in the comparison order. Since B is the current element, 
+and there was none before, we can conclude there is a missing entry in B (or an extra element in A, equivalently).
+We can move forward with A's stream, looking for the element matching B, but we can't move B's stream forward.. 
+
+- `compare(A,B)>0` shows the opposite situation, where B have an element not present in A. 
+
+- `compare(A,B)=0` indicates both elements are actually the same (as long as comparison equality contract is satisfied). 
+Nothing to report, and can move both streams forward.  
+
+As far as I know, there is no class implementing this behaviour in Java, but `ComparableStreamEqualizer` does it in Taijitu 
+(despite the name, `Comparable` this class does not require stream elements to be comparable, but just require a `Comparator` for them).
+
+##### Mapped streams
+What if there is nothing known from the streams we can actually use to perform the comparisons?
+On worst case, there is only the option to keep every unmatched element from the stream, waiting for the matching element is produced
+(if it is ever produced!).
+
+But, instead of trying to match every saved element to every other element from the stream, some cases we can use a shotcurt: hashing.
+
+Hashing creates a "signature" for the element. As for hash contract, two elements "equals" must have the same `hashCode` (the signature).
+So instead of comparing each new element against every single unmatched element, we can reduce the search to only those unmatched elements
+having the same `hashCode`.
+
+And, indeed, that's what Java `HashSet` does.
+
+So we can add the elements from the stream into a HashSet. If there already was an element with the same hashCode, then we can test equality
+on both, and the result will be used to create the final equality response.
+
+`HashingStreamEqualizer` os the class implementing this algorithm, with some minor implementation details (i.e. uses a `HashMap` instead of
+a `HashSet`).
+
+WARNING: There is a big caveat with this implementation!
+As you read, `HashingStreamEqualizer` maps all incoming elements, waiting for matching elements to be produced.
+If a matching element is found, the algorithm will do nothing (if elements are equals) of generate an `Unequals` instance.
+If there are no more elements in any of the streams, all unmatched elements will be reported as `Missing` instances.
+Despite generated results are built lazily, in case of an infinite input, process will not terminate, or consume 
+an unbounded amount of memory until process crashes.
+
+So warning about infinite streams!
+
+### Integrations 
+Now we have the equality infrastructure....
+
+####  Equality wrappers
+
+####  Equality proxies
+
+####  Equality-aware collections
+
+
 ## Real life examples.
-Ok, we have now the external and internal equality defined... what can we do with it?
+Ok, we have now all equality stuff defined... what can we do with it?
 Let's place a real world example.
 
 > Manager: We have a List of `String` objects. We need to sort them. How you do that?
@@ -225,8 +399,32 @@ But asserting so is depending on the situation.
  > Note: Proxy capabilities are still experimental, and there are some cases proxies can not be easily created (i.e. for Streams). Use with caution.
  
 ### External Equality collections
-There is a third alternative, that should not be impacted by caveats from wrappers or proxies: that all collections and methods based on equality
+There is a third alternative, that should not be impacted by caveats from wrappers or proxies: collections and methods based on equality that
 accept an external equality (the same way most of them already do with `Comparator` in Java).
+
+Taijitu provides some basic implementation for most common Java `Collection` datastructures:
+- ArrayList
+- HashMap
+- HashSet
+- LinkedHashMap
+- LinkedHashSet
+
+Note that there are no implementations for `Tree` or `Deque` based collections. The reason is that those rely just on external comparison,
+and Java already provide this functionality (via `Comparator`).
+
+If fair to say equality collections is neither a perfect solution. Take a look at the following code:
+```
+    HashSet<String> hashSet = new HashSet<>(new StringCaseInsensitive());
+    hashSet.add("Hello");
+    assertTrue(hashSet.contains("HELLO")); // 1) This actually works as expected, returning true
+    assertTrue(hashSet.iterator().next().equals("HELLO")); // 2) This assertion fails!
+```
+At first sight, this 1) and 2) should return the same value! But checking in detail shows one detail that changes it all: in 1), the responsible for 
+performing comparisons on elements is the set (the `contains` methods, precisely); but in 2), we are **extracting** the element from the set, and then asking 
+this same element to compare itself to another value -hence the responsible for comparison is the element-.
+
+This tiny difference changes it all: it moves the comparison from the collection (the one we provided comparator to) to the elements (that we are willing to left
+untouch).
 
 
 

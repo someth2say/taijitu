@@ -1,5 +1,6 @@
 package org.someth2say.taijitu.compare.equality.impl.composite;
 
+import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasher;
 import org.someth2say.taijitu.compare.equality.impl.value.JavaComparable;
 import org.someth2say.taijitu.compare.equality.impl.value.JavaObject;
 import org.someth2say.taijitu.compare.equality.impl.value.ObjectToString;
@@ -55,16 +56,24 @@ public class TestComposite {
     }
 
 
-    public static final CompositeEqualizer<TestComposite> testClassOneTwoEquality = new CompositeEqualizer.Builder<TestComposite>()
-            .addComponent(TestComposite::getOne, new StringCaseInsensitive())
-            .addComponent(TestComposite::getTwo, new StringCaseInsensitive()).build();
+    public static final CompositeEqualizer<TestComposite> testClassOneTwoEquality
+            = new CompositeEqualizer.Builder<TestComposite>()
+            .addComponent(TestComposite::getOne, StringCaseInsensitive.EQUALITY)
+            .addComponent(TestComposite::getTwo, StringCaseInsensitive.EQUALITY)
+            .build();
 
-    public static final CompositeComparator<TestComposite> testClassThreeComparator = new CompositeComparator.Builder<TestComposite>()
-            .addComponent(TestComposite::getThree, new JavaComparable<>()).build();
+    public static final CompositeComparator<TestComposite> testClassThreeComparator
+            = new CompositeComparator.Builder<TestComposite>()
+            .addComponent(TestComposite::getThree, new JavaComparable<>())
+            .build();
 
-    public static final CompositeHasher<TestComposite> testClassThreeHasher = new CompositeHasher.Builder<TestComposite>()
-            .addComponent(TestComposite::getThree, new JavaObject<>()).build();
+    public static final CompositeHasher<TestComposite> testClassThreeHasher
+            = new CompositeHasher.Builder<TestComposite>()
+            .addComponent(TestComposite::getThree, JavaObject.EQUALITY)
+            .build();
 
-    public static final CompositeComparatorHasher<TestComposite> testClassThreeComparatorHasher = new CompositeComparatorHasher.Builder<TestComposite>()
-            .addComponent(TestComposite::getThree, new ObjectToString<>()).build();
+    public static final CompositeComparatorHasher<TestComposite> testClassThreeComparatorHasher
+            = new CompositeComparatorHasher.Builder<TestComposite>()
+            .addComponent(TestComposite::getThree, ObjectToString.EQUALITY)
+            .build();
 }

@@ -19,7 +19,7 @@ public interface ICompositeEqualizer<T> extends IComposite, Equalizer<T> {
 
     default <V> boolean valueEquals(T first, T second, ExtractorAndEquality<T, V, ?> eae) {
         Function<T, V> extractors = eae.getExtractor();
-        Equalizer<V> equalizer = eae.getEquality();
+        Equalizer<? super V> equalizer = eae.getEquality();
         V firstValue = extractors.apply(first);
         V secondValue = extractors.apply(second);
         return equalizer.areEquals(firstValue, secondValue);
@@ -35,7 +35,7 @@ public interface ICompositeEqualizer<T> extends IComposite, Equalizer<T> {
 
     default <V> Difference<V> differenceOrNull(T first, T second, ExtractorAndEquality<T, V, ?> eae) {
         Function<T, V> extractors = eae.getExtractor();
-        Equalizer<V> equalizer = eae.getEquality();
+        Equalizer<? super V> equalizer = eae.getEquality();
         V firstValue = extractors.apply(first);
         V secondValue = extractors.apply(second);
         boolean equals = equalizer.areEquals(firstValue, secondValue);

@@ -15,9 +15,9 @@ import static org.junit.Assert.*;
 
 public class HashMapTest {
 
-    private Hasher<String> hasher = new StringCaseInsensitive();
+    private Hasher<String> hasher = StringCaseInsensitive.EQUALITY;
     private HashMap<String, Float> hashMap;
-    private Equalizer<Float> equalizer = new NumberThreshold<>();
+    private Equalizer<Number> equalizer = NumberThreshold.EQUALITY;
 
     @Before
     public void buildHolaMundoMap() {

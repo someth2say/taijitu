@@ -11,7 +11,7 @@ public class ArrayListTest {
 
     @Test
     public void _indexOf() {
-        ArrayList<String> insensitive = new ArrayList<>(new StringCaseInsensitive(), Arrays.asList("Hola", "hola", "mundo"));
+        ArrayList<String> insensitive = new ArrayList<>(StringCaseInsensitive.EQUALITY, Arrays.asList("Hola", "hola", "mundo"));
         assertEquals(0, insensitive.indexOf("HOLA"));
         assertEquals(2, insensitive.indexOf("mundo"));
         assertEquals(-1, insensitive.indexOf("adios"));
@@ -24,7 +24,7 @@ public class ArrayListTest {
 
     @Test
     public void _lastIndexOf() {
-        ArrayList<String> insensitive = new ArrayList<>(new StringCaseInsensitive(), Arrays.asList("Hola", "hola", "mundo"));
+        ArrayList<String> insensitive = new ArrayList<>(StringCaseInsensitive.EQUALITY, Arrays.asList("Hola", "hola", "mundo"));
         assertEquals(1, insensitive.lastIndexOf("HOLA"));
         assertEquals(2, insensitive.lastIndexOf("mundo"));
         assertEquals(-1, insensitive.indexOf("adios"));
@@ -37,14 +37,14 @@ public class ArrayListTest {
 
     @Test
     public void _clone() {
-        ArrayList<String> insensitive = new ArrayList<>(new StringCaseInsensitive(), Arrays.asList("Hola", "hola", "mundo"));
+        ArrayList<String> insensitive = new ArrayList<>(StringCaseInsensitive.EQUALITY, Arrays.asList("Hola", "hola", "mundo"));
         Object clone = insensitive.clone();
         assertEquals(insensitive, clone);
     }
 
     @Test
     public void _remove() {
-        ArrayList<String> insensitive = new ArrayList<>(new StringCaseInsensitive(), Arrays.asList("Hola", "hola", "mundo"));
+        ArrayList<String> insensitive = new ArrayList<>(StringCaseInsensitive.EQUALITY, Arrays.asList("Hola", "hola", "mundo"));
         ArrayList clone = (ArrayList) insensitive.clone();
 
         assertTrue(insensitive.remove("HOLA"));
@@ -59,8 +59,8 @@ public class ArrayListTest {
 
     @Test
     public void _equals() {
-        ArrayList<String> insensitive1 = new ArrayList<>(new StringCaseInsensitive(), Arrays.asList("Hola", "hola", "mundo"));
-        ArrayList<String> insensitive2 = new ArrayList<>(new StringCaseInsensitive(), Arrays.asList("Hola", "HOLA", "mundo"));
+        ArrayList<String> insensitive1 = new ArrayList<>(StringCaseInsensitive.EQUALITY, Arrays.asList("Hola", "hola", "mundo"));
+        ArrayList<String> insensitive2 = new ArrayList<>(StringCaseInsensitive.EQUALITY, Arrays.asList("Hola", "HOLA", "mundo"));
         assertEquals(insensitive1, insensitive2);
 
         ArrayList<String> sensitive1 = new ArrayList<>(Arrays.asList("Hola", "hola", "mundo"));
