@@ -13,6 +13,8 @@ public class DateThresholdTest {
     final Date now = new Date();
     final Date sameSecond = new Date(now.getTime()+900);
     final Date tomorrow = new Date(now.getTime()-1000*60*24);
+
+    //TODO: Use factory
     final ComparableWrapper<Date,?> nowWrap = new ComparableWrapper<>(now, instance);
     final ComparableWrapper<Date,?> sameWrap = new ComparableWrapper<>(sameSecond, instance);
     final ComparableWrapper<Date,?> tomWrap = new ComparableWrapper<>(tomorrow, instance);

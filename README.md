@@ -303,7 +303,7 @@ on both, and the result will be used to create the final equality response.
 `HashingStreamEqualizer` os the class implementing this algorithm, with some minor implementation details (i.e. uses a `HashMap` instead of
 a `HashSet`).
 
-WARNING: There is a big caveat with this implementation!
+**:warning:** There is a big caveat with this implementation!
 As you read, `HashingStreamEqualizer` maps all incoming elements, waiting for matching elements to be produced.
 If a matching element is found, the algorithm will do nothing (if elements are equals) of generate an `Unequals` instance.
 If there are no more elements in any of the streams, all unmatched elements will be reported as `Missing` instances.
@@ -313,9 +313,41 @@ an unbounded amount of memory until process crashes.
 So warning about infinite streams!
 
 ### Integrations 
-Now we have the equality infrastructure....
+Now we have the equality infrastructure, we can define equality for classes and for streams (collections). 
+But how can equality be used in current programs?
+
+Obviously, you can always invoke equality methods on the defined equality: `if (equality.areEquals(A,B))...`
+But this is just the tip of the iceberg.  There are many other places where equality (and equality-based contracts) are used, but
+out of reach for the developer.
+
+In order to be able to inject equality into those places, Taijitu offer three different approaches, each one with some benefits and caveats: 
 
 ####  Equality wrappers
+Say you (as a developer) need to provide an instance (i.e. an `String`) to a third party library (via an API). 
+And let's say this library somehow relies on equality for the instance for doing its work.
+This dependence is reasonable (because Java force all instances to have some kind of equality).
+But, for business purposes, you need this library to ignore the case of the strings: should treat "Hi","HI" and "hi" as the same instance.
+Unluckily, the library relies on `Object.equals` methods, and can not be instructed to rely on `String.equalsCaseInsensitive`.
+
+Then, equality wrappers are the way to go. 
+
+Equality wrapper are classes that:
+1. Accept and keep and instance for any class (V)
+2. Accept and keep and equality for that same class (E)
+3. Delegate its own internal equality to provided external equality (E) onto the provided instance (V).
+
+In other words, and equality wrapper "wrap" an instance and an equality, in order to transform external equality into internal equality.
+
+So, in our sample situation, we can just wrap `String` instances with a `StringCaseInsensitive` equality, before sending them to the third party library.
+You can use direct class instantiation...
+```java
+    EqualizableWrapper<String,?> wrappedString = new EqualizableWrapper<>(string, StringCaseInsensitive.EQUALITY);
+```
+... or use an static factory, that simplifies generating multiple wrappers for the same equality:
+```java
+    EqualizableWrapper.Factory<String> factory = new ComparableHashableWrapper.Factory<>(StringCaseInsensitive.EQUALITY);
+    EqualizableWrapper<String,?> wrappedString = factory.wrapp(string);
+```
 
 ####  Equality proxies
 
