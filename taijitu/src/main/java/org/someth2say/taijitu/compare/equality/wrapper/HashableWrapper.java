@@ -5,7 +5,7 @@ import org.someth2say.taijitu.compare.equality.aspects.internal.Hashable;
 
 public class HashableWrapper<WRAPPED>
         extends EqualizableWrapper<WRAPPED, Hasher<WRAPPED>>
-        implements Hashable<IWraper<WRAPPED,?>>, IWraper<WRAPPED,Hasher<WRAPPED>> {
+        implements Hashable<Wrapper<WRAPPED,?>> {
 
     public HashableWrapper(WRAPPED wrapped, Hasher<WRAPPED> hasher) {
         super(wrapped, hasher);

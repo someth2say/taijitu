@@ -6,7 +6,7 @@ import org.someth2say.taijitu.compare.equality.aspects.internal.Hashable;
 
 public class ComparableHashableWrapper<WRAPPED, EQ extends ComparatorHasher<WRAPPED>>
         extends EqualizableWrapper<WRAPPED, EQ>
-        implements Comparable<IWraper<WRAPPED, ?>>, Hashable<IWraper<WRAPPED, ?>>, IWraper<WRAPPED, EQ> {
+        implements Comparable<Wrapper<WRAPPED, ?>>, Hashable<Wrapper<WRAPPED, ?>> {
 
     public ComparableHashableWrapper(WRAPPED wrapped, EQ equality) {
         super(wrapped, equality);
@@ -19,7 +19,7 @@ public class ComparableHashableWrapper<WRAPPED, EQ extends ComparatorHasher<WRAP
     }
 
     @Override
-    public int compareTo(IWraper<WRAPPED, ?> other) {
+    public int compareTo(Wrapper<WRAPPED, ?> other) {
         return getEquality().compare(getWraped(), other.getWraped());
     }
 

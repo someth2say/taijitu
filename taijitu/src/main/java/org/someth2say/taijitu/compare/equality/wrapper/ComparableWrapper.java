@@ -5,14 +5,14 @@ import org.someth2say.taijitu.compare.equality.aspects.internal.Comparable;
 
 public class ComparableWrapper<WRAPPED,EQ extends Comparator<WRAPPED>>
         extends EqualizableWrapper<WRAPPED, EQ>
-        implements Comparable<IWraper<WRAPPED,?>>, IWraper<WRAPPED,EQ>{
+        implements Comparable<Wrapper<WRAPPED,?>> {
 
     public ComparableWrapper(WRAPPED wrapped, EQ equality) {
         super(wrapped, equality);
     }
 
     @Override
-    public int compareTo(IWraper<WRAPPED, ?> other) {
+    public int compareTo(Wrapper<WRAPPED, ?> other) {
         return getEquality().compare(getWraped(), other.getWraped());
     }
 
@@ -23,8 +23,8 @@ public class ComparableWrapper<WRAPPED,EQ extends Comparator<WRAPPED>>
             this.comparator = comparator;
         }
 
-        public EqualizableWrapper<FWRAPPED, Comparator<FWRAPPED>> wrapp(FWRAPPED wrapped){
-            return new ComparableWrapper<>(wrapped, comparator);
+        public EqualizableWrapper<FWRAPPED, Comparator<FWRAPPED>> wrap(FWRAPPED wrapped){
+            return new EqualizableWrapper<>(wrapped, comparator);
         }
     }
 }
