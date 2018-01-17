@@ -1,18 +1,18 @@
 package org.someth2say.taijitu.compare.equality.impl.value;
 
 import org.junit.Test;
-import org.someth2say.taijitu.compare.equality.aspects.external.Comparator;
-import org.someth2say.taijitu.compare.equality.wrapper.ComparableHashableWrapper;
 import org.someth2say.taijitu.compare.equality.wrapper.ComparableWrapper;
+import org.someth2say.taijitu.compare.equality.wrapper.Wrappers;
 
 import java.util.Date;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class DateThresholdTest {
 
     final DateThreshold<Date> instance = DateThreshold.EQUALITY;
-    final ComparableWrapper.Factory<Date> factory = new ComparableWrapper.Factory<>(instance);
+    final ComparableWrapper.Factory<Date> factory = Wrappers.factory(instance);
 
     final Date now = new Date();
     final Date sameSecond = new Date(now.getTime() + 900);

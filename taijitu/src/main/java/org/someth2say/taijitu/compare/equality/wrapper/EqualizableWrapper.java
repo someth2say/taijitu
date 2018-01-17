@@ -36,7 +36,7 @@ public class EqualizableWrapper<WRAPPED>
         return getEqualizer().areEquals(getWraped(), other.getWraped());
     }
 
-    public static class Factory<FWRAPPED> implements Wrapper.Factory<EqualizableWrapper<FWRAPPED>, FWRAPPED> {
+    public static class Factory<FWRAPPED> implements Wrapper.Factory<FWRAPPED> {
         private final Equalizer<FWRAPPED> equalizer;
 
         public Factory(Equalizer<FWRAPPED> equalizer) {

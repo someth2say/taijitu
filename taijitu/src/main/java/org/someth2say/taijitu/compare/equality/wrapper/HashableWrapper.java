@@ -25,7 +25,7 @@ public class HashableWrapper<WRAPPED>
         return getEqualizer().hash(getWraped());
     }
 
-    public static class Factory<FWRAPPED> implements Wrapper.Factory<HashableWrapper<FWRAPPED>, FWRAPPED> {
+    public static class Factory<FWRAPPED> implements Wrapper.Factory<FWRAPPED> {
         private final Hasher<FWRAPPED> hasher;
 
         public Factory(Hasher<FWRAPPED> hasher) {

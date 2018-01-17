@@ -2,13 +2,16 @@ package org.someth2say.taijitu.compare.equality.impl.value;
 
 import org.junit.Test;
 import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasher;
+import org.someth2say.taijitu.compare.equality.aspects.internal.ComparableHashable;
 import org.someth2say.taijitu.compare.equality.wrapper.ComparableHashableWrapper;
+import org.someth2say.taijitu.compare.equality.wrapper.Wrapper;
+import org.someth2say.taijitu.compare.equality.wrapper.Wrappers;
 
 import static org.junit.Assert.*;
 
 public class NumberThresholdTest {
     final NumberThreshold<Number> instance = NumberThreshold.EQUALITY;
-    final ComparableHashableWrapper.Factory<Number> factory = new ComparableHashableWrapper.Factory<>(instance);
+    final ComparableHashableWrapper.Factory<Number> factory = Wrappers.factory(instance);
 
     private final Number one = 1.000;
     private final Number oneOOtwo = 1.002;
@@ -25,7 +28,6 @@ public class NumberThresholdTest {
 
         assertEquals(oneWrap.hashCode(), oneOOTwoWrap.hashCode());
         assertNotEquals(oneWrap.hashCode(), twoWrap.hashCode());
-
     }
 
     @Test

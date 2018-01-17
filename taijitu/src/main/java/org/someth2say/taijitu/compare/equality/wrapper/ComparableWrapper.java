@@ -23,7 +23,7 @@ public class ComparableWrapper<WRAPPED>
         return getComparator().compare(getWraped(), other.getWraped());
     }
 
-    public static class Factory<FWRAPPED> implements Wrapper.Factory<ComparableWrapper<FWRAPPED>, FWRAPPED> {
+    public static class Factory<FWRAPPED> implements Wrapper.Factory<FWRAPPED> {
         private final Comparator<FWRAPPED> comparator;
 
         public Factory(Comparator<FWRAPPED> comparator) {

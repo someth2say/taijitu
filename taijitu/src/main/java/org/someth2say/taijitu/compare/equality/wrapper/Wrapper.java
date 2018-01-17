@@ -7,12 +7,12 @@ public abstract class Wrapper<WRAPPED> {
         this.wrapped = wrapped;
     }
 
-	public WRAPPED getWraped() {
+    public WRAPPED getWraped() {
         return wrapped;
     }
 
-    public interface Factory<WRAPPER, WRAPPED> {
-        WRAPPER wrap(WRAPPED wrapped);
+    public interface Factory<WRAPPED> {
+        Wrapper<WRAPPED> wrap(WRAPPED wrapped);
     }
 
 }
