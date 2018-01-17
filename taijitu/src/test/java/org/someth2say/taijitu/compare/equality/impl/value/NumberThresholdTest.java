@@ -1,6 +1,7 @@
 package org.someth2say.taijitu.compare.equality.impl.value;
 
 import org.junit.Test;
+import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasher;
 import org.someth2say.taijitu.compare.equality.wrapper.ComparableHashableWrapper;
 
 import static org.junit.Assert.*;
@@ -8,12 +9,14 @@ import static org.junit.Assert.*;
 public class NumberThresholdTest {
     final NumberThreshold<Number> instance = NumberThreshold.EQUALITY;
     final ComparableHashableWrapper.Factory<Number> factory = new ComparableHashableWrapper.Factory<>(instance);
+
     private final Number one = 1.000;
     private final Number oneOOtwo = 1.002;
     private final Number two = 2.000;
-    private final ComparableHashableWrapper<Number, ?> oneWrap = factory.wrapp(one);
-    private final ComparableHashableWrapper<Number, ?> oneOOTwoWrap = factory.wrapp(oneOOtwo);
-    private final ComparableHashableWrapper<Number, ?> twoWrap = factory.wrapp(two);
+
+    private final ComparableHashableWrapper<Number> oneWrap = factory.wrap(one);
+    private final ComparableHashableWrapper<Number> oneOOTwoWrap = factory.wrap(oneOOtwo);
+    private final ComparableHashableWrapper<Number> twoWrap = factory.wrap(two);
 
     @Test
     public void hashCodeTest() {

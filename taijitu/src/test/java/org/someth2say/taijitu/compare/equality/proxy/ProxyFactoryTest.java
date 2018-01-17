@@ -6,8 +6,7 @@ import org.someth2say.taijitu.compare.equality.impl.stream.simple.SimpleStreamEq
 import org.someth2say.taijitu.compare.equality.impl.value.DateThreshold;
 import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
 
-import java.util.Date;
-import java.util.Spliterator;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
@@ -15,16 +14,28 @@ import static org.junit.Assert.*;
 public class ProxyFactoryTest {
     @Test
     public void proxyEqualizerTest() {
-        Date date = new Date();
-        Date otherDate = new Date(date.getTime() + 400);
-        DateThreshold<Date> equalizer = new DateThreshold<>(1000);
-        Date proxy = ProxyFactory.proxyEqualizer(date, equalizer, Date.class);
+        Date now = new Date();
+        Date future = new Date(now.getTime() + 400);
+        Date nowProxy = ProxyFactory.proxyEqualizer(now, DateThreshold.EQUALITY, Date.class);
 
-        assertEquals(proxy, otherDate); // Test equality is actually applied
-        assertEquals(date.toString(), proxy.toString()); // Test non-equality methods are kept
+        assertTrue(nowProxy instanceof Date);
+
+        assertEquals(nowProxy, future); // Test equality is actually applied
+
+//        Collection<Date> dates = Collections.singletonList(nowProxy);
+        Collection<Date> dates = Arrays.asList(nowProxy);
+        assertTrue(dates.contains(now));
+
+        //TODO: This fails because implementation for SingletonList inverts the order of comparison. It does 'external.equals(internal)' instead of 'internal.equals(external)'
+        //assertTrue(dates.contains(future));
+
+        Date futureProxy = ProxyFactory.proxyEqualizer(future, DateThreshold.EQUALITY, Date.class);
+        assertTrue(dates.contains(futureProxy));
+
+        assertEquals(now.toString(), nowProxy.toString()); // Test non-equality methods are kept
 
         //Equality Proxy can not ensure equality reflexiveness... and this may be a real pain!
-        assertNotEquals(otherDate, proxy);
+        assertNotEquals(future, nowProxy);
     }
 
     //@Test  //Can't make it work, too many difficulties for binding Stream/BaseStream methods... I give up :(

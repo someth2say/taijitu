@@ -3,28 +3,37 @@ package org.someth2say.taijitu.compare.equality.wrapper;
 import org.someth2say.taijitu.compare.equality.aspects.external.Comparator;
 import org.someth2say.taijitu.compare.equality.aspects.internal.Comparable;
 
-public class ComparableWrapper<WRAPPED,EQ extends Comparator<WRAPPED>>
-        extends EqualizableWrapper<WRAPPED, EQ>
-        implements Comparable<Wrapper<WRAPPED,?>> {
+public class ComparableWrapper<WRAPPED>
+        extends EqualizableWrapper<WRAPPED>
+        implements Comparable<Wrapper<WRAPPED>> {
 
-    public ComparableWrapper(WRAPPED wrapped, EQ equality) {
-        super(wrapped, equality);
+    public Comparator<WRAPPED> getComparator() {
+        return comparator;
+    }
+
+    private final Comparator<WRAPPED> comparator;
+
+    public ComparableWrapper(WRAPPED wrapped, Comparator<WRAPPED> comparator) {
+        super(wrapped, comparator);
+        this.comparator = comparator;
     }
 
     @Override
-    public int compareTo(Wrapper<WRAPPED, ?> other) {
-        return getEquality().compare(getWraped(), other.getWraped());
+    public int compareTo(Wrapper<WRAPPED> other) {
+        return getComparator().compare(getWraped(), other.getWraped());
     }
 
-    public class Factory<FWRAPPED> {
+    public static class Factory<FWRAPPED> implements Wrapper.Factory<ComparableWrapper<FWRAPPED>, FWRAPPED> {
         private final Comparator<FWRAPPED> comparator;
 
-        public Factory(Comparator<FWRAPPED> comparator){
+        public Factory(Comparator<FWRAPPED> comparator) {
             this.comparator = comparator;
         }
 
-        public EqualizableWrapper<FWRAPPED, Comparator<FWRAPPED>> wrap(FWRAPPED wrapped){
-            return new EqualizableWrapper<>(wrapped, comparator);
+        @Override
+        public ComparableWrapper<FWRAPPED> wrap(FWRAPPED wrapped) {
+            return new ComparableWrapper<>(wrapped, comparator);
         }
+
     }
 }

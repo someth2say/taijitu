@@ -1,6 +1,8 @@
 package org.someth2say.taijitu.compare.equality.impl.value;
 
 import org.junit.Test;
+import org.someth2say.taijitu.compare.equality.aspects.external.Comparator;
+import org.someth2say.taijitu.compare.equality.wrapper.ComparableHashableWrapper;
 import org.someth2say.taijitu.compare.equality.wrapper.ComparableWrapper;
 
 import java.util.Date;
@@ -10,14 +12,15 @@ import static org.junit.Assert.*;
 public class DateThresholdTest {
 
     final DateThreshold<Date> instance = DateThreshold.EQUALITY;
-    final Date now = new Date();
-    final Date sameSecond = new Date(now.getTime()+900);
-    final Date tomorrow = new Date(now.getTime()-1000*60*24);
+    final ComparableWrapper.Factory<Date> factory = new ComparableWrapper.Factory<>(instance);
 
-    //TODO: Use factory
-    final ComparableWrapper<Date,?> nowWrap = new ComparableWrapper<>(now, instance);
-    final ComparableWrapper<Date,?> sameWrap = new ComparableWrapper<>(sameSecond, instance);
-    final ComparableWrapper<Date,?> tomWrap = new ComparableWrapper<>(tomorrow, instance);
+    final Date now = new Date();
+    final Date sameSecond = new Date(now.getTime() + 900);
+    final Date tomorrow = new Date(now.getTime() - 1000 * 60 * 24);
+
+    final ComparableWrapper<Date> nowWrap = factory.wrap(now);
+    final ComparableWrapper<Date> sameWrap = factory.wrap(sameSecond);
+    final ComparableWrapper<Date> tomWrap = factory.wrap(tomorrow);
 
 
     @Test

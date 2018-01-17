@@ -1,13 +1,9 @@
 package org.someth2say.taijitu.compare.equality.wrapper;
 
-import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
-
-public abstract class Wrapper<WRAPPED, EQ extends Equalizer<WRAPPED>> {
+public abstract class Wrapper<WRAPPED> {
     private final WRAPPED wrapped;
-    private final EQ equality;
 
-    Wrapper(WRAPPED wrapped, EQ equality) {
-        this.equality = equality;
+    Wrapper(WRAPPED wrapped) {
         this.wrapped = wrapped;
     }
 
@@ -15,7 +11,8 @@ public abstract class Wrapper<WRAPPED, EQ extends Equalizer<WRAPPED>> {
         return wrapped;
     }
 
-	public EQ getEquality() {
-        return equality;
+    public interface Factory<WRAPPER, WRAPPED> {
+        WRAPPER wrap(WRAPPED wrapped);
     }
+
 }

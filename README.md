@@ -341,17 +341,66 @@ In other words, and equality wrapper "wrap" an instance and an equality, in orde
 So, in our sample situation, we can just wrap `String` instances with a `StringCaseInsensitive` equality, before sending them to the third party library.
 You can use direct class instantiation...
 ```java
-    EqualizableWrapper<String,?> wrappedString = new EqualizableWrapper<>(string, StringCaseInsensitive.EQUALITY);
+    EqualizableWrapper<String> wrappedString = new EqualizableWrapper<>(string, StringCaseInsensitive.EQUALITY);
 ```
 ... or use an static factory, that simplifies generating multiple wrappers for the same equality:
 ```java
-    EqualizableWrapper.Factory<String> factory = new ComparableHashableWrapper.Factory<>(StringCaseInsensitive.EQUALITY);
-    EqualizableWrapper<String,?> wrappedString = factory.wrapp(string);
+    EqualizableWrapper.Factory<String> factory = new EqualizableWrapper.Factory<>(StringCaseInsensitive.EQUALITY);
+    EqualizableWrapper<String> wrappedString = factory.wrapp(string);
+    EqualizableWrapper<String> anotherWrapped = factory.wrapp(anotherString);
 ```
 
+Having the instances wrapped, now all comparisons will go through external equality:
+```java
+        EqualizableWrapper.Factory<String> factory = new EqualizableWrapper.Factory<>(StringCaseInsensitive.EQUALITY);
+        EqualizableWrapper<String> wrappedString = factory.wrap("Hola");
+        EqualizableWrapper<String> anotherWrapped = factory.wrap("HOLA");
+
+        assertEquals(wrappedString,anotherWrapped);              
+        assertTrue(Collections.singletonList(wrappedString).contains(anotherWrapped));    
+```
+
+##### Caveats:
+- New instance should be created to wrap any instance. Despite minimal, this implies both memory and time overhead.
+- The instance providing internal equality is not same class for the original instance. So if class restrictions apply, this solution will not work.
+
 ####  Equality proxies
+The main problem about using wrappers for 'internalize' equality is that the resulting instance does not satisfy original class anymore.
+Taijitu provides a second approach for avoiding this problem: using dynamic proxies.
+Dynamic proxies classes that:
+1. Are completely generated on run-time. 
+2. Extend (or implement) the original class
+3. Can define behaviour for each method on the original class: delegate to original instance, delegate to another instance, or perform whatever the developer decides to.
+
+So Taijitu can create instance proxies that delegate ALL methods to the original instance, but equality-related methods. Those methods are delegated to external equality.
+
+Following code sample uses `ProxyFactory` to create a `Date` proxy, that delegates equality to the default `DateThreshold` equality.
+```java
+    Date now = new Date();
+    Date nowProxy = ProxyFactory.proxyEqualizer(now, DateThreshold.EQUALITY, Date.class);
+```
+Now, we can use the `proxy` like any other `Date` instance:
+```java
+    assertTrue(nowProxy instanceof Date);
+    Date future = new Date(now.getTime() + 400); // In future, but below default threshold
+    assertEquals(nowProxy, future); 
+    
+    Collection<Date> dates = Arrays.asList(nowProxy);
+    assertTrue(dates.contains(now));
+    assertTrue(dates.contains(future));
+```
+
+
+
+##### Caveats:
+- Both new class and new instances should be created. Despite classes can be cached, instance creation still have memory and time overhead.
+- Final classes (i.e. String) or complex class structures (i.e. Stream) can not be proxyfied.
+- Non-reflexiveness: Proxy instances have equality methods updated, while non-proxied instances retain the original methods. That means
+`proxy.equals(date)` can return true, while `date.equals(proxy)` returns false.
+
 
 ####  Equality-aware collections
+
 
 
 ## Real life examples.

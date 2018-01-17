@@ -1,6 +1,7 @@
 package org.someth2say.taijitu.compare.equality.impl.composite;
 
 import org.junit.Test;
+import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasher;
 import org.someth2say.taijitu.compare.equality.wrapper.ComparableHashableWrapper;
 import org.someth2say.taijitu.compare.equality.wrapper.ComparableWrapper;
 
@@ -20,18 +21,18 @@ public class CompositeComparatorHasherTest {
         assertTrue(testClassThreeComparatorHasher.compare(differentFrom1, differentFrom2) == 0);
         assertTrue(testClassThreeComparatorHasher.areEquals(differentFrom1, differentFrom2));
 
-        ComparableHashableWrapper<TestComposite, ?> wrap1 = new ComparableHashableWrapper<>(differentFrom1, testClassThreeComparatorHasher);
-        ComparableHashableWrapper<TestComposite, ?> wrap3 = new ComparableHashableWrapper<>(differentFrom3, testClassThreeComparatorHasher);
-        ComparableHashableWrapper<TestComposite, ?> wrap2 = new ComparableHashableWrapper<>(differentFrom2, testClassThreeComparatorHasher);
+        ComparableHashableWrapper<TestComposite> wrap1 = new ComparableHashableWrapper<>(differentFrom1, testClassThreeComparatorHasher);
+        ComparableHashableWrapper<TestComposite> wrap3 = new ComparableHashableWrapper<>(differentFrom3, testClassThreeComparatorHasher);
+        ComparableHashableWrapper<TestComposite> wrap2 = new ComparableHashableWrapper<>(differentFrom2, testClassThreeComparatorHasher);
 
         assertTrue(wrap1.compareTo(wrap3) < 0);
         assertTrue(wrap1.compareTo(wrap2) == 0);
         assertTrue(wrap1.equals(wrap2));
 
-        assertTrue(testClassThreeComparatorHasher.hash(differentFrom1)== testClassThreeComparatorHasher.hash(differentFrom2));
-        assertFalse(testClassThreeComparatorHasher.hash(differentFrom1)==testClassThreeComparatorHasher.hash(differentFrom3));
+        assertTrue(testClassThreeComparatorHasher.hash(differentFrom1) == testClassThreeComparatorHasher.hash(differentFrom2));
+        assertFalse(testClassThreeComparatorHasher.hash(differentFrom1) == testClassThreeComparatorHasher.hash(differentFrom3));
         assertTrue(new ComparableHashableWrapper<>(differentFrom1, testClassThreeComparatorHasher).hashCode() == new ComparableHashableWrapper<>(differentFrom2, testClassThreeComparatorHasher).hashCode());
-        assertFalse(new ComparableHashableWrapper<>(differentFrom1, testClassThreeComparatorHasher).hashCode()== new ComparableHashableWrapper<>(differentFrom3, testClassThreeComparatorHasher).hashCode());
+        assertFalse(new ComparableHashableWrapper<>(differentFrom1, testClassThreeComparatorHasher).hashCode() == new ComparableHashableWrapper<>(differentFrom3, testClassThreeComparatorHasher).hashCode());
 
     }
 }

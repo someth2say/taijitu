@@ -3,12 +3,19 @@ package org.someth2say.taijitu.compare.equality.wrapper;
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.aspects.internal.Equalizable;
 
-public class EqualizableWrapper<WRAPPED, EQ extends Equalizer<WRAPPED>>
-        extends Wrapper<WRAPPED, EQ>
-        implements Equalizable<Wrapper<WRAPPED,?>> {
+public class EqualizableWrapper<WRAPPED>
+        extends Wrapper<WRAPPED>
+        implements Equalizable<Wrapper<WRAPPED>> {
 
-    public EqualizableWrapper(WRAPPED wrapped, EQ equality) {
-        super(wrapped, equality);
+    public Equalizer<WRAPPED> getEqualizer() {
+        return equality;
+    }
+
+    private final Equalizer<WRAPPED> equality;
+
+    public EqualizableWrapper(WRAPPED wrapped, Equalizer<WRAPPED> equality) {
+        super(wrapped);
+        this.equality = equality;
     }
 
     @Override
@@ -18,26 +25,28 @@ public class EqualizableWrapper<WRAPPED, EQ extends Equalizer<WRAPPED>>
         }
         if (obj instanceof EqualizableWrapper) {
             @SuppressWarnings("unchecked")
-            EqualizableWrapper<WRAPPED, ?> otherWrapper = (EqualizableWrapper<WRAPPED, ?>) obj;
+            EqualizableWrapper<WRAPPED> otherWrapper = (EqualizableWrapper<WRAPPED>) obj;
             return equalsTo(otherWrapper);
         }
         return false;
     }
 
     @Override
-    public boolean equalsTo(Wrapper<WRAPPED,?> other) {
-        return getEquality().areEquals(getWraped(), other.getWraped());
+    public boolean equalsTo(Wrapper<WRAPPED> other) {
+        return getEqualizer().areEquals(getWraped(), other.getWraped());
     }
 
-    public class Factory<FWRAPPED> {
+    public static class Factory<FWRAPPED> implements Wrapper.Factory<EqualizableWrapper<FWRAPPED>, FWRAPPED> {
         private final Equalizer<FWRAPPED> equalizer;
 
-        public Factory(Equalizer<FWRAPPED> equalizer){
+        public Factory(Equalizer<FWRAPPED> equalizer) {
             this.equalizer = equalizer;
         }
 
-        public EqualizableWrapper<FWRAPPED, Equalizer<FWRAPPED>> wrapp(FWRAPPED wrapped){
+        @Override
+        public EqualizableWrapper<FWRAPPED> wrap(FWRAPPED wrapped) {
             return new EqualizableWrapper<>(wrapped, equalizer);
         }
     }
 }
+

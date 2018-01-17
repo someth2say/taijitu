@@ -1,6 +1,7 @@
 package org.someth2say.taijitu.compare.equality.impl.value;
 
 import org.junit.Test;
+import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasher;
 import org.someth2say.taijitu.compare.equality.wrapper.ComparableHashableWrapper;
 
 import static org.junit.Assert.*;
@@ -9,9 +10,10 @@ public class StringCaseInsensitiveTest {
 
     final StringCaseInsensitive instance = StringCaseInsensitive.EQUALITY;
     final ComparableHashableWrapper.Factory<String> factory = new ComparableHashableWrapper.Factory<>(instance);
-    final ComparableHashableWrapper<String, ?> aaa = factory.wrapp("aaa");
-    final ComparableHashableWrapper<String, ?> aAA = factory.wrapp("aAA");
-    final ComparableHashableWrapper<String, ?> aa = factory.wrapp("aa");
+
+    final ComparableHashableWrapper<String> aaa = factory.wrap("aaa");
+    final ComparableHashableWrapper<String> aAA = factory.wrap("aAA");
+    final ComparableHashableWrapper<String> aa = factory.wrap("aa");
 
     @Test
     public void hashCodeTest() {

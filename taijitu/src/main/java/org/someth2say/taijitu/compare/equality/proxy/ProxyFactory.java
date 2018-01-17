@@ -27,10 +27,6 @@ public class ProxyFactory {
 
     public static final String DELEGATE_FIELD_NAME = "$delegate";
 
-    public static <T> T proxy(T instance, Equalizer<T> equalizer) {
-        return proxyEqualizer(instance, equalizer, (Class<T>) instance.getClass());
-    }
-
     public static <T> T proxyEqualizer(T instance, Equalizer<T> equalizer, Class<? extends T> clazz) {
         Builder<? extends T> builder = getProxyClassBuilder(clazz, Equalizable.class);
         EqualizableInterceptor<T, Equalizer<T>> interceptor = new EqualizableInterceptor<>(equalizer);
