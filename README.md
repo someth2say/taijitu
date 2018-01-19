@@ -357,7 +357,16 @@ Having the instances wrapped, now all comparisons will go through external equal
         EqualizableWrapper<String> anotherWrapped = factory.wrap("HOLA");
 
         assertEquals(wrappedString,anotherWrapped);              
-        assertTrue(Collections.singletonList(wrappedString).contains(anotherWrapped));    
+        assertTrue(Collections.singletonList(wrappedString).contains(anotherWrapped));
+```
+
+Finally, but not least important: if you feel creating equality wrappers and factories tedious, Taijitu offers an utility class to
+simplify the process: `Wrappers`. This class offers static utility methods for both wrapping instances and creating wrapper factories
+without having to worry about the kind of equality actually being used.
+
+```java
+     ComparableWrapper.Factory<Date> factory = Wrappers.factory(DateThreshold.EQUALITY);
+     ComparableHashableWrapper<String> aa = Wrappers.wrap("aa", instance);
 ```
 
 ##### Caveats:
@@ -389,8 +398,6 @@ Now, we can use the `proxy` like any other `Date` instance:
     assertTrue(dates.contains(now));
     assertTrue(dates.contains(future));
 ```
-
-
 
 ##### Caveats:
 - Both new class and new instances should be created. Despite classes can be cached, instance creation still have memory and time overhead.
