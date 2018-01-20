@@ -11,13 +11,13 @@ import java.util.Date;
 
 import static org.junit.Assert.*;
 
-public class ProxyFactoryTest {
+public class ProxiesTest {
     @Test
     public void proxyEqualizerOnClass() {
         Date now = new Date();
         Date future = new Date(now.getTime() + 400);
-        Date nowProxy = ProxyFactory.proxyEqualizer(now, DateThreshold.EQUALITY, Date.class);
-        Date futureProxy = ProxyFactory.proxyEqualizer(future, DateThreshold.EQUALITY, Date.class);
+        Date nowProxy = Proxies.proxy(now, DateThreshold.EQUALITY, Date.class);
+        Date futureProxy = Proxies.proxy(future, DateThreshold.EQUALITY, Date.class);
 
         assertTrue(nowProxy instanceof Date);
         assertEquals(nowProxy, future); // Test equality is actually applied
@@ -41,8 +41,8 @@ public class ProxyFactoryTest {
         Number low = 1.001f;
         Number up = 1.002f;
         Comparator<Number> comparator = NumberThreshold.EQUALITY;
-        Number lowProxy = ProxyFactory.proxyComparator(low, comparator, Number.class);
-        Number upProxy = ProxyFactory.proxyComparator(up, comparator, Number.class);
+        Number lowProxy = Proxies.proxyComparator(low, comparator, Number.class);
+        Number upProxy = Proxies.proxyComparator(up, comparator, Number.class);
 
         assertTrue(lowProxy instanceof Number);
         assertEquals(lowProxy, up); // Test equality is actually applied

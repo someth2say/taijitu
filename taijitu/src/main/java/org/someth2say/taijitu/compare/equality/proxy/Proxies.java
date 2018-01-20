@@ -21,28 +21,28 @@ import static net.bytebuddy.implementation.MethodDelegation.to;
 import static net.bytebuddy.matcher.ElementMatchers.isDeclaredBy;
 import static net.bytebuddy.matcher.ElementMatchers.not;
 
-public class ProxyFactory {
+public class Proxies {
 
-    public static final String DELEGATE_FIELD_NAME = "$delegate";
+    private static final String DELEGATE_FIELD_NAME = "$delegate";
 
-    public static <T> T proxyEqualizer(T instance, Equalizer<? extends T> equalizer, Class<? extends T> clazz) {
+    public static <T> T proxy(T instance, Equalizer<? extends T> equalizer, Class<T> clazz) {
         Builder<? extends T> builder = getProxyClassBuilder(clazz, Equalizable.class);
         EqualizableInterceptor<? extends T, ? extends Equalizer<? extends T>> interceptor = new EqualizableInterceptor<>(equalizer);
         builder = interceptEqualizableMethods(clazz, interceptor, builder);
         return getProxyInstance(instance, builder);
     }
 
-    public static <T> T proxyComparator(T instance, Comparator<T> comparator, Class<? extends T> clazz) {
+    public static <T> T proxyComparator(T instance, Comparator<? extends T> comparator, Class<T> clazz) {
         Builder<? extends T> builder = getProxyClassBuilder(clazz, Comparable.class);
-        ComparatorInterceptor<T, Comparator<T>> interceptor = new ComparatorInterceptor<>(comparator);
+        ComparatorInterceptor<? extends T, ? extends Comparator<? extends T>> interceptor = new ComparatorInterceptor<>(comparator);
         builder = interceptEqualizableMethods(clazz, interceptor, builder);
         builder = interceptComparableMethods(clazz, interceptor, builder);
         return getProxyInstance(instance, builder);
     }
 
-    public static <T> T proxyHasher(T instance, Hasher<T> hasher, Class<? extends T> clazz) {
+    public static <T> T proxyHasher(T instance, Hasher<? extends T> hasher, Class<T> clazz) {
         Builder<? extends T> builder = getProxyClassBuilder(clazz, Hashable.class);
-        HasherInterceptor<T, Hasher<T>> interceptor = new HasherInterceptor<>(hasher);
+        HasherInterceptor<? extends T, ? extends Hasher<? extends T>> interceptor = new HasherInterceptor<>(hasher);
 
         builder = interceptEqualizableMethods(clazz, interceptor, builder);
         builder = interceptHashableMethods(clazz, interceptor, builder);
@@ -50,7 +50,7 @@ public class ProxyFactory {
         return getProxyInstance(instance, builder);
     }
 
-    public static <T> T proxyComparatorHasher(T instance, ComparatorHasher<T> comparatorHasher, Class<? extends T> clazz) {
+    public static <T> T proxyComparatorHasher(T instance, ComparatorHasher<T> comparatorHasher, Class<T> clazz) {
         Builder<? extends T> builder = getProxyClassBuilder(clazz, Comparable.class, Hashable.class);
         ComparatorHasherInterceptor<T, ComparatorHasher<T>> interceptor = new ComparatorHasherInterceptor<>(comparatorHasher);
 
@@ -63,7 +63,7 @@ public class ProxyFactory {
 
     private static <T> T getProxyInstance(T instance, Builder<? extends T> builder) {
         Class<? extends T> proxyClass = builder.make()
-                .load(ProxyFactory.class.getClassLoader(), ClassLoadingStrategy.Default.WRAPPER).getLoaded();
+                .load(Proxies.class.getClassLoader(), ClassLoadingStrategy.Default.WRAPPER).getLoaded();
 
         try {
             T newInstance = proxyClass.newInstance();
@@ -81,11 +81,11 @@ public class ProxyFactory {
                 .defineMethod("equalsTo", boolean.class, Visibility.PUBLIC).withParameters(clazz).intercept(to(interceptor));
     }
 
-    private static <T> Builder<? extends T> interceptComparableMethods(Class<? extends T> clazz, IComparatorInterceptor<T, ?> interceptor, Builder<? extends T> builder) {
+    private static <T> Builder<? extends T> interceptComparableMethods(Class<? extends T> clazz, IComparatorInterceptor<? extends T, ?> interceptor, Builder<? extends T> builder) {
         return builder.defineMethod("compareTo", clazz, Visibility.PUBLIC).withParameters(Object.class).intercept(to(interceptor));
     }
 
-    private static <T> Builder<? extends T> interceptHashableMethods(Class<? extends T> clazz, IHasherInterceptor<T, ?> interceptor, Builder<? extends T> builder) {
+    private static <T> Builder<? extends T> interceptHashableMethods(Class<? extends T> clazz, IHasherInterceptor<? extends T, ?> interceptor, Builder<? extends T> builder) {
         return builder.defineMethod("hash", clazz, Visibility.PUBLIC).withParameters(Object.class).intercept(to(interceptor));
     }
 
