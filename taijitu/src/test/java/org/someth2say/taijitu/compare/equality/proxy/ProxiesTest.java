@@ -16,8 +16,8 @@ public class ProxiesTest {
     public void proxyEqualizerOnClass() {
         Date now = new Date();
         Date future = new Date(now.getTime() + 400);
-        Date nowProxy = Proxies.proxy(now, DateThreshold.EQUALITY, Date.class);
-        Date futureProxy = Proxies.proxy(future, DateThreshold.EQUALITY, Date.class);
+        Date nowProxy = Proxies.proxyEqualizer(now, DateThreshold.EQUALITY, Date.class);
+        Date futureProxy = Proxies.proxyEqualizer(future, DateThreshold.EQUALITY, Date.class);
 
         assertTrue(nowProxy instanceof Date);
         assertEquals(nowProxy, future); // Test equality is actually applied

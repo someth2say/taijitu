@@ -25,7 +25,7 @@ public class Proxies {
 
     private static final String DELEGATE_FIELD_NAME = "$delegate";
 
-    public static <T> T proxy(T instance, Equalizer<? extends T> equalizer, Class<T> clazz) {
+    public static <T> T proxyEqualizer(T instance, Equalizer<? extends T> equalizer, Class<T> clazz) {
         Builder<? extends T> builder = getProxyClassBuilder(clazz, Equalizable.class);
         EqualizableInterceptor<? extends T, ? extends Equalizer<? extends T>> interceptor = new EqualizableInterceptor<>(equalizer);
         builder = interceptEqualizableMethods(clazz, interceptor, builder);
@@ -42,7 +42,7 @@ public class Proxies {
 
     public static <T> T proxyHasher(T instance, Hasher<? extends T> hasher, Class<T> clazz) {
         Builder<? extends T> builder = getProxyClassBuilder(clazz, Hashable.class);
-        HasherInterceptor<? extends T, ? extends Hasher<? extends T>> interceptor = new HasherInterceptor<>(hasher);
+        HasherInterceptor<T, ? extends Hasher<? extends T>> interceptor = new HasherInterceptor<>(hasher);
 
         builder = interceptEqualizableMethods(clazz, interceptor, builder);
         builder = interceptHashableMethods(clazz, interceptor, builder);
@@ -55,7 +55,7 @@ public class Proxies {
         ComparatorHasherInterceptor<T, ComparatorHasher<T>> interceptor = new ComparatorHasherInterceptor<>(comparatorHasher);
 
         builder = interceptEqualizableMethods(clazz, interceptor, builder);
-        builder = interceptHashableMethods(clazz, interceptor, builder);
+        builder = interceptComparableMethods(clazz, interceptor, builder);
         builder = interceptHashableMethods(clazz, interceptor, builder);
 
         return getProxyInstance(instance, builder);
@@ -121,7 +121,5 @@ public class Proxies {
                                 .withResolvers(CUSTOM_AMBIGUITY_RESOLVER)
                                 .toField(DELEGATE_FIELD_NAME));  // java.lang.IllegalArgumentException: Cannot resolve ambiguous delegation of public abstract void java.util.stream.BaseStream.close() to net.bytebuddy.implementation.bind.MethodDelegationBinder$MethodBinding$Builder$Build@9416032f or net.bytebuddy.implementation.bind.MethodDelegationBinder$MethodBinding$Builder$Build@a6a115df
         return builder;
-
-
     }
 }

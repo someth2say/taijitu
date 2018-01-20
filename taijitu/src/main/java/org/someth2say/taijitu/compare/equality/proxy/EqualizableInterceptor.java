@@ -2,7 +2,8 @@ package org.someth2say.taijitu.compare.equality.proxy;
 
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 
-public class EqualizableInterceptor<T, EQ extends Equalizer<T>> implements IEqualizableInterceptor<T,EQ> {
+public class EqualizableInterceptor<T, EQ extends Equalizer<T>>
+        implements IEqualizableInterceptor<T,EQ> {
 
     private final EQ equalizer;
 
