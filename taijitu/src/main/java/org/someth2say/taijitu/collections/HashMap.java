@@ -15,7 +15,7 @@ import java.util.function.Function;
 
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
-import sun.misc.SharedSecrets;
+//import sun.misc.SharedSecrets;
 
 
 public class HashMap<K, V>
@@ -1313,7 +1313,7 @@ public class HashMap<K, V>
 
             // Check Map.Entry[].class since it's the nearest public type to
             // what we're actually creating.
-            SharedSecrets.getJavaOISAccess().checkArray(s, Map.Entry[].class, cap);
+            //SharedSecrets.getJavaOISAccess().checkArray(s, Map.Entry[].class, cap);
             @SuppressWarnings({"rawtypes", "unchecked"})
             Node<K, V>[] tab = (Node<K, V>[]) new Node[cap];
             table = tab;

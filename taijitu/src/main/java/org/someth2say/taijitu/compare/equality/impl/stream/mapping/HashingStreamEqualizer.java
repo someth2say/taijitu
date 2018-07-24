@@ -8,6 +8,7 @@ import java.util.stream.StreamSupport;
 import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
+import org.someth2say.taijitu.compare.equality.wrapper.HashableWrapper;
 
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Unequal;

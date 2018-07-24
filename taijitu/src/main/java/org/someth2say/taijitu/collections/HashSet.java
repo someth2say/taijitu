@@ -2,7 +2,7 @@ package org.someth2say.taijitu.collections;
 
 import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
 import org.someth2say.taijitu.compare.equality.impl.value.JavaObject;
-import sun.misc.SharedSecrets;
+//import sun.misc.SharedSecrets;
 
 import java.io.InvalidObjectException;
 import java.util.*;
@@ -260,8 +260,8 @@ public class HashSet<E>
         // actual allocation size. Check Map.Entry[].class since it's the nearest public type to
         // what is actually created.
 
-        SharedSecrets.getJavaOISAccess()
-                .checkArray(s, Map.Entry[].class, HashMap.tableSizeFor(capacity));
+        //SharedSecrets.getJavaOISAccess()
+        //        .checkArray(s, Map.Entry[].class, HashMap.tableSizeFor(capacity));
 
         // Create backing HashMap
         map = (this instanceof LinkedHashSet ?
