@@ -27,9 +27,7 @@
         <opencsv.version>3.8</opencsv.version>
         <sonar.host.url>https://sonarqube.com</sonar.host.url>
         <sonar.projectName>taijitu</sonar.projectName>
-        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-        <!--<sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>-->
         <sonar.language>java</sonar.language>
         <argLine></argLine>
         <taijitu.version>1.1-SNAPSHOT</taijitu.version>
@@ -78,25 +76,6 @@
         <pluginManagement>
             <plugins>
 
-                <!--<plugin>-->
-                <!--<groupId>org.sonarsource.scanner.maven</groupId>-->
-                <!--<artifactId>sonar-maven-plugin</artifactId>-->
-                <!--<version>3.2</version>-->
-                <!--</plugin>-->
-
-                <plugin>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.19.1</version>
-                    <configuration>
-                        <argLine>${argLine}</argLine>
-                        <properties>
-                            <property>
-                                <name>listener</name>
-                                <value>org.sonar.java.jacoco.JUnitListener</value>
-                            </property>
-                        </properties>
-                    </configuration>
-                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -225,16 +204,6 @@
 
         </dependencies>
     </dependencyManagement>
-
-
-    <!--<dependencies>-->
-    <!--<dependency>-->
-    <!--<groupId>org.sonarsource.java</groupId>-->
-    <!--<artifactId>sonar-jacoco-listeners</artifactId>-->
-    <!--<version>3.8</version>-->
-    <!--<scope>test</scope>-->
-    <!--</dependency>-->
-    <!--</dependencies>-->
 
 
 </project>
