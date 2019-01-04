@@ -10,7 +10,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>cli</artifactId>
-
+    <packaging>jar</packaging>
+    
     <dependencies>
         <dependency>
             <groupId>org.someth2say.taijitu</groupId>
@@ -76,7 +77,8 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-        </dependency>
+        </dependency>        
+        
     </dependencies>
 
 </project>
