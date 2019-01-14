@@ -8,9 +8,9 @@ import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasher
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.impl.value.JavaComparable;
 
-public class CompositeComparatorHasher<T> extends AbstractCompositeEquality implements ICompositeHasherComparator<T> {
+public class CompositeComparatorHasher<T> extends AbstractCompositeEquality<T> implements ICompositeHasherComparator<T> {
 
-	protected CompositeComparatorHasher(List<ExtractorAndEquality> extractorsAndEqualities) {
+	protected CompositeComparatorHasher(List<ExtractorAndEquality<T, ?, ? extends Equalizer<?>>> extractorsAndEqualities) {
         super(extractorsAndEqualities);
     }
 

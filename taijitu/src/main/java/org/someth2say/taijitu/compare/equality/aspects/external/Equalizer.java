@@ -13,12 +13,14 @@ public interface Equalizer<EQUALIZED> {
      * In case no differences are found, objects are considered equal. Else, are considered non-equal.,
      * 
      * Note that this implementation creates and consume a `Stream` of underlying differences. 
-     * Despite streams aer targeted to be lazy, efficiency depends on `underlyingDiffs` actual implementation and return type.
+     * Despite streams are targeted to be lazy, efficiency depends on `underlyingDiffs` actual implementation and return type.
      * 
-     * Equalizers for simple types (i.e. native types or value types) should overwrite this method and provide an straightforward implementation.
+     * Equalizers for simple types (i.e. native types or value types)
+     *  should overwrite this method and provide an straightforward implementation.
      */
     default boolean areEquals(EQUALIZED equalized1, EQUALIZED equalized2) {
-        return underlyingDiffs(equalized1, equalized2) == null;
+        Stream<Difference<?>> underlyingDiffs = underlyingDiffs(equalized1, equalized2);
+		return underlyingDiffs == null || underlyingDiffs.count()==0;
     }
 
     /**
@@ -33,15 +35,15 @@ public interface Equalizer<EQUALIZED> {
      * 
      * @param equalized1
      * @param equalized2
-     * @return A stream of differences that explain the current differenceOrNull
+     * @return A stream of differences that explain the current difference
      */
     Stream<Difference<?>> underlyingDiffs(EQUALIZED equalized1, EQUALIZED equalized2);
 
     default Unequal<EQUALIZED> asUnequal(EQUALIZED equalized1, EQUALIZED equalized2) {
-        Stream<Difference<?>> underlyingDifferences = underlyingDiffs(equalized1, equalized2);
-        if (underlyingDifferences != null)
-            return new Unequal<>(this, equalized1, equalized2, underlyingDifferences);
-        else
+			Stream<Difference<?>> underlyingDiffs = underlyingDiffs(equalized1, equalized2);
+		if (areEquals(equalized1, equalized2)) {
+			return new Unequal<>(this, equalized1, equalized2, underlyingDiffs);
+		} else
             return null;
     }
 

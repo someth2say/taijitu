@@ -4,6 +4,10 @@ import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 
 import java.util.stream.Stream;
 
+/**
+ * Comparison result class, showing two instances contains different values or meanings.
+ * 
+ */
 public class Unequal<DT> extends Difference<DT> {
 
     public Unequal(Equalizer<? super DT> cause, DT composite, DT composite2, Stream<Difference<?>> underlyingDifferences) {

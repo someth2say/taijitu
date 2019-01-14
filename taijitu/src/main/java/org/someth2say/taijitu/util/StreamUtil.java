@@ -164,7 +164,8 @@ public class StreamUtil {
     }
 
     /**
-     * Provides a stream resulting of mapping both streams elements, with the difference that elements will not be paired with elements on same "position", but
+     * Provides a stream resulting of mapping both streams elements, with the difference that elements 
+     * will not be paired with elements on same "position",
      * but the pairing element will be decided by a "comparator" function.
      * The pseudo-code for deciding if two elements should be mapped together is:
      * <pre>
@@ -174,8 +175,8 @@ public class StreamUtil {
      *     if "comparator" function returns >0 value, `mapper` function is applied to the element from the second stream, and next element is picked from second stream
      * </pre>
      * In other words, the "comparator" function is a `comparator` for stream elements.
-     * If both elements are "areEquals" given that comparator, then `biMapper` is applied to both. Else, `mapper` is applied to the 'minor' element.
-     * Note that this behaviour assumes elements on both streams are somehow 'sorted' given the comparator/comparator function.
+     * If both elements are "equals" given that comparator, then `biMapper` is applied to both. Else, `mapper` is applied to the 'minor' element.
+     * Note that this behaviour assumes elements on both streams are somehow 'sorted' given the comparator function.
      *
      * @param first
      * @param second

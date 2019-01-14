@@ -7,6 +7,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Abstract comparison result class expressing some entries are not equal (given the generating equality).
+ * Differences can be of many kind, i.e. having different values, different inner order, missing values, depending on the 
+ * equality used. 
+ */
 public abstract class Difference<MMT> {
     private final Equalizer<? super MMT> cause;
     private final List<MMT> entries;

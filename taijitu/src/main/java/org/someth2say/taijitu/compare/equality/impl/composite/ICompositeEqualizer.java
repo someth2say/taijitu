@@ -1,23 +1,22 @@
 package org.someth2say.taijitu.compare.equality.impl.composite;
 
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Unequal;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-public interface ICompositeEqualizer<T> extends IComposite, Equalizer<T> {
+public interface ICompositeEqualizer<T> extends IComposite<T>, Equalizer<T> {
 
     @Override
     default boolean areEquals(T first, T second) {
-        return getExtractorsAndEqualities().stream().allMatch(eae -> valueEquals(first, second, eae));
+        Stream<ExtractorAndEquality<T, ?, ? extends Equalizer<?>>> extractorsAndEqualities = getExtractorsAndEqualities();
+        return extractorsAndEqualities.allMatch(eae -> valueEquals(first, second, eae));
     }
 
-    default <V> boolean valueEquals(T first, T second, ExtractorAndEquality<T, V, ?> eae) {
+    default <V> boolean valueEquals(T first, T second, ExtractorAndEquality<T, V, ? extends Equalizer<? super V>> eae) {
         Function<T, V> extractors = eae.getExtractor();
         Equalizer<? super V> equalizer = eae.getEquality();
         V firstValue = extractors.apply(first);
@@ -25,12 +24,15 @@ public interface ICompositeEqualizer<T> extends IComposite, Equalizer<T> {
         return equalizer.areEquals(firstValue, secondValue);
     }
 
-    //TODO: This is actually a piece of shit!!! Need to work out to the iterator not to be consumed (but then, how filter out non-different elements?)
+    // TODO: This is actually a piece of shit!!!
+    // Need to work out to the iterator not to be consumed (but then, how filter out
+    // non-different elements?)
     @Override
     default Stream<Difference<?>> underlyingDiffs(T t1, T t2) {
-        Stream<Difference<?>> differenceStream = getExtractorsAndEqualities().stream().<Difference<?>>map(eae -> differenceOrNull(t1, t2, eae)).filter(Objects::nonNull);
-        List<Difference<?>> differences = differenceStream.collect(Collectors.toList());
-        return differences.isEmpty() ? null : differences.stream();
+        Stream<ExtractorAndEquality<T, ?, ? extends Equalizer<?>>> extractorsAndEqualities = getExtractorsAndEqualities();
+        Stream<Difference<?>> differenceStream = extractorsAndEqualities
+                .<Difference<?>>map(eae -> differenceOrNull(t1, t2, eae)).filter(Objects::nonNull);
+        return differenceStream;
     }
 
     default <V> Difference<V> differenceOrNull(T first, T second, ExtractorAndEquality<T, V, ?> eae) {
@@ -41,6 +43,5 @@ public interface ICompositeEqualizer<T> extends IComposite, Equalizer<T> {
         boolean equals = equalizer.areEquals(firstValue, secondValue);
         return equals ? null : new Unequal<>(equalizer, firstValue, secondValue);
     }
-
 
 }

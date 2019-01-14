@@ -9,7 +9,16 @@ import org.someth2say.taijitu.compare.equality.wrapper.HashableWrapper;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * Runnable class that is responsible for too many things:
+ * - Iterate a source of elements
+ * - Keep a hash table for those elements (using a given Hasher)
+ * - If two elements have same hash, use the given Equalizer to determine equality
+ * - If elements are equals, both are consumed.
+ * - Else, an 'Unequals' object is built
+ * 
+ * This class should be deprecated in favor of stream-based implementation.
+ */
 class Mapper<T> implements Runnable {
 
     private final Iterator<T> source;
@@ -49,13 +58,15 @@ class Mapper<T> implements Runnable {
     }
 
     public static <T> Unequal<T> map(OrdinalAndComposite<T> thisOaC, Hasher<T> hasher,
-                                     Map<HashableWrapper<T>, OrdinalAndComposite<T>> sharedMap, Equalizer<T> equalizer) {
+                                     Map<HashableWrapper<T>, OrdinalAndComposite<T>> sharedMap, 
+                                     Equalizer<T> equalizer) {
         HashableWrapper<T> wrapper = new HashableWrapper<>(thisOaC.getComposite(), hasher);
         OrdinalAndComposite<T> otherOaC = sharedMap.putIfAbsent(wrapper, new OrdinalAndComposite<>(thisOaC.getOrdinal(), thisOaC.getComposite()));
         if (otherOaC != null) {
             // we have a key match ...
             sharedMap.remove(wrapper);
-            return getUnequal(equalizer, thisOaC, otherOaC);
+            Unequal<T> unequal = getUnequal(equalizer, thisOaC, otherOaC);
+			return unequal;
         }
         return null;
     }

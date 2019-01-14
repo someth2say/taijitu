@@ -1,7 +1,9 @@
 package org.someth2say.taijitu.compare.equality.impl.composite;
 
-import java.util.List;
+import java.util.stream.Stream;
 
-public interface IComposite {
-    List<ExtractorAndEquality> getExtractorsAndEqualities();
+import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
+
+public interface IComposite<T> {
+    Stream<ExtractorAndEquality<T,?,? extends Equalizer<?>>> getExtractorsAndEqualities();
 }

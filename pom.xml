@@ -70,6 +70,7 @@
     <modules>
         <module>taijitu</module>
         <module>cli</module>
+        <module>collections</module>
     </modules>
 
     <build>
