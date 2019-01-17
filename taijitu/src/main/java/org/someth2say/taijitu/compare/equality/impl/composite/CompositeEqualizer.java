@@ -1,12 +1,13 @@
 package org.someth2say.taijitu.compare.equality.impl.composite;
 
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
-import org.someth2say.taijitu.compare.equality.impl.value.JavaObject;
+import org.someth2say.taijitu.compare.equality.impl.partial.PartialEqualizer;
+import org.someth2say.taijitu.compare.result.Difference;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * This is the simplest class of CompositeEqualizer. It assumes that:
@@ -15,32 +16,39 @@ import java.util.function.Function;
  *
  * @param <T>
  */
-public class CompositeEqualizer<T> extends AbstractCompositeEquality implements ICompositeEqualizer<T> {
+public class CompositeEqualizer<T> extends Composite<T, Equalizer<T>> implements ICompositeEqualizer<T, Equalizer<T>> {
 
-    protected CompositeEqualizer(List<ExtractorAndEquality> eaes) {
-        super(eaes);
-    }
-
-    protected <V> CompositeEqualizer(Function<T, V> extractor, Equalizer<? super V> equalizer) {
-        this(Collections.singletonList(new ExtractorAndEquality<>(extractor, equalizer)));
+    public CompositeEqualizer(List<Equalizer<T>> components) {
+        super(components);
     }
 
     public static class Builder<T> {
-        private final List<ExtractorAndEquality> eaes = new ArrayList<>();
+        private final List<Equalizer<T>> equalities = new ArrayList<>();
 
-        @SuppressWarnings("unchecked")
-        public <V> Builder<T> addComponent(Function<T, V> extractor) {
-            return addComponent(extractor, (Equalizer<V>)JavaObject.EQUALITY);
-        }
-
-        public <V> Builder<T> addComponent(Function<T, V> extractor, Equalizer<? super V> equalizer) {
-            ExtractorAndEquality<T, V, Equalizer<? super V>> eae = new ExtractorAndEquality<>(extractor, equalizer);
-            eaes.add(eae);
+        public Builder<T> addComponent(Equalizer<T> equalizer) {
+            equalities.add(equalizer);
             return this;
         }
 
-        public CompositeEqualizer<T> build() {
-            return new CompositeEqualizer<>(eaes);
+        //TODO: First approach for equality hierarchy: Partial application by builder
+        public <R> Builder<T> addComponent(Function<T, R> extractor, Equalizer<R> delegate) {
+            return addComponent(new PartialEqualizer<>(extractor, delegate));
         }
+
+        public CompositeEqualizer<T> build() {
+            return new CompositeEqualizer<>(equalities);
+        }
+    }
+
+}
+
+interface ICompositeEqualizer<T, E extends Equalizer<T>> extends IComposite<E>, Equalizer<T> {
+
+    default boolean areEquals(T first, T second) {
+        return getComponents().allMatch(equalizer -> equalizer.areEquals(first, second));
+    }
+
+    default Stream<Difference> underlyingDiffs(T first, T second) {
+        return getComponents().flatMap(e -> e.underlyingDiffs(first, second));
     }
 }

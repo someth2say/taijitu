@@ -1,34 +1,37 @@
 package org.someth2say.taijitu.compare.equality.impl.composite;
 
+import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasher;
+import org.someth2say.taijitu.compare.equality.impl.partial.PartialComparatorHasher;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasher;
-import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
-import org.someth2say.taijitu.compare.equality.impl.value.JavaComparable;
+public class CompositeComparatorHasher<T> extends Composite<T,ComparatorHasher<T>> implements ICompositeComparatorHasher<T,ComparatorHasher<T>> {
 
-public class CompositeComparatorHasher<T> extends AbstractCompositeEquality<T> implements ICompositeHasherComparator<T> {
-
-	protected CompositeComparatorHasher(List<ExtractorAndEquality<T, ?, ? extends Equalizer<?>>> extractorsAndEqualities) {
-        super(extractorsAndEqualities);
+	protected CompositeComparatorHasher(List<ComparatorHasher<T>> components) {
+        super(components);
     }
 
     public static class Builder<T> {
-        private final List<ExtractorAndEquality> eaes = new ArrayList<>();
+        private final List<ComparatorHasher<T>> equalities = new ArrayList<>();
 
-        public <V extends Comparable<V>> Builder<T> addComponent(Function<T, V> extractor) {
-            return addComponent(extractor, new JavaComparable<>());
-        }
-
-        public <V> Builder<T> addComponent(Function<T, V> extractor, ComparatorHasher<? super V> equality) {
-            ExtractorAndEquality<T, V, Equalizer<? super V>> eae = new ExtractorAndEquality<>(extractor, equality);
-            eaes.add(eae);
+        public Builder<T> addComponent(ComparatorHasher<T> equalizer) {
+            equalities.add(equalizer);
             return this;
         }
 
+        public <R> Builder<T> addComponent(Function<T,R> extractor, ComparatorHasher<R> delegate) {
+            return addComponent(new PartialComparatorHasher<>(extractor, delegate));
+        }
+
+
         public CompositeComparatorHasher<T> build() {
-            return new CompositeComparatorHasher<>(eaes);
+            return new CompositeComparatorHasher<>(equalities);
         }
     }
+}
+
+interface ICompositeComparatorHasher<T, E extends ComparatorHasher<T>>
+        extends ICompositeComparator<T,E>, ICompositeHasher<T,E> {
 }

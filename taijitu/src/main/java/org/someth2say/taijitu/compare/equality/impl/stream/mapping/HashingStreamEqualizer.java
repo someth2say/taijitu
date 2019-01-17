@@ -1,18 +1,19 @@
 package org.someth2say.taijitu.compare.equality.impl.stream.mapping;
 
-import java.util.*;
+import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
+import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
+import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
+import org.someth2say.taijitu.compare.equality.wrapper.HashableWrapper;
+import org.someth2say.taijitu.compare.result.Difference;
+import org.someth2say.taijitu.compare.result.Missing;
+import org.someth2say.taijitu.util.StreamUtil;
+
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Spliterators;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
-import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
-import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
-import org.someth2say.taijitu.compare.equality.wrapper.HashableWrapper;
-
-import org.someth2say.taijitu.compare.result.Difference;
-import org.someth2say.taijitu.compare.result.Unequal;
-import org.someth2say.taijitu.util.StreamUtil;
 
 /**
  * Created by Jordi Sola on 02/03/2017.
@@ -33,36 +34,37 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
     }
 
     @Override
-    public Stream<Difference<?>> underlyingDiffs(Stream<T> source, Stream<T> target) {
-        Iterator<Difference<?>> it = new Iterator<Difference<?>>() {
-            Map<HashableWrapper<T>, OrdinalAndComposite<T>> sharedMap1 = new ConcurrentHashMap<>();
+    public Stream<Difference> underlyingDiffs(Stream<T> source, Stream<T> target) {
+        Iterator<Difference> it = new Iterator<>() {
+            Map<HashableWrapper<T>, OrdinalAndComposite<T>> map = new ConcurrentHashMap<>();
 
             // Using zip, so we can alternate both streams, and produce differences even one of them is infinite.
-            private Stream<Unequal<T>> stream = StreamUtil.zip(
-                    source.map(t -> new OrdinalAndComposite<>(1, t)), 
+            private Stream<Difference> mappedDifferences = StreamUtil.zip(
+                    source.map(t -> new OrdinalAndComposite<>(1, t)),
                     target.map(t -> new OrdinalAndComposite<>(2, t)), 1, true)
-               .map(oac -> Mapper.map(oac, hasher, sharedMap1, equalizer))
-               .filter(Objects::nonNull);
+                    .flatMap(oac -> Mapper.map(oac, hasher, map, equalizer));
+            // TODO: Test just concat-ing another stream from map entries.
 
-            private Iterator<Unequal<T>> unequals = stream.iterator();
+            private Iterator<Difference> mappedDifferencesIt = mappedDifferences.iterator();
 
             @Override
             public boolean hasNext() {
-                return unequals.hasNext() || !sharedMap1.isEmpty();
+                return mappedDifferencesIt.hasNext() || !map.isEmpty();
             }
 
             @Override
             public Difference<?> next() {
-                if (unequals.hasNext()) {
-                    return unequals.next();
+                if (mappedDifferencesIt.hasNext()) {
+                    return mappedDifferencesIt.next();
                 } else {
-                    OrdinalAndComposite<T> oac = sharedMap1.remove(sharedMap1.entrySet().iterator().next().getKey());
-                    return hasher.asMissing(oac.getComposite());
+                    //pick next available entry in map and return it as a "missing"
+                    OrdinalAndComposite<T> oac = map.remove(map.entrySet().iterator().next().getKey());
+                    return new Missing<>(hasher,oac.getComposite());
                 }
             }
         };
 
-        // We are here creating a non-parallel stream! :(
+        // TODO: We are here creating a non-parallel stream! :(
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(it, 0), false);
     }
 

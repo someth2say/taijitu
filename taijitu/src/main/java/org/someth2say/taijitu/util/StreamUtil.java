@@ -335,7 +335,7 @@ public class StreamUtil {
         private final Iterator<A> aIterator;
         private final Iterator<B> bIterator;
         private final BiFunction<? super A, ? super B, ? extends C> mapper;
-        private final BiFunction<? super A, ? super B, Integer> stepper;
+        private final BiFunction<? super A, ? super B, Integer> comparator;
         private final Function<? super A, ? extends C> aTailer;
         private final Function<? super B, ? extends C> bTailer;
         private A currentA;
@@ -345,13 +345,13 @@ public class StreamUtil {
 
         public SteppingBiMapTailIterator(Iterator<A> aIterator, Iterator<B> bIterator,
                                          BiFunction<? super A, ? super B, ? extends C> mapper,
-                                         BiFunction<? super A, ? super B, Integer> stepper,
+                                         BiFunction<? super A, ? super B, Integer> comparator,
                                          Function<? super A, ? extends C> aTailer,
                                          Function<? super B, ? extends C> bTailer) {
             this.aIterator = aIterator;
             this.bIterator = bIterator;
             this.mapper = mapper;
-            this.stepper = stepper;
+            this.comparator = comparator;
             this.aTailer = aTailer;
             this.bTailer = bTailer;
             init();
@@ -363,11 +363,11 @@ public class StreamUtil {
         }
 
         private boolean availableB() {
-            return (haveA && haveB && stepper.apply(currentA, currentB) >= 0) || (!haveA && haveB);
+            return (haveA && haveB && comparator.apply(currentA, currentB) >= 0) || (!haveA && haveB);
         }
 
         private boolean availableA() {
-            return (haveA && haveB && stepper.apply(currentA, currentB) <= 0) || (haveA && !haveB);
+            return (haveA && haveB && comparator.apply(currentA, currentB) <= 0) || (haveA && !haveB);
         }
 
         @Override
@@ -376,6 +376,9 @@ public class StreamUtil {
             C result;
             if (availableA() && availableB()) {
                 result = mapper.apply(currentA, currentB);
+                //TODO: If we want a way to skip elements based on result (i.e. if result is null),
+                // or even better, pre-filter elements to be mapped (using areEquals),
+                // we need to calculate availability in advance, so 'hasNext' can be calculated.
                 haveA = stepA();
                 haveB = stepB();
             } else if (availableA()) {

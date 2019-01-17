@@ -1,11 +1,9 @@
 package org.someth2say.taijitu.compare.equality.impl.composite;
 
 import org.someth2say.taijitu.compare.equality.aspects.external.Comparator;
-import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
-import org.someth2say.taijitu.compare.equality.impl.value.JavaComparable;
+import org.someth2say.taijitu.compare.equality.impl.partial.PartialComparator;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
@@ -16,32 +14,36 @@ import java.util.function.Function;
  *
  * @param <T>
  */
-public class CompositeComparator<T> extends AbstractCompositeEquality implements ICompositeEqualizer<T>, ICompositeComparator<T> {
+public class CompositeComparator<T> extends Composite<T,Comparator<T>> implements ICompositeComparator<T,Comparator<T>>{
 
-    protected CompositeComparator(List<ExtractorAndEquality> eaes) {
-        super(eaes);
-    }
 
-    protected <V> CompositeComparator(Function<T, V> extractor, Equalizer<? super V> equalizer) {
-        this(Collections.singletonList(new ExtractorAndEquality<>(extractor, equalizer)));
+    public CompositeComparator(List<Comparator<T>> components) {
+        super(components);
     }
 
     public static class Builder<T> {
-        private final List<ExtractorAndEquality> eaes = new ArrayList<>();
+        private final List<Comparator<T>> equalities = new ArrayList<>();
 
-        public <V extends Comparable<V>> Builder<T> addComponent(Function<T, V> extractor) {
-            return addComponent(extractor, new JavaComparable<>());
-        }
-
-        public <V> Builder<T> addComponent(Function<T, V> extractor, Comparator<? super V> comparator) {
-            ExtractorAndEquality<T, V, Equalizer<? super V>> eae = new ExtractorAndEquality<>(extractor, comparator);
-            eaes.add(eae);
+        public Builder<T> addComponent(Comparator<T> equalizer) {
+            equalities.add(equalizer);
             return this;
         }
 
+        public <R> Builder<T> addComponent(Function<T,R> extractor, Comparator<R> delegate) {
+            return addComponent(new PartialComparator<>(extractor,delegate));
+        }
+
         public CompositeComparator<T> build() {
-            return new CompositeComparator<>(eaes);
+            return new CompositeComparator<>(equalities);
         }
     }
 
+}
+
+interface ICompositeComparator<T, E extends Comparator<T>> extends ICompositeEqualizer<T, E>, Comparator<T> {
+
+    @Override
+    default int compare(T first, T second) {
+        return this.getComponents().map(comparator -> comparator.compare(first, second)).filter(i -> i != 0).findFirst().orElse(0);
+    }
 }

@@ -1,6 +1,7 @@
 package org.someth2say.taijitu.compare.equality.impl.stream;
 
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
+import org.someth2say.taijitu.compare.result.Difference;
 
 import java.util.stream.Stream;
 
@@ -9,5 +10,17 @@ import java.util.stream.Stream;
  */
 //TODO: What about StreamComparer<T> or StreamHasher<T>?
 public interface StreamEqualizer<T> extends Equalizer<Stream<T>> {
-
+    /**
+     * By default, all stream equalities will delegate on underlyingDiffs.
+     * That means both streams will be consumed up to the moment a difference is found, or completely if they are equals.
+     *
+     * @param equalized1
+     * @param equalized2
+     * @return
+     */
+    @Override
+    default boolean areEquals(Stream<T> equalized1, Stream<T> equalized2) {
+        Stream<Difference> underlyingDiffs = underlyingDiffs(equalized1, equalized2);
+        return !underlyingDiffs.findAny().isPresent();
+    }
 }

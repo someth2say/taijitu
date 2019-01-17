@@ -15,16 +15,16 @@ import java.util.stream.Stream;
 public abstract class Difference<MMT> {
     private final Equalizer<? super MMT> cause;
     private final List<MMT> entries;
-    private final Stream<Difference<?>> underlyingDifferences;
+    private final Stream<Difference> underlyingDifferences;
 
 
-    public Difference(Equalizer<? super MMT> cause, List<MMT> entries, Stream<Difference<?>> underlyingDifferences) {
+    public Difference(Equalizer<? super MMT> cause, List<MMT> entries, Stream<Difference> underlyingDifferences) {
         this.cause = cause;
         this.entries = entries;
         this.underlyingDifferences = underlyingDifferences;
     }
 
-    public Difference(Equalizer<? super MMT> cause, MMT composite, Stream<Difference<?>> underlyingDifferences) {
+    public Difference(Equalizer<? super MMT> cause, MMT composite, Stream<Difference> underlyingDifferences) {
         this(cause, Collections.singletonList(composite), underlyingDifferences);
     }
 
@@ -36,7 +36,7 @@ public abstract class Difference<MMT> {
         this(cause, composite, composite2, Stream.empty());
     }
 
-    public Difference(Equalizer<? super MMT> cause, MMT composite, MMT composite2, Stream<Difference<?>> underlyingDifferences) {
+    public Difference(Equalizer<? super MMT> cause, MMT composite, MMT composite2, Stream<Difference> underlyingDifferences) {
         this(cause, Arrays.asList(composite, composite2), underlyingDifferences);
     }
 
@@ -46,7 +46,7 @@ public abstract class Difference<MMT> {
         if (underlyingDifferences == null) {
             return this.getClass().getSimpleName() + ": " + cause.toString() + "(" + StringUtils.join(entries, "<>") + ")";
         } else {
-            List<Difference<?>> differences = underlyingDifferences.collect(Collectors.toList());
+            List<Difference> differences = underlyingDifferences.collect(Collectors.toList());
             if (differences.isEmpty()) {
                 return this.getClass().getSimpleName() + ": " + cause.toString() + "(" + StringUtils.join(entries, "<>") + ")";
             } else {

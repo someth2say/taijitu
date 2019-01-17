@@ -10,7 +10,7 @@ import java.util.stream.Stream;
  */
 public class Unequal<DT> extends Difference<DT> {
 
-    public Unequal(Equalizer<? super DT> cause, DT composite, DT composite2, Stream<Difference<?>> underlyingDifferences) {
+    public Unequal(Equalizer<? super DT> cause, DT composite, DT composite2, Stream<Difference> underlyingDifferences) {
         super(cause, composite, composite2, underlyingDifferences);
     }
 

@@ -21,7 +21,7 @@ public class CompositeComparatorHasherTest {
         assertTrue(testClassThreeComparatorHasher.compare(differentFrom1, differentFrom2) == 0);
         assertTrue(testClassThreeComparatorHasher.areEquals(differentFrom1, differentFrom2));
 
-        ComparableHashableWrapper<TestComposite> wrap1 = new ComparableHashableWrapper<>(differentFrom1, testClassThreeComparatorHasher);
+        ComparableHashableWrapper<TestComposite> wrap1 = new ComparableHashableWrapper<TestComposite>(differentFrom1, testClassThreeComparatorHasher);
         ComparableHashableWrapper<TestComposite> wrap3 = new ComparableHashableWrapper<>(differentFrom3, testClassThreeComparatorHasher);
         ComparableHashableWrapper<TestComposite> wrap2 = new ComparableHashableWrapper<>(differentFrom2, testClassThreeComparatorHasher);
 

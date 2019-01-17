@@ -6,7 +6,7 @@ import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.util.StreamUtil;
 
-import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -28,13 +28,26 @@ public class ComparableStreamEqualizer<T> implements StreamEqualizer<T> {
     }
 
     @Override
-    public Stream<Difference<?>> underlyingDiffs(Stream<T> source, Stream<T> target) {
+    public Stream<Difference> underlyingDiffs(Stream<T> source, Stream<T> target) {
         return compare(source, target, comparator, equalizer);
     }
 
-    public static <T> Stream<Difference<?>> compare(Stream<T> source, Stream<T> target, Comparator<T> comparator, Equalizer<T> equalizer) {
-        Stream<Difference<?>> differenceStream = StreamUtil.comparingBiMap(source, target, comparator::compare, equalizer::asUnequal, comparator::asMissing);
-        return differenceStream.filter(Objects::nonNull);
+    /**
+     * Short-cut method that performs stream comparison without actually creating the equalizer.
+     *
+     * @param source
+     * @param target
+     * @param comparator
+     * @param equalizer
+     * @param <T>
+     * @return
+     */
+    public static <T> Stream<Difference> compare(Stream<T> source, Stream<T> target, Comparator<T> comparator, Equalizer<T> equalizer) {
+        return StreamUtil.comparingBiMap(source, target,
+                    comparator::compare,
+                    equalizer::underlyingDiffs,
+                    comparator::asMissing)
+                .flatMap(Function.identity());
 
     }
 

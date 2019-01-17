@@ -32,7 +32,7 @@ public class SimpleStreamEqualizerTest {
 
         SimpleStreamEqualizer<TestComposite> streamEquality
                 = new SimpleStreamEqualizer<>(testClassOneTwoEquality);
-        List<Difference<?>> differences = streamEquality.underlyingDiffs(stream1, stream2).collect(Collectors.toList());
+        List<Difference> differences = streamEquality.underlyingDiffs(stream1, stream2).collect(Collectors.toList());
 
         // Test results
         differences.forEach(System.out::println);
