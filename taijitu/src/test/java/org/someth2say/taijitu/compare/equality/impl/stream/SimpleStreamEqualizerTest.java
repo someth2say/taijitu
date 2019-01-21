@@ -3,6 +3,7 @@ package org.someth2say.taijitu.compare.equality.impl.stream;
 import org.junit.Test;
 import org.someth2say.taijitu.compare.equality.impl.composite.TestComposite;
 import org.someth2say.taijitu.compare.equality.impl.stream.simple.SimpleStreamEqualizer;
+import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
 import org.someth2say.taijitu.compare.result.Unequal;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Missing;
@@ -37,10 +38,8 @@ public class SimpleStreamEqualizerTest {
         // Test results
         differences.forEach(System.out::println);
         assertEquals(2, differences.size());
-        Missing<TestComposite> missing = new Missing<>(testClassOneTwoEquality, missingFrom1);
-        assertTrue(differences.contains(missing));
-//        Stream<Difference<?>> underlyingCauses = Stream.of(new Unequal<>(new StringCaseInsensitive(), "aaa", "aa"));
-        assertTrue(differences.contains(new Unequal<>(testClassOneTwoEquality, differentFrom1, differentFrom2)));
+        assertTrue(differences.contains(new Missing<>(testClassOneTwoEquality, missingFrom1)));
+        assertTrue(differences.contains(new Unequal<>(StringCaseInsensitive.EQUALITY, differentFrom1.getTwo(), differentFrom2.getTwo())));
     }
 
     @Test

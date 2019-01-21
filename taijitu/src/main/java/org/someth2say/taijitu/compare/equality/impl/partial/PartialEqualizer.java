@@ -12,7 +12,10 @@ public class PartialEqualizer<T,R> extends Partial<T, R> implements IPartialEqua
         super(extractor, delegate);
     }
 
-
+    @Override
+    public String toString() {
+        return "*"+getDelegate().toString();
+    }
 }
 interface IPartialEqualizer<T,R> extends Equalizer<T>, IPartial<T, R> {
 

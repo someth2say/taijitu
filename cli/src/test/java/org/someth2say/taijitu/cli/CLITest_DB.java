@@ -83,7 +83,7 @@ public class CLITest_DB {
 
         final ITaijituCfg configuration = getTaijituConfig(databaseProps);
 
-        final List<Stream<Difference<?>>> comparisonResults = TaijituCli.compare(configuration);
+        final List<Stream<Difference>> comparisonResults = TaijituCli.compare(configuration);
 
         Assert.assertEquals(2, comparisonResults.size());
         final List<Difference> firstResult = comparisonResults.get(0).collect(Collectors.toList());
@@ -101,7 +101,7 @@ public class CLITest_DB {
 
         final ImmutableHierarchicalConfiguration configuration = getApacheConfiguration(sourceBuildProperties);
 
-        final List<Stream<Difference<?>>> comparisonResults = TaijituCli.compare(configuration);
+        final List<Stream<Difference>> comparisonResults = TaijituCli.compare(configuration);
 
         Assert.assertEquals(2, comparisonResults.size());
         final List<Difference> firstResult = comparisonResults.get(0).collect(Collectors.toList());

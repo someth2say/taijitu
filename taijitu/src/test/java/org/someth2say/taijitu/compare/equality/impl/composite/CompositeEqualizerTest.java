@@ -23,7 +23,7 @@ public class CompositeEqualizerTest {
 
         assertFalse(testClassOneTwoEquality.areEquals(differentFrom1, differentFrom2));
         assertTrue(testClassOneTwoEquality.areEquals(differentFrom1, differentFrom3));
-        List<Difference<?>> differences = testClassOneTwoEquality.underlyingDiffs(differentFrom1, differentFrom2).collect(Collectors.toList());
+        List<Difference> differences = testClassOneTwoEquality.underlyingDiffs(differentFrom1, differentFrom2).collect(Collectors.toList());
         assertTrue(differences.containsAll(Arrays.asList(
                         new Unequal<>(StringCaseInsensitive.EQUALITY, "aaa", "bbb"),
                         new Unequal<>(StringCaseInsensitive.EQUALITY, "aaa", "ccc"))));

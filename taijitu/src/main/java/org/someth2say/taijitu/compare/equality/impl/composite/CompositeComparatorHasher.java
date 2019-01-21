@@ -33,5 +33,5 @@ public class CompositeComparatorHasher<T> extends Composite<T,ComparatorHasher<T
 }
 
 interface ICompositeComparatorHasher<T, E extends ComparatorHasher<T>>
-        extends ICompositeComparator<T,E>, ICompositeHasher<T,E> {
+        extends ICompositeComparator<T,E>, ICompositeHasher<T,E>, ComparatorHasher<T> {
 }

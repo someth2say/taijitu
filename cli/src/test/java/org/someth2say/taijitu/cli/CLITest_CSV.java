@@ -52,10 +52,10 @@ public class CLITest_CSV {
                 "/csv/Sacramentorealestatetransactions.csv"
         );
 
-        final List<Stream<Difference<?>>> comparisonResults = TaijituCli.compare(configuration);
+        final List<Stream<Difference>> comparisonResults = TaijituCli.compare(configuration);
 
         Assert.assertEquals(1, comparisonResults.size());
-        final List<Difference<?>> firstResult = comparisonResults.get(0).collect(Collectors.toList());
+        final List<Difference> firstResult = comparisonResults.get(0).collect(Collectors.toList());
         Assert.assertEquals(0, firstResult.size());
     }
 

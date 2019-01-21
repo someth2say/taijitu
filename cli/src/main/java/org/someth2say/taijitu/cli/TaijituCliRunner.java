@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 /**
  * @author Jordi Sola
  */
-class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
+class TaijituCliRunner implements Callable<Stream<Difference>> {
 
     private static final Logger logger = LoggerFactory.getLogger(TaijituCliRunner.class);
 
@@ -47,11 +47,11 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
     }
 
     @Override
-    public Stream<Difference<?>> call() {
+    public Stream<Difference> call() {
         return runComparison(comparisonCfg);
     }
 
-    public <MAPPED_TYPE> Stream<Difference<?>> runComparison(IComparisonCfg iComparisonCfg) {
+    public <MAPPED_TYPE> Stream<Difference> runComparison(IComparisonCfg iComparisonCfg) {
 
         List<ISourceCfg> sourceConfigs = iComparisonCfg.getSourceConfigs();
         if (sourceConfigs.size() < 2) {
@@ -232,7 +232,7 @@ class TaijituCliRunner implements Callable<Stream<Difference<?>>> {
         return source;
     }
 
-    private <MAPPED_TYPE> Stream<Difference<?>> runStreamEquality(StreamEqualizer<MAPPED_TYPE> streamEquality,
+    private <MAPPED_TYPE> Stream<Difference> runStreamEquality(StreamEqualizer<MAPPED_TYPE> streamEquality,
                                                                   Duo<Source<MAPPED_TYPE>> mappedSources) {
         Source<MAPPED_TYPE> sourceSrc = mappedSources.getLeft();
         Source<MAPPED_TYPE> targetSrc = mappedSources.getRight();
