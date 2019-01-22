@@ -33,7 +33,7 @@ public class HashingStreamEqualizerTest {
         Stream<TestComposite> stream2 = Stream.of(differentFrom2, equalsFrom2);
 
         HashingStreamEqualizer<TestComposite> streamEqualizer = new HashingStreamEqualizer<>(testClassOneTwoEquality, testClassThreeHasher);
-        List<Difference> differences = streamEqualizer.underlyingDiffs(stream1, stream2).collect(Collectors.toList());
+        List<Difference> differences = streamEqualizer.explain(stream1, stream2).collect(Collectors.toList());
 
         // Test results
         assertEquals(2, differences.size());
@@ -51,7 +51,7 @@ public class HashingStreamEqualizerTest {
         Stream<TestComposite> stream2 = Stream.iterate(0, i -> i + 1).map(i -> new TestComposite("", "", i)).map(tc -> tc.equals(differentTD1) ? differentTD2 : tc);
 
         HashingStreamEqualizer<TestComposite> streamEqualizer = new HashingStreamEqualizer<>(testClassOneTwoEquality, testClassThreeHasher);
-        List<Difference> differences = streamEqualizer.underlyingDiffs(stream1, stream2).limit(2).collect(Collectors.toList());
+        List<Difference> differences = streamEqualizer.explain(stream1, stream2).limit(2).collect(Collectors.toList());
 
         assertEquals(2,differences.size());
         // Test results

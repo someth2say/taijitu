@@ -4,11 +4,11 @@ import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 
 import java.util.function.Function;
 
-abstract class Partial<T, R> implements IPartial<T,R> {
+abstract class Indirect<T, R> implements IIndirect<T,R> {
     private Function<T, R> extractor;
     private Equalizer<R> delegate;
 
-    Partial(Function<T, R> extractor, Equalizer<R> delegate) {
+    Indirect(Function<T, R> extractor, Equalizer<R> delegate) {
         this.extractor = extractor;
         this.delegate = delegate;
     }
@@ -23,8 +23,7 @@ abstract class Partial<T, R> implements IPartial<T,R> {
 
 }
 
-// TODO: Find a better name
-interface IPartial<T, E> {
+interface IIndirect<T, E> {
     Function<T, E> getExtractor();
 
     Equalizer<E> getDelegate();

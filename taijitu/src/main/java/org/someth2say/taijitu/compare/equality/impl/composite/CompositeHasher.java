@@ -1,7 +1,7 @@
 package org.someth2say.taijitu.compare.equality.impl.composite;
 
 import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
-import org.someth2say.taijitu.compare.equality.impl.partial.PartialHasher;
+import org.someth2say.taijitu.compare.equality.impl.partial.IndirectHasher;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,7 +23,7 @@ public class CompositeHasher<T> extends Composite<T, Hasher<T>> implements IComp
         }
 
         public <R> Builder<T> addComponent(Function<T, R> extractor, Hasher<R> delegate) {
-            return addComponent(new PartialHasher<>(extractor, delegate));
+            return addComponent(new IndirectHasher<>(extractor, delegate));
         }
 
         public CompositeHasher<T> build() {

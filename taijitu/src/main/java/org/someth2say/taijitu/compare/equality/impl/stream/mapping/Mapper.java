@@ -71,9 +71,9 @@ class Mapper<T> implements Runnable {
     private static <T> Stream<Difference> getUnderlyingDiffs(Equalizer<T> equalizer, OrdinalAndComposite<T> first, OrdinalAndComposite<T> second) {
         Stream<Difference> unequal;
         if (first.getOrdinal() < second.getOrdinal()) {
-            unequal = equalizer.underlyingDiffs(first.getComposite(), second.getComposite());
+            unequal = equalizer.explain(first.getComposite(), second.getComposite());
         } else {
-            unequal = equalizer.underlyingDiffs(second.getComposite(), first.getComposite());
+            unequal = equalizer.explain(second.getComposite(), first.getComposite());
         }
         return unequal;
     }

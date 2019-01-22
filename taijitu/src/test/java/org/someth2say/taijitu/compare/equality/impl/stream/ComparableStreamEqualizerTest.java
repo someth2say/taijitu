@@ -3,10 +3,9 @@ package org.someth2say.taijitu.compare.equality.impl.stream;
 import org.junit.Test;
 import org.someth2say.taijitu.compare.equality.impl.composite.TestComposite;
 import org.someth2say.taijitu.compare.equality.impl.stream.sorted.ComparableStreamEqualizer;
-import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
-import org.someth2say.taijitu.compare.result.Unequal;
 import org.someth2say.taijitu.compare.result.Difference;
 import org.someth2say.taijitu.compare.result.Missing;
+import org.someth2say.taijitu.compare.result.Unequal;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,12 +30,12 @@ public class ComparableStreamEqualizerTest {
         Stream<TestComposite> stream2 = Stream.of(differentFrom2, equalsFrom2);
 
         ComparableStreamEqualizer<TestComposite> equality = new ComparableStreamEqualizer<>(testClassOneTwoEquality, testClassThreeComparator);
-        List<Difference> differences = equality.underlyingDiffs(stream1, stream2).collect(Collectors.toList());
+        List<Difference> differences = equality.explain(stream1, stream2).collect(Collectors.toList());
 
         // Test results
         differences.forEach(System.out::println);
         assertEquals(2, differences.size());
         assertTrue(differences.contains(new Missing<>(testClassThreeComparator, missingFrom1)));
-        assertTrue(differences.contains(new Unequal<>(StringCaseInsensitive.EQUALITY, differentFrom1.getTwo(), differentFrom2.getTwo())));
+        assertTrue(differences.contains(new Unequal<>(testClassOneTwoEquality, differentFrom1, differentFrom2)));
     }
 }

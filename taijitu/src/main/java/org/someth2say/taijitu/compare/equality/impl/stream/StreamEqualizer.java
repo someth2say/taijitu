@@ -11,8 +11,8 @@ import java.util.stream.Stream;
 //TODO: What about StreamComparer<T> or StreamHasher<T>?
 public interface StreamEqualizer<T> extends Equalizer<Stream<T>> {
     /**
-     * By default, all stream equalities will delegate on underlyingDiffs.
-     * That means both streams will be consumed up to the moment a difference is found, or completely if they are equals.
+     * By default, all stream equalities will delegate on explain.
+     * That means both streams will be consumed upon comparing them.
      *
      * @param equalized1
      * @param equalized2
@@ -20,7 +20,7 @@ public interface StreamEqualizer<T> extends Equalizer<Stream<T>> {
      */
     @Override
     default boolean areEquals(Stream<T> equalized1, Stream<T> equalized2) {
-        Stream<Difference> underlyingDiffs = underlyingDiffs(equalized1, equalized2);
+        Stream<Difference> underlyingDiffs = explain(equalized1, equalized2);
         return !underlyingDiffs.findAny().isPresent();
     }
 }

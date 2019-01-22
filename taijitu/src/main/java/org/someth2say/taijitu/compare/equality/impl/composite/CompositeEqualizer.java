@@ -1,7 +1,7 @@
 package org.someth2say.taijitu.compare.equality.impl.composite;
 
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
-import org.someth2say.taijitu.compare.equality.impl.partial.PartialEqualizer;
+import org.someth2say.taijitu.compare.equality.impl.partial.IndirectEqualizer;
 import org.someth2say.taijitu.compare.result.Difference;
 
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class CompositeEqualizer<T> extends Composite<T, Equalizer<T>> implements
 
         //TODO: First approach for equality hierarchy: Partial application by builder
         public <R> Builder<T> addComponent(Function<T, R> extractor, Equalizer<R> delegate) {
-            return addComponent(new PartialEqualizer<>(extractor, delegate));
+            return addComponent(new IndirectEqualizer<>(extractor, delegate));
         }
 
         public CompositeEqualizer<T> build() {
@@ -48,7 +48,7 @@ interface ICompositeEqualizer<T, E extends Equalizer<T>> extends IComposite<E>, 
         return getComponents().allMatch(equalizer -> equalizer.areEquals(first, second));
     }
 
-    default Stream<Difference> underlyingDiffs(T first, T second) {
-        return getComponents().flatMap(e -> e.underlyingDiffs(first, second));
+    default Stream<Difference> explain(T first, T second) {
+        return getComponents().flatMap(e -> e.explain(first, second));
     }
 }

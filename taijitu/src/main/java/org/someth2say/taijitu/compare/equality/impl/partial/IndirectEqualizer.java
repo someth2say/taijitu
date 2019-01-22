@@ -6,9 +6,9 @@ import org.someth2say.taijitu.compare.result.Difference;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class PartialEqualizer<T,R> extends Partial<T, R> implements IPartialEqualizer<T,R> {
+public class IndirectEqualizer<T,R> extends Indirect<T, R> implements IIndirectEqualizer<T,R> {
 
-    public PartialEqualizer(Function<T, R> extractor, Equalizer<R> delegate) {
+    public IndirectEqualizer(Function<T, R> extractor, Equalizer<R> delegate) {
         super(extractor, delegate);
     }
 
@@ -17,7 +17,7 @@ public class PartialEqualizer<T,R> extends Partial<T, R> implements IPartialEqua
         return "*"+getDelegate().toString();
     }
 }
-interface IPartialEqualizer<T,R> extends Equalizer<T>, IPartial<T, R> {
+interface IIndirectEqualizer<T,R> extends Equalizer<T>, IIndirect<T, R> {
 
     @Override
     default boolean areEquals(T equalized1, T equalized2) {
@@ -25,8 +25,8 @@ interface IPartialEqualizer<T,R> extends Equalizer<T>, IPartial<T, R> {
     }
 
     @Override
-    default Stream<Difference> underlyingDiffs(T equalized1, T equalized2) {
-        return getDelegate().underlyingDiffs(getExtractor().apply(equalized1), getExtractor().apply(equalized2));
+    default Stream<Difference> explain(T equalized1, T equalized2) {
+        return getDelegate().explain(getExtractor().apply(equalized1), getExtractor().apply(equalized2));
     }
 
 }

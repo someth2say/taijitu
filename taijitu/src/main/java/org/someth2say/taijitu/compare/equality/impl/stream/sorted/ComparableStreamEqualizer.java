@@ -4,13 +4,21 @@ import org.someth2say.taijitu.compare.equality.aspects.external.Comparator;
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
 import org.someth2say.taijitu.compare.result.Difference;
+import org.someth2say.taijitu.compare.result.Missing;
+import org.someth2say.taijitu.compare.result.Unequal;
 import org.someth2say.taijitu.util.StreamUtil;
 
-import java.util.function.Function;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
- * Created by Jordi Sola on 02/03/2017.
+ * An evolution from SimpleStreamEqualizer.
+ * Its main advantage is that ComparableStreamEqualizer uses a Comparator to identify gaps of missing elements in streams.
+ * Before testing element for equality, they are compared for order. If both elements are equivalent in order,
+ * then Equalizer is used o check their equality. If one element is "lesser" than the other, this element is considered
+ * not having a matching element on the other stream, and hence it is reported as Missing.
+ * <p>
+ * This comparison scheme implies stream elements are ordered given the order defined by the comparator.
  */
 public class ComparableStreamEqualizer<T> implements StreamEqualizer<T> {
 
@@ -28,7 +36,7 @@ public class ComparableStreamEqualizer<T> implements StreamEqualizer<T> {
     }
 
     @Override
-    public Stream<Difference> underlyingDiffs(Stream<T> source, Stream<T> target) {
+    public Stream<Difference> explain(Stream<T> source, Stream<T> target) {
         return compare(source, target, comparator, equalizer);
     }
 
@@ -38,17 +46,16 @@ public class ComparableStreamEqualizer<T> implements StreamEqualizer<T> {
      * @param source
      * @param target
      * @param comparator
-     * @param equalizer
-     * @param <T>
+     * @param elementEqualizer
+     * @param <ELEMENT>
      * @return
      */
-    public static <T> Stream<Difference> compare(Stream<T> source, Stream<T> target, Comparator<T> comparator, Equalizer<T> equalizer) {
+    public static <ELEMENT> Stream<Difference> compare(Stream<ELEMENT> source, Stream<ELEMENT> target, Comparator<ELEMENT> comparator, Equalizer<ELEMENT> elementEqualizer) {
         return StreamUtil.comparingBiMap(source, target,
-                    comparator::compare,
-                    equalizer::underlyingDiffs,
-                    comparator::asMissing)
-                .flatMap(Function.identity());
-
+                comparator::compare,
+                (sourceElem, targetElem) -> elementEqualizer.areEquals(sourceElem, targetElem) ? null : new Unequal<>(elementEqualizer, sourceElem, targetElem),
+                element -> new Missing(comparator, element))
+                .filter(Objects::nonNull);
     }
 
 }

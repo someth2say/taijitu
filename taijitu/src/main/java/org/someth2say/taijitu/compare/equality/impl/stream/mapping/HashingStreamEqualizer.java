@@ -34,8 +34,8 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
     }
 
     @Override
-    public Stream<Difference> underlyingDiffs(Stream<T> source, Stream<T> target) {
-        Iterator<Difference> it = new Iterator<>() {
+    public Stream<Difference> explain(Stream<T> source, Stream<T> target) {
+        Iterator<Difference> differencesAndMissings = new Iterator<>() {
             Map<HashableWrapper<T>, OrdinalAndComposite<T>> map = new ConcurrentHashMap<>();
 
             // Using zip, so we can alternate both streams, and produce differences even one of them is infinite.
@@ -43,7 +43,6 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
                     source.map(t -> new OrdinalAndComposite<>(1, t)),
                     target.map(t -> new OrdinalAndComposite<>(2, t)), 1, true)
                     .flatMap(oac -> Mapper.map(oac, hasher, map, equalizer));
-            // TODO: Test just concat-ing another stream from map entries.
 
             private Iterator<Difference> mappedDifferencesIt = mappedDifferences.iterator();
 
@@ -53,7 +52,7 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
             }
 
             @Override
-            public Difference<?> next() {
+            public Difference next() {
                 if (mappedDifferencesIt.hasNext()) {
                     return mappedDifferencesIt.next();
                 } else {
@@ -65,7 +64,7 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         };
 
         // TODO: We are here creating a non-parallel stream! :(
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(it, 0), false);
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(differencesAndMissings, 0), false);
     }
 
 }
