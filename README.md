@@ -139,4 +139,3 @@ _Note: All `output` entries default to `false`, so no output will be generated (
 ### taijituSQLProvider (keyword `sqlProvider`)
 - `sqlProvider.outputFile = taijitu.sql`: Sets the path and name for the file where generated queries will be stored.
 
-Test
