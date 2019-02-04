@@ -115,7 +115,7 @@ public class QuerySource extends AbstractSource<ResultSet> {
     @Override
 	public void close() {
         try {
-            preparedStatement.close(); // This also closes the result-set
+            preparedStatement.close(); // This also closes the explain-set
         } catch (SQLException e) {
             //nothing we can do here
         }

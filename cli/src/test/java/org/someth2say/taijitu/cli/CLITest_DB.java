@@ -27,7 +27,7 @@ import org.someth2say.taijitu.cli.source.query.QuerySource;
 import org.someth2say.taijitu.compare.equality.impl.value.DateThreshold;
 import org.someth2say.taijitu.compare.equality.impl.value.NumberThreshold;
 import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
-import org.someth2say.taijitu.compare.result.Difference;
+import org.someth2say.taijitu.compare.explain.Difference;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;

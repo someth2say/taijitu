@@ -11,7 +11,7 @@ import org.someth2say.taijitu.cli.registry.SourceRegistry;
 import org.someth2say.taijitu.cli.registry.ValueEqualityRegistry;
 import org.someth2say.taijitu.cli.source.query.ConnectionManager;
 import org.someth2say.taijitu.cli.util.FileUtil;
-import org.someth2say.taijitu.compare.result.Difference;
+import org.someth2say.taijitu.compare.explain.Difference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -123,11 +123,11 @@ public final class TaijituCli {
                 try {
                     result.add(future.get());
                 } catch (ExecutionException e) {
-                    logger.error("Unable to obtain comparison result.", e);
+                    logger.error("Unable to obtain comparison explain.", e);
                     result.add(null);
                 }
             } catch (InterruptedException e) {
-                logger.error("Unable to obtain comparison result.", e);
+                logger.error("Unable to obtain comparison explain.", e);
                 result.add(null);
             }
         }

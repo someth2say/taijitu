@@ -7,8 +7,8 @@ import org.someth2say.taijitu.compare.equality.aspects.external.Comparator;
 import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
 import org.someth2say.taijitu.compare.equality.impl.stream.sorted.ComparableStreamEqualizer;
 import org.someth2say.taijitu.compare.equality.impl.value.JavaComparable;
-import org.someth2say.taijitu.compare.result.Difference;
-import org.someth2say.taijitu.compare.result.Missing;
+import org.someth2say.taijitu.compare.explain.Difference;
+import org.someth2say.taijitu.compare.explain.Missing;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 
 public class FilterMapperTest {
     @Test
-    public void testFilterMapper() throws Source.ClosingException {
+    public void testFilterMapper() {
         FilterMapper<Integer> stringFilterMapper = new FilterMapper<>(s -> !s.equals(3));
 
         Source<Integer> source1 = new StreamSource<>("", Stream.of(1, 2, 3, 4, 5), Integer.class);
@@ -28,7 +28,7 @@ public class FilterMapperTest {
         Comparator<Integer> comparator = new JavaComparable<>();
 
         StreamEqualizer<Integer> sse = new ComparableStreamEqualizer<>(comparator);
-        Stream<Difference> diffs = sse.underlyingDiffs(filteredSource1.stream(), source2.stream());
+        Stream<Difference> diffs = sse.explain(filteredSource1.stream(), source2.stream());
         List<Difference> collect = diffs.collect(Collectors.toList());
         assertEquals(1, collect.size());
         assertEquals(new Missing<>(comparator, 3), collect.get(0));

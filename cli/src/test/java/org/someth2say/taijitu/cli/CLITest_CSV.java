@@ -10,7 +10,7 @@ import org.someth2say.taijitu.cli.config.delegates.simple.BasicSourceCfg;
 import org.someth2say.taijitu.cli.config.delegates.simple.BasicTaijituCfg;
 import org.someth2say.taijitu.cli.config.impl.TaijituCfg;
 import org.someth2say.taijitu.cli.source.csv.CSVResourceSource;
-import org.someth2say.taijitu.compare.result.Difference;
+import org.someth2say.taijitu.compare.explain.Difference;
 
 import java.util.*;
 import java.util.stream.Collectors;

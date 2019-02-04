@@ -23,7 +23,7 @@ import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
 import org.someth2say.taijitu.compare.equality.impl.stream.mapping.HashingStreamEqualizer;
 import org.someth2say.taijitu.compare.equality.impl.stream.simple.SimpleStreamEqualizer;
 import org.someth2say.taijitu.compare.equality.impl.stream.sorted.ComparableStreamEqualizer;
-import org.someth2say.taijitu.compare.result.Difference;
+import org.someth2say.taijitu.compare.explain.Difference;
 
 import java.util.List;
 import java.util.Map;
@@ -238,7 +238,7 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
         Source<MAPPED_TYPE> targetSrc = mappedSources.getRight();
         Stream<MAPPED_TYPE> sourceStream = sourceSrc.stream();
         Stream<MAPPED_TYPE> targetStream = targetSrc.stream();
-        return streamEquality.underlyingDiffs(sourceStream, targetStream);
+        return streamEquality.explain(sourceStream, targetStream);
     }
 
     private <VALUE_TYPE> Equalizer<VALUE_TYPE> getEquality(FieldDescription<VALUE_TYPE> fd, List<IEqualityCfg> equalityConfigs) {
