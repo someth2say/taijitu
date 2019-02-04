@@ -376,7 +376,7 @@ public class StreamUtil {
             C result;
             if (availableA() && availableB()) {
                 result = mapper.apply(currentA, currentB);
-                //TODO: If we want a way to skip elements based on result (i.e. if result is null),
+                //TODO: If we want a way to skip elements based on explain (i.e. if explain is null),
                 // or even better, pre-filter elements to be mapped (using areEquals),
                 // we need to calculate availability in advance, so 'hasNext' can be calculated.
                 haveA = stepA();

@@ -1,14 +1,6 @@
 package org.someth2say.taijitu.compare.equality.impl.composite;
 
 import org.junit.Test;
-import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
-import org.someth2say.taijitu.compare.equality.wrapper.EqualizableWrapper;
-import org.someth2say.taijitu.compare.result.Difference;
-import org.someth2say.taijitu.compare.result.Unequal;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -23,13 +15,6 @@ public class CompositeEqualizerTest {
 
         assertFalse(testClassOneTwoEquality.areEquals(differentFrom1, differentFrom2));
         assertTrue(testClassOneTwoEquality.areEquals(differentFrom1, differentFrom3));
-        List<Difference> differences = testClassOneTwoEquality.explain(differentFrom1, differentFrom2).collect(Collectors.toList());
-        assertTrue(differences.containsAll(Arrays.asList(
-                        new Unequal<>(StringCaseInsensitive.EQUALITY, "aaa", "bbb"),
-                        new Unequal<>(StringCaseInsensitive.EQUALITY, "aaa", "ccc"))));
-
-        assertFalse(new EqualizableWrapper<>(differentFrom1, testClassOneTwoEquality).equals(new EqualizableWrapper<>(differentFrom2, testClassOneTwoEquality)));
-        assertTrue(new EqualizableWrapper<>(differentFrom1, testClassOneTwoEquality).equals(new EqualizableWrapper<>(differentFrom3, testClassOneTwoEquality)));
 
     }
 }

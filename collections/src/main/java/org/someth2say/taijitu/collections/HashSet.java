@@ -159,7 +159,7 @@ public class HashSet<E>
      * <tt>(o==null&nbsp;?&nbsp;e==null&nbsp;:&nbsp;o.equals(e))</tt>,
      * if this set contains such an element.  Returns <tt>true</tt> if
      * this set contained the element (or equivalently, if this set
-     * changed as a result of the call).  (This set will not contain the
+     * changed as a explain of the call).  (This set will not contain the
      * element once the call returns.)
      *
      * @param o object to be removed from this set, if present

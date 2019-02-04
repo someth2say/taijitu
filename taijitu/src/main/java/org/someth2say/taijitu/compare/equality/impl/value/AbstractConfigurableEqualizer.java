@@ -1,11 +1,8 @@
 package org.someth2say.taijitu.compare.equality.impl.value;
 
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
-import org.someth2say.taijitu.compare.result.Difference;
-import org.someth2say.taijitu.compare.result.Unequal;
 
 import java.util.Objects;
-import java.util.stream.Stream;
 
 public abstract class AbstractConfigurableEqualizer<T> implements Equalizer<T> {
 
@@ -24,11 +21,11 @@ public abstract class AbstractConfigurableEqualizer<T> implements Equalizer<T> {
         return getClass().getSimpleName() + "[" + (getEqualityConfig() != null ? getEqualityConfig().toString() : "") + "]";
     }
 
-    @Override
+/*    @Override
     public Stream<Difference> explain(T t1, T t2) {
         //Warning: cyclic dependency (unless areEquals is overwritten in subclasses)
         return areEquals(t1, t2) ? null : Stream.of(new Unequal<>(this, t1, t2));
-    }
+    }*/
 
     @Override
     public int hashCode() {

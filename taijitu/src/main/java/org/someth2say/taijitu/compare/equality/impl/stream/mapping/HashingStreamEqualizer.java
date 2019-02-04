@@ -4,8 +4,8 @@ import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
 import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
 import org.someth2say.taijitu.compare.equality.wrapper.HashableWrapper;
-import org.someth2say.taijitu.compare.result.Difference;
-import org.someth2say.taijitu.compare.result.Missing;
+import org.someth2say.taijitu.compare.explain.Difference;
+import org.someth2say.taijitu.compare.explain.Missing;
 import org.someth2say.taijitu.util.StreamUtil;
 
 import java.util.Iterator;
@@ -28,6 +28,7 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         this.hasher = hasher;
     }
 
+    // TODO; This constructor is hairy: should we allow using a different hasher and equalizer? Shouldn't they express the same rules?
     public HashingStreamEqualizer(Equalizer<T> equalizer, Hasher<T> hasher) {
         this.equalizer = equalizer;
         this.hasher = hasher;
@@ -58,7 +59,7 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
                 } else {
                     //pick next available entry in map and return it as a "missing"
                     OrdinalAndComposite<T> oac = map.remove(map.entrySet().iterator().next().getKey());
-                    return new Missing<>(hasher,oac.getComposite());
+                    return new Missing<>(hasher, oac.getComposite());
                 }
             }
         };

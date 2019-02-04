@@ -2,9 +2,9 @@ package org.someth2say.taijitu.compare.equality.impl.stream.simple;
 
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
-import org.someth2say.taijitu.compare.result.Difference;
-import org.someth2say.taijitu.compare.result.Missing;
-import org.someth2say.taijitu.compare.result.Unequal;
+import org.someth2say.taijitu.compare.explain.Difference;
+import org.someth2say.taijitu.compare.explain.Missing;
+import org.someth2say.taijitu.compare.explain.Unequal;
 import org.someth2say.taijitu.util.StreamUtil;
 
 import java.util.Objects;
@@ -33,7 +33,7 @@ public class SimpleStreamEqualizer<ELEMENT> implements StreamEqualizer<ELEMENT> 
         return StreamUtil
                 .biMapTail(source, target,
                         (sourceElem, targetElem) -> elementEqualizer.areEquals(sourceElem, targetElem) ? null : new Unequal<>(elementEqualizer, sourceElem, targetElem),
-                        element -> new Missing(elementEqualizer, element)) //Stupid type inference... if diamond operator is used, then the result is Stream<Difference<ELEMENT>>, witch is incompatible with return type Stream<Difference>>
+                        element -> new Missing(elementEqualizer, element)) //Stupid type inference... if diamond operator is used, then the explain is Stream<Difference<ELEMENT>>, witch is incompatible with return type Stream<Difference>>
                 .filter(Objects::nonNull);
 
     }

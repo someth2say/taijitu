@@ -3,9 +3,9 @@ package org.someth2say.taijitu.compare.equality.impl.stream;
 import org.junit.Test;
 import org.someth2say.taijitu.compare.equality.impl.composite.TestComposite;
 import org.someth2say.taijitu.compare.equality.impl.stream.sorted.ComparableStreamEqualizer;
-import org.someth2say.taijitu.compare.result.Difference;
-import org.someth2say.taijitu.compare.result.Missing;
-import org.someth2say.taijitu.compare.result.Unequal;
+import org.someth2say.taijitu.compare.explain.Difference;
+import org.someth2say.taijitu.compare.explain.Missing;
+import org.someth2say.taijitu.compare.explain.Unequal;
 
 import java.util.List;
 import java.util.stream.Collectors;

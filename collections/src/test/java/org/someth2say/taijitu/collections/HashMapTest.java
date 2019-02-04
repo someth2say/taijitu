@@ -251,7 +251,7 @@ public class HashMapTest {
         assertEquals(4, hashMap.size());
 
         /*
-         * ... or removes if the result is {@code null}.
+         * ... or removes if the explain is {@code null}.
          */
         assertNull(hashMap.merge("hola", 3f, (x, y) -> null));
         assertNull(hashMap.get("HOLA"));

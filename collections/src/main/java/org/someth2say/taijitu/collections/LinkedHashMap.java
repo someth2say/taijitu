@@ -45,7 +45,7 @@ import java.util.function.Consumer;
  * {@code get}, {@code getOrDefault}, {@code compute}, {@code computeIfAbsent},
  * {@code computeIfPresent}, or {@code merge} methods results
  * in an access to the corresponding entry (assuming it exists after the
- * invocation completes). The {@code replace} methods only result in an access
+ * invocation completes). The {@code replace} methods only explain in an access
  * of the entry if the value is replaced.  The {@code putAll} method generates one
  * entry access for each mapping in the specified map, in the order that
  * key-value mappings are provided by the specified map's entry set iterator.

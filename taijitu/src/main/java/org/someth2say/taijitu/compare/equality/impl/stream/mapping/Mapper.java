@@ -3,7 +3,8 @@ package org.someth2say.taijitu.compare.equality.impl.stream.mapping;
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
 import org.someth2say.taijitu.compare.equality.wrapper.HashableWrapper;
-import org.someth2say.taijitu.compare.result.Difference;
+import org.someth2say.taijitu.compare.explain.Difference;
+import org.someth2say.taijitu.compare.explain.Unequal;
 
 import java.util.Iterator;
 import java.util.List;
@@ -17,9 +18,10 @@ import java.util.stream.Stream;
  * - If two elements have same hash, use the given Equalizer to determine equality
  * - If elements are equals, both are consumed.
  * - Else, an 'Unequals' object is built
- * 
+ * <p>
  * This class should be deprecated in favor of stream-based implementation.
  */
+@Deprecated
 class Mapper<T> implements Runnable {
 
     private final Iterator<T> source;
@@ -63,18 +65,25 @@ class Mapper<T> implements Runnable {
         if (otherOaC != null) {
             // we have a key match ...
             sharedMap.remove(wrapper);
-            return getUnderlyingDiffs(equalizer, thisOaC, otherOaC);
+            return explain(equalizer, thisOaC, otherOaC);
         }
         return Stream.empty();
     }
 
-    private static <T> Stream<Difference> getUnderlyingDiffs(Equalizer<T> equalizer, OrdinalAndComposite<T> first, OrdinalAndComposite<T> second) {
+    private static <T> Stream<Difference> explain(Equalizer<T> equalizer, OrdinalAndComposite<T> first, OrdinalAndComposite<T> second) {
         Stream<Difference> unequal;
-        if (first.getOrdinal() < second.getOrdinal()) {
-            unequal = equalizer.explain(first.getComposite(), second.getComposite());
+        boolean areEquals = equalizer.areEquals(first.getComposite(), second.getComposite());
+        if (!areEquals) {
+            if (first.getOrdinal() < second.getOrdinal()) {
+                // The simple case do not recurse explanations, only identify differences
+                unequal = Stream.of(new Unequal<>(equalizer, first.getComposite(), second.getComposite()));
+            } else {
+                unequal = Stream.of(new Unequal<>(equalizer, second.getComposite(), first.getComposite()));
+            }
         } else {
-            unequal = equalizer.explain(second.getComposite(), first.getComposite());
+            unequal = Stream.empty();
         }
+
         return unequal;
     }
 

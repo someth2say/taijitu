@@ -2,12 +2,10 @@ package org.someth2say.taijitu.compare.equality.impl.composite;
 
 import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.compare.equality.impl.partial.IndirectEqualizer;
-import org.someth2say.taijitu.compare.result.Difference;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * This is the simplest class of CompositeEqualizer. It assumes that:
@@ -48,7 +46,9 @@ interface ICompositeEqualizer<T, E extends Equalizer<T>> extends IComposite<E>, 
         return getComponents().allMatch(equalizer -> equalizer.areEquals(first, second));
     }
 
+/*
     default Stream<Difference> explain(T first, T second) {
         return getComponents().flatMap(e -> e.explain(first, second));
     }
+*/
 }

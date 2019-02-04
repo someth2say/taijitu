@@ -1,6 +1,5 @@
 package org.someth2say.taijitu.compare.equality.impl.composite;
 
-import org.someth2say.taijitu.compare.equality.aspects.external.ComparatorHasher;
 import org.someth2say.taijitu.compare.equality.impl.value.JavaComparable;
 import org.someth2say.taijitu.compare.equality.impl.value.JavaObject;
 import org.someth2say.taijitu.compare.equality.impl.value.ObjectToString;
@@ -56,8 +55,8 @@ public class TestComposite {
     }
 
 
-    public static final CompositeEqualizer<TestComposite> testClassOneTwoEquality
-            = new CompositeEqualizer.Builder<TestComposite>()
+    public static final CompositeHasher<TestComposite> testClassOneTwoEquality
+            = new CompositeHasher.Builder<TestComposite>()
             .addComponent(TestComposite::getOne, StringCaseInsensitive.EQUALITY)
             .addComponent(TestComposite::getTwo, StringCaseInsensitive.EQUALITY)
             .build();
