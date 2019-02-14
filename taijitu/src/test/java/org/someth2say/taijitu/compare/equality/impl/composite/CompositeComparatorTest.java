@@ -1,11 +1,10 @@
 package org.someth2say.taijitu.compare.equality.impl.composite;
 
+import org.junit.Test;
+import org.someth2say.taijitu.compare.equality.wrapper.ComparableWrapper;
+
 import static org.junit.Assert.assertTrue;
 import static org.someth2say.taijitu.compare.equality.impl.composite.TestComposite.testClassThreeComparator;
-
-import org.junit.Test;
-import org.someth2say.taijitu.compare.equality.aspects.external.Comparator;
-import org.someth2say.taijitu.compare.equality.wrapper.ComparableWrapper;
 
 public class CompositeComparatorTest {
 
@@ -19,7 +18,6 @@ public class CompositeComparatorTest {
         assertTrue(testClassThreeComparator.compare(differentFrom1, differentFrom2) == 0);
         assertTrue(testClassThreeComparator.areEquals(differentFrom1, differentFrom2));
 
-        // TODO: Those casts seems only to be needed in Java8 ...
         ComparableWrapper<TestComposite> wrap1 = new ComparableWrapper<>(differentFrom1, testClassThreeComparator);
         ComparableWrapper<TestComposite> wrap3 = new ComparableWrapper<>(differentFrom3, testClassThreeComparator);
         ComparableWrapper<TestComposite> wrap2 = new ComparableWrapper<>(differentFrom2, testClassThreeComparator);

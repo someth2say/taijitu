@@ -28,7 +28,6 @@ public class CompositeEqualizer<T> extends Composite<T, Equalizer<T>> implements
             return this;
         }
 
-        //TODO: First approach for equality hierarchy: Partial application by builder
         public <R> Builder<T> addComponent(Function<T, R> extractor, Equalizer<R> delegate) {
             return addComponent(new IndirectEqualizer<>(extractor, delegate));
         }
