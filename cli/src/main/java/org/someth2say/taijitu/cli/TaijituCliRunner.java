@@ -105,7 +105,7 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
                     streamEquality = new HashingStreamEqualizer<>(hasher);
                 } else if (sorter != null) {
                     logger.debug("Assuming composites ordered by using " + sorter);
-                    streamEquality = new ComparableStreamEqualizer<>(equality, sorter);
+                    streamEquality = new ComparableStreamEqualizer<>(sorter);
                 } else {
                     logger.debug("No sort/hash fields provided, so applying positional comparison.");
                     streamEquality = new SimpleStreamEqualizer<>(equality);

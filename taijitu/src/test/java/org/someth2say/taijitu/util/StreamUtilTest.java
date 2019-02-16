@@ -1,6 +1,7 @@
 package org.someth2say.taijitu.util;
 
 import org.junit.Test;
+import org.someth2say.taijitu.stream.StreamUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -10,7 +11,7 @@ import static java.util.function.Function.*;
 import static java.util.stream.Collectors.*;
 import static java.util.stream.Stream.*;
 import static org.junit.Assert.assertEquals;
-import static org.someth2say.taijitu.util.StreamUtil.*;
+import static org.someth2say.taijitu.stream.StreamUtil.*;
 
 public class StreamUtilTest {
 
