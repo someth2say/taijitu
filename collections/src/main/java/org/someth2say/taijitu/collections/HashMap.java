@@ -13,8 +13,8 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
-import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
+import org.someth2say.taijitu.equality.aspects.external.Equalizer;
+import org.someth2say.taijitu.equality.aspects.external.Hasher;
 //import sun.misc.SharedSecrets;
 
 

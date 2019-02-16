@@ -13,17 +13,17 @@ import org.someth2say.taijitu.cli.source.FieldDescription;
 import org.someth2say.taijitu.cli.source.Source;
 import org.someth2say.taijitu.cli.source.mapper.SourceMapper;
 import org.someth2say.taijitu.cli.util.ClassScanUtils;
-import org.someth2say.taijitu.compare.equality.aspects.external.Comparator;
-import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
-import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
-import org.someth2say.taijitu.compare.equality.impl.composite.CompositeComparator;
-import org.someth2say.taijitu.compare.equality.impl.composite.CompositeEqualizer;
-import org.someth2say.taijitu.compare.equality.impl.composite.CompositeHasher;
-import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
-import org.someth2say.taijitu.compare.equality.impl.stream.mapping.HashingStreamEqualizer;
-import org.someth2say.taijitu.compare.equality.impl.stream.simple.SimpleStreamEqualizer;
-import org.someth2say.taijitu.compare.equality.impl.stream.sorted.ComparableStreamEqualizer;
-import org.someth2say.taijitu.compare.explain.Difference;
+import org.someth2say.taijitu.equality.aspects.external.Comparator;
+import org.someth2say.taijitu.equality.aspects.external.Equalizer;
+import org.someth2say.taijitu.equality.aspects.external.Hasher;
+import org.someth2say.taijitu.equality.impl.composite.CompositeComparator;
+import org.someth2say.taijitu.equality.impl.composite.CompositeEqualizer;
+import org.someth2say.taijitu.equality.impl.composite.CompositeHasher;
+import org.someth2say.taijitu.stream.StreamEqualizer;
+import org.someth2say.taijitu.stream.mapping.HashingStreamEqualizer;
+import org.someth2say.taijitu.stream.simple.SimpleStreamEqualizer;
+import org.someth2say.taijitu.stream.sorted.ComparableStreamEqualizer;
+import org.someth2say.taijitu.equality.explain.Difference;
 
 import java.util.List;
 import java.util.Map;
@@ -102,7 +102,7 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
             } else {
                 if (hasher != null) {
                     logger.debug("Hashing composites using " + hasher);
-                    streamEquality = new HashingStreamEqualizer<>(equality, hasher);
+                    streamEquality = new HashingStreamEqualizer<>(hasher);
                 } else if (sorter != null) {
                     logger.debug("Assuming composites ordered by using " + sorter);
                     streamEquality = new ComparableStreamEqualizer<>(equality, sorter);

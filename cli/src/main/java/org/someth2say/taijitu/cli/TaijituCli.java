@@ -11,7 +11,7 @@ import org.someth2say.taijitu.cli.registry.SourceRegistry;
 import org.someth2say.taijitu.cli.registry.ValueEqualityRegistry;
 import org.someth2say.taijitu.cli.source.query.ConnectionManager;
 import org.someth2say.taijitu.cli.util.FileUtil;
-import org.someth2say.taijitu.compare.explain.Difference;
+import org.someth2say.taijitu.equality.explain.Difference;
 
 import java.util.ArrayList;
 import java.util.List;

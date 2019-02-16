@@ -3,12 +3,12 @@ package org.someth2say.taijitu.cli.source.mapper;
 import org.junit.Test;
 import org.someth2say.taijitu.cli.source.Source;
 import org.someth2say.taijitu.cli.source.StreamSource;
-import org.someth2say.taijitu.compare.equality.aspects.external.Comparator;
-import org.someth2say.taijitu.compare.equality.impl.stream.StreamEqualizer;
-import org.someth2say.taijitu.compare.equality.impl.stream.sorted.ComparableStreamEqualizer;
-import org.someth2say.taijitu.compare.equality.impl.value.JavaComparable;
-import org.someth2say.taijitu.compare.explain.Difference;
-import org.someth2say.taijitu.compare.explain.Missing;
+import org.someth2say.taijitu.equality.aspects.external.Comparator;
+import org.someth2say.taijitu.stream.StreamEqualizer;
+import org.someth2say.taijitu.stream.sorted.ComparableStreamEqualizer;
+import org.someth2say.taijitu.equality.impl.value.JavaComparable;
+import org.someth2say.taijitu.equality.explain.Difference;
+import org.someth2say.taijitu.equality.explain.Missing;
 
 import java.util.List;
 import java.util.stream.Collectors;

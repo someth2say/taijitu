@@ -1,6 +1,6 @@
 package org.someth2say.taijitu.collections;
 
-import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
+import org.someth2say.taijitu.equality.aspects.external.Equalizer;
 
 import java.util.Collection;
 import java.util.List;

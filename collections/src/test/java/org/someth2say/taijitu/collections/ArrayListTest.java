@@ -1,7 +1,7 @@
 package org.someth2say.taijitu.collections;
 
 import org.junit.Test;
-import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
+import org.someth2say.taijitu.equality.impl.value.StringCaseInsensitive;
 
 import java.util.Arrays;
 

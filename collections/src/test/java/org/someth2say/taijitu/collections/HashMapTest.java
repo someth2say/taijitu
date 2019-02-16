@@ -2,10 +2,10 @@ package org.someth2say.taijitu.collections;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.someth2say.taijitu.compare.equality.aspects.external.Equalizer;
-import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
-import org.someth2say.taijitu.compare.equality.impl.value.NumberThreshold;
-import org.someth2say.taijitu.compare.equality.impl.value.StringCaseInsensitive;
+import org.someth2say.taijitu.equality.aspects.external.Equalizer;
+import org.someth2say.taijitu.equality.aspects.external.Hasher;
+import org.someth2say.taijitu.equality.impl.value.NumberThreshold;
+import org.someth2say.taijitu.equality.impl.value.StringCaseInsensitive;
 
 import java.util.Collection;
 import java.util.Map;

@@ -2,8 +2,8 @@ package org.someth2say.taijitu.cli.config;
 
 import org.someth2say.taijitu.cli.config.interfaces.DefaultEqualityConfig;
 import org.someth2say.taijitu.cli.config.interfaces.IEqualityCfg;
-import org.someth2say.taijitu.compare.equality.impl.value.JavaObject;
-import org.someth2say.taijitu.compare.equality.impl.value.ObjectToString;
+import org.someth2say.taijitu.equality.impl.value.JavaObject;
+import org.someth2say.taijitu.equality.impl.value.ObjectToString;
 
 import java.util.Arrays;
 import java.util.Collections;

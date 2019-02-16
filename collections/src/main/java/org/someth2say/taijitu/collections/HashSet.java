@@ -1,7 +1,7 @@
 package org.someth2say.taijitu.collections;
 
-import org.someth2say.taijitu.compare.equality.aspects.external.Hasher;
-import org.someth2say.taijitu.compare.equality.impl.value.JavaObject;
+import org.someth2say.taijitu.equality.aspects.external.Hasher;
+import org.someth2say.taijitu.equality.impl.value.JavaObject;
 //import sun.misc.SharedSecrets;
 
 import java.io.InvalidObjectException;
