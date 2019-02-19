@@ -8,35 +8,38 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Abstract comparison explain class expressing some entries are not equal (given the generating equality).
+ * Abstract explanation class abstracting over the underlying difference between two instances (under given equality definition).
  * Differences can be of many kind, i.e. having different values, different inner order, missing values, depending on the 
- * equality used. 
+ * equality used.
+ *
+ * @see Missing
+ * @see Unequal
  */
-public abstract class Difference<MMT> {
-    private final Equalizer<? super MMT> cause;
-    private final List<MMT> entries;
+public abstract class Difference<T> {
+    private final Equalizer<? super T> cause;
+    private final List<T> entries;
     private final Stream<Difference> underlyingDifferences;
 
 
-    public Difference(Equalizer<? super MMT> cause, List<MMT> entries, Stream<Difference> underlyingDifferences) {
+    public Difference(Equalizer<? super T> cause, List<T> entries, Stream<Difference> underlyingDifferences) {
         this.cause = cause;
         this.entries = entries;
         this.underlyingDifferences = underlyingDifferences;
     }
 
-    public Difference(Equalizer<? super MMT> cause, MMT composite, Stream<Difference> underlyingDifferences) {
+    public Difference(Equalizer<? super T> cause, T composite, Stream<Difference> underlyingDifferences) {
         this(cause, Collections.singletonList(composite), underlyingDifferences);
     }
 
-    public Difference(Equalizer<? super MMT> cause, MMT composite) {
+    public Difference(Equalizer<? super T> cause, T composite) {
         this(cause, composite, Stream.empty());
     }
 
-    public Difference(Equalizer<? super MMT> cause, MMT composite, MMT composite2) {
+    public Difference(Equalizer<? super T> cause, T composite, T composite2) {
         this(cause, composite, composite2, Stream.empty());
     }
 
-    public Difference(Equalizer<? super MMT> cause, MMT composite, MMT composite2, Stream<Difference> underlyingDifferences) {
+    public Difference(Equalizer<? super T> cause, T composite, T composite2, Stream<Difference> underlyingDifferences) {
         this(cause, Arrays.asList(composite, composite2), underlyingDifferences);
     }
 

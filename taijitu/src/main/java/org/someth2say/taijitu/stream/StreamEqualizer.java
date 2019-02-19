@@ -1,8 +1,7 @@
 package org.someth2say.taijitu.stream;
 
-import org.someth2say.taijitu.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.equality.explain.Difference;
-import org.someth2say.taijitu.equality.explain.Explainer;
+import org.someth2say.taijitu.equality.explain.ExplainingEqualizer;
 
 import java.util.stream.Stream;
 
@@ -11,12 +10,12 @@ import java.util.stream.Stream;
  * General contract interface for comparing streams.
  * Streams are a edge case, because comparing them means consuming them.
  * Hence, usual use cases will better get an explanation on the differences, instead of just indicating they are equal or not.
- * That's the reason 'StreamEqualizer' extends 'Explainer' interface.
+ * That's the reason 'StreamEqualizer' extends 'ExplainingEqualizer' interface.
  *
  * For the same reason, StreamComparer or StreamHasher are not implemented: no use on  compare streams or calculate hash, as they are consumed and became unusable.
  *
  */
-public interface StreamEqualizer<T> extends Equalizer<Stream<T>>, Explainer<Stream<T>> {
+public interface StreamEqualizer<T> extends ExplainingEqualizer<Stream<T>> {
     /**
      * By default, all stream equalities will delegate on explain.
      * That means both streams will be consumed upon comparing them.

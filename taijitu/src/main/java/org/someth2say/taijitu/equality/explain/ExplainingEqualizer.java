@@ -1,8 +1,17 @@
 package org.someth2say.taijitu.equality.explain;
 
+import org.someth2say.taijitu.equality.aspects.external.Equalizer;
+
 import java.util.stream.Stream;
 
-public interface Explainer<EQUALIZED> {
+/**
+ * {@link ExplainingEqualizer} is an extension of {@link Equalizer} aspect that can provide with an explanation for why two objects are equals or not.
+ * This explanation is provided as an streams of {@link Difference} instances.
+ *
+ * @see Difference
+ * @param <T>
+ */
+public interface ExplainingEqualizer<T> extends Equalizer<T> {
     /**
      * Get the underlying differences that causes this equalizer to determine both elements are not equal.
      * The meaning for "underlying differences" depends on the kind of equalizer. I.E. composite equalizers delegate differences
@@ -15,11 +24,11 @@ public interface Explainer<EQUALIZED> {
      * <p>
      * Default implementation returns an empty stream.
      *
-     * @param equalized1
-     * @param equalized2
+     * @param t1
+     * @param t2
      * @return A stream of differences that explain the current difference
      */
-    default Stream<Difference> explain(EQUALIZED equalized1, EQUALIZED equalized2) {
+    default Stream<Difference> explain(T t1, T t2) {
         return Stream.empty();
     }
 }

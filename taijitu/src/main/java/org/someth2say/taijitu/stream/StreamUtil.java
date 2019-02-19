@@ -2,6 +2,7 @@ package org.someth2say.taijitu.stream;
 
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -178,42 +179,46 @@ public class StreamUtil {
      * If both elements are "equals" given that comparator, then `biMapper` is applied to both. Else, `mapper` is applied to the 'minor' element.
      * Note that this behaviour assumes elements on both streams are somehow 'sorted' given the comparator function.
      *
+     * @param <A>
+     * @param <C>
      * @param first
      * @param second
      * @param comparator
      * @param biMapper
      * @param mapper
-     * @param <A>
-     * @param <C>
+     * @param biFilter
      * @return
      */
     public static <A, C> Stream<C> comparingBiMap(Stream<? extends A> first, Stream<? extends A> second,
                                                   BiFunction<? super A, ? super A, Integer> comparator,
                                                   BiFunction<? super A, ? super A, ? extends C> biMapper,
-                                                  Function<? super A, ? extends C> mapper) {
-        return comparingBiMap(first, second, comparator, biMapper, mapper, mapper);
+                                                  Function<? super A, ? extends C> mapper,
+                                                  BiPredicate<? super A, ? super A> biFilter) {
+        return comparingBiMap(first, second, comparator, biMapper, mapper, mapper, biFilter);
     }
 
     /**
      * Same than equally-named method, but this one accepts two different `mappers`, one for each stream.
      * This also allows stream to contain elements of different types, as long as both biMapper and mapper's produce a common type (C).
      *
+     * @param <A>
+     * @param <B>
+     * @param <C>
      * @param first
      * @param second
      * @param comparator
      * @param biMapper
      * @param aMapper
      * @param bMapper
-     * @param <A>
-     * @param <B>
-     * @param <C>
+     * @param biFilter
      * @return
      */
     public static <A, B, C> Stream<C> comparingBiMap(Stream<? extends A> first, Stream<? extends B> second,
                                                      BiFunction<? super A, ? super B, Integer> comparator,
                                                      BiFunction<? super A, ? super B, ? extends C> biMapper,
                                                      Function<? super A, ? extends C> aMapper,
-                                                     Function<? super B, ? extends C> bMapper) {
+                                                     Function<? super B, ? extends C> bMapper,
+                                                     BiPredicate<? super A, ? super B> biFilter) {
         Objects.requireNonNull(biMapper);
         Objects.requireNonNull(aMapper);
         Objects.requireNonNull(bMapper);
@@ -223,7 +228,7 @@ public class StreamUtil {
 
         Iterator<A> aIterator = Spliterators.iterator(aSpliterator);
         Iterator<B> bIterator = Spliterators.iterator(bSpliterator);
-        Iterator<C> cIterator = new SteppingBiMapTailIterator<>(aIterator, bIterator, biMapper, comparator, aMapper, bMapper);
+        Iterator<C> cIterator = new ComparingBiMapTailIterator<>(aIterator, bIterator, biMapper, comparator, aMapper, bMapper, biFilter);
         boolean parallel = first.isParallel() || second.isParallel();
         int lostCharacteristics = Spliterator.DISTINCT | Spliterator.SORTED | Spliterator.SIZED;
         BinaryOperator<Long> sizeOperator = null;
@@ -331,92 +336,102 @@ public class StreamUtil {
         }
     }
 
-    private static class SteppingBiMapTailIterator<C, A, B> implements Iterator<C> {
-        private final Iterator<A> aIterator;
-        private final Iterator<B> bIterator;
+
+
+    private static class ComparingBiMapTailIterator<C, A, B> implements Iterator<C> {
+        private final PreFetchIterator<A> pIteratorA;
+        private final PreFetchIterator<B> pIteratorB;
+
         private final BiFunction<? super A, ? super B, ? extends C> mapper;
         private final BiFunction<? super A, ? super B, Integer> comparator;
-        private final Function<? super A, ? extends C> aTailer;
-        private final Function<? super B, ? extends C> bTailer;
-        private A currentA;
-        private B currentB;
-        private boolean haveA = false;
-        private boolean haveB = false;
+        private final Function<? super A, ? extends C> onUnpairedA;
+        private final Function<? super B, ? extends C> onUnpairedB;
+        private final BiPredicate<? super A, ? super B> biFilter;
 
-        public SteppingBiMapTailIterator(Iterator<A> aIterator, Iterator<B> bIterator,
-                                         BiFunction<? super A, ? super B, ? extends C> mapper,
-                                         BiFunction<? super A, ? super B, Integer> comparator,
-                                         Function<? super A, ? extends C> aTailer,
-                                         Function<? super B, ? extends C> bTailer) {
-            this.aIterator = aIterator;
-            this.bIterator = bIterator;
+        public ComparingBiMapTailIterator(Iterator<A> aIterator, Iterator<B> bIterator,
+                                          BiFunction<? super A, ? super B, ? extends C> mapper,
+                                          BiFunction<? super A, ? super B, Integer> comparator,
+                                          Function<? super A, ? extends C> onUnpairedA,
+                                          Function<? super B, ? extends C> onUnpairedB,
+                                          BiPredicate<? super A, ? super B> biFilter) {
+            this.pIteratorA = new PreFetchIterator<>(aIterator);
+            this.pIteratorB = new PreFetchIterator<>(bIterator);
+
             this.mapper = mapper;
             this.comparator = comparator;
-            this.aTailer = aTailer;
-            this.bTailer = bTailer;
-            init();
+            this.onUnpairedA = onUnpairedA;
+            this.onUnpairedB = onUnpairedB;
+            this.biFilter = biFilter;
         }
 
         @Override
         public boolean hasNext() {
-            return (availableA() || availableB());
-        }
-
-        private boolean availableB() {
-            return (haveA && haveB && comparator.apply(currentA, currentB) >= 0) || (!haveA && haveB);
-        }
-
-        private boolean availableA() {
-            return (haveA && haveB && comparator.apply(currentA, currentB) <= 0) || (haveA && !haveB);
+            while (pIteratorA.hasNext() && pIteratorB.hasNext()) {
+                if (!biFilter.test(pIteratorA.peek(), pIteratorB.peek())){
+                    return true;
+                } else {
+                    pIteratorA.next();
+                    pIteratorB.next();
+                }
+            }
+            //TODO: Apply tail filters
+            return (pIteratorA.hasNext() || pIteratorB.hasNext());
         }
 
         @Override
         public C next() {
-            // 1.- Fetch next values, **based on biComparator**
             C result;
-            if (availableA() && availableB()) {
-                result = mapper.apply(currentA, currentB);
-                //TODO: If we want a way to skip elements based on explain (i.e. if explain is null),
-                // or even better, pre-filter elements to be mapped (using areEquals),
-                // we need to calculate availability in advance, so 'hasNext' can be calculated.
-                haveA = stepA();
-                haveB = stepB();
-            } else if (availableA()) {
-                result = aTailer.apply(currentA);
-                haveA = stepA();
-            } else if (availableB()) {
-                result = bTailer.apply(currentB);
-                haveB = stepB();
+            if (pIteratorA.hasNext() && pIteratorB.hasNext() && comparator.apply(pIteratorA.peek(), pIteratorB.peek()) == 0) {
+                result = mapper.apply(pIteratorA.next(), pIteratorB.next());
+            } else if ((pIteratorA.hasNext() && pIteratorB.hasNext() && comparator.apply(pIteratorA.peek(), pIteratorB.peek()) < 0) || (pIteratorA.hasNext() && !pIteratorB.hasNext())) {
+                result = onUnpairedA.apply(pIteratorA.next());
+            } else if ((pIteratorA.hasNext() && pIteratorB.hasNext() && comparator.apply(pIteratorA.peek(), pIteratorB.peek()) > 0) || (!pIteratorA.hasNext() && pIteratorB.hasNext())) {
+                result = onUnpairedB.apply(pIteratorB.next());
             } else {
                 //Should never happen (protected by hasNext);
                 result = null;
             }
             return result;
-
         }
 
-        private void init() {
-            haveA = stepA();
-            haveB = stepB();
+    }
+
+    public static class PreFetchIterator<A> implements Iterator<A>{
+        private final Iterator<A> aIterator;
+        private A preFetched;
+        private boolean hasNext = false;
+
+        public PreFetchIterator(Iterator<A> aIterator) {
+            this.aIterator = aIterator;
+            preFetch();
         }
 
-        private boolean stepA() {
+        @Override
+        public boolean hasNext() {
+            return hasNext;
+        }
+
+        @Override
+        public A next() {
+            A next = this.preFetched;
+            preFetch();
+            return next;
+        }
+
+        public A peek(){
+            return this.preFetched;
+        }
+
+        private void preFetch() {
             if (aIterator.hasNext()) {
-                currentA = aIterator.next();
-                return true;
+                this.preFetched = aIterator.next();
+                hasNext =true;
             } else {
-                return false;
-            }
-        }
-
-        private boolean stepB() {
-            if (bIterator.hasNext()) {
-                currentB = bIterator.next();
-                return true;
-            } else {
-                return false;
+                this.preFetched =null;
+                hasNext =false;
             }
         }
     }
+
 }
 

@@ -7,7 +7,6 @@ import org.someth2say.taijitu.equality.explain.Unequal;
 import org.someth2say.taijitu.stream.StreamEqualizer;
 import org.someth2say.taijitu.stream.StreamUtil;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -44,9 +43,9 @@ public class ComparableStreamEqualizer<T> implements StreamEqualizer<T> {
     public static <ELEMENT> Stream<Difference> compare(Stream<ELEMENT> source, Stream<ELEMENT> target, Comparator<ELEMENT> comparator) {
         return StreamUtil.comparingBiMap(source, target,
                 comparator::compare,
-                (sourceElem, targetElem) -> comparator.areEquals(sourceElem, targetElem) ? null : new Unequal<>(comparator, sourceElem, targetElem),
-                element -> new Missing(comparator, element))
-                .filter(Objects::nonNull);
+                (sourceElem, targetElem) ->  new Unequal<>(comparator, sourceElem, targetElem),
+                element -> new Missing(comparator, element),
+                comparator::areEquals);
     }
 
 }

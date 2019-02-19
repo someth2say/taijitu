@@ -35,5 +35,8 @@ public class SimpleStreamEqualizer<ELEMENT> implements StreamEqualizer<ELEMENT> 
                 //Stupid type inference... if diamond operator is used, then the explain is Stream<Difference<ELEMENT>>, witch is incompatible with return type Stream<Difference>>
                 .filter(Objects::nonNull);
 
+
+
+
     }
 }
