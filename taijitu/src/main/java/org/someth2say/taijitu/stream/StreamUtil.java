@@ -168,6 +168,39 @@ public class StreamUtil {
 
     }
 
+
+    public static <A, C> Stream<C> comparingBiMap(Stream<? extends A> first, Stream<? extends A> second,
+                                                      BiFunction<? super A, ? super A, Integer> comparator,
+                                                      BiFunction<? super A, ? super A, ? extends C> biMapper,
+                                                      Function<? super A, ? extends C> mapper,
+                                                      BiPredicate<? super A, ? super A> biFilter) {
+        return comparingBiMap(first, second, comparator, biMapper, mapper, mapper, biFilter);
+    }
+
+
+    public static <A, B, C> Stream<C> comparingBiMap(Stream<? extends A> first, Stream<? extends B> second,
+                                                         BiFunction<? super A, ? super B, Integer> comparator,
+                                                         BiFunction<? super A, ? super B, ? extends C> biMapper,
+                                                         Function<? super A, ? extends C> aMapper,
+                                                         Function<? super B, ? extends C> bMapper,
+                                                         BiPredicate<? super A, ? super B> biFilter) {
+        Objects.requireNonNull(biMapper);
+        Objects.requireNonNull(aMapper);
+        Objects.requireNonNull(bMapper);
+
+        Spliterator<? extends A> aSpliterator = Objects.requireNonNull(first).spliterator();
+        Spliterator<? extends B> bSpliterator = Objects.requireNonNull(second).spliterator();
+
+        Iterator<A> aIterator = Spliterators.iterator(aSpliterator);
+        Iterator<B> bIterator = Spliterators.iterator(bSpliterator);
+        Iterator<C> cIterator = new ComparingBiMapIterator<>(aIterator, bIterator, biMapper, comparator, aMapper, bMapper, biFilter);
+        boolean parallel = first.isParallel() || second.isParallel();
+        int lostCharacteristics = Spliterator.DISTINCT | Spliterator.SORTED | Spliterator.SIZED;
+        BinaryOperator<Long> sizeOperator = null;
+        return getStreamFromIterators(aSpliterator, bSpliterator, cIterator, sizeOperator, parallel, lostCharacteristics);
+    }
+
+    //TODO: add onUnpaired functions.
     /**
      * Provides a stream resulting of mapping both streams elements, with the difference that elements
      * will not be paired with elements on same "position",
@@ -193,12 +226,12 @@ public class StreamUtil {
      * @param biFilter
      * @return
      */
-    public static <A, C> Stream<C> comparingBiMap(Stream<? extends A> first, Stream<? extends A> second,
-                                                  BiFunction<? super A, ? super A, Integer> comparator,
-                                                  BiFunction<? super A, ? super A, ? extends C> biMapper,
-                                                  Function<? super A, ? extends C> mapper,
-                                                  BiPredicate<? super A, ? super A> biFilter) {
-        return comparingBiMap(first, second, comparator, biMapper, mapper, mapper, biFilter);
+    public static <A, C> Stream<C> comparingBiMapTail(Stream<? extends A> first, Stream<? extends A> second,
+                                                      BiFunction<? super A, ? super A, Integer> comparator,
+                                                      BiFunction<? super A, ? super A, ? extends C> biMapper,
+                                                      Function<? super A, ? extends C> mapper,
+                                                      BiPredicate<? super A, ? super A> biFilter) {
+        return comparingBiMapTail(first, second, comparator, biMapper, mapper, mapper, biFilter);
     }
 
     /**
@@ -217,12 +250,12 @@ public class StreamUtil {
      * @param biFilter
      * @return
      */
-    public static <A, B, C> Stream<C> comparingBiMap(Stream<? extends A> first, Stream<? extends B> second,
-                                                     BiFunction<? super A, ? super B, Integer> comparator,
-                                                     BiFunction<? super A, ? super B, ? extends C> biMapper,
-                                                     Function<? super A, ? extends C> aMapper,
-                                                     Function<? super B, ? extends C> bMapper,
-                                                     BiPredicate<? super A, ? super B> biFilter) {
+    public static <A, B, C> Stream<C> comparingBiMapTail(Stream<? extends A> first, Stream<? extends B> second,
+                                                         BiFunction<? super A, ? super B, Integer> comparator,
+                                                         BiFunction<? super A, ? super B, ? extends C> biMapper,
+                                                         Function<? super A, ? extends C> aMapper,
+                                                         Function<? super B, ? extends C> bMapper,
+                                                         BiPredicate<? super A, ? super B> biFilter) {
         Objects.requireNonNull(biMapper);
         Objects.requireNonNull(aMapper);
         Objects.requireNonNull(bMapper);
@@ -250,7 +283,6 @@ public class StreamUtil {
         Spliterator<C> split = Spliterators.spliterator(iterator, size, characteristics);
         return StreamSupport.stream(split, parallel);
     }
-
 
     private static class ZipIterator<C, A extends C, B extends C> implements Iterator<C> {
         private final Iterator<A> aIterator;
@@ -328,6 +360,43 @@ public class StreamUtil {
         }
     }
 
+    private static class ComparingBiMapIterator<C, A, B> extends PreFetchBiIterator<A, B, C> {
+
+        private final BiFunction<? super A, ? super B, ? extends C> mapper;
+        private final BiFunction<? super A, ? super B, Integer> comparator;
+        private final Function<? super A, ? extends C> onUnpairedA;
+        private final Function<? super B, ? extends C> onUnpairedB;
+
+        public ComparingBiMapIterator(Iterator<A> aIterator, Iterator<B> bIterator,
+                                          BiFunction<? super A, ? super B, ? extends C> mapper,
+                                          BiFunction<? super A, ? super B, Integer> comparator,
+                                          Function<? super A, ? extends C> onUnpairedA,
+                                          Function<? super B, ? extends C> onUnpairedB,
+                                          BiPredicate<? super A, ? super B> biFilter) {
+
+            super(aIterator,bIterator,biFilter);
+
+            this.mapper = mapper;
+            this.comparator = comparator;
+            this.onUnpairedA = onUnpairedA;
+            this.onUnpairedB = onUnpairedB;
+        }
+
+        @Override
+        public C next() {
+            if (pIteratorA.hasNext() && pIteratorB.hasNext() && comparator.apply(pIteratorA.peek(), pIteratorB.peek()) == 0) {
+                return mapper.apply(pIteratorA.next(), pIteratorB.next());
+            } else if ((pIteratorA.hasNext() && pIteratorB.hasNext() && comparator.apply(pIteratorA.peek(), pIteratorB.peek()) < 0) || (pIteratorA.hasNext() && !pIteratorB.hasNext())) {
+                return onUnpairedA.apply(pIteratorA.next());
+            } else if ((pIteratorA.hasNext() && pIteratorB.hasNext() && comparator.apply(pIteratorA.peek(), pIteratorB.peek()) > 0) || (!pIteratorA.hasNext() && pIteratorB.hasNext())) {
+                return onUnpairedB.apply(pIteratorB.next());
+            } else {
+                //Should never happen (protected by hasNext);
+                return null;
+            }
+        }
+    }
+
     private static class ComparingBiMapTailIterator<C, A, B> extends PreFetchTailBiIterator<A, B, C> {
 
         private final BiFunction<? super A, ? super B, ? extends C> mapper;
@@ -364,14 +433,13 @@ public class StreamUtil {
         }
     }
 
-
     private static abstract class PreFetchBiIterator<A, B, C> implements Iterator<C> {
 
         public final PreFetchIterator<A> pIteratorA;
         public final PreFetchIterator<B> pIteratorB;
         public final BiPredicate biFilter;
 
-        private PreFetchBiIterator(Iterator<A> aIterator, Iterator<B> bIterator, BiPredicate<? super A, ? super B> biFilter) {
+        public PreFetchBiIterator(Iterator<A> aIterator, Iterator<B> bIterator, BiPredicate<? super A, ? super B> biFilter) {
             this.pIteratorA = new PreFetchIterator<>(aIterator);
             this.pIteratorB = new PreFetchIterator<>(bIterator);
             this.biFilter = biFilter;
@@ -390,6 +458,7 @@ public class StreamUtil {
             return false;
         }
     }
+
     private static abstract class PreFetchTailBiIterator<A, B, C> implements Iterator<C> {
 
         public final PreFetchIterator<A> pIteratorA;

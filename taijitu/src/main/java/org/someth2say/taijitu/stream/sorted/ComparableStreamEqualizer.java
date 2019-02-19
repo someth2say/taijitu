@@ -41,7 +41,7 @@ public class ComparableStreamEqualizer<T> implements StreamEqualizer<T> {
      * @return
      */
     public static <ELEMENT> Stream<Difference> compare(Stream<ELEMENT> source, Stream<ELEMENT> target, Comparator<ELEMENT> comparator) {
-        return StreamUtil.comparingBiMap(source, target,
+        return StreamUtil.comparingBiMapTail(source, target,
                 comparator::compare,
                 (sourceElem, targetElem) ->  new Unequal<>(comparator, sourceElem, targetElem),
                 element -> new Missing(comparator, element),

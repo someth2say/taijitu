@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.someth2say.taijitu.stream.StreamUtil;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -68,10 +69,21 @@ public class StreamUtilTest {
     public void comparingBiMapTest() {
         List<String> collect;
         collect = StreamUtil.comparingBiMap(of("-", "a", "C", "d", "e"), of("a", "b", "c", "D"), String::compareToIgnoreCase, String::concat, String::toUpperCase, String::equals).collect(toList());
-        assertEquals(Arrays.asList("-", "B", "Cc", "dD", "E"), collect);
+        assertEquals(Arrays.asList("-", "B", "Cc", "dD"), collect);
         collect = StreamUtil.comparingBiMap(of("a", "c", "d"), empty(), String::compareToIgnoreCase, String::concat, identity(), String::equals).collect(toList());
-        assertEquals(Arrays.asList("a", "c", "d"), collect);
+        assertEquals(Collections.emptyList(), collect);
         collect = StreamUtil.comparingBiMap(empty(), of("a", "c", "d"), String::compareToIgnoreCase, String::concat, identity(), String::equals).collect(toList());
+        assertEquals(Collections.emptyList(), collect);
+    }
+
+    @Test
+    public void comparingBiMapTailTest() {
+        List<String> collect;
+        collect = StreamUtil.comparingBiMapTail(of("-", "a", "C", "d", "e"), of("a", "b", "c", "D"), String::compareToIgnoreCase, String::concat, String::toUpperCase, String::equals).collect(toList());
+        assertEquals(Arrays.asList("-", "B", "Cc", "dD", "E"), collect);
+        collect = StreamUtil.comparingBiMapTail(of("a", "c", "d"), empty(), String::compareToIgnoreCase, String::concat, identity(), String::equals).collect(toList());
+        assertEquals(Arrays.asList("a", "c", "d"), collect);
+        collect = StreamUtil.comparingBiMapTail(empty(), of("a", "c", "d"), String::compareToIgnoreCase, String::concat, identity(), String::equals).collect(toList());
         assertEquals(Arrays.asList("a", "c", "d"), collect);
     }
 
