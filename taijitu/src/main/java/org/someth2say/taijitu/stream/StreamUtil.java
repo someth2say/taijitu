@@ -94,8 +94,11 @@ public class StreamUtil {
                                             BiFunction<? super A, ? super B, ? extends C> mapper,
                                             BiPredicate<? super A, ? super B> biFilter) {
         Objects.requireNonNull(mapper);
-        Spliterator<? extends A> aSpliterator = Objects.requireNonNull(first).spliterator();
-        Spliterator<? extends B> bSpliterator = Objects.requireNonNull(second).spliterator();
+        Objects.requireNonNull(first);
+        Objects.requireNonNull(second);
+
+        Spliterator<? extends A> aSpliterator = first.spliterator();
+        Spliterator<? extends B> bSpliterator = second.spliterator();
 
         Iterator<A> aIterator = Spliterators.iterator(aSpliterator);
         Iterator<B> bIterator = Spliterators.iterator(bSpliterator);
@@ -154,9 +157,11 @@ public class StreamUtil {
         Objects.requireNonNull(mapper);
         Objects.requireNonNull(onUnpairedA);
         Objects.requireNonNull(onUnpairedB);
+        Objects.requireNonNull(first);
+        Objects.requireNonNull(second);
 
-        Spliterator<? extends A> aSpliterator = Objects.requireNonNull(first).spliterator();
-        Spliterator<? extends B> bSpliterator = Objects.requireNonNull(second).spliterator();
+        Spliterator<? extends A> aSpliterator = first.spliterator();
+        Spliterator<? extends B> bSpliterator = second.spliterator();
 
         Iterator<A> aIterator = Spliterators.iterator(aSpliterator);
         Iterator<B> bIterator = Spliterators.iterator(bSpliterator);

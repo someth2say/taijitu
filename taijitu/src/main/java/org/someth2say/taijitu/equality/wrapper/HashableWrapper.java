@@ -37,4 +37,9 @@ public class HashableWrapper<WRAPPED>
             return new HashableWrapper<>(wrapped, hasher);
         }
     }
+
+    @Override
+    public String toString() {
+        return HashableWrapper.class.getSimpleName()+"("+this.getWraped().toString()+")";
+    }
 }

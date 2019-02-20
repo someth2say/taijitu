@@ -1,23 +1,20 @@
 package org.someth2say.taijitu.stream.mapping;
 
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.someth2say.taijitu.equality.aspects.external.Hasher;
-import org.someth2say.taijitu.stream.StreamEqualizer;
-import org.someth2say.taijitu.equality.wrapper.HashableWrapper;
 import org.someth2say.taijitu.equality.explain.Difference;
 import org.someth2say.taijitu.equality.explain.Missing;
 import org.someth2say.taijitu.equality.explain.Unequal;
+import org.someth2say.taijitu.equality.wrapper.HashableWrapper;
+import org.someth2say.taijitu.stream.StreamEqualizer;
 import org.someth2say.taijitu.stream.StreamUtil;
 
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Spliterators;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * Created by Jordi Sola on 02/03/2017.
@@ -33,12 +30,8 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
     @Override
     public Stream<Difference> explain(Stream<T> source, Stream<T> target) {
 
-        final Stream<OrdinalAndComposite<T>> alternattingStream = StreamUtil.zip(
-                source.map(t -> new OrdinalAndComposite<>(1, t)),
-                target.map(t -> new OrdinalAndComposite<>(2, t)), 1, true);
-
-        Map<HashableWrapper<T>, T> map1 = new ConcurrentHashMap<>();
-        Map<HashableWrapper<T>, T> map2 = new ConcurrentHashMap<>();
+        ArrayListValuedHashMap<HashableWrapper<T>, T> map1 = new ArrayListValuedHashMap<>();
+        ArrayListValuedHashMap<HashableWrapper<T>, T> map2 = new ArrayListValuedHashMap<>();
 
         //TODO: Simplify
         BiFunction<? super T, ? super T, Stream<Difference>> biMapper = (a,b)-> Stream.of(
@@ -52,60 +45,48 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         BiPredicate<? super T, ? super T> filter = (a, b) -> false;
 
         Stream<Difference> unequals = StreamUtil.biMapTail(source, target, biMapper, aTailer, bTailer, filter).flatMap(Function.identity());
-        Stream<Difference> remaining1 = map1.values().stream().map(t->new Missing<>(hasher,t));
-        Stream<Difference> remaining2 = map2.values().stream().map(t->new Missing<>(hasher,t));
+
+        Stream<Difference> remaining1 = Stream.generate(()->{
+            if (map1.isEmpty()) return null;
+            Map.Entry<HashableWrapper<T>, T> next = map1.entries().iterator().next();
+            map1.removeMapping(next.getKey(),next.getValue());
+            return (Difference)new Missing<>(hasher,next.getValue());
+        }).takeWhile(Objects::nonNull);
+
+        Stream<Difference> remaining2 = Stream.generate(()->{
+            if (map2.isEmpty()) return null;
+            Map.Entry<HashableWrapper<T>, T> next = map2.entries().iterator().next();
+            map2.removeMapping(next.getKey(),next.getValue());
+            return (Difference)new Missing<>(hasher,next.getValue());
+        }).takeWhile(Objects::nonNull);
 
         return Stream.concat(Stream.concat(unequals, remaining1), remaining2);
-//
-//
-//        alternattingStream.flatMap(oac -> map(oac, hasher, map)).
-//
-//                Iterator < Difference > differencesAndMissings = new Iterator<>() {
-//            Map<HashableWrapper<T>, OrdinalAndComposite<T>> map = new ConcurrentHashMap<>();
-//
-//            private Iterator<Difference> mappedDifferencesIt = alternattingStream
-//                    .flatMap(oac -> map(oac, hasher, map)).iterator();
-//
-//            @Override
-//            public boolean hasNext() {
-//                return mappedDifferencesIt.hasNext() || !map.isEmpty();
-//            }
-//
-//            @Override
-//            public Difference next() {
-//                if (mappedDifferencesIt.hasNext()) {
-//                    return mappedDifferencesIt.next();
-//                } else {
-//                    //pick next available entry in map and return it as a "missing"
-//                    OrdinalAndComposite<T> oac = map.remove(map.entrySet().iterator().next().getKey());
-//                    return new Missing<>(hasher, oac.getComposite());
-//                }
-//            }
-//        };
-//
-//        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(differencesAndMissings, 0), true);
     }
 
     public static <T> Stream<Difference> map(T thisT, Hasher<T> hasher,
-                                             Map<HashableWrapper<T>, T> thisMap,
-                                             Map<HashableWrapper<T>, T> otherMap,
+                                             ArrayListValuedHashMap<HashableWrapper<T>, T> thisMap,
+                                             ArrayListValuedHashMap<HashableWrapper<T>, T> otherMap,
                                              BiFunction<T,T,Difference<T>> diffMaker) {
-        HashableWrapper<T> thisWrapper = new HashableWrapper<>(thisT, hasher);
-        T other = otherMap.remove(thisWrapper);
-        if (other != null) {
-            // we have a key match ...
-            Stream<Difference> unequal;
-            boolean areEquals = hasher.areEquals(thisT, other);
-            if (!areEquals) {
-                unequal = Stream.of(diffMaker.apply(thisT, other));
-            } else {
-                thisMap.put(thisWrapper,thisT);
-                unequal = Stream.empty();
-            }
 
-            return unequal;
+        HashableWrapper<T> thisWrapper = new HashableWrapper<>(thisT, hasher);
+        //TODO: Investigate efficiency
+        synchronized (hasher) {
+            if (otherMap.containsKey(thisWrapper)) {
+                T other = otherMap.get(thisWrapper).get(0);
+                otherMap.removeMapping(thisWrapper,other);
+                // we have a key match ...
+                if (!hasher.areEquals(thisT, other)) {
+                    Difference<T> apply = diffMaker.apply(thisT, other);
+                    return Stream.of(apply);
+                } else {
+                    return Stream.empty();
+                }
+            } else {
+                thisMap.put(thisWrapper, thisT);
+                return Stream.empty();
+            }
         }
-        return Stream.empty();
+
     }
 
 }
