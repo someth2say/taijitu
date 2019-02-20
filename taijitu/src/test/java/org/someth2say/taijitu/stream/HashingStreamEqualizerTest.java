@@ -39,6 +39,25 @@ public class HashingStreamEqualizerTest {
         assertTrue(differences.contains(new Missing<>(TestComposite.testClassOneTwoEquality, bFrom1a))|differences.contains(new Missing<>(TestComposite.testClassOneTwoEquality, bFrom1b)));
     }
 
+    @Test
+    public void hashingStreamEqualizerTest_colisions_same_stream() {
+        // Build Streams
+        TestComposite a1 = new TestComposite("aaa", "aaa", 1);
+        TestComposite a2 = new TestComposite("aaa", "aaA", 1);
+
+        Stream<TestComposite> stream1 = Stream.of(a1,a2);
+        Stream<TestComposite> stream2 = Stream.empty();
+
+        HashingStreamEqualizer<TestComposite> streamEqualizer = new HashingStreamEqualizer<>(TestComposite.testClassOneTwoEquality);
+        List<Difference> differences = streamEqualizer.explain(stream1, stream2).collect(Collectors.toList());
+
+        differences.forEach(System.out::println);
+        // Test results
+        assertEquals(2, differences.size());
+        assertTrue(differences.contains(new Missing<>(TestComposite.testClassOneTwoEquality, a1)));
+        assertTrue(differences.contains(new Missing<>(TestComposite.testClassOneTwoEquality, a2)));
+    }
+
 /*    @Test(timeout = 1000)
     public void hashingStreamEqualizerInfiniteTest() {
         TestComposite differentTD1 = new TestComposite("", "", 100);

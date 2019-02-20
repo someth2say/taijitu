@@ -49,7 +49,7 @@ class Mapper<T> implements Runnable {
 
     public static <T> Stream<Difference> map(T composite, int ordinal, Hasher<T> hasher, Map<HashableWrapper<T>, OrdinalAndComposite<T>> sharedMap) {
         OrdinalAndComposite<T> oac = new OrdinalAndComposite<>(ordinal, composite);
-        return HashingStreamEqualizer.map(oac, hasher, sharedMap);
+        return null; //HashingStreamEqualizer.map(oac, hasher, sharedMap);
     }
 
     private static <T> T getNextRecordOrNull(Iterator<T> resultSetSource) {

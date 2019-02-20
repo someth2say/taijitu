@@ -307,7 +307,7 @@ public class StreamUtil {
 
         @Override
         public C next() {
-            boolean aOrB = (aIterator.hasNext() && batchStep < 0) || (batchStep > 0 && !bIterator.hasNext() && keepTail);
+            boolean aOrB = (aIterator.hasNext() && batchStep < 0) || (batchStep >= 0 && !bIterator.hasNext() && keepTail);
             batchStep = ++batchStep < batchSize ? batchStep : -batchSize;
             return aOrB ? aIterator.next() : bIterator.next();
         }
