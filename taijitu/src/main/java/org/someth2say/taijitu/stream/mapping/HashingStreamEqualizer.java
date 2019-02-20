@@ -30,17 +30,15 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
     @Override
     public Stream<Difference> explain(Stream<T> source, Stream<T> target) {
 
-        ArrayListValuedHashMap<HashableWrapper<T>, T> map1 = new ArrayListValuedHashMap<>();
-        ArrayListValuedHashMap<HashableWrapper<T>, T> map2 = new ArrayListValuedHashMap<>();
+        final ArrayListValuedHashMap<HashableWrapper<T>, T> map1 = new ArrayListValuedHashMap<>();
+        final ArrayListValuedHashMap<HashableWrapper<T>, T> map2 = new ArrayListValuedHashMap<>();
 
         //TODO: Simplify
-        BiFunction<? super T, ? super T, Stream<Difference>> biMapper = (a,b)-> Stream.of(
-                map(a, hasher, map1, map2, (ta,tb)->new Unequal<>(hasher, ta, tb)),
-                map(b, hasher, map2, map1, (ta,tb)->new Unequal<>(hasher, tb, ta))
-        ).flatMap(Function.identity());
+        BiFunction<? super T, ? super T, Stream<Difference>> biMapper = (a,b)-> Stream.of(mapA(a, map1, map2), mapB(b, map1, map2))
+                .flatMap(Function.identity());
 
-        Function<? super T, Stream<Difference>> aTailer = a -> map(a, hasher, map1, map2, (ta,tb)->new Unequal<>(hasher, ta, tb));
-        Function<? super T, Stream<Difference>> bTailer = b -> map(b, hasher, map2, map1, (ta,tb)->new Unequal<>(hasher, tb, ta));
+        Function<? super T, Stream<Difference>> aTailer = a -> mapA(a, map1, map2);
+        Function<? super T, Stream<Difference>> bTailer = b -> mapB(b, map1, map2);
         //TODO: Default filter as empty filter
         BiPredicate<? super T, ? super T> filter = (a, b) -> false;
 
@@ -61,6 +59,14 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         }).takeWhile(Objects::nonNull);
 
         return Stream.concat(Stream.concat(unequals, remaining1), remaining2);
+    }
+
+    private Stream<Difference> mapB(T b, ArrayListValuedHashMap<HashableWrapper<T>, T> map1, ArrayListValuedHashMap<HashableWrapper<T>, T> map2) {
+        return map(b, hasher, map2, map1, (ta, tb) -> new Unequal<>(hasher, tb, ta));
+    }
+
+    private Stream<Difference> mapA(T a, ArrayListValuedHashMap<HashableWrapper<T>, T> map1, ArrayListValuedHashMap<HashableWrapper<T>, T> map2) {
+        return map(a, hasher, map1, map2, (ta, tb) -> new Unequal<>(hasher, ta, tb));
     }
 
     public static <T> Stream<Difference> map(T thisT, Hasher<T> hasher,

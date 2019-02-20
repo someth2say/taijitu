@@ -318,6 +318,7 @@ public class StreamUtil {
         }
     }
 
+    //TODO: BiMap(Tail)Iterators do not need to be pre-fetched if no filter is used. Hence, can create just an `BiIterator`
     private static class BiMapIterator<C, A, B> extends PreFetchBiIterator<A, B, C> {
         private final BiFunction<? super A, ? super B, ? extends C> mapper;
 
