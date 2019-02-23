@@ -1,7 +1,7 @@
 package org.someth2say.taijitu.equality.impl.composite;
 
 import org.someth2say.taijitu.equality.aspects.external.ComparatorHasher;
-import org.someth2say.taijitu.equality.impl.partial.IndirectComparatorHasher;
+import org.someth2say.taijitu.equality.impl.delegating.DelegatingComparatorHasher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ public class CompositeComparatorHasher<T> extends Composite<T,ComparatorHasher<T
         }
 
         public <R> Builder<T> addComponent(Function<T, R> extractor, ComparatorHasher<R> delegate) {
-            return addComponent(new IndirectComparatorHasher<>(extractor, delegate));
+            return addComponent(new DelegatingComparatorHasher<>(extractor, delegate));
         }
 
 

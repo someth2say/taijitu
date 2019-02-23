@@ -12,8 +12,6 @@ import org.someth2say.taijitu.stream.StreamUtil;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -33,16 +31,9 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         final ArrayListValuedHashMap<HashableWrapper<T>, T> map1 = new ArrayListValuedHashMap<>();
         final ArrayListValuedHashMap<HashableWrapper<T>, T> map2 = new ArrayListValuedHashMap<>();
 
-        //TODO: Simplify
-        BiFunction<? super T, ? super T, Stream<Difference>> biMapper = (a,b)-> Stream.of(mapA(a, map1, map2), mapB(b, map1, map2))
-                .flatMap(Function.identity());
-
-        Function<? super T, Stream<Difference>> aTailer = a -> mapA(a, map1, map2);
-        Function<? super T, Stream<Difference>> bTailer = b -> mapB(b, map1, map2);
-        //TODO: Default filter as empty filter
-        BiPredicate<? super T, ? super T> filter = (a, b) -> false;
-
-        Stream<Difference> unequals = StreamUtil.biMapTail(source, target, biMapper, aTailer, bTailer, filter).flatMap(Function.identity());
+        Stream<Difference> mapA = source.flatMap( a -> mapA(a, map1, map2));
+        Stream<Difference> mapB = target.flatMap( b -> mapB(b, map1, map2));
+        Stream<Difference> unequals = StreamUtil.zip(mapA, mapB,true);
 
         Stream<Difference> remaining1 = Stream.generate(()->{
             if (map1.isEmpty()) return null;
@@ -58,7 +49,7 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
             return (Difference)new Missing<>(hasher,next.getValue());
         }).takeWhile(Objects::nonNull);
 
-        return Stream.concat(Stream.concat(unequals, remaining1), remaining2);
+        return Stream.concat(unequals, Stream.concat( remaining1, remaining2));
     }
 
     private Stream<Difference> mapB(T b, ArrayListValuedHashMap<HashableWrapper<T>, T> map1, ArrayListValuedHashMap<HashableWrapper<T>, T> map2) {
@@ -69,13 +60,14 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         return map(a, hasher, map1, map2, (ta, tb) -> new Unequal<>(hasher, ta, tb));
     }
 
+    //TODO: Investigate eficiency of creating an Optional instead of a Stream.
     public static <T> Stream<Difference> map(T thisT, Hasher<T> hasher,
                                              ArrayListValuedHashMap<HashableWrapper<T>, T> thisMap,
                                              ArrayListValuedHashMap<HashableWrapper<T>, T> otherMap,
                                              BiFunction<T,T,Difference<T>> diffMaker) {
 
         HashableWrapper<T> thisWrapper = new HashableWrapper<>(thisT, hasher);
-        //TODO: Investigate efficiency
+        //TODO: Investigate efficiency of this sync
         synchronized (hasher) {
             if (otherMap.containsKey(thisWrapper)) {
                 T other = otherMap.get(thisWrapper).get(0);

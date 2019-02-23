@@ -1,7 +1,7 @@
 package org.someth2say.taijitu.equality.impl.composite;
 
 import org.someth2say.taijitu.equality.aspects.external.Comparator;
-import org.someth2say.taijitu.equality.impl.partial.IndirectComparator;
+import org.someth2say.taijitu.equality.impl.delegating.DelegatingComparator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ public class CompositeComparator<T> extends Composite<T,Comparator<T>> implement
         }
 
         public <R> Builder<T> addComponent(Function<T,R> extractor, Comparator<R> delegate) {
-            return addComponent(new IndirectComparator<>(extractor,delegate));
+            return addComponent(new DelegatingComparator<>(extractor,delegate));
         }
 
         public CompositeComparator<T> build() {

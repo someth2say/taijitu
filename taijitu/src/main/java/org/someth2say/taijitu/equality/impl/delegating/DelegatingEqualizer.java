@@ -1,12 +1,12 @@
-package org.someth2say.taijitu.equality.impl.partial;
+package org.someth2say.taijitu.equality.impl.delegating;
 
 import org.someth2say.taijitu.equality.aspects.external.Equalizer;
 
 import java.util.function.Function;
 
-public class IndirectEqualizer<T,R> extends Indirect<T, R> implements IIndirectEqualizer<T,R> {
+public class DelegatingEqualizer<T,R> extends Delegating<T, R> implements IDelegatingEqualizer<T,R> {
 
-    public IndirectEqualizer(Function<T, R> extractor, Equalizer<R> delegate) {
+    public DelegatingEqualizer(Function<T, R> extractor, Equalizer<R> delegate) {
         super(extractor, delegate);
     }
 
@@ -15,7 +15,7 @@ public class IndirectEqualizer<T,R> extends Indirect<T, R> implements IIndirectE
         return "*"+getDelegate().toString();
     }
 }
-interface IIndirectEqualizer<T,R> extends IIndirect<T, R>, Equalizer<T> {
+interface IDelegatingEqualizer<T,R> extends IDelegating<T, R>, Equalizer<T> {
 
     @Override
     default boolean areEquals(T equalized1, T equalized2) {

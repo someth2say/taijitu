@@ -1,7 +1,7 @@
 package org.someth2say.taijitu.equality.impl.composite;
 
 import org.someth2say.taijitu.equality.aspects.external.Equalizer;
-import org.someth2say.taijitu.equality.impl.partial.IndirectEqualizer;
+import org.someth2say.taijitu.equality.impl.delegating.DelegatingEqualizer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ public class CompositeEqualizer<T> extends Composite<T, Equalizer<T>> implements
         }
 
         public <R> Builder<T> addComponent(Function<T, R> extractor, Equalizer<R> delegate) {
-            return addComponent(new IndirectEqualizer<>(extractor, delegate));
+            return addComponent(new DelegatingEqualizer<>(extractor, delegate));
         }
 
         public CompositeEqualizer<T> build() {

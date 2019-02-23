@@ -4,6 +4,8 @@ import org.someth2say.taijitu.equality.aspects.external.Equalizer;
 
 import java.util.Objects;
 
+//TODO: Remove this. Abstract configuration is a CLI topic, not a comparator topic.
+@Deprecated
 public abstract class AbstractConfigurableEqualizer<T> implements Equalizer<T> {
 
     private final Object equalityConfig;
@@ -20,12 +22,6 @@ public abstract class AbstractConfigurableEqualizer<T> implements Equalizer<T> {
     public String toString() {
         return getClass().getSimpleName() + "[" + (getEqualityConfig() != null ? getEqualityConfig().toString() : "") + "]";
     }
-
-/*    @Override
-    public Stream<Difference> explain(T t1, T t2) {
-        //Warning: cyclic dependency (unless areEquals is overwritten in subclasses)
-        return areEquals(t1, t2) ? null : Stream.of(new Unequal<>(this, t1, t2));
-    }*/
 
     @Override
     public int hashCode() {
