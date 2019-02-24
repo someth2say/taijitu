@@ -6,9 +6,9 @@ import org.someth2say.taijitu.equality.wrapper.Wrappers;
 
 import static org.junit.Assert.*;
 
-public class StringCaseInsensitiveTest {
+public class StringCaseInsensitiveComparatorHasherTest {
 
-    final StringCaseInsensitive instance = StringCaseInsensitive.EQUALITY;
+    final StringCaseInsensitiveComparatorHasher instance = StringCaseInsensitiveComparatorHasher.INSTANCE;
     final ComparableHashableWrapper.Factory<String> factory = Wrappers.factory(instance);
 
     final ComparableHashableWrapper<String> aaa = factory.wrap("aaa");

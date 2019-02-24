@@ -5,45 +5,43 @@ import org.someth2say.taijitu.equality.aspects.external.ComparatorHasher;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class NumberThreshold<T extends Number> extends AbstractConfigurableEqualizer<T> implements ComparatorHasher<T> {
+public class NumberThresholdComparatorHasher<T extends Number> implements ComparatorHasher<T> {
 
     private static final int DEFAULT_SCALE = 2;
 
-    public static final NumberThreshold<Number> EQUALITY = new NumberThreshold<>();
+    public static final NumberThresholdComparatorHasher<Number> INSTANCE = new NumberThresholdComparatorHasher<>();
+    private int scale;
 
-    public NumberThreshold() {
-        this(null);
+    public NumberThresholdComparatorHasher() {
+        this(DEFAULT_SCALE);
     }
 
-    public NumberThreshold(Object equalityConfig) {
-        super(equalityConfig);
+    public NumberThresholdComparatorHasher(int scale) {
+        if (scale < 0) throw new IllegalArgumentException();
+        this.scale = scale;
     }
 
     @Override
     public int hash(T object) {
-        int scale = getScale();
         double doubleValue = object.doubleValue();
-        double rounded = round(doubleValue, scale);
+        double rounded = round(doubleValue);
         return Double.valueOf(rounded).hashCode();
     }
 
-    private int getScale() {
-        Object equalityConfig = getEqualityConfig();
-        return equalityConfig != null ? Integer.parseInt(equalityConfig.toString()) : DEFAULT_SCALE;
+    public int getScale() {
+        return scale;
     }
 
-    private static double round(double value, int places) {
-        if (places < 0) throw new IllegalArgumentException();
+    private double round(double value) {
         BigDecimal bd = new BigDecimal(Double.toString(value));
-        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        bd = bd.setScale(getScale(), RoundingMode.HALF_UP);
         return bd.doubleValue();
     }
 
     @Override
     public boolean areEquals(T object1, T object2) {
-        int scale = getScale();
         double diff = object1.doubleValue() - object2.doubleValue();
-        double scaleRange = getScaleRange(scale);
+        double scaleRange = getScaleRange(getScale());
         return (Math.abs(diff) < scaleRange);
     }
 
@@ -53,9 +51,8 @@ public class NumberThreshold<T extends Number> extends AbstractConfigurableEqual
 
     @Override
     public int compare(T object1, T object2) {
-        int scale = getScale();
         double diff = object1.doubleValue() - object2.doubleValue();
-        double scaleRange = getScaleRange(scale);
+        double scaleRange = getScaleRange(getScale());
         return Math.abs(diff) < scaleRange ? 0 : diff < 0 ? -1 : 1;
     }
 }

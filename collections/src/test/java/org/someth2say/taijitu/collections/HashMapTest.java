@@ -4,8 +4,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.someth2say.taijitu.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.equality.aspects.external.Hasher;
-import org.someth2say.taijitu.equality.impl.value.NumberThreshold;
-import org.someth2say.taijitu.equality.impl.value.StringCaseInsensitive;
+import org.someth2say.taijitu.equality.impl.value.NumberThresholdComparatorHasher;
+import org.someth2say.taijitu.equality.impl.value.StringCaseInsensitiveComparatorHasher;
 
 import java.util.Collection;
 import java.util.Map;
@@ -15,9 +15,9 @@ import static org.junit.Assert.*;
 
 public class HashMapTest {
 
-    private Hasher<String> hasher = StringCaseInsensitive.EQUALITY;
+    private Hasher<String> hasher = StringCaseInsensitiveComparatorHasher.INSTANCE;
     private HashMap<String, Float> hashMap;
-    private Equalizer<Number> equalizer = NumberThreshold.EQUALITY;
+    private Equalizer<Number> equalizer = NumberThresholdComparatorHasher.INSTANCE;
 
     @Before
     public void buildHolaMundoMap() {

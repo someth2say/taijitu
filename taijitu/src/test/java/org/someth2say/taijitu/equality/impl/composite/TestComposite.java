@@ -54,23 +54,23 @@ public class TestComposite {
 
     public static final CompositeComparatorHasher<TestComposite> testClassOneTwoEquality
             = new CompositeComparatorHasher.Builder<TestComposite>()
-            .addComponent(TestComposite::getThree, NumberComparatorHasher.EQUALITY)
-            .addComponent(TestComposite::getOne, StringCaseInsensitive.EQUALITY)
-            .addComponent(TestComposite::getTwo, StringCaseInsensitive.EQUALITY)
+            .addComponent(TestComposite::getThree, NumberComparatorHasher.INSTANCE)
+            .addComponent(TestComposite::getOne, StringCaseInsensitiveComparatorHasher.INSTANCE)
+            .addComponent(TestComposite::getTwo, StringCaseInsensitiveComparatorHasher.INSTANCE)
             .build();
 
     public static final CompositeComparator<TestComposite> testClassThreeComparator
             = new CompositeComparator.Builder<TestComposite>()
-            .addComponent(TestComposite::getThree, new JavaComparable<>())
+            .addComponent(TestComposite::getThree, new ComparableComparatorHasher<>())
             .build();
 
     public static final CompositeHasher<TestComposite> testClassThreeHasher
             = new CompositeHasher.Builder<TestComposite>()
-            .addComponent(TestComposite::getThree, JavaObject.EQUALITY)
+            .addComponent(TestComposite::getThree, ObjectHasher.INSTANCE)
             .build();
 
     public static final CompositeComparatorHasher<TestComposite> testClassThreeComparatorHasher
             = new CompositeComparatorHasher.Builder<TestComposite>()
-            .addComponent(TestComposite::getThree, ObjectToString.EQUALITY)
+            .addComponent(TestComposite::getThree, ObjectToStringComparatorHasher.INSTANCE)
             .build();
 }

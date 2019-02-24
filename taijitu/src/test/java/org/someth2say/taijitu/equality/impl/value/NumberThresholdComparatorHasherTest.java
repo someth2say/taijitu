@@ -6,8 +6,8 @@ import org.someth2say.taijitu.equality.wrapper.Wrappers;
 
 import static org.junit.Assert.*;
 
-public class NumberThresholdTest {
-    final NumberThreshold<Number> instance = NumberThreshold.EQUALITY;
+public class NumberThresholdComparatorHasherTest {
+    final NumberThresholdComparatorHasher<Number> instance = NumberThresholdComparatorHasher.INSTANCE;
     final ComparableHashableWrapper.Factory<Number> factory = Wrappers.factory(instance);
 
     private final Number one = 1.000;

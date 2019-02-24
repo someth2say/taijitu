@@ -24,9 +24,9 @@ import org.someth2say.taijitu.cli.config.interfaces.ITaijituCfg;
 import org.someth2say.taijitu.cli.source.mapper.ResultSetTupleMapper;
 import org.someth2say.taijitu.cli.source.query.ConnectionManager;
 import org.someth2say.taijitu.cli.source.query.QuerySource;
-import org.someth2say.taijitu.equality.impl.value.DateThreshold;
-import org.someth2say.taijitu.equality.impl.value.NumberThreshold;
-import org.someth2say.taijitu.equality.impl.value.StringCaseInsensitive;
+import org.someth2say.taijitu.equality.impl.value.DateThresholdComparator;
+import org.someth2say.taijitu.equality.impl.value.NumberThresholdComparatorHasher;
+import org.someth2say.taijitu.equality.impl.value.StringCaseInsensitiveComparatorHasher;
 import org.someth2say.taijitu.equality.explain.Difference;
 
 import java.io.IOException;
@@ -135,9 +135,9 @@ public class CLITest_DB {
         basicTaijituCfg.setComparisons(Arrays.asList(comp1, comp2));
 
         // Equalizer
-        BasicEqualityCfg stringEq = new BasicEqualityCfg(StringCaseInsensitive.class.getSimpleName(), String.class.getName(), null);
-        BasicEqualityCfg numberEq = new BasicEqualityCfg(NumberThreshold.class.getSimpleName(), Number.class.getName(), null, "2");
-        IEqualityCfg timestampEq = new BasicEqualityCfg(DateThreshold.class.getSimpleName(), Date.class.getName(), null, "100");
+        BasicEqualityCfg stringEq = new BasicEqualityCfg(StringCaseInsensitiveComparatorHasher.class.getSimpleName(), String.class.getName(), null);
+        BasicEqualityCfg numberEq = new BasicEqualityCfg(NumberThresholdComparatorHasher.class.getSimpleName(), Number.class.getName(), null, "2");
+        IEqualityCfg timestampEq = new BasicEqualityCfg(DateThresholdComparator.class.getSimpleName(), Date.class.getName(), null, "100");
         basicTaijituCfg.setEqualityConfigs(Arrays.asList(stringEq, numberEq, timestampEq));
 
         return new TaijituCfg(basicTaijituCfg);
@@ -161,13 +161,13 @@ public class CLITest_DB {
 
         //Add comparators
         //Case insensitive strings
-        properties.setProperty(ConfigurationLabels.EQUALITY + "." + StringCaseInsensitive.class.getSimpleName() + "." + ConfigurationLabels.FIELD_CLASS, String.class.getName());
+        properties.setProperty(ConfigurationLabels.EQUALITY + "." + StringCaseInsensitiveComparatorHasher.class.getSimpleName() + "." + ConfigurationLabels.FIELD_CLASS, String.class.getName());
         //Decimal places for Numbers
-        properties.setProperty(ConfigurationLabels.EQUALITY + "." + NumberThreshold.class.getSimpleName() + "." + ConfigurationLabels.FIELD_CLASS, Number.class.getName());
-        properties.setProperty(ConfigurationLabels.EQUALITY + "." + NumberThreshold.class.getSimpleName() + "." + ConfigurationLabels.EQUALITY_PARAMS, "2");
+        properties.setProperty(ConfigurationLabels.EQUALITY + "." + NumberThresholdComparatorHasher.class.getSimpleName() + "." + ConfigurationLabels.FIELD_CLASS, Number.class.getName());
+        properties.setProperty(ConfigurationLabels.EQUALITY + "." + NumberThresholdComparatorHasher.class.getSimpleName() + "." + ConfigurationLabels.EQUALITY_PARAMS, "2");
         //Threshold 100ms for Timestamps.
-        properties.setProperty(ConfigurationLabels.EQUALITY + "." + DateThreshold.class.getSimpleName() + "." + ConfigurationLabels.FIELD_CLASS, Date.class.getName());
-        properties.setProperty(ConfigurationLabels.EQUALITY + "." + DateThreshold.class.getSimpleName() + "." + ConfigurationLabels.EQUALITY_PARAMS, "100");
+        properties.setProperty(ConfigurationLabels.EQUALITY + "." + DateThresholdComparator.class.getSimpleName() + "." + ConfigurationLabels.FIELD_CLASS, Date.class.getName());
+        properties.setProperty(ConfigurationLabels.EQUALITY + "." + DateThresholdComparator.class.getSimpleName() + "." + ConfigurationLabels.EQUALITY_PARAMS, "100");
 
         return ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(properties));
     }

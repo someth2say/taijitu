@@ -2,8 +2,8 @@ package org.someth2say.taijitu.cli.config;
 
 import org.someth2say.taijitu.cli.config.interfaces.DefaultEqualityConfig;
 import org.someth2say.taijitu.cli.config.interfaces.IEqualityCfg;
-import org.someth2say.taijitu.equality.impl.value.JavaObject;
-import org.someth2say.taijitu.equality.impl.value.ObjectToString;
+import org.someth2say.taijitu.equality.impl.value.ObjectHasher;
+import org.someth2say.taijitu.equality.impl.value.ObjectToStringComparatorHasher;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,7 +18,7 @@ public class DefaultConfig {
     public static final boolean DEFAULT_SCAN_CLASSPATH = false;
 
     //TODO: We are here adding two equalities: a simple one, and a HasherComparer one. Maybe this should be split
-    public static final List<IEqualityCfg> DEFAULT_EQUALITY_CONFIG = Arrays.asList((DefaultEqualityConfig) JavaObject.class::getSimpleName, (DefaultEqualityConfig) ObjectToString.class::getSimpleName);
+    public static final List<IEqualityCfg> DEFAULT_EQUALITY_CONFIG = Arrays.asList((DefaultEqualityConfig) ObjectHasher.class::getSimpleName, (DefaultEqualityConfig) ObjectToStringComparatorHasher.class::getSimpleName);
 
     public static final String DEFAULT_CONFIG_FILE = "taijitu.properties";
 

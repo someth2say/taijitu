@@ -2,9 +2,9 @@ package org.someth2say.taijitu.equality.impl.value;
 
 import org.someth2say.taijitu.equality.aspects.external.ComparatorHasher;
 
-public class NumberComparatorHasher<T extends Number> extends JavaObject<T> implements ComparatorHasher<T> {
+public class NumberComparatorHasher<T extends Number> extends ObjectHasher<T> implements ComparatorHasher<T> {
 
-    public static final NumberComparatorHasher<Number> EQUALITY = new NumberComparatorHasher<>();
+    public static final NumberComparatorHasher<Number> INSTANCE = new NumberComparatorHasher<>();
 
     @Override
     public int compare(T number1, T number2) {

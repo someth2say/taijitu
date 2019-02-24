@@ -2,8 +2,8 @@ package org.someth2say.taijitu.collections;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.someth2say.taijitu.equality.impl.value.NumberThreshold;
-import org.someth2say.taijitu.equality.impl.value.StringCaseInsensitive;
+import org.someth2say.taijitu.equality.impl.value.NumberThresholdComparatorHasher;
+import org.someth2say.taijitu.equality.impl.value.StringCaseInsensitiveComparatorHasher;
 
 import java.util.*;
 
@@ -15,7 +15,7 @@ public class LinkedHashMapTest {
 
     @Before
     public void init() {
-        hashMap = new LinkedHashMap<>(StringCaseInsensitive.EQUALITY, NumberThreshold.EQUALITY);
+        hashMap = new LinkedHashMap<>(StringCaseInsensitiveComparatorHasher.INSTANCE, NumberThresholdComparatorHasher.INSTANCE);
         hashMap.put("HOLA", 4f);
         hashMap.put("MUNDO", 5f);
     }

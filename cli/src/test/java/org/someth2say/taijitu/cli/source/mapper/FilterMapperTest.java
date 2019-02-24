@@ -6,7 +6,7 @@ import org.someth2say.taijitu.cli.source.StreamSource;
 import org.someth2say.taijitu.equality.aspects.external.Comparator;
 import org.someth2say.taijitu.stream.StreamEqualizer;
 import org.someth2say.taijitu.stream.sorted.ComparableStreamEqualizer;
-import org.someth2say.taijitu.equality.impl.value.JavaComparable;
+import org.someth2say.taijitu.equality.impl.value.ComparableComparatorHasher;
 import org.someth2say.taijitu.equality.explain.Difference;
 import org.someth2say.taijitu.equality.explain.Missing;
 
@@ -25,7 +25,7 @@ public class FilterMapperTest {
         Source<Integer> source2 = new StreamSource<>("", Stream.of(1, 2, 3, 4, 5), Integer.class);
         Source<Integer> filteredSource1 = stringFilterMapper.apply(source1);
 
-        Comparator<Integer> comparator = new JavaComparable<>();
+        Comparator<Integer> comparator = new ComparableComparatorHasher<>();
 
         StreamEqualizer<Integer> sse = new ComparableStreamEqualizer<>(comparator);
         Stream<Difference> diffs = sse.explain(filteredSource1.stream(), source2.stream());

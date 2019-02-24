@@ -9,9 +9,9 @@ import java.util.Date;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class DateThresholdTest {
+public class DateThresholdComparatorTest {
 
-    final DateThreshold<Date> instance = DateThreshold.EQUALITY;
+    final DateThresholdComparator<Date> instance = DateThresholdComparator.EQUALITY;
     final ComparableWrapper.Factory<Date> factory = Wrappers.factory(instance);
 
     final Date now = new Date();

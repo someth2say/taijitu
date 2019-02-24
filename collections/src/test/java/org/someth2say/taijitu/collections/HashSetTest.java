@@ -2,7 +2,7 @@ package org.someth2say.taijitu.collections;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.someth2say.taijitu.equality.impl.value.StringCaseInsensitive;
+import org.someth2say.taijitu.equality.impl.value.StringCaseInsensitiveComparatorHasher;
 
 import static org.junit.Assert.*;
 
@@ -12,7 +12,7 @@ public class HashSetTest {
 
     @Before
     public void buildHashSet() {
-        hashSet = new HashSet<>(StringCaseInsensitive.EQUALITY);
+        hashSet = new HashSet<>(StringCaseInsensitiveComparatorHasher.INSTANCE);
         hashSet.add("HOLA");
         hashSet.add("MUNDO");
     }
