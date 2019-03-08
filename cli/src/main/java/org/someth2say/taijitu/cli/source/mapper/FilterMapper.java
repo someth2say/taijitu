@@ -21,7 +21,7 @@ public class FilterMapper<ORIG_TYPE> extends AbstractSourceMapper<ORIG_TYPE, ORI
 
     @Override
     public Source<ORIG_TYPE> apply(Source<ORIG_TYPE> source) {
-        return new AbstractSource<ORIG_TYPE>(source.getName(), null, null) {
+        return new AbstractSource<>(source.getName(), null, null) {
 
             @Override
             public List<FieldDescription<?>> getProvidedFields() {

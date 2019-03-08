@@ -55,4 +55,9 @@ public class NumberThresholdComparatorHasher<T extends Number> implements Compar
         double scaleRange = getScaleRange(getScale());
         return Math.abs(diff) < scaleRange ? 0 : diff < 0 ? -1 : 1;
     }
+
+    @Override
+    public String toString() {
+        return NumberThresholdComparatorHasher.class.getSimpleName()+"("+getScale()+")";
+    }
 }

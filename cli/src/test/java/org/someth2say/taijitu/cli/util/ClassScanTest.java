@@ -27,7 +27,6 @@ public class ClassScanTest {
     @Test
     public void testClassScan() throws TaijituCliException {
         BasicTaijituCfg config = new BasicTaijituCfg("");
-        
         config.setUseScanClassPath(true);
         
         Properties buildProperties = new Properties();

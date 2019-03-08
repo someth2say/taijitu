@@ -1,9 +1,8 @@
 package org.someth2say.taijitu.cli.util;
 
-import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
-import io.github.lukehutch.fastclasspathscanner.scanner.ScanResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.github.fastclasspathscanner.ClassInfoList;
+import io.github.fastclasspathscanner.FastClasspathScanner;
+import io.github.fastclasspathscanner.ScanResult;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -36,10 +35,10 @@ public abstract class ClassScanUtils {
 
     @SuppressWarnings("unchecked")
 	private static <T> Stream<Class<? extends T>> getClassesFor(Class<T> clazzOrInterface) {
-        final FastClasspathScanner fcs = new FastClasspathScanner();
+        final FastClasspathScanner fcs = new FastClasspathScanner().enableClassInfo();
         final ScanResult scanResult = fcs.scan();
-        final List<String> classNames = clazzOrInterface.isInterface() ? scanResult.getNamesOfClassesImplementing(clazzOrInterface) : scanResult.getNamesOfSubclassesOf(clazzOrInterface);
-        List<Class<?>> classes = scanResult.classNamesToClassRefs(classNames);
+        final ClassInfoList classInfoList = clazzOrInterface.isInterface() ? scanResult.getClassesImplementing(clazzOrInterface.getName()) : scanResult.getSubclasses(clazzOrInterface.getName());
+        List<Class<?>> classes = classInfoList.loadClasses();
         return classes.stream().map(t -> (Class<? extends T>) t);
     }
 

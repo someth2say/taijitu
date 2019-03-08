@@ -49,9 +49,10 @@ public class ValueEqualityRegistry {
 
     public static Equalizer getInstance(String type, Object equalityConfig) {
         Class<? extends Equalizer> equalityType = getValueEqualityType(type);
+
         try {
-            //TODO: Fix this unckecked assignment
-            return equalityType.getDeclaredConstructor(Object.class).newInstance(equalityConfig);
+            //TODO: This is a mess. Do equality need configurations?
+            return equalityType.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             logger.error("Unable to create stream equality. Type: " + type + " Arguments: " + equalityConfig, e);
         }

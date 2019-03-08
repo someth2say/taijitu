@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.cli.fileutil.CommandException;
 import org.someth2say.taijitu.cli.fileutil.FileCommand;
-import org.someth2say.taijitu.discarter.TimeBiDiscarter;
+import org.someth2say.taijitu.cli.discarter.TimeBiDiscarter;
 
 import java.io.*;
 import java.util.function.BiConsumer;

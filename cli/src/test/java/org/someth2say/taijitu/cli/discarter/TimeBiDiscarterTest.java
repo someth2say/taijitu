@@ -1,4 +1,4 @@
-package org.someth2say.taijitu.discarter;
+package org.someth2say.taijitu.cli.discarter;
 
 import org.junit.Test;
 

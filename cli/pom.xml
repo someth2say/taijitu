@@ -11,7 +11,7 @@
 
     <artifactId>cli</artifactId>
     <packaging>jar</packaging>
-    
+
     <dependencies>
         <dependency>
             <groupId>org.someth2say.taijitu</groupId>
