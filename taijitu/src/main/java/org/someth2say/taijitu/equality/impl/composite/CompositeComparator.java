@@ -1,11 +1,13 @@
 package org.someth2say.taijitu.equality.impl.composite;
 
 import org.someth2say.taijitu.equality.aspects.external.Comparator;
+import org.someth2say.taijitu.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.equality.impl.delegating.DelegatingComparator;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * This is the simplest class of CompositeEqualizer. It assumes that:
@@ -14,36 +16,65 @@ import java.util.function.Function;
  *
  * @param <T>
  */
-public class CompositeComparator<T> extends Composite<T,Comparator<T>> implements ICompositeComparator<T,Comparator<T>>{
+public class CompositeComparator<T> extends CompositeEqualizer<T> implements ICompositeComparator<T>{
 
 
-    public CompositeComparator(List<Comparator<T>> components) {
-        super(components);
+    private final List<? extends Comparator<T>> comparators;
+
+    public CompositeComparator(List<? extends Comparator<T>> comparators){
+        this(comparators,comparators);
     }
 
-    public static class Builder<T> {
-        private final List<Comparator<T>> equalities = new ArrayList<>();
+    private CompositeComparator(List<? extends Comparator<T>> comparators, List<? extends Equalizer<T>> equalizers) {
+        super(equalizers);
+        this.comparators = comparators;
+    }
 
-        public Builder<T> addComponent(Comparator<T> equalizer) {
-            equalities.add(equalizer);
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName()
+                + comparators.stream().map(Equalizer::toString).collect(Collectors.joining(",","(",")"));
+    }
+
+    public List<? extends Comparator<T>> getComparators() {
+        return comparators;
+    }
+
+    public static class Builder<T> extends CompositeEqualizer.Builder<T> {
+        private final List<Comparator<T>> comparators = new ArrayList<>();
+
+        public Builder<T> addComparator(Comparator<T> comparator) {
+            super.addEqualizer(comparator);
+            comparators.add(comparator);
             return this;
         }
 
-        public <R> Builder<T> addComponent(Function<T,R> extractor, Comparator<R> delegate) {
-            return addComponent(new DelegatingComparator<>(extractor,delegate));
+        public <R> Builder<T> addComparator(Function<T,R> extractor, Comparator<R> delegate) {
+            Comparator<T> delegatingComparator = new DelegatingComparator<>(extractor, delegate);
+            return addComparator(delegatingComparator);
         }
 
         public CompositeComparator<T> build() {
-            return new CompositeComparator<>(equalities);
+            return new CompositeComparator<>(getComparators(), getEqualizers());
+        }
+
+        public List<? extends Comparator<T>> getComparators() {
+            return comparators;
         }
     }
 
 }
 
-interface ICompositeComparator<T, E extends Comparator<T>> extends ICompositeEqualizer<T, E>, Comparator<T> {
+interface ICompositeComparator<T> extends Comparator<T> {
 
     @Override
     default int compare(T first, T second) {
-        return this.getComponents().map(comparator -> comparator.compare(first, second)).filter(i -> i != 0).findFirst().orElse(0);
+        return this.getComparators().stream()
+                .map(comparator -> comparator.compare(first, second))
+                .filter(i -> i != 0)
+                .findFirst()
+                .orElse(0);
     }
+
+    List<? extends Comparator<T>> getComparators();
 }

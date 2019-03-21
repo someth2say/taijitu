@@ -6,6 +6,7 @@ import org.someth2say.taijitu.equality.impl.delegating.DelegatingEqualizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * This is the simplest class of CompositeEqualizer. It assumes that:
@@ -14,40 +15,55 @@ import java.util.function.Function;
  *
  * @param <T>
  */
-public class CompositeEqualizer<T> extends Composite<T, Equalizer<T>> implements ICompositeEqualizer<T, Equalizer<T>> {
+public class CompositeEqualizer<T> implements ICompositeEqualizer<T> {
 
-    public CompositeEqualizer(List<Equalizer<T>> components) {
-        super(components);
+    private final List<? extends Equalizer<T>> equalizers;
+
+    public CompositeEqualizer(List<? extends Equalizer<T>> equalizers) {
+        this.equalizers = equalizers;
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName()
+                + equalizers.stream().map(Equalizer::toString).collect(Collectors.joining(",","(",")"));
+    }
+
+    public List<? extends Equalizer<T>> getEqualizers() {
+        return equalizers;
     }
 
     public static class Builder<T> {
-        private final List<Equalizer<T>> equalities = new ArrayList<>();
+        private final List<Equalizer<T>> equalizers = new ArrayList<>();
 
-        public Builder<T> addComponent(Equalizer<T> equalizer) {
-            equalities.add(equalizer);
+        public Builder<T> addEqualizer(Equalizer<T> equalizer) {
+            equalizers.add(equalizer);
             return this;
         }
 
-        public <R> Builder<T> addComponent(Function<T, R> extractor, Equalizer<R> delegate) {
-            return addComponent(new DelegatingEqualizer<>(extractor, delegate));
+
+        public <R> Builder<T> addEqualizer(Function<T, R> extractor, Equalizer<R> delegate) {
+            Equalizer<T> delegatingEqualizer = new DelegatingEqualizer<>(extractor, delegate);
+            return addEqualizer(delegatingEqualizer);
         }
 
+
         public CompositeEqualizer<T> build() {
-            return new CompositeEqualizer<>(equalities);
+            return new CompositeEqualizer<>(getEqualizers());
+        }
+
+        protected List<? extends Equalizer<T>> getEqualizers() {
+            return equalizers;
         }
     }
 
 }
 
-interface ICompositeEqualizer<T, E extends Equalizer<T>> extends IComposite<E>, Equalizer<T> {
+interface ICompositeEqualizer<T> extends Equalizer<T> {
 
     default boolean areEquals(T first, T second) {
-        return getComponents().allMatch(equalizer -> equalizer.areEquals(first, second));
+        return getEqualizers().parallelStream().allMatch(equalizer -> equalizer.areEquals(first, second));
     }
 
-/*
-    default Stream<Difference> explain(T first, T second) {
-        return getComponents().flatMap(e -> e.explain(first, second));
-    }
-*/
+    List<? extends Equalizer<T>> getEqualizers();
 }

@@ -79,6 +79,10 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
         List<String> compareFDS = iComparisonCfg.getCompareFields();
         List<IEqualityCfg> equalityConfigs = iComparisonCfg.getEqualityConfigs();
 
+        //TODO: This does not make sense when understanding hasher is a kind of equalizer.
+        // Should only create a hasher or a comparator based on the strategy (that is based itself on the presence of order).
+        // Also, there should be only a "comparator"
+
         // 3.1.- If Key fields present, build hasher
         CompositeHasher<MAPPED_TYPE> hasher = getHasher(keyFDs, mappedSources, equalityConfigs);
 
@@ -152,9 +156,9 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
                                                                  List<IEqualityCfg> equalityConfigs) {
         CompositeHasher<MAPPED_TYPE> hasher = null;
         if (!keyFDs.isEmpty()) {
-            CompositeHasher.Builder<MAPPED_TYPE> categorizerBuilder = new CompositeHasher.Builder<>();
-            keyFDs.forEach(fd -> addCategorizerComponent(categorizerBuilder, fd, mappedSources, equalityConfigs));
-            hasher = categorizerBuilder.build();
+            CompositeHasher.Builder<MAPPED_TYPE> hasherBuilder = new CompositeHasher.Builder<>();
+            keyFDs.forEach(fd -> addHasherComponent(hasherBuilder, fd, mappedSources, equalityConfigs));
+            hasher = hasherBuilder.build();
         }
         return hasher;
     }
@@ -166,17 +170,17 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
         Source<MAPPED_TYPE> mappedSource = mappedSources.getLeft(); // Here we are assuming the all same extractor can be used for all sources (a.k.a. non-hybrid equality)
         Function<MAPPED_TYPE, VALUE_TYPE> extractor = mappedSource.getExtractor(fd);
         Equalizer<VALUE_TYPE> vEqualizer = getEquality(fd, equalityConfigs);
-        equalityBuilder.addComponent(extractor, vEqualizer);
+        equalityBuilder.addEqualizer(extractor, vEqualizer);
     }
 
-    private <MAPPED_TYPE, VALUE_TYPE> void addCategorizerComponent(CompositeHasher.Builder<MAPPED_TYPE> categorizerBuilder,
-                                                                   FieldDescription<VALUE_TYPE> fd,
-                                                                   Duo<Source<MAPPED_TYPE>> mappedSources,
-                                                                   List<IEqualityCfg> equalityConfigs) {
+    private <MAPPED_TYPE, VALUE_TYPE> void addHasherComponent(CompositeHasher.Builder<MAPPED_TYPE> hasherBuilder,
+                                                              FieldDescription<VALUE_TYPE> fd,
+                                                              Duo<Source<MAPPED_TYPE>> mappedSources,
+                                                              List<IEqualityCfg> equalityConfigs) {
         Source<MAPPED_TYPE> mappedSource = mappedSources.getLeft(); // Here we are assuming the all same extractor can be used for all sources (a.k.a. non-hybrid equality)
         Function<MAPPED_TYPE, VALUE_TYPE> extractor = mappedSource.getExtractor(fd);
-        Hasher<VALUE_TYPE> vEquality = getCategorizerEquality(fd, equalityConfigs);
-        categorizerBuilder.addComponent(extractor, vEquality);
+        Hasher<VALUE_TYPE> vEquality = getHaherEquality(fd, equalityConfigs);
+        hasherBuilder.addHasher(extractor, vEquality);
     }
 
     private <MAPPED_TYPE, VALUE_TYPE> void addComparerComponent(CompositeComparator.Builder<MAPPED_TYPE> comparerBuilder,
@@ -186,7 +190,7 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
         Source<MAPPED_TYPE> mappedSource = mappedSources.getLeft(); // Here we are assuming the all same extractor can be used for all sources (a.k.a. non-hybrid equality)
         Function<MAPPED_TYPE, VALUE_TYPE> extractor = mappedSource.getExtractor(fd);
         Comparator<VALUE_TYPE> vEquality = getComparableEquality(fd, equalityConfigs);
-        comparerBuilder.addComponent(extractor, vEquality);
+        comparerBuilder.addComparator(extractor, vEquality);
     }
 
     private <MAPPED_TYPE> Duo<Source<MAPPED_TYPE>> buildMappedSources(List<ISourceCfg> sourceConfigs) {
@@ -260,7 +264,7 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
         throw new RuntimeException("Can't find any comparable equality for field " + fd);
     }
 
-    private <VALUE_TYPE> Hasher<VALUE_TYPE> getCategorizerEquality(FieldDescription<VALUE_TYPE> fd, List<IEqualityCfg> equalityConfigs) {
+    private <VALUE_TYPE> Hasher<VALUE_TYPE> getHaherEquality(FieldDescription<VALUE_TYPE> fd, List<IEqualityCfg> equalityConfigs) {
         List<IEqualityCfg> compatibleEqualityConfigs = getEqualityConfigsFor(fd, equalityConfigs);
 
         Optional<Hasher<VALUE_TYPE>> first = compatibleEqualityConfigs.stream()
@@ -271,7 +275,7 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
             return first.get();
         }
 
-        throw new RuntimeException("Can't find any categorizer equality for field " + fd);
+        throw new RuntimeException("Can't find any hasher equality for field " + fd);
     }
 
     private <VALUE_TYPE> List<IEqualityCfg> getEqualityConfigsFor(FieldDescription<VALUE_TYPE> fd, final List<IEqualityCfg> equalityCfgs) {
