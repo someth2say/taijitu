@@ -85,12 +85,12 @@ public class CLITest_DB {
 
         final List<Stream<Difference>> comparisonResults = TaijituCli.compare(configuration);
 
-        Assert.assertEquals(2, comparisonResults.size());
+        Assert.assertEquals(configuration.getComparisons().size(), comparisonResults.size());
         final List<Difference> firstResult = comparisonResults.get(0).collect(Collectors.toList());
-        //System.out.println(firstResult);
+        System.out.println(firstResult);
         Assert.assertEquals(0, firstResult.size());
         final List<Difference> secondResult = comparisonResults.get(1).collect(Collectors.toList());
-        //System.out.println(secondResult);
+        System.out.println(secondResult);
         Assert.assertEquals(1, secondResult.size());
     }
 
@@ -118,8 +118,8 @@ public class CLITest_DB {
 
         // Databases
         basicTaijituCfg.setBuildProperties(dbProperties);
-        // Comparisons
 
+        // Comparisons
         Properties s1fetchProperties = new Properties();
         s1fetchProperties.setProperty(ConfigurationLabels.STATEMENT, "select * from test");
 

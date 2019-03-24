@@ -1,11 +1,12 @@
 package org.someth2say.taijitu.stream.mapping;
 
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.equality.aspects.external.Hasher;
 import org.someth2say.taijitu.equality.explain.Difference;
 import org.someth2say.taijitu.equality.explain.Missing;
 import org.someth2say.taijitu.equality.explain.Unequal;
-import org.someth2say.taijitu.equality.wrapper.HashableWrapper;
 import org.someth2say.taijitu.stream.StreamEqualizer;
 import org.someth2say.taijitu.stream.StreamUtil;
 
@@ -19,6 +20,8 @@ import java.util.stream.Stream;
  */
 public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
 
+    private static final Logger logger = LoggerFactory.getLogger(HashingStreamEqualizer.class);
+
     final private Hasher<T> hasher;
 
     public HashingStreamEqualizer(Hasher<T> hasher) {
@@ -28,8 +31,8 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
     @Override
     public Stream<Difference> explain(Stream<T> source, Stream<T> target) {
 
-        final ArrayListValuedHashMap<HashableWrapper<T>, T> map1 = new ArrayListValuedHashMap<>();
-        final ArrayListValuedHashMap<HashableWrapper<T>, T> map2 = new ArrayListValuedHashMap<>();
+        final ArrayListValuedHashMap<Integer, T> map1 = new ArrayListValuedHashMap<>();
+        final ArrayListValuedHashMap<Integer, T> map2 = new ArrayListValuedHashMap<>();
 
         Stream<Difference> mapA = source.flatMap( a -> mapA(a, map1, map2));
         Stream<Difference> mapB = target.flatMap( b -> mapB(b, map1, map2));
@@ -37,14 +40,14 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
 
         Stream<Difference> remaining1 = Stream.generate(()->{
             if (map1.isEmpty()) return null;
-            Map.Entry<HashableWrapper<T>, T> next = map1.entries().iterator().next();
+            Map.Entry<Integer, T> next = map1.entries().iterator().next();
             map1.removeMapping(next.getKey(),next.getValue());
             return (Difference)new Missing<>(hasher,next.getValue());
         }).takeWhile(Objects::nonNull);
 
         Stream<Difference> remaining2 = Stream.generate(()->{
             if (map2.isEmpty()) return null;
-            Map.Entry<HashableWrapper<T>, T> next = map2.entries().iterator().next();
+            Map.Entry<Integer, T> next = map2.entries().iterator().next();
             map2.removeMapping(next.getKey(),next.getValue());
             return (Difference)new Missing<>(hasher,next.getValue());
         }).takeWhile(Objects::nonNull);
@@ -52,35 +55,37 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         return Stream.concat(unequals, Stream.concat( remaining1, remaining2));
     }
 
-    private Stream<Difference> mapB(T b, ArrayListValuedHashMap<HashableWrapper<T>, T> map1, ArrayListValuedHashMap<HashableWrapper<T>, T> map2) {
+    private Stream<Difference> mapB(T b, ArrayListValuedHashMap<Integer, T> map1, ArrayListValuedHashMap<Integer, T> map2) {
         return map(b, hasher, map2, map1, (ta, tb) -> new Unequal<>(hasher, tb, ta));
     }
 
-    private Stream<Difference> mapA(T a, ArrayListValuedHashMap<HashableWrapper<T>, T> map1, ArrayListValuedHashMap<HashableWrapper<T>, T> map2) {
+    private Stream<Difference> mapA(T a, ArrayListValuedHashMap<Integer, T> map1, ArrayListValuedHashMap<Integer, T> map2) {
         return map(a, hasher, map1, map2, (ta, tb) -> new Unequal<>(hasher, ta, tb));
     }
 
     //TODO: Investigate eficiency of creating an Optional instead of a Stream.
     public static <T> Stream<Difference> map(T thisT, Hasher<T> hasher,
-                                             ArrayListValuedHashMap<HashableWrapper<T>, T> thisMap,
-                                             ArrayListValuedHashMap<HashableWrapper<T>, T> otherMap,
+                                             ArrayListValuedHashMap<Integer, T> thisMap,
+                                             ArrayListValuedHashMap<Integer, T> otherMap,
                                              BiFunction<T,T,Difference<T>> diffMaker) {
 
-        HashableWrapper<T> thisWrapper = new HashableWrapper<>(thisT, hasher);
         //TODO: Investigate efficiency of this sync
         synchronized (hasher) {
-            if (otherMap.containsKey(thisWrapper)) {
-                T other = otherMap.get(thisWrapper).get(0);
-                otherMap.removeMapping(thisWrapper,other);
+            if (otherMap.containsKey(hasher.hash(thisT))) {
+                T otherT = otherMap.get(hasher.hash(thisT)).get(0); //TODO: Maybe other element with the same key is equal...
+                otherMap.removeMapping(hasher.hash(thisT),otherT);
                 // we have a key match ...
-                if (!hasher.areEquals(thisT, other)) {
-                    Difference<T> apply = diffMaker.apply(thisT, other);
-                    return Stream.of(apply);
-                } else {
+                if (hasher.areEquals(thisT, otherT)) {
+                    logger.trace("Found equal elements "+thisT+" and "+otherT);
                     return Stream.empty();
+                } else {
+                    logger.trace("Found difference between " +thisT +" and "+ otherT);
+                    Difference<T> apply = diffMaker.apply(thisT, otherT);
+                    return Stream.of(apply);
                 }
             } else {
-                thisMap.put(thisWrapper, thisT);
+                logger.trace("Adding element to map: "+thisT + " with key " + hasher.hash(thisT));
+                thisMap.put(hasher.hash(thisT), thisT);
                 return Stream.empty();
             }
         }

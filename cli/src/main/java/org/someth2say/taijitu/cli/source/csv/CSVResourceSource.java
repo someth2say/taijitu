@@ -47,11 +47,6 @@ public class CSVResourceSource extends AbstractSource<String[]> {
         }
     }
 
-/*    public CSVResourceSource(final ISourceCfg iSource) {
-        super(iSource);
-        this.buildProperties = new CSVBuildProperties(iSource.getBuildProperties());
-    }*/
-
     private Stream<String> getLines() {
         try {
             URL resource = new URL(buildProperties.path);

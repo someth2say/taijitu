@@ -23,7 +23,6 @@ public class CSVTupleMapper extends AbstractSourceMapper<String[], Object[]> {
             public Stream<Object[]> stream() {
                 return source.stream().map(this::mapItem);
             }
-
         };
     }
 }

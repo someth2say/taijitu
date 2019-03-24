@@ -29,11 +29,6 @@ public class FieldDescription<V> {
         return name;
     }
 
-//    @Deprecated
-//    public String getClazzName() {
-//        return clazzName;
-//    }
-
     @Override
     public String toString() {
         return name + "(" + clazz.getName() + ")";

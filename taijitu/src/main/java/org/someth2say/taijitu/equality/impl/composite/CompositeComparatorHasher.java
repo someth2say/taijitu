@@ -4,7 +4,9 @@ import org.someth2say.taijitu.equality.aspects.external.Comparator;
 import org.someth2say.taijitu.equality.aspects.external.ComparatorHasher;
 import org.someth2say.taijitu.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.equality.aspects.external.Hasher;
+import org.someth2say.taijitu.equality.impl.delegating.DelegatingComparator;
 import org.someth2say.taijitu.equality.impl.delegating.DelegatingComparatorHasher;
+import org.someth2say.taijitu.equality.impl.delegating.DelegatingHasher;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +42,7 @@ public class CompositeComparatorHasher<T> extends CompositeEqualizer<T> implemen
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName()
+        return super.toString()
                 + comparators.stream().map(Equalizer::toString).collect(Collectors.joining(",","(",")"))
                 + hashers.stream().map(Equalizer::toString).collect(Collectors.joining(",","(",")"));
     }
@@ -64,10 +66,21 @@ public class CompositeComparatorHasher<T> extends CompositeEqualizer<T> implemen
             return this;
         }
 
+        public <R> Builder<T> addHasher(Function<T, R> extractor, Hasher<R> delegate) {
+            Hasher<T> delegatingHasher = new DelegatingHasher<>(extractor, delegate);
+            return addHasher(delegatingHasher);
+        }
+
+
         public Builder<T> addComparator(Comparator<T> comparator) {
             super.addEqualizer(comparator);
             comparators.add(comparator);
             return this;
+        }
+
+        public <R> Builder<T> addComparator(Function<T,R> extractor, Comparator<R> delegate) {
+            Comparator<T> delegatingComparator = new DelegatingComparator<>(extractor, delegate);
+            return addComparator(delegatingComparator);
         }
 
         public <R> Builder<T> addComparatorHasher(Function<T, R> extractor, ComparatorHasher<R> delegate) {
@@ -77,7 +90,7 @@ public class CompositeComparatorHasher<T> extends CompositeEqualizer<T> implemen
 
 
         public CompositeComparatorHasher<T> build() {
-            return new CompositeComparatorHasher<T>(comparators, hashers, getEqualizers());
+            return new CompositeComparatorHasher<>(comparators, hashers, getEqualizers());
         }
     }
 }
