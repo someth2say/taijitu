@@ -24,7 +24,7 @@ public class CompositeComparatorHasher<T> extends CompositeEqualizer<T> implemen
         this.hashers = comparatorHashers;
     }
 
-    private CompositeComparatorHasher(List<? extends Comparator<T>> comparators, List<? extends Hasher<T>> hashers,List<? extends Equalizer<T>> equalizers) {
+    private CompositeComparatorHasher(List<? extends Comparator<T>> comparators, List<? extends Hasher<T>> hashers, List<? extends Equalizer<T>> equalizers) {
         super(equalizers);
         this.comparators = comparators;
         this.hashers = hashers;

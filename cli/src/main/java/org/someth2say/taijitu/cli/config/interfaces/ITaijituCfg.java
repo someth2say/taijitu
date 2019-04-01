@@ -10,5 +10,4 @@ public interface ITaijituCfg extends IComparisonCfg {
 
     Boolean isUseScanClassPath();
 
-
 }

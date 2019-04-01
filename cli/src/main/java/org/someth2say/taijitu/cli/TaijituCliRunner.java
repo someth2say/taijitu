@@ -8,7 +8,7 @@ import org.someth2say.taijitu.cli.config.interfaces.IEqualityCfg;
 import org.someth2say.taijitu.cli.config.interfaces.ISourceCfg;
 import org.someth2say.taijitu.cli.registry.MapperRegistry;
 import org.someth2say.taijitu.cli.registry.SourceRegistry;
-import org.someth2say.taijitu.cli.registry.ValueEqualityRegistry;
+import org.someth2say.taijitu.cli.registry.EqualizerRegistry;
 import org.someth2say.taijitu.cli.source.FieldDescription;
 import org.someth2say.taijitu.cli.source.Source;
 import org.someth2say.taijitu.cli.source.mapper.SourceMapper;
@@ -18,6 +18,9 @@ import org.someth2say.taijitu.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.equality.aspects.external.Hasher;
 import org.someth2say.taijitu.equality.explain.Difference;
 import org.someth2say.taijitu.equality.impl.composite.CompositeComparatorHasher;
+import org.someth2say.taijitu.equality.impl.value.ComparableComparatorHasher;
+import org.someth2say.taijitu.equality.impl.value.ObjectHasher;
+import org.someth2say.taijitu.equality.impl.value.ObjectToStringComparatorHasher;
 import org.someth2say.taijitu.stream.StreamEqualizer;
 import org.someth2say.taijitu.stream.mapping.HashingStreamEqualizer;
 import org.someth2say.taijitu.stream.simple.SimpleStreamEqualizer;
@@ -25,6 +28,7 @@ import org.someth2say.taijitu.stream.sorted.ComparableStreamEqualizer;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
@@ -65,7 +69,7 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
         // 2. Calculate common fields (given all sources)
         final StreamEqualizer<MAPPED_TYPE> streamEquality = getStreamEqualizer(iComparisonCfg, mappedSources);
 
-        logger.info("Comparison {} ready to run: {} vs {}", iComparisonCfg.getName(), mappedSources.getLeft().getName(), mappedSources.getRight().getName());
+        logger.info("ComparisonCfg {} ready to run: {} vs {}", iComparisonCfg.getName(), mappedSources.getLeft().getName(), mappedSources.getRight().getName());
         return runStreamEquality(streamEquality, mappedSources);
     }
 
@@ -75,8 +79,10 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
         List<FieldDescription<?>> keyFDs = iComparisonCfg.getKeyFields().stream().map(commonFDs::get).collect(Collectors.toList());
         List<FieldDescription<?>> sortFDs = iComparisonCfg.getSortFields().stream().map(commonFDs::get).collect(Collectors.toList());
 
-        List<FieldDescription<?>> compareFDS = (iComparisonCfg.getCompareFields().isEmpty()? commonFDs.keySet():iComparisonCfg.getCompareFields()).stream().map(commonFDs::get).collect(Collectors.toList());
-
+        //TODO: If the compare list contains non-common fields, those are silently ignored. Maybe better sanitize...
+        List<FieldDescription<?>> compareFDS = (iComparisonCfg.getCompareFields().isEmpty()
+                ? commonFDs.keySet()
+                :iComparisonCfg.getCompareFields()).stream().map(commonFDs::get).filter(Objects::nonNull).collect(Collectors.toList());
 
         List<IEqualityCfg> equalityConfigs = iComparisonCfg.getEqualityConfigs();
 
@@ -84,7 +90,7 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
         // Instead of looking for the extractor and the comparator to use on the fields, just indicate the comparator in the field description.
         // Caveat: When using automatic field gathering, noone is setting the fields, so can't indicate the comparator...
         /*
-        Comparison...
+        ComparisonCfg...
           Fields:
             - Name: ...
               EqualityClass: ...
@@ -92,16 +98,9 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
               isSort: true/false
          */
 
-
-
-        //TODO: This does not make sense when understanding hasher is a kind of equalizer.
-        // Should only create a hasher or a comparator based on the strategy (that is based itself on the presence of order).
-        // Also, there should be only a "comparator"
-
         CompositeComparatorHasher.Builder<MAPPED_TYPE> builder = new CompositeComparatorHasher.Builder<>();
 
         // 3.1.- If Key fields present, build hasher
-        //CompositeHasher<MAPPED_TYPE> hasher =
         keyFDs.forEach(fd -> addHasherComponent(builder, fd, mappedSources, equalityConfigs));
 
         // 3.2.- If Sort fields present, build comparator
@@ -136,41 +135,7 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
         }
         return streamEquality;
     }
-/*
-    private <MAPPED_TYPE> CompositeEqualizer<MAPPED_TYPE> getEquality(Map<String, FieldDescription<?>> commonFDs,
-                                                                      List<FieldDescription<?>> keyFDs,
-                                                                      List<FieldDescription<?>> sortFDs,
-                                                                      List<String> compareFDS,
-                                                                      Duo<Source<MAPPED_TYPE>> mappedSources,
-                                                                      List<IEqualityCfg> equalityConfigs) {
-        CompositeEqualizer<MAPPED_TYPE> equality = null;
-        Stream<FieldDescription<?>> commonFDsStream = commonFDs.values().stream();
-        List<FieldDescription<?>> actualCompareFDs = (!compareFDS.isEmpty()
-                ? commonFDsStream.filter(commonFD -> compareFDS.contains(commonFD.getName()))
-                : commonFDsStream.filter(commonFD -> !keyFDs.contains(commonFD) && !sortFDs.contains(commonFD)))
-                .collect(Collectors.toList());
-        if (!actualCompareFDs.isEmpty()) {
-            CompositeEqualizer.Builder<MAPPED_TYPE> equalityBuilder = new CompositeEqualizer.Builder<>();
-            actualCompareFDs.forEach(fd -> addEqualityComponent(equalityBuilder, fd, mappedSources, equalityConfigs));
-            equality = equalityBuilder.build();
-        }
-        return equality;
-    }
 
-    private <MAPPED_TYPE> CompositeComparator<MAPPED_TYPE> getComparator(List<FieldDescription<?>> sortFDs,
-                                                                         Duo<Source<MAPPED_TYPE>> mappedSources,
-                                                                         List<IEqualityCfg> equalityConfigs) {
-        CompositeComparator<MAPPED_TYPE> sorter = null;
-        if (!sortFDs.isEmpty()) {
-            CompositeComparator.Builder<MAPPED_TYPE> comparerBuilder = new CompositeComparator.Builder<>();
-            sortFDs.forEach(fd -> addComparerComponent(comparerBuilder, fd, mappedSources, equalityConfigs));
-            sorter = comparerBuilder.build();
-        }
-        return sorter;
-    }
-
-}
-*/
     private <MAPPED_TYPE, VALUE_TYPE> void addEqualityComponent(CompositeComparatorHasher.Builder<MAPPED_TYPE> equalityBuilder,
                                                                 FieldDescription<VALUE_TYPE> fd,
                                                                 Duo<Source<MAPPED_TYPE>> mappedSources,
@@ -255,28 +220,34 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
 
     private <VALUE_TYPE> Equalizer<VALUE_TYPE> getEquality(FieldDescription<VALUE_TYPE> fd, List<IEqualityCfg> equalityConfigs) {
         IEqualityCfg iEqualityCfg = getEqualityConfigFor(fd, equalityConfigs);
-        return ValueEqualityRegistry.getInstance(iEqualityCfg.getName(), iEqualityCfg.getEqualityParameters());
+        return iEqualityCfg!=null
+                ? EqualizerRegistry.getInstance(iEqualityCfg.getName())
+                : ObjectHasher.INSTANCE;
     }
 
     private <VALUE_TYPE> Comparator<VALUE_TYPE> getComparableEquality(FieldDescription<VALUE_TYPE> fd, List<IEqualityCfg> equalityConfigs) {
         List<IEqualityCfg> compatibleEqualityConfigs = getEqualityConfigsFor(fd, equalityConfigs);
 
         Optional<Comparator<VALUE_TYPE>> first = compatibleEqualityConfigs.stream()
-                .map(cfg -> ValueEqualityRegistry.getInstance(cfg.getName(), cfg.getEqualityParameters()))
+                .map(cfg -> EqualizerRegistry.getInstance(cfg.getName()))
                 .filter(eq -> eq instanceof Comparator)
                 .map(eq -> (Comparator<VALUE_TYPE>) eq).findFirst();
         if (first.isPresent()) {
             return first.get();
         }
 
-        throw new RuntimeException("Can't find any comparable equality for field " + fd);
+        //throw new RuntimeException("Can't find any comparable equality for field " + fd);
+        if (fd.getClazz().isAssignableFrom(Comparable.class))
+            return ComparableComparatorHasher.INSTANCE;
+
+        return ObjectToStringComparatorHasher.INSTANCE;
     }
 
     private <VALUE_TYPE> Hasher<VALUE_TYPE> getHasherEquality(FieldDescription<VALUE_TYPE> fd, List<IEqualityCfg> equalityConfigs) {
         List<IEqualityCfg> compatibleEqualityConfigs = getEqualityConfigsFor(fd, equalityConfigs);
 
         Optional<Hasher<VALUE_TYPE>> first = compatibleEqualityConfigs.stream()
-                .map(cfg -> ValueEqualityRegistry.getInstance(cfg.getName(), cfg.getEqualityParameters()))
+                .map(cfg -> EqualizerRegistry.getInstance(cfg.getName()))
                 .filter(eq -> eq instanceof Hasher)
                 .map(eq -> (Hasher<VALUE_TYPE>) eq)
                 .findFirst();
@@ -284,7 +255,8 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
             return first.get();
         }
 
-        throw new RuntimeException("Can't find any hasher equality for field " + fd);
+        //throw new RuntimeException("Can't find any hasher equality for field " + fd);
+        return ObjectHasher.INSTANCE;
     }
 
     private <VALUE_TYPE> List<IEqualityCfg> getEqualityConfigsFor(FieldDescription<VALUE_TYPE> fd, final List<IEqualityCfg> equalityCfgs) {

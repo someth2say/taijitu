@@ -62,7 +62,8 @@ public class CompositeEqualizer<T> implements ICompositeEqualizer<T> {
 interface ICompositeEqualizer<T> extends Equalizer<T> {
 
     default boolean areEquals(T first, T second) {
-        return getEqualizers().parallelStream().allMatch(equalizer -> equalizer.areEquals(first, second));
+        return getEqualizers().parallelStream()
+                .allMatch(equalizer -> equalizer.areEquals(first, second));
     }
 
     List<? extends Equalizer<T>> getEqualizers();

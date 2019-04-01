@@ -19,7 +19,9 @@ interface IDelegatingEqualizer<T,R> extends IDelegating<T, R>, Equalizer<T> {
 
     @Override
     default boolean areEquals(T equalized1, T equalized2) {
-        return getDelegate().areEquals(getExtractor().apply(equalized1), getExtractor().apply(equalized2));
+        R lhs = getExtractor().apply(equalized1);
+        R rhs = getExtractor().apply(equalized2);
+        return getDelegate().areEquals(lhs, rhs);
     }
 
 }

@@ -10,6 +10,7 @@ import org.someth2say.taijitu.cli.source.csv.CSVResourceSource;
 import org.someth2say.taijitu.cli.source.query.QuerySource;
 import org.someth2say.taijitu.cli.util.ClassScanUtils;
 
+import java.lang.reflect.Constructor;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,14 +47,14 @@ public class SourceRegistry {
 
     public static <T> Source<T> getInstance(String type, ISourceCfg sourceConfig) {
         Class<? extends AbstractSource> sourceClass = getSourceType(type);
+        Properties buildProperties = sourceConfig.getBuildProperties();
+        Properties fetchProperties = sourceConfig.getFetchProperties();
         try {
             //TODO: Fix this unckecked assignment
-            //return sourceClass.getDeclaredConstructor(ISourceCfg.class).newInstance(sourceConfig);
-            return sourceClass.getDeclaredConstructor(String.class, Properties.class, Properties.class)
-                    .newInstance(sourceConfig.getName(),sourceConfig.getBuildProperties(), sourceConfig.getFetchProperties());
+            Constructor<? extends AbstractSource> constructor = sourceClass.getDeclaredConstructor(String.class, Properties.class, Properties.class);
+            return constructor.newInstance(sourceConfig.getName(), buildProperties, fetchProperties);
         } catch (Exception e) {
-            Object[] arguments = {sourceConfig};
-            logger.error("Unable to create source. Type: {}  Arguments: {}",type, StringUtils.join(arguments, ","), e);
+            logger.error("Unable to create source. Type: {}  Arguments: {}",type, StringUtils.join(new Object[]{buildProperties, fetchProperties}, ","), e);
         }
         return null;
     }

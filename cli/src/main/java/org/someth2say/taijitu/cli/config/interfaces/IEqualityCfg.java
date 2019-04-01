@@ -9,6 +9,4 @@ public interface IEqualityCfg extends ICfg, Named {
     String getFieldClass();
 
     Boolean isFieldClassStrict();
-
-    Object getEqualityParameters();
 }

@@ -1,6 +1,5 @@
 package org.someth2say.taijitu.cli.config;
 
-import org.someth2say.taijitu.cli.config.interfaces.DefaultEqualityConfig;
 import org.someth2say.taijitu.cli.config.interfaces.IEqualityCfg;
 import org.someth2say.taijitu.equality.impl.value.ObjectHasher;
 import org.someth2say.taijitu.equality.impl.value.ObjectToStringComparatorHasher;
@@ -13,12 +12,14 @@ public class DefaultConfig {
 
     public static final char DEFAULT_LIST_DELIMITER = ',';
 
-    public static final int DEFAULT_FETCHSIZE = 1024;
+    public static final int DEFAULT_FETCH_SIZE = 1024;
     public static final int DEFAULT_THREADS = 1;
     public static final boolean DEFAULT_SCAN_CLASSPATH = false;
 
     //TODO: We are here adding two equalities: a simple one, and a HasherComparer one. Maybe this should be split
-    public static final List<IEqualityCfg> DEFAULT_EQUALITY_CONFIG = Arrays.asList((DefaultEqualityConfig) ObjectHasher.class::getSimpleName, (DefaultEqualityConfig) ObjectToStringComparatorHasher.class::getSimpleName);
+    public static final List<IEqualityCfg> DEFAULT_EQUALITY_CONFIGS = Arrays.asList(
+            (DefaultEqualityConfig) ObjectHasher.class::getSimpleName,
+            (DefaultEqualityConfig) ObjectToStringComparatorHasher.class::getSimpleName);
 
     public static final String DEFAULT_CONFIG_FILE = "taijitu.properties";
 
@@ -26,4 +27,22 @@ public class DefaultConfig {
     public static final List<String> DEFAULT_KEY_FIELDS = Collections.emptyList();
     public static final List<String> DEFAULT_SORT_FIELDS = Collections.emptyList();
     public static final List<String> DEFAULT_COMPARE_FIELDS = Collections.emptyList();
+
+    public interface DefaultEqualityConfig extends IEqualityCfg {
+        @Override
+        default String getFieldName() {
+            return null;
+        }
+
+        @Override
+        default String getFieldClass() {
+            return null;
+        }
+
+        @Override
+        default Boolean isFieldClassStrict() {
+            return false;
+        }
+
+    }
 }

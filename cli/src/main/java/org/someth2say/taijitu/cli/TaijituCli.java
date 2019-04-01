@@ -1,14 +1,14 @@
 package org.someth2say.taijitu.cli;
 
-import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.someth2say.taijitu.cli.config.impl.TaijituCfg;
+import org.someth2say.taijitu.cli.config.TaijituConfig;
 import org.someth2say.taijitu.cli.config.interfaces.IComparisonCfg;
 import org.someth2say.taijitu.cli.config.interfaces.ITaijituCfg;
 import org.someth2say.taijitu.cli.registry.MapperRegistry;
 import org.someth2say.taijitu.cli.registry.SourceRegistry;
-import org.someth2say.taijitu.cli.registry.ValueEqualityRegistry;
+import org.someth2say.taijitu.cli.registry.EqualizerRegistry;
 import org.someth2say.taijitu.cli.source.query.ConnectionManager;
 import org.someth2say.taijitu.cli.util.FileUtil;
 import org.someth2say.taijitu.equality.explain.Difference;
@@ -27,13 +27,13 @@ public final class TaijituCli {
 
     private static final Logger logger = LoggerFactory.getLogger(TaijituCli.class);
 
-    private static ITaijituCfg configFromApache(final ImmutableHierarchicalConfiguration properties) {
-        return TaijituCfg.fromApacheConfig(properties);
+    private static ITaijituCfg configFromApache(final HierarchicalConfiguration properties) {
+        return TaijituConfig.fromApacheConfig(properties);
     }
 
 
     private static ITaijituCfg configFromFile(final String fileName) throws TaijituCliException {
-        return TaijituCfg.fromFile(fileName);
+        return TaijituConfig.fromPropertiesFile(fileName);
     }
 
     private static void performSetup(final ITaijituCfg config) throws TaijituCliException {
@@ -47,11 +47,11 @@ public final class TaijituCli {
     //This registry stuff may be moved to a IC context (Weld?)
     private static void setupRegistries(final ITaijituCfg config) {
         if (config.isUseScanClassPath()) {
-            ValueEqualityRegistry.scanClassPath();
+            EqualizerRegistry.scanClassPath();
             SourceRegistry.scanClassPath();
             MapperRegistry.scanClassPath();
         } else {
-            ValueEqualityRegistry.useDefaults();
+            EqualizerRegistry.useDefaults();
             SourceRegistry.useDefaults();
             MapperRegistry.useDefaults();
         }
@@ -79,7 +79,7 @@ public final class TaijituCli {
     }
 
 
-    public static List<Stream<Difference>> compare(final ImmutableHierarchicalConfiguration properties) throws TaijituCliException {
+    public static List<Stream<Difference>> compare(final HierarchicalConfiguration properties) throws TaijituCliException {
         return compare(configFromApache(properties));
     }
 
@@ -123,11 +123,11 @@ public final class TaijituCli {
                 try {
                     result.add(future.get());
                 } catch (ExecutionException e) {
-                    logger.error("Unable to obtain comparison explain.", e);
+                    logger.error("Unable to obtain comparison results.", e);
                     result.add(null);
                 }
             } catch (InterruptedException e) {
-                logger.error("Unable to obtain comparison explain.", e);
+                logger.error("Unable to obtain comparison results.", e);
                 result.add(null);
             }
         }

@@ -1,15 +1,12 @@
 package org.someth2say.taijitu.cli.config.impl;
 
-import org.someth2say.taijitu.cli.config.impl.defaults.IEqualityCfgDefaults;
-import org.someth2say.taijitu.cli.config.interfaces.IEqualityCfg;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.someth2say.taijitu.cli.config.impl.defaults.IApacheEqualityCfg;
 
-public class EqualityCfg
-        extends NamedCfg<IEqualityCfg>
-        implements IEqualityCfgDefaults<IEqualityCfg> {
+public class EqualityCfg extends NamedGfg implements IApacheEqualityCfg {
 
-    public EqualityCfg(IEqualityCfg delegate, IEqualityCfgDefaults parent) {
-        super(delegate, parent);
+    public EqualityCfg(HierarchicalConfiguration configuration) {
+        super(configuration);
     }
-
 
 }

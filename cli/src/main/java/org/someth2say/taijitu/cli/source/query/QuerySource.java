@@ -35,19 +35,19 @@ public class QuerySource extends AbstractSource<ResultSet> {
         private final int fetchSize;
         private final List<Object> queryParameters;
 
-        FetchData(Properties properties) {
-            this.statement = properties.getProperty(ConfigurationLabels.STATEMENT);
-            String property = properties.getProperty(ConfigurationLabels.FETCH_SIZE);
+        FetchData(Properties fetchProperties) {
+            this.statement = fetchProperties.getProperty(ConfigurationLabels.STATEMENT);
+            String fetchSizeProp = fetchProperties.getProperty(ConfigurationLabels.FETCH_SIZE);
 
             int fs;
             try {
-                fs = Integer.parseInt(property);
+                fs = Integer.parseInt(fetchSizeProp);
             } catch (NumberFormatException e) {
-                fs = DefaultConfig.DEFAULT_FETCHSIZE;
+                fs = DefaultConfig.DEFAULT_FETCH_SIZE;
             }
             this.fetchSize = fs;
 
-            String qp = properties.getProperty(ConfigurationLabels.QUERY_PARAMETERS);
+            String qp = fetchProperties.getProperty(ConfigurationLabels.QUERY_PARAMETERS);
             if (qp != null) {
                 this.queryParameters = Arrays.asList(StringUtils.split(qp, DefaultConfig.DEFAULT_LIST_DELIMITER));
             } else {
@@ -146,7 +146,6 @@ public class QuerySource extends AbstractSource<ResultSet> {
         };
     }
 
-
     @Override
     public Stream<ResultSet> stream() {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(buildIterator(), 0), false);
@@ -154,7 +153,7 @@ public class QuerySource extends AbstractSource<ResultSet> {
 
     private Iterator<ResultSet> buildIterator() {
 
-        return new Iterator<ResultSet>() {
+        return new Iterator<>() {
 
             @Override
             public boolean hasNext() {

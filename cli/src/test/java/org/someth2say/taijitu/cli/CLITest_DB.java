@@ -5,35 +5,23 @@ import org.apache.commons.configuration2.ImmutableHierarchicalConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.YAMLConfiguration;
 import org.apache.commons.configuration2.builder.BasicConfigurationBuilder;
-import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.someth2say.taijitu.cli.config.ConfigurationLabels;
-import org.someth2say.taijitu.cli.config.DefaultConfig;
-import org.someth2say.taijitu.cli.config.delegates.simple.BasicComparisonCfg;
-import org.someth2say.taijitu.cli.config.delegates.simple.BasicEqualityCfg;
-import org.someth2say.taijitu.cli.config.delegates.simple.BasicSourceCfg;
-import org.someth2say.taijitu.cli.config.delegates.simple.BasicTaijituCfg;
-import org.someth2say.taijitu.cli.config.impl.TaijituCfg;
-import org.someth2say.taijitu.cli.config.interfaces.IEqualityCfg;
+import org.someth2say.taijitu.cli.config.TaijituConfig;
 import org.someth2say.taijitu.cli.config.interfaces.ITaijituCfg;
-import org.someth2say.taijitu.cli.source.mapper.ResultSetTupleMapper;
 import org.someth2say.taijitu.cli.source.query.ConnectionManager;
 import org.someth2say.taijitu.cli.source.query.QuerySource;
-import org.someth2say.taijitu.equality.impl.value.DateThresholdComparator;
-import org.someth2say.taijitu.equality.impl.value.NumberThresholdComparatorHasher;
-import org.someth2say.taijitu.equality.impl.value.StringCaseInsensitiveComparatorHasher;
 import org.someth2say.taijitu.equality.explain.Difference;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,34 +29,11 @@ import java.util.stream.Stream;
 /**
  * @author Jordi Sola
  */
-@RunWith(Parameterized.class)
 public class CLITest_DB {
 
     private static final String DB_NAME = "test";
     private static final String DB_USER = "user";
     private static final String DB_PWD = "pwd";
-
-    private List<String> compare;
-    private List<String> key;
-    private List<String> sort;
-
-    public CLITest_DB(String compare, String key, String sort) {
-        this.compare = compare == "" ? null : Arrays.asList(compare.split(","));
-        this.key = key == "" ? null : Arrays.asList(key.split(","));
-        this.sort = sort == "" ? null : Arrays.asList(sort.split(","));
-    }
-
-
-    //FIELDS, in the form of [COMPARE, KEY, SORT]
-    @Parameterized.Parameters(name = "{index}: {0}")
-    public static Collection<String[]> fields() {
-        return Arrays.asList(
-        //return Collections.singletonList(
-                new String[]{"", "KEY", ""} //Compare everything, hash by KEY, sort by nothing
-                ,new String[]{"", "", "KEY"} //Compare everything, hash by nothing, sort by KEY
-                ,new String[]{"", "", ""} //Compare everything, hash by nothing, sort by nothing (use stream order)
-                );
-    }
 
     @After
     public void dropTables() throws SQLException {
@@ -81,7 +46,7 @@ public class CLITest_DB {
         // Create the tables and test data
         final Properties databaseProps = buildDbSampleData();
 
-        final ITaijituCfg configuration = getTaijituConfig(databaseProps);
+        final ITaijituCfg configuration = TaijituConfig.fromYamlFile("test.yaml");
 
         final List<Stream<Difference>> comparisonResults = TaijituCli.compare(configuration);
 
@@ -92,84 +57,6 @@ public class CLITest_DB {
         final List<Difference> secondResult = comparisonResults.get(1).collect(Collectors.toList());
         System.out.println(secondResult);
         Assert.assertEquals(1, secondResult.size());
-    }
-
-    @Test
-    public void apacheDBTest() throws TaijituCliException, SQLException, ConfigurationException {
-        // Create the tables and test data
-        final Properties sourceBuildProperties = buildDbSampleData();
-
-        final ImmutableHierarchicalConfiguration configuration = getApacheConfiguration(sourceBuildProperties);
-
-        final List<Stream<Difference>> comparisonResults = TaijituCli.compare(configuration);
-
-        Assert.assertEquals(2, comparisonResults.size());
-        final List<Difference> firstResult = comparisonResults.get(0).collect(Collectors.toList());
-        Assert.assertEquals(0, firstResult.size());
-        final List<Difference> secondResult = comparisonResults.get(1).collect(Collectors.toList());
-        Assert.assertEquals(1, secondResult.size());
-
-        //TODO: Define exactly the expected differenceOrNull!
-
-    }
-
-    private ITaijituCfg getTaijituConfig(Properties dbProperties) {
-        BasicTaijituCfg basicTaijituCfg = new BasicTaijituCfg("");
-
-        // Databases
-        basicTaijituCfg.setBuildProperties(dbProperties);
-
-        // Comparisons
-        Properties s1fetchProperties = new Properties();
-        s1fetchProperties.setProperty(ConfigurationLabels.STATEMENT, "select * from test");
-
-        Properties s2fetchProperties = new Properties();
-        s2fetchProperties.setProperty(ConfigurationLabels.STATEMENT, "select * from test2");
-
-        BasicSourceCfg sourceSrc = new BasicSourceCfg("source", QuerySource.class.getSimpleName(), s1fetchProperties, null, ResultSetTupleMapper.class.getSimpleName());
-        BasicSourceCfg source2Src = new BasicSourceCfg("source2", QuerySource.class.getSimpleName(), s1fetchProperties, null, ResultSetTupleMapper.class.getSimpleName());
-        BasicSourceCfg targetSrc = new BasicSourceCfg("target", QuerySource.class.getSimpleName(), s2fetchProperties, null, ResultSetTupleMapper.class.getSimpleName());
-
-        BasicComparisonCfg comp1 = new BasicComparisonCfg("test1", compare, key, sort, Arrays.asList(sourceSrc, source2Src));
-        BasicComparisonCfg comp2 = new BasicComparisonCfg("test2", compare, key, sort, Arrays.asList(sourceSrc, targetSrc));
-        basicTaijituCfg.setComparisons(Arrays.asList(comp1, comp2));
-
-        // Equalizer
-        BasicEqualityCfg stringEq = new BasicEqualityCfg(StringCaseInsensitiveComparatorHasher.class.getSimpleName(), String.class.getName(), null);
-        BasicEqualityCfg numberEq = new BasicEqualityCfg(NumberThresholdComparatorHasher.class.getSimpleName(), Number.class.getName(), null, "2");
-        IEqualityCfg timestampEq = new BasicEqualityCfg(DateThresholdComparator.class.getSimpleName(), Date.class.getName(), null, "100");
-        basicTaijituCfg.setEqualityConfigs(Arrays.asList(stringEq, numberEq, timestampEq));
-
-        return new TaijituCfg(basicTaijituCfg);
-    }
-
-    private ImmutableHierarchicalConfiguration getApacheConfiguration(Properties sourceBuildProperties) throws ConfigurationException {
-
-        final PropertiesConfiguration properties = new BasicConfigurationBuilder<>(PropertiesConfiguration.class).getConfiguration();
-
-        properties.setListDelimiterHandler(new DefaultListDelimiterHandler(DefaultConfig.DEFAULT_LIST_DELIMITER));
-
-        // Comparisons
-        // ResultSet are transient objects, so we need to use mappers to keep a copy before they are dismissed. Else, we will be able to reach difference objects, but not its underlying causes.
-        Properties sourceProps1 = makeQuerySourceProps("select * from test", sourceBuildProperties, ResultSetTupleMapper.class.getSimpleName());
-        Properties sourceProps2 = makeQuerySourceProps("select * from test2", sourceBuildProperties, ResultSetTupleMapper.class.getSimpleName());
-        String compareStr = compare != null ? String.join(",", compare) : "";
-        String keyStr = key != null ? String.join(",", key) : "";
-        String sortStr = sort != null ? String.join(",", sort) : "";
-        putAll(properties, makeComparisonProps("test1", compareStr, keyStr, sortStr, sourceProps1, sourceProps1, null), "");
-        putAll(properties, makeComparisonProps("test2", compareStr, keyStr, sortStr, sourceProps1, sourceProps2, null), "");
-
-        //Add comparators
-        //Case insensitive strings
-        properties.setProperty(ConfigurationLabels.EQUALITY + "." + StringCaseInsensitiveComparatorHasher.class.getSimpleName() + "." + ConfigurationLabels.FIELD_CLASS, String.class.getName());
-        //Decimal places for Numbers
-        properties.setProperty(ConfigurationLabels.EQUALITY + "." + NumberThresholdComparatorHasher.class.getSimpleName() + "." + ConfigurationLabels.FIELD_CLASS, Number.class.getName());
-        properties.setProperty(ConfigurationLabels.EQUALITY + "." + NumberThresholdComparatorHasher.class.getSimpleName() + "." + ConfigurationLabels.EQUALITY_PARAMS, "2");
-        //Threshold 100ms for Timestamps.
-        properties.setProperty(ConfigurationLabels.EQUALITY + "." + DateThresholdComparator.class.getSimpleName() + "." + ConfigurationLabels.FIELD_CLASS, Date.class.getName());
-        properties.setProperty(ConfigurationLabels.EQUALITY + "." + DateThresholdComparator.class.getSimpleName() + "." + ConfigurationLabels.EQUALITY_PARAMS, "100");
-
-        return ConfigurationUtils.unmodifiableConfiguration(ConfigurationUtils.convertToHierarchical(properties));
     }
 
     private Properties buildDbSampleData() throws SQLException {

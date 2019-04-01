@@ -2,9 +2,9 @@ package org.someth2say.taijitu.cli.registry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.someth2say.taijitu.cli.source.mapper.SourceMapper;
 import org.someth2say.taijitu.cli.source.mapper.CSVTupleMapper;
 import org.someth2say.taijitu.cli.source.mapper.ResultSetTupleMapper;
-import org.someth2say.taijitu.cli.source.mapper.SourceMapper;
 import org.someth2say.taijitu.cli.util.ClassScanUtils;
 
 import java.util.Map;
@@ -27,10 +27,8 @@ public class MapperRegistry {
 	public static void scanClassPath() {
 		// This seems fast enough for a one-shot initialization
 		// If found slow, it can be changed to scan only sub-packages
-		final Class<SourceMapper> implementedInterface = SourceMapper.class;
-		classes = ClassScanUtils.getNamedClassesImplementing(implementedInterface);
-
-		logger.info("Registered source mappers: {}", classes.keySet().toString());
+		classes = ClassScanUtils.getNamedClassesImplementing(SourceMapper.class);
+		logger.info("Registered mappers: {}", classes.keySet().toString());
 	}
 
 	public static void useDefaults() {

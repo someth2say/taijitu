@@ -3,9 +3,9 @@
 [![Quality Gate](https://sonarqube.com/api/badges/measure?key=org.someth2say.taijitu%3Aroot&metric=alert_status)](https://sonarqube.com/dashboard?id=org.someth2say.taijitu%3Aroot)
 
 # The basis (and a bit of theory)
-The basic idea behind Taijitu is that `equality` in JVM-based languages is usually limited, if not wrong, in several ways:
-- Equality is not (always) a responsibility for the object/class
-- Equality do not enforce equality-based contracts. 
+The basic idea behind TaijituGfg is that `equality` in JVM-based languages is usually limited, if not wrong, in several ways:
+- EqualityCfg is not (always) a responsibility for the object/class
+- EqualityCfg do not enforce equality-based contracts. 
 
 Lets go deep into those concepts:
 
@@ -63,7 +63,7 @@ Let's depict each classification deeper:
 ### Equality by place:
 
 #### External equality
-External equality is based on the following idea: **Equality and equality-based contracts should be external to the class being compared**, so different equality 
+External equality is based on the following idea: **EqualityCfg and equality-based contracts should be external to the class being compared**, so different equality 
 concepts can be applied to same objects in different context.
 
 Java developers are already familiarized with this idea, but just for a single equality contract: the `Comparator` interface. This interface provides capabilities
@@ -79,12 +79,12 @@ Java implements internal equality in a "tricky" way: Implements both equality (`
 This way, **ALL** objects will, by default, provide an implementation for those equality contracts (even if there is no reasonable definition for the class!).
 
 ### Equality contracts:
-Equality contracts are all those "calculations" or "operations" that can be performed onto a class' instance, that are somehow dependant on one definition for equality. 
+EqualityCfg contracts are all those "calculations" or "operations" that can be performed onto a class' instance, that are somehow dependant on one definition for equality. 
 
 
 #### Equality:
-Equality (the definition for two instances being "equals") is indeed a equality contract, as it depends on its own definition.
-Equality can be described as a boolean function onto two instances (`Boolean equals(A,B)`).
+EqualityCfg (the definition for two instances being "equals") is indeed a equality contract, as it depends on its own definition.
+EqualityCfg can be described as a boolean function onto two instances (`Boolean equals(A,B)`).
 But I do prefer to see it as a function that divide a class' space (the space with all possible class' instances) into two sub-spaces: instances "equals" to "A", and instances "not equals" to "A":
 ```
 +--------------------------------------------------------------------------------------------+
@@ -96,7 +96,7 @@ But I do prefer to see it as a function that divide a class' space (the space wi
 This contract is defined in Java by `Object`s `equal` method.
 
 #### Comparison:
-Comparison contract in defined in Java `Comparable` by interface. 
+ComparisonCfg contract in defined in Java `Comparable` by interface. 
 It divides the class' space in three sections: Those "lesser" then the compared element (`compare(A,B) < 0`), those "greater" (`compare(A,B) > 0`) and those "equal" (`compare(A,B) == 0`): 
  ```
 +--------------------------------------------------------------------------------------------+
@@ -131,12 +131,12 @@ Those expectations make hash useful for using creating a "short-cut" for equalit
 they have great chances to be equals (costly to compute).
 
 Worth noting Hash the "simplest" contract, given it does not define a relation between two instances, but between a single instance and `Integer`s 
-instances space. On the contrary, Equality and Comparison contracts relates between two instances for the same class.
+instances space. On the contrary, EqualityCfg and ComparisonCfg contracts relates between two instances for the same class.
 
 ### Equality by place:
 
 #### External equality
-External equality is based on the following idea: **Equality and equality-based contracts should be external to the class being compared**, so different equality 
+External equality is based on the following idea: **EqualityCfg and equality-based contracts should be external to the class being compared**, so different equality 
 concepts can be applied to same objects in different context.
 
 In other words, equality (and other contracts) are based on equality "context", and this context is not part for the compared classes, but something 'external'.
@@ -185,10 +185,10 @@ But let's add a new question:
 
 This sentence raises the option that we can actually compare a `Person` with a `Picture`, two instances for different classes!
 
-Defining equality between different classes is named **Hibrid Equality**, and allow to compare instances that, despite having common attributes, 
+Defining equality between different classes is named **Hibrid EqualityCfg**, and allow to compare instances that, despite having common attributes, 
 do not belong to the same class. 
 
-**Hibrid Equality** opens a door to an exponential explosion for equality cases, and drops a lot of unanswered questions. And, given I still haven't found
+**Hibrid EqualityCfg** opens a door to an exponential explosion for equality cases, and drops a lot of unanswered questions. And, given I still haven't found
 and actual benefit it, I will let exploration for this to the reader.
 
  

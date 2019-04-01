@@ -13,7 +13,7 @@ public final class ConfigurationLabels {
 	public static final String STATEMENT = "sql";
 	public static final String QUERY_PARAMETERS = "queryParameters";
 	public static final String EQUALITY_PARAMS = "parameters";
-	public static final String FIELD_CLASS_STRICT = "exactClass";
+	public static final String FIELD_CLASS_STRICT = "exactClass"; //TODO: Rename to "matchSubclasses"
 	public static final String RESOURCE = "resource";
 	public static final String SOURCES = "sources";
 	public static final String SOURCE_TYPE = "type";

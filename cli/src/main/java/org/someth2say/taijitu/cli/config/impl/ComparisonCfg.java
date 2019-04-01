@@ -1,28 +1,13 @@
 package org.someth2say.taijitu.cli.config.impl;
 
-import org.someth2say.taijitu.cli.config.impl.defaults.IComparisonCfgDefaults;
-import org.someth2say.taijitu.cli.config.interfaces.IComparisonCfg;
-import org.someth2say.taijitu.cli.config.interfaces.ISourceCfg;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.someth2say.taijitu.cli.config.impl.defaults.IApacheComparisonCfg;
 
-import java.util.List;
+public class ComparisonCfg extends Cfg implements IApacheComparisonCfg {
 
-
-public class ComparisonCfg
-        extends NamedCfg<IComparisonCfg>
-        implements IComparisonCfgDefaults<IComparisonCfg> {
-
-    public ComparisonCfg(IComparisonCfg delegate, IComparisonCfgDefaults parent) {
-        super(delegate, parent);
-    }
-
-    private List<ISourceCfg> sourceConfigs = null;
-
-    @Override
-    public List<ISourceCfg> getSourceConfigs() {
-        if (sourceConfigs == null) {
-            sourceConfigs = IComparisonCfgDefaults.super.getSourceConfigs();
-        }
-        return sourceConfigs;
+    public ComparisonCfg(HierarchicalConfiguration configuration) {
+        super(configuration);
     }
 
 }
+

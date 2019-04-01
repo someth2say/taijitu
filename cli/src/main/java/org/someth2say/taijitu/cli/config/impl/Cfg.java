@@ -1,41 +1,33 @@
 package org.someth2say.taijitu.cli.config.impl;
 
-import org.someth2say.taijitu.cli.config.interfaces.ICfg;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
+import org.someth2say.taijitu.cli.config.impl.defaults.IApacheCfg;
 
-import java.util.Objects;
+public abstract class Cfg implements IApacheCfg {
+    private final HierarchicalConfiguration configuration;
 
-abstract class Cfg<P> implements ICfg {
-    private final P delegate;
-    private final P parent;
 
-    Cfg(P delegate, P parent) {
-        this.delegate = delegate;
-        this.parent = parent;
+    Cfg(final HierarchicalConfiguration configuration) {
+        this.configuration = configuration;
     }
 
-    public P getDelegate() {
-        return delegate;
-    }
 
-    public P getParent() {
-        return parent;
+    @Override
+	public HierarchicalConfiguration getConfiguration() {
+        return configuration;
     }
-
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Cfg)) return false;
-
-        Cfg<?> other = (Cfg<?>) o;
-
-        return Objects.equals(getDelegate(), other.getDelegate()) &&
-                Objects.equals(getParent(), other.getParent());
-
+        Cfg other = (Cfg) o;
+        //Cfg Configuration does not define areEquals/hashcode! :'(
+        return getConfiguration().equals(other.getConfiguration());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getDelegate(), getParent());
+        return getConfiguration().hashCode();
     }
 }
