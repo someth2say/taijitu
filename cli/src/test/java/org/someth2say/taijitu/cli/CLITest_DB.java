@@ -46,7 +46,7 @@ public class CLITest_DB {
         // Create the tables and test data
         final Properties databaseProps = buildDbSampleData();
 
-        final ITaijituCfg configuration = TaijituConfig.fromYamlFile("test.yaml");
+        final ITaijituCfg configuration = TaijituConfig.fromYamlFile("test_db.yaml");
 
         final List<Stream<Difference>> comparisonResults = TaijituCli.compare(configuration);
 

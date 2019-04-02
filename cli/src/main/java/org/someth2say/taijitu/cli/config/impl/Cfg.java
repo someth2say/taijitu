@@ -1,9 +1,9 @@
 package org.someth2say.taijitu.cli.config.impl;
 
 import org.apache.commons.configuration2.HierarchicalConfiguration;
-import org.someth2say.taijitu.cli.config.impl.defaults.IApacheCfg;
+import org.someth2say.taijitu.cli.config.interfaces.ICfg;
 
-public abstract class Cfg implements IApacheCfg {
+public abstract class Cfg implements ICfg {
     private final HierarchicalConfiguration configuration;
 
 

@@ -80,7 +80,7 @@ public class CSVResourceSource extends AbstractSource<String[]> {
                         String[] split = header.split(FIELD_SEPARATOR);
                         this.providedFields = new ArrayList<>(split.length);
                         for (String column : split) {
-                            //TODO: Maybe we can try somehow to provide a class (i.e. by parsing the header...), or use String instead of null...
+                            //TODO: Maybe we can try somehow to provide a class (i.e. by parsing the header...), or use String instead of null..., or maybe using fetchProperties
                             this.providedFields.add(new FieldDescription<>(column, String.class));
                         }
                         return this.providedFields;

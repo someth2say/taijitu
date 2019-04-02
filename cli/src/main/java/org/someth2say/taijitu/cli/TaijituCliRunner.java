@@ -76,8 +76,8 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
     private <MAPPED_TYPE> StreamEqualizer<MAPPED_TYPE> getStreamEqualizer(IComparisonCfg iComparisonCfg,
                                                                           Duo<Source<MAPPED_TYPE>> mappedSources) {
         Map<String, FieldDescription<?>> commonFDs = getCommonFields(mappedSources);
-        List<FieldDescription<?>> keyFDs = iComparisonCfg.getKeyFields().stream().map(commonFDs::get).collect(Collectors.toList());
-        List<FieldDescription<?>> sortFDs = iComparisonCfg.getSortFields().stream().map(commonFDs::get).collect(Collectors.toList());
+        List<FieldDescription<?>> keyFDs = iComparisonCfg.getKeyFields().stream().map(commonFDs::get).filter(Objects::nonNull).collect(Collectors.toList());
+        List<FieldDescription<?>> sortFDs = iComparisonCfg.getSortFields().stream().map(commonFDs::get).filter(Objects::nonNull).collect(Collectors.toList());
 
         //TODO: If the compare list contains non-common fields, those are silently ignored. Maybe better sanitize...
         List<FieldDescription<?>> compareFDS = (iComparisonCfg.getCompareFields().isEmpty()

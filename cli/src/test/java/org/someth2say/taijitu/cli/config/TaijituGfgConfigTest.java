@@ -15,7 +15,7 @@ public class TaijituGfgConfigTest {
 
     @Test
     public void fromYaml() throws TaijituCliException {
-        ITaijituCfg iTaijituCfg = TaijituConfig.fromYamlFile("test.yaml");
+        ITaijituCfg iTaijituCfg = TaijituConfig.fromYamlFile("test_db.yaml");
         System.out.println(TaijituConfig.toYaml((TaijituGfg) iTaijituCfg));
     }
 

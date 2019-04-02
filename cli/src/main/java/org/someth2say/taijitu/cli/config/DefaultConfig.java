@@ -1,5 +1,6 @@
 package org.someth2say.taijitu.cli.config;
 
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.someth2say.taijitu.cli.config.interfaces.IEqualityCfg;
 import org.someth2say.taijitu.equality.impl.value.ObjectHasher;
 import org.someth2say.taijitu.equality.impl.value.ObjectToStringComparatorHasher;
@@ -7,6 +8,7 @@ import org.someth2say.taijitu.equality.impl.value.ObjectToStringComparatorHasher
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 public class DefaultConfig {
 
@@ -18,8 +20,29 @@ public class DefaultConfig {
 
     //TODO: We are here adding two equalities: a simple one, and a HasherComparer one. Maybe this should be split
     public static final List<IEqualityCfg> DEFAULT_EQUALITY_CONFIGS = Arrays.asList(
-            (DefaultEqualityConfig) ObjectHasher.class::getSimpleName,
-            (DefaultEqualityConfig) ObjectToStringComparatorHasher.class::getSimpleName);
+            new IEqualityCfg() {
+                @Override
+                public HierarchicalConfiguration<?> getConfiguration() {
+                    return null;
+                }
+
+                @Override
+                public String getName() {
+                    return ObjectHasher.class.getSimpleName();
+                }
+            },
+            new IEqualityCfg() {
+                @Override
+                public HierarchicalConfiguration<?> getConfiguration() {
+                    return null;
+                }
+
+                @Override
+                public String getName() {
+                    return ObjectToStringComparatorHasher.class.getSimpleName();
+                }
+            }
+    );
 
     public static final String DEFAULT_CONFIG_FILE = "taijitu.properties";
 
@@ -28,21 +51,5 @@ public class DefaultConfig {
     public static final List<String> DEFAULT_SORT_FIELDS = Collections.emptyList();
     public static final List<String> DEFAULT_COMPARE_FIELDS = Collections.emptyList();
 
-    public interface DefaultEqualityConfig extends IEqualityCfg {
-        @Override
-        default String getFieldName() {
-            return null;
-        }
-
-        @Override
-        default String getFieldClass() {
-            return null;
-        }
-
-        @Override
-        default Boolean isFieldClassStrict() {
-            return false;
-        }
-
-    }
+    public static final Properties DEFAULT_EMPTY_PROPERTIES = new Properties();
 }

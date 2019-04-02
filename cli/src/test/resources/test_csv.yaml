@@ -1,0 +1,33 @@
+threads: 1
+scanClasspath: true
+comparison:
+  - name: csv
+    keys: [street,price,latitude,longitude]
+    equality:
+      - name: StringCaseInsensitiveComparatorHasher
+        class: java.lang.String
+      - name: NumberThresholdComparatorHasher
+        class: java.lang.Number
+        exactClass: false
+      - name: DateThresholdComparator
+        class: java.util.Date
+        exactClass: false
+    sources:
+      - name: source
+        type: CSVResourceSource
+        buildProperties:
+          resource: http://samplecsvs.s3.amazonaws.com/Sacramentorealestatetransactions.csv
+      - name: source2
+        type: CSVResourceSource
+        buildProperties:
+          resource: /csv/Sacramentorealestatetransactions.csv
+equality:
+  - name: StringCaseInsensitiveComparatorHasher
+    class: java.lang.String
+  - name: NumberThresholdComparatorHasher
+    class: java.lang.Number
+    exactClass: false
+  - name: DateThresholdComparator
+    class: java.util.Date
+    exactClass: false
+
