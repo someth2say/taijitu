@@ -21,4 +21,9 @@ public class ComparableComparatorHasher<T extends Comparable<T>> implements Comp
         return object1.equals(other);
     }
 
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName();
+    }
+
 }

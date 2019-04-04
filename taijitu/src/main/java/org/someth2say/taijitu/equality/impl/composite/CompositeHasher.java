@@ -14,7 +14,7 @@ public class CompositeHasher<T> extends CompositeEqualizer<T> implements ICompos
     private final List<? extends Hasher<T>> hashers;
 
     public CompositeHasher(List<? extends Hasher<T>> hashers) {
-        this(hashers,hashers);
+        this(hashers, hashers);
     }
 
     private CompositeHasher(List<? extends Hasher<T>> hashers, List<? extends Equalizer<T>> equalizers) {
@@ -25,7 +25,7 @@ public class CompositeHasher<T> extends CompositeEqualizer<T> implements ICompos
     @Override
     public String toString() {
         return this.getClass().getSimpleName()
-                + hashers.stream().map(Equalizer::toString).collect(Collectors.joining(",","(",")"));
+                + hashers.stream().map(Equalizer::toString).collect(Collectors.joining(",", "(", ")"));
     }
 
     public List<? extends Hasher<T>> getHashers() {
@@ -63,12 +63,8 @@ interface ICompositeHasher<T> extends Hasher<T>, ICompositeEqualizer<T> {
 
     @Override
     default int hash(T obj) {
-        int result = 1;
-        //TODO: getHashers produce an ordered stream (as per contract). So it should be safe reduce the stream
-        for (Hasher<T> e : getHashers()) {
-            result = 31 * result + e.hash(obj);
-        }
-        return result;
+        return getHashers().stream().mapToInt(ha -> ha.hash(obj)).reduce(1, (prev, cur) -> 31 * prev + cur);
+
     }
 
     List<? extends Hasher<T>> getHashers();

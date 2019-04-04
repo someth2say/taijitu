@@ -43,8 +43,8 @@ public class CompositeComparatorHasher<T> extends CompositeEqualizer<T> implemen
     @Override
     public String toString() {
         return super.toString()
-                + comparators.stream().map(Equalizer::toString).collect(Collectors.joining(",","(",")"))
-                + hashers.stream().map(Equalizer::toString).collect(Collectors.joining(",","(",")"));
+                + comparators.stream().map(Comparator::toString).collect(Collectors.joining(",","(",")"))
+                + hashers.stream().map(Hasher::toString).collect(Collectors.joining(",","(",")"));
     }
 
     public static class Builder<T> extends CompositeEqualizer.Builder<T> {

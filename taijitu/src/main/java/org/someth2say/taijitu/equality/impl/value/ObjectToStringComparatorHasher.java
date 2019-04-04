@@ -21,4 +21,9 @@ public class ObjectToStringComparatorHasher<T> implements ComparatorHasher<T> {
         return object1.toString().compareTo(object2.toString());
     }
 
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName();
+    }
+
 }

@@ -20,5 +20,4 @@ public interface Equalizer<T> {
      */
     boolean areEquals(T t1, T t2);
 
-
 }

@@ -35,4 +35,9 @@ public class StringCaseInsensitiveComparatorHasher implements ComparatorHasher<S
     public Locale getLocale() {
         return locale;
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName()+"("+getLocale()+")";
+    }
 }

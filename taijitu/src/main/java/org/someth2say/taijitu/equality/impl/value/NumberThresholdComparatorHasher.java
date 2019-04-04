@@ -58,6 +58,6 @@ public class NumberThresholdComparatorHasher<T extends Number> implements Compar
 
     @Override
     public String toString() {
-        return NumberThresholdComparatorHasher.class.getSimpleName()+"("+getScale()+")";
+        return this.getClass().getSimpleName()+"("+getScale()+")";
     }
 }

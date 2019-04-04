@@ -55,5 +55,9 @@ public class DateThresholdComparator<T extends Date> implements Comparator<T> {
         return Math.abs(diff) < threshold ? 0 : diff < 0 ? -1 : 1;
     }
 
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName()+"("+getThreshold()+")";
+    }
 
 }

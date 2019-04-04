@@ -16,4 +16,8 @@ public class ObjectHasher<T> implements Hasher<T> {
         return object1.equals(object2);
     }
 
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName();
+    }
 }
