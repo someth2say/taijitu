@@ -6,6 +6,7 @@ import org.someth2say.taijitu.cli.config.TaijituConfig;
 import org.someth2say.taijitu.cli.config.interfaces.ITaijituCfg;
 import org.someth2say.taijitu.equality.explain.Difference;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,9 +25,15 @@ public class CLITest_CSV {
         final List<Stream<Difference>> comparisonResults = TaijituCli.compare(configuration);
 
         Assert.assertEquals(1, comparisonResults.size());
-        final List<Difference> firstResult = comparisonResults.get(0).collect(Collectors.toList());
+       Stream<Difference> differenceStream = comparisonResults.get(0);
+       final List<Difference> firstResult = differenceStream.collect(Collectors.toList());
         //TODO: Introduce expected differences
-        Assert.assertEquals(0, firstResult.size());
+       Difference difference = firstResult.get(0);
+       Object lhs = difference.getEntries().get(0);
+       Object rhs = difference.getEntries().get(1);
+       System.out.println("From: "+ Arrays.toString((String[]) lhs));
+       System.out.println("  To: "+ Arrays.toString((String[]) rhs));
+        Assert.assertEquals(1, firstResult.size());
     }
 
 }

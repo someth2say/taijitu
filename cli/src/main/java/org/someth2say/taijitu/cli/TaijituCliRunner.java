@@ -327,12 +327,7 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
 
     private <MAPPED_TYPE> List<FieldDescription<?>> getCanonicalFDs(Duo<Source<MAPPED_TYPE>> sources) {
         List<FieldDescription<?>> canonicalFDs = sources.getLeft().getProvidedFields();
-        // Retain only canonicalFields that are also provided by other streams.
-        for (Source<MAPPED_TYPE> source : sources.stream().skip(1).collect(Collectors.toList())) {
-            List<FieldDescription<?>> sourceFDs = source.getProvidedFields();
-            // TODO: This sometimes drop a NPE... should investigate.
-            canonicalFDs.retainAll(sourceFDs);
-        }
+        canonicalFDs.retainAll(sources.getRight().getProvidedFields());
         return canonicalFDs;
     }
 
@@ -362,7 +357,4 @@ class Duo<T> extends Pair<T, T> {
         throw new UnsupportedOperationException();
     }
 
-    public Stream<T> stream() {
-        return Stream.of(left, right);
-    }
 }
