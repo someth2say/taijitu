@@ -69,13 +69,5 @@ comparison:
             password: pwd
           jdbcUrl: jdbc:h2:mem:test;DB_CLOSE_DELAY=-1
         mapper: ResultSetTupleMapper
-equality:
-  - name: StringCaseInsensitiveComparatorHasher
-    class: java.lang.String
-  - name: NumberThresholdComparatorHasher
-    class: java.lang.Number
-    exactClass: false
-  - name: DateThresholdComparator
-    class: java.util.Date
-    exactClass: false
+
 

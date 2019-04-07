@@ -30,7 +30,7 @@ public class SimpleStreamEqualizer<ELEMENT> implements StreamEqualizer<ELEMENT> 
         return StreamUtil
                 .biMapTail(source, target,
                         (sourceElem, targetElem) -> new Unequal<>(elementEqualizer, sourceElem, targetElem),
-                        element -> new Missing(elementEqualizer, element),
+                        element -> new Missing<>(elementEqualizer, element),
                         elementEqualizer::areEquals );
     }
 }

@@ -35,8 +35,8 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         final ArrayListValuedHashMap<Integer, T> map1 = new ArrayListValuedHashMap<>();
         final ArrayListValuedHashMap<Integer, T> map2 = new ArrayListValuedHashMap<>();
 
-        Stream<Difference> mapA = source.flatMap(a -> mapA(a, map1, map2));
-        Stream<Difference> mapB = target.flatMap(b -> mapB(b, map1, map2));
+        Stream<Difference> mapA = source.flatMap(a -> map(a, hasher, map1, map2, (ta, tb) -> new Unequal<>(hasher, ta, tb)));
+        Stream<Difference> mapB = target.flatMap(b -> map(b, hasher, map2, map1, (ta, tb) -> new Unequal<>(hasher, tb, ta)));
         Stream<Difference> unequals = StreamUtil.zip(mapA, mapB, true);
 
         Stream<Difference> remaining1 = Stream.generate(() -> {
@@ -54,14 +54,6 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         }).takeWhile(Objects::nonNull);
 
         return Stream.concat(unequals, Stream.concat(remaining1, remaining2));
-    }
-
-    private Stream<Difference> mapB(T b, ArrayListValuedHashMap<Integer, T> map1, ArrayListValuedHashMap<Integer, T> map2) {
-        return map(b, hasher, map2, map1, (ta, tb) -> new Unequal<>(hasher, tb, ta));
-    }
-
-    private Stream<Difference> mapA(T a, ArrayListValuedHashMap<Integer, T> map1, ArrayListValuedHashMap<Integer, T> map2) {
-        return map(a, hasher, map1, map2, (ta, tb) -> new Unequal<>(hasher, ta, tb));
     }
 
     //TODO: Investigate efficiency of creating an Optional instead of a Stream.

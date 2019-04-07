@@ -70,4 +70,9 @@ public abstract class Difference<T> {
     @Override
     public int hashCode() {
         return Objects.hash(entries, cause);}
+
+    public List<T> getEntries() {
+        return entries;
+    }
+
 }

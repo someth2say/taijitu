@@ -61,14 +61,16 @@ public class StreamUtilTest {
     public void biMapTailTest() {
         Stream<String> s1 = of("a", "-", "b", "c", "d");
         Stream<String> s2 = of("1", "-", "2", "3");
-        Stream<String> zip = biMapTail(s1, s2, String::concat, String::toUpperCase, identity(), String::equals);
+        Stream<String> zip = biMapTail(s1, s2, String::concat, String::toUpperCase, String::equals);
         assertEquals(Arrays.asList("a1", "b2", "c3", "D"), zip.collect(toList()));
     }
 
     @Test
     public void comparingBiMapTest() {
         List<String> collect;
-        collect = StreamUtil.comparingBiMap(of("-", "a", "C", "d", "e"), of("a", "b", "c", "D"), String::compareToIgnoreCase, String::concat, String::toUpperCase, String::equals).collect(toList());
+        Stream<String> s1 = of("-", "a", "C", "d", "e");
+        Stream<String> s2 = of("a", "b", "c", "D");
+        collect = StreamUtil.comparingBiMap(s1, s2, String::compareToIgnoreCase, String::concat, String::toUpperCase, String::equals).collect(toList());
         assertEquals(Arrays.asList("-", "B", "Cc", "dD"), collect);
         collect = StreamUtil.comparingBiMap(of("a", "c", "d"), empty(), String::compareToIgnoreCase, String::concat, identity(), String::equals).collect(toList());
         assertEquals(Collections.emptyList(), collect);
