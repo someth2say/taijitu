@@ -38,7 +38,7 @@ public class SourceRegistry {
     }
 
     private static <T extends AbstractSource> void addSourceType(Class<T> clazz) {
-        classes.put(ClassScanUtils.getClassName(clazz), clazz);
+        classes.put(clazz.getSimpleName(), clazz);
     }
 
     private static Class<? extends AbstractSource> getSourceType(String type) {
@@ -50,9 +50,10 @@ public class SourceRegistry {
         Properties buildProperties = sourceConfig.getBuildProperties();
         Properties fetchProperties = sourceConfig.getFetchProperties();
         try {
-            //TODO: Fix this unckecked assignment
             Constructor<? extends AbstractSource> constructor = sourceClass.getDeclaredConstructor(String.class, Properties.class, Properties.class);
-            return constructor.newInstance(sourceConfig.getName(), buildProperties, fetchProperties);
+            @SuppressWarnings("unchecked")
+            AbstractSource<T> abstractSource = constructor.newInstance(sourceConfig.getName(), buildProperties, fetchProperties);
+            return abstractSource;
         } catch (Exception e) {
             logger.error("Unable to create source. Type: {}  Arguments: {}",type, StringUtils.join(new Object[]{buildProperties, fetchProperties}, ","), e);
         }

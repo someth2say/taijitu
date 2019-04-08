@@ -1,20 +1,20 @@
 
 package org.someth2say.taijitu.collections;
 
+import org.someth2say.taijitu.equality.aspects.external.Equalizer;
+import org.someth2say.taijitu.equality.aspects.external.Hasher;
+import org.someth2say.taijitu.equality.impl.value.ObjectHasher;
+
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import org.someth2say.taijitu.equality.aspects.external.Equalizer;
-import org.someth2say.taijitu.equality.aspects.external.Hasher;
 //import sun.misc.SharedSecrets;
 
 
@@ -79,14 +79,12 @@ public class HashMap<K, V>
      * Basic hash bin node, used for most entries.  (See below for
      * TreeNode subclass, and in LinkedHashMap for its Entry subclass.)
      */
-    //TODO: Review potential issues with Map.Entry.comparingBy* methods....
     static class Node<K, V> implements Map.Entry<K, V> {
         final int hash;
         final K key;
         V value;
         Node<K, V> next;
 
-        //TODO: Analize if those can be somehow delegated to the Map...
         final Hasher<? super K> hasher;
         final Equalizer<? super V> equalizer;
 
@@ -234,9 +232,6 @@ public class HashMap<K, V>
 
     /* ---------------- Public operations -------------- */
 
-
-    //TODO: Create constructor for default hasher and equalizer values
-
     /**
      * Constructs an empty <tt>HashMap</tt> with the specified initial
      * capacity and load factor.
@@ -263,32 +258,44 @@ public class HashMap<K, V>
         this.threshold = tableSizeFor(initialCapacity);
     }
 
-    /**
-     * Constructs an empty <tt>HashMap</tt> with the specified initial
-     * capacity and the default load factor (0.75).
-     *
-     * @param initialCapacity the initial capacity.
-     * @param hasher
-     * @param equalizer
-     * @throws IllegalArgumentException if the initial capacity is negative.
-     */
+    public HashMap(int initialCapacity, float loadFactor) {
+        this(initialCapacity, loadFactor, ObjectHasher.INSTANCE, ObjectHasher.INSTANCE);
+    }
+
+
+        /**
+         * Constructs an empty <tt>HashMap</tt> with the specified initial
+         * capacity and the default load factor (0.75).
+         *
+         * @param initialCapacity the initial capacity.
+         * @param hasher
+         * @param equalizer
+         * @throws IllegalArgumentException if the initial capacity is negative.
+         */
     public HashMap(int initialCapacity, Hasher<K> hasher, Equalizer<V> equalizer) {
         this(initialCapacity, DEFAULT_LOAD_FACTOR, hasher, equalizer);
     }
 
-    /**
-     * Constructs an empty <tt>HashMap</tt> with the default initial capacity
-     * (16) and the default load factor (0.75).
-     *
-     * @param hasher
-     * @param equalizer
-     */
+    public HashMap(int initialCapacity) {
+        this(initialCapacity, DEFAULT_LOAD_FACTOR, ObjectHasher.INSTANCE, ObjectHasher.INSTANCE);
+    }
+
+        /**
+         * Constructs an empty <tt>HashMap</tt> with the default initial capacity
+         * (16) and the default load factor (0.75).
+         *
+         * @param hasher
+         * @param equalizer
+         */
     public HashMap(Hasher<? super K> hasher, Equalizer<? super V> equalizer) {
         this.hasher = hasher;
         this.equalizer = equalizer;
         this.loadFactor = DEFAULT_LOAD_FACTOR; // all other fields defaulted
     }
 
+    public HashMap(){
+        this(ObjectHasher.INSTANCE, ObjectHasher.INSTANCE);
+    }
     /**
      * Constructs a new <tt>HashMap</tt> with the same mappings as the
      * specified <tt>Map</tt>.  The <tt>HashMap</tt> is created with
@@ -1805,8 +1812,6 @@ public class HashMap<K, V>
                     treeNode = rightNode;
                 else if (rightNode == null)
                     treeNode = leftNode;
-                    //TODO: Check if the hasher is also a Comparator, so we can use the defined order.
-                    // Same hash, both children, use key Comparable interface (if available)
                 else if ((comparableClass != null || (comparableClass = comparableClassFor(key)) != null) &&
                         (dir = compareComparables(comparableClass, key, nodeKey)) != 0)
                     treeNode = (dir < 0) ? leftNode : rightNode;

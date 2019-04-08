@@ -1,6 +1,5 @@
 package org.someth2say.taijitu.cli.source.query;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.someth2say.taijitu.cli.config.ConfigurationLabels;
@@ -9,7 +8,6 @@ import org.someth2say.taijitu.cli.source.AbstractSource;
 import org.someth2say.taijitu.cli.source.FieldDescription;
 
 import java.sql.*;
-import java.sql.Date;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -33,7 +31,6 @@ public class QuerySource extends AbstractSource<ResultSet> {
     private static class FetchData {
         private final String statement;
         private final int fetchSize;
-        private final List<Object> queryParameters;
 
         FetchData(Properties fetchProperties) {
             this.statement = fetchProperties.getProperty(ConfigurationLabels.STATEMENT);
@@ -47,12 +44,6 @@ public class QuerySource extends AbstractSource<ResultSet> {
             }
             this.fetchSize = fs;
 
-            String qp = fetchProperties.getProperty(ConfigurationLabels.QUERY_PARAMETERS);
-            if (qp != null) {
-                this.queryParameters = Arrays.asList(StringUtils.split(qp, DefaultConfig.DEFAULT_LIST_DELIMITER));
-            } else {
-                this.queryParameters = Collections.emptyList();
-            }
         }
 
         String getStatement() {
@@ -63,9 +54,6 @@ public class QuerySource extends AbstractSource<ResultSet> {
             return fetchSize;
         }
 
-        List<Object> getQueryParameters() {
-            return queryParameters;
-        }
     }
 
     private void init() {
@@ -79,19 +67,8 @@ public class QuerySource extends AbstractSource<ResultSet> {
     }
 
     private PreparedStatement getPreparedStatement() throws SQLException {
-        PreparedStatement preparedStatement;
-        preparedStatement = connection.prepareStatement(fetchData.getStatement());
+        PreparedStatement preparedStatement = connection.prepareStatement(fetchData.getStatement());
         preparedStatement.setFetchSize(fetchData.getFetchSize());
-        //TODO: Here we lost type-safety because we went through Properties... consider using a `Map<String,Object>` instead.
-        List<Object> sqlParameters = fetchData.getQueryParameters();
-        for (int paramIdx = 0; paramIdx < sqlParameters.size(); paramIdx++) {
-            Object object = sqlParameters.get(paramIdx);
-            if (object instanceof java.util.Date) {
-                preparedStatement.setDate(paramIdx + 1, new Date(((java.util.Date) object).getTime()));
-            } else {
-                preparedStatement.setObject(paramIdx + 1, object);
-            }
-        }
         return preparedStatement;
     }
 

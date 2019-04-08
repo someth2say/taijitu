@@ -4,7 +4,6 @@ import org.someth2say.taijitu.cli.source.Source;
 
 import java.util.stream.Stream;
 
-//TODO: Maybe this is the point to add some semantics to CSV: Parse provided fields names, try to cast values to the right object
 public class CSVTupleMapper extends AbstractSourceMapper<String[], Object[]> {
 
     public CSVTupleMapper() {

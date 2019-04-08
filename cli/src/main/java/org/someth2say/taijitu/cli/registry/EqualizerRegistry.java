@@ -40,7 +40,7 @@ public class EqualizerRegistry {
     }
 
     private static void addEqualityStrategy(Class<? extends Equalizer> clazz) {
-        classes.put(ClassScanUtils.getClassName(clazz), clazz);
+        classes.put(clazz.getSimpleName(), clazz);
     }
 
     public static Equalizer getInstance(String type) {

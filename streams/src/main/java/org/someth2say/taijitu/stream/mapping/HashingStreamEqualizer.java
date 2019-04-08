@@ -56,13 +56,11 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
         return Stream.concat(unequals, Stream.concat(remaining1, remaining2));
     }
 
-    //TODO: Investigate efficiency of creating an Optional instead of a Stream.
     private static <T> Stream<Difference> map(T thisT, Hasher<T> hasher,
                                               ArrayListValuedHashMap<Integer, T> thisMap,
                                               ArrayListValuedHashMap<Integer, T> otherMap,
                                               BiFunction<T, T, Difference<T>> diffMaker) {
 
-        //TODO: Investigate efficiency of this sync (maybe double-locking?)
         synchronized (otherMap) {
             if (otherMap.containsKey(hasher.hash(thisT))) {
 
@@ -89,8 +87,6 @@ public class HashingStreamEqualizer<T> implements StreamEqualizer<T> {
                 thisMap.put(hasher.hash(thisT), thisT);
                 return Stream.empty();
             }
-
-
         }
 
     }

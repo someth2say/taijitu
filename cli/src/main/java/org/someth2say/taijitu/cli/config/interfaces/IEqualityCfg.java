@@ -6,9 +6,6 @@ import static org.someth2say.taijitu.cli.config.DefaultConfig.DEFAULT_FIELD_CLAS
 
 public interface IEqualityCfg extends ICfg, INamedCfg {
 
-    //TODO: Do actually equality configs need to be named after the equality class? Won't be better having a `class`attribute?
-
-    //TODO: May use a field list here.
     default String getFieldName() {
         return getConfiguration().getString(ConfigurationLabels.FIELD_NAME);
     }

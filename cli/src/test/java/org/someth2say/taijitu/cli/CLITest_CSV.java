@@ -26,14 +26,28 @@ public class CLITest_CSV {
 
         Assert.assertEquals(1, comparisonResults.size());
        Stream<Difference> differenceStream = comparisonResults.get(0);
-       final List<Difference> firstResult = differenceStream.collect(Collectors.toList());
-        //TODO: Introduce expected differences
-       Difference difference = firstResult.get(0);
-       Object lhs = difference.getEntries().get(0);
-       Object rhs = difference.getEntries().get(1);
-       System.out.println("From: "+ Arrays.toString((String[]) lhs));
-       System.out.println("  To: "+ Arrays.toString((String[]) rhs));
-        Assert.assertEquals(1, firstResult.size());
+       final List<Difference> firstComparisonResult = differenceStream.collect(Collectors.toList());
+       Assert.assertEquals(1, firstComparisonResult.size());
+
+       Difference difference = firstComparisonResult.get(0);
+       String[] lhs = (String[]) difference.getEntries().get(0);
+       String[] rhs = (String[]) difference.getEntries().get(1);
+       System.out.println("From: "+ Arrays.toString(lhs));
+       System.out.println("  To: "+ Arrays.toString(rhs));
+       for (int i = 0; i < lhs.length; i++) {
+            if (i==4) {
+                Assert.assertNotEquals(lhs[i],rhs[i]);
+            } else {
+                Assert.assertEquals(lhs[i], rhs[i]);
+            }
+       }
+
+       // Underlying differences not yet implemented...
+       /*Stream<Difference> underlyingDifferences = difference.getUnderlyingDifferences();
+       List<Difference> udiffs = underlyingDifferences.collect(Collectors.toList());
+       System.out.printf(""+udiffs.size());
+       udiffs.forEach(System.out::println);*/
+
     }
 
 }

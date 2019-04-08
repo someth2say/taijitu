@@ -3,9 +3,10 @@ package org.someth2say.taijitu.equality.explain;
 import org.apache.commons.lang.StringUtils;
 import org.someth2say.taijitu.equality.aspects.external.Equalizer;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Abstract explanation class abstracting over the underlying difference between two instances (under given equality definition).
@@ -18,44 +19,24 @@ import java.util.stream.Stream;
 public abstract class Difference<T> {
     private final Equalizer<? super T> cause;
     private final List<T> entries;
-    private final Stream<Difference> underlyingDifferences;
 
-
-    public Difference(Equalizer<? super T> cause, List<T> entries, Stream<Difference> underlyingDifferences) {
+    public Difference(Equalizer<? super T> cause, List<T> entries) {
         this.cause = cause;
         this.entries = entries;
-        this.underlyingDifferences = underlyingDifferences;
-    }
-
-    public Difference(Equalizer<? super T> cause, T composite, Stream<Difference> underlyingDifferences) {
-        this(cause, Collections.singletonList(composite), underlyingDifferences);
     }
 
     public Difference(Equalizer<? super T> cause, T composite) {
-        this(cause, composite, Stream.empty());
+        this(cause, Collections.singletonList(composite));
     }
 
     public Difference(Equalizer<? super T> cause, T composite, T composite2) {
-        this(cause, composite, composite2, Stream.empty());
-    }
-
-    public Difference(Equalizer<? super T> cause, T composite, T composite2, Stream<Difference> underlyingDifferences) {
-        this(cause, Arrays.asList(composite, composite2), underlyingDifferences);
+        this(cause, Arrays.asList(composite, composite2));
     }
 
 
     @Override
     public String toString() {
-        if (underlyingDifferences == null) {
-            return this.getClass().getSimpleName() + ": " + cause.toString() + "(" + StringUtils.join(entries, "<>") + ")";
-        } else {
-            List<Difference> differences = underlyingDifferences.collect(Collectors.toList());
-            if (differences.isEmpty()) {
-                return this.getClass().getSimpleName() + ": " + cause.toString() + "(" + StringUtils.join(entries, "<>") + ")";
-            } else {
-                return this.getClass().getSimpleName() + ": " + cause.toString() + "(" + StringUtils.join(differences, ",") + ")";
-            }
-        }
+        return this.getClass().getSimpleName() + ": " + cause.toString() + "(" + StringUtils.join(entries, "<>") + ")";
     }
 
     @Override

@@ -8,10 +8,10 @@ comparison:
         class: java.lang.String
       - name: NumberThresholdComparatorHasher
         class: java.lang.Number
-        exactClass: false
+        avoidSubclasses: false
       - name: DateThresholdComparator
         class: java.util.Date
-        exactClass: false
+        avoidSubclasses: false
     sources:
       - name: source
         type: QuerySource
@@ -42,10 +42,10 @@ comparison:
         class: java.lang.String
       - name: NumberThresholdComparatorHasher
         class: java.lang.Number
-        exactClass: false
+        avoidSubclasses: false
       - name: DateThresholdComparator
         class: java.util.Date
-        exactClass: false
+        avoidSubclasses: false
     sources:
       - name: source
         type: QuerySource

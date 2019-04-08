@@ -37,7 +37,7 @@ public class MapperRegistry {
 	}
 
 	private static void addMapper(Class<? extends SourceMapper<?, ?>> clazz) {
-		classes.put(ClassScanUtils.getClassName(clazz), clazz);
+        classes.put(clazz.getSimpleName(), clazz);
 	}
 	
 	@SuppressWarnings("unchecked")

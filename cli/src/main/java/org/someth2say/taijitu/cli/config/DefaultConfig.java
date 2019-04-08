@@ -13,12 +13,10 @@ import java.util.Properties;
 public class DefaultConfig {
 
     public static final char DEFAULT_LIST_DELIMITER = ',';
-
     public static final int DEFAULT_FETCH_SIZE = 1024;
     public static final int DEFAULT_THREADS = 1;
     public static final boolean DEFAULT_SCAN_CLASSPATH = false;
 
-    //TODO: We are here adding two equalities: a simple one, and a HasherComparer one. Maybe this should be split
     public static final List<IEqualityCfg> DEFAULT_EQUALITY_CONFIGS = Arrays.asList(
             new IEqualityCfg() {
                 @Override
@@ -50,6 +48,6 @@ public class DefaultConfig {
     public static final List<String> DEFAULT_KEY_FIELDS = Collections.emptyList();
     public static final List<String> DEFAULT_SORT_FIELDS = Collections.emptyList();
     public static final List<String> DEFAULT_COMPARE_FIELDS = Collections.emptyList();
-
     public static final Properties DEFAULT_EMPTY_PROPERTIES = new Properties();
+
 }

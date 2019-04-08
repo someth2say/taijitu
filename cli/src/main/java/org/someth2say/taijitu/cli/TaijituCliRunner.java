@@ -12,7 +12,6 @@ import org.someth2say.taijitu.cli.registry.EqualizerRegistry;
 import org.someth2say.taijitu.cli.source.FieldDescription;
 import org.someth2say.taijitu.cli.source.Source;
 import org.someth2say.taijitu.cli.source.mapper.SourceMapper;
-import org.someth2say.taijitu.cli.util.ClassScanUtils;
 import org.someth2say.taijitu.equality.aspects.external.Comparator;
 import org.someth2say.taijitu.equality.aspects.external.Equalizer;
 import org.someth2say.taijitu.equality.aspects.external.Hasher;
@@ -79,24 +78,16 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
         List<FieldDescription<?>> keyFDs = iComparisonCfg.getKeyFields().stream().map(commonFDs::get).filter(Objects::nonNull).collect(Collectors.toList());
         List<FieldDescription<?>> sortFDs = iComparisonCfg.getSortFields().stream().map(commonFDs::get).filter(Objects::nonNull).collect(Collectors.toList());
 
-        //TODO: If the compare list contains non-common fields, those are silently ignored. Maybe better sanitize...
         List<FieldDescription<?>> compareFDS = (iComparisonCfg.getCompareFields().isEmpty()
                 ? commonFDs.keySet()
-                :iComparisonCfg.getCompareFields()).stream().map(commonFDs::get).filter(Objects::nonNull).collect(Collectors.toList());
+                : iComparisonCfg.getCompareFields()).stream().map(commonFDs::get).filter(Objects::nonNull).collect(Collectors.toList());
+
+        if (!iComparisonCfg.getCompareFields().isEmpty() && compareFDS.size() < iComparisonCfg.getCompareFields().size()) {
+            logger.warn("Some of the comparison fields in configuration are not common to both sources, and will be ignored.");
+            logger.debug("Common fields: ´{}", commonFDs.keySet());
+        }
 
         List<IEqualityCfg> equalityConfigs = iComparisonCfg.getEqualityConfigs();
-
-        //TODO: Simplify:
-        // Instead of looking for the extractor and the comparator to use on the fields, just indicate the comparator in the field description.
-        // Caveat: When using automatic field gathering, noone is setting the fields, so can't indicate the comparator...
-        /*
-        ComparisonCfg...
-          Fields:
-            - Name: ...
-              EqualityClass: ...
-              isKey: true/false
-              isSort: true/false
-         */
 
         CompositeComparatorHasher.Builder<MAPPED_TYPE> builder = new CompositeComparatorHasher.Builder<>();
 
@@ -133,6 +124,7 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
                 }
             }
         }
+        logger.debug("Using stream equality strategy: {}", streamEquality.getClass().getSimpleName());
         return streamEquality;
     }
 
@@ -176,13 +168,13 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
         return mapSource(source, mapper);
     }
 
+    @SuppressWarnings("unchecked")
     private <GENERATED_TYPE, MAPPED_TYPE> Source<MAPPED_TYPE> mapSource(Source<GENERATED_TYPE> source, SourceMapper<GENERATED_TYPE, MAPPED_TYPE> mapper) {
         if (mapper == null) {
-            // TODO: What should we do with this unchecked cast?
             return (Source<MAPPED_TYPE>) source;
         } else {
             Source<MAPPED_TYPE> mappedSource = mapper.apply(source);
-            logger.debug("Applying mapper {} to source {}", ClassScanUtils.getClassName(mapper.getClass()),source.getName());
+            logger.debug("Applying mapper {} to source {}", mapper.getClass().getSimpleName(),source.getName());
             return mappedSource;
         }
     }
