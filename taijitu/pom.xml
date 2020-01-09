@@ -13,10 +13,6 @@
 
     <artifactId>taijitu</artifactId>
     <packaging>jar</packaging>
-    <properties>
-        <poi.version>3.15</poi.version>
-        <opencsv.version>3.8</opencsv.version>
-    </properties>
 
     <build>
         <resources>
@@ -57,68 +53,58 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.8</version>
+            </plugin>
+
         </plugins>
     </build>
 
     <dependencies>
         <dependency>
-            <groupId>org.someth2say.taijitu</groupId>
-            <artifactId>commons</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.someth2say.taijitu</groupId>
-            <artifactId>query</artifactId>
-            <type>test-jar</type>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.someth2say.taijitu</groupId>
-            <artifactId>properties</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.someth2say.taijitu</groupId>
-            <artifactId>query</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml-schemas</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-ooxml</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-csv</artifactId>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.lukehutch</groupId>
-            <artifactId>fast-classpath-scanner</artifactId>
-        </dependency>
-        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.7.9</version>
+        </dependency>
     </dependencies>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <version>3.0.5</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.8</version>
+            </plugin>
+        </plugins>
+    </reporting>
 
 </project>

@@ -1,0 +1,25 @@
+threads: 1
+scanClasspath: true
+comparison:
+  - name: csv
+    keys: [street,zip]
+    equality:
+      - name: StringCaseInsensitiveComparatorHasher
+        class: java.lang.String
+      - name: NumberThresholdComparatorHasher
+        class: java.lang.Number
+        avoidSubclasses: false
+      - name: DateThresholdComparator
+        class: java.util.Date
+        avoidSubclasses: false
+    sources:
+      - name: source
+        type: CSVResourceSource
+        buildProperties:
+          resource: /csv/Sacramentorealestatetransactions2.csv
+      - name: source2
+        type: CSVResourceSource
+        buildProperties:
+          resource: /csv/Sacramentorealestatetransactions.csv
+
+
