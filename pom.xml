@@ -1,7 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
 
@@ -29,7 +26,7 @@
         <sonar.projectName>taijitu</sonar.projectName>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.language>java</sonar.language>
-        <argLine></argLine>
+        <argLine/>
         <taijitu.version>1.1-SNAPSHOT</taijitu.version>
     </properties>
 
@@ -115,7 +112,29 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>fabric8-maven-plugin</artifactId>
+                <version>3.5.38</version>
+                <executions>
+                    <execution>
+                        <goals>
+                        <goal>resource</goal>
+                        <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
 
+                <configuration>
+                    <resources>
+                        <labels>
+                        <all>
+                            <space>Taijitu</space>
+                        </all>
+                        </labels>
+                    </resources>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

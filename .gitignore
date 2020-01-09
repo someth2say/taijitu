@@ -16,3 +16,5 @@
 **/.project
 **/.settings/
 .vscode/settings.json
+**/.classpath
+

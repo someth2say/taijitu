@@ -3,14 +3,14 @@
 [![Quality Gate](https://sonarqube.com/api/badges/measure?key=org.someth2say.taijitu%3Aroot&metric=alert_status)](https://sonarqube.com/dashboard?id=org.someth2say.taijitu%3Aroot)
 
 TL;DR;
-Equality in JVM based languages is incomplete, as well as many equality-related contracts. 
-Taijitu provides an implementation for both external and internal equality contracts (as defined [here](BACKGROUND.md)) that enforce 
+Equality in JVM based languages is incomplete, as well as many equality-related contracts.
+Taijitu provides an implementation for both external and internal equality contracts (as defined [here](BACKGROUND.md)) that enforce
 completeness for equality-based contracts.
 
 Also, based on this implementation, Taitiju provides:
-- Several implementations for value and composite equality contracts 
+- Several implementations for value and composite equality contracts
 - Versatile implementations for stream equality
-- Sample implementations for Equality-aware collections: HashMap, LinkedList, etc. 
+- Sample implementations for Equality-aware collections: HashMap, LinkedList, etc.
 - A standalone comparison implementation for several data source formats (SQL queries, CSV files...): [Taijitu CLI](cli/README.md)
 
 ## Interfaces
@@ -20,7 +20,7 @@ Interfaces (or aspects) used to implement concepts previously defined are classi
 External equalities are instances able to provide equality capabilities to a different class' instances.
 
 ##### Equalizer
-The root for equality aspects structure. An `Equalizer` is an (external) object being able to compare two instances for equality, in a given context. 
+The root for equality aspects structure. An `Equalizer` is an (external) object being able to compare two instances for equality, in a given context.
 `Equalizer` defines the signature for the method that (externally) compare two instances:
 
         boolean areEquals(EQUALIZED equalized1, EQUALIZED equalized2) { ... }
@@ -31,9 +31,9 @@ Simple, isn't it? Just defines a method for checking if objects are equals.
 A `Hasher` is an object that can provide a `hashCode` for other instance. The only method defined by this interface is:
 
     int hash(HASHED hashed);
- 
+
 Several considerations about `Hasher`:
-- `Hasher` interface extends `Equalizer` interfaces. That means, all `Hasher` instances should be also `Equalizer`s. 
+- `Hasher` interface extends `Equalizer` interfaces. That means, all `Hasher` instances should be also `Equalizer`s.
 This enforces the fact that `hashCode` contract is based on `equals`, and forces the developer to implement both methods.
 
 ##### Comparator
@@ -48,7 +48,7 @@ Also, the same way we defined aspects (interfaces) for external equality contrac
 strengthening it to avoid miss-implementations. Parallel to external equalities, we define three interfaces:
 
 #### `Equalizable`
-Classes that define a default internal equality. 
+Classes that define a default internal equality.
 
 Java language forces the signature for the `equals` method to:
 
@@ -66,7 +66,7 @@ This methods is not absolutely required, but useful for skipping the infamous `i
 Again, Java language forces the signature:
 
     int hashCode();
-    
+
 #### `Comparable`
  Classes that define both internal equality AND instance comparison.
 
@@ -81,7 +81,7 @@ Of course they can! Both `Comparable` and `Hashable` are interfaces, so you only
 But Java language have a limitation in this situation: You can not reference multiple aspects (interfaces) in parameters or return types!
 In other words, you can not write:
 
-    Comparable<Person>&Hashable<Person> getComparableAndHashablePerson(); 
+    Comparable<Person>&Hashable<Person> getComparableAndHashablePerson();
 
 The solution, despite a bit clumpy, is creating an interface extending both `Comparable` and `Hashable`: `ComparableHashable`
 
@@ -91,10 +91,10 @@ This way, you can refer to both aspects in a single name:
 
 Luckily, we only have two equality-based contracts! Else, combinations will explode exponentially!
 
-By the way, the same mixing can be done for external equalities, obtaining the `ComparatorHasher` interface.  
+By the way, the same mixing can be done for external equalities, obtaining the `ComparatorHasher` interface.
 
 #### Equality descriptions
-Having this capacity when performing comparisons is great. 
+Having this capacity when performing comparisons is great.
 But sometimes it is great (ir not required) not only be able to tell if instances are equals or not, but also provide a reason for the response.
 
 Taijitu equality (and hence, all equality-based contracts) provide a set of methods and classes for providing this reasoning.
@@ -102,29 +102,29 @@ Taijitu equality (and hence, all equality-based contracts) provide a set of meth
 First thing to be done is modeling the equality reasons responses. Taijitu bases its responses in two classes:
 - Unequal: Wraps two instances that have been reasoned to be not equal, as well as the equality instance used for that reasoning.
 - Missing: Given two containers/collections/streams, describes an instance contained in one of them, that have no "equal" element on the other container.
-- Difference: Can be an `Unequal` or a `Missing`. Understand it as a super-class for those. 
- 
+- Difference: Can be an `Unequal` or a `Missing`. Understand it as a super-class for those.
+
 If no differences are found between two instances, reasoning simply will provide no Unequal/Missing instances.
 
 Now the responses are modeled, need a method for reasoning the response, isn't it? Taijitu defines a method named `underlyinDiffs`.
 This method will return a (lazy) stream of `Difference` instances, explaining the differences actually found in provided instances.
 
-Note that sometimes (mainly for Value equalities), `underlyinDiffs` may return `null` for equal instances, instead of an empty stream. 
-This is done for performance reasons, so clients do not actually need to consume an empty stream to check the simplest equalities. 
+Note that sometimes (mainly for Value equalities), `underlyinDiffs` may return `null` for equal instances, instead of an empty stream.
+This is done for performance reasons, so clients do not actually need to consume an empty stream to check the simplest equalities.
 
 ## Implementations
-We have now interfaces (or aspects) defining all equality concepts as per [theory](BACKGROUND.md). 
+We have now interfaces (or aspects) defining all equality concepts as per [theory](BACKGROUND.md).
 Let's see how can we make them real.
 
 ### Equalities
 For clarification purposes, Taijitu divides equalities in three levels:
 
-- Value equalities: Those computed actually onto a single value: an Integer, a String, a Date... 
+- Value equalities: Those computed actually onto a single value: an Integer, a String, a Date...
 Most of the time, they define alternative equality for already-defined classes.
 
-- Composite equalities: Is the minimal definition for an equality, as defined by a) a bunch of functions extracting values from the instance, and b) value equalities to be applied to the extracted values.     
+- Composite equalities: Is the minimal definition for an equality, as defined by a) a bunch of functions extracting values from the instance, and b) value equalities to be applied to the extracted values.
 
-- Stream equality: Generic implementations for comparing streams, depending on its characteristics.  
+- Stream equality: Generic implementations for comparing streams, depending on its characteristics.
 
 
 #### Value equalities
@@ -145,7 +145,7 @@ Following table shows capabilities for each value equality:
 | JavaObject            | Object         | :heavy_check_mark: | :heavy_check_mark: | :heavy_multiplication_x: |
 | NumberThreshold       | Number         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | StringCaseInsensitive | String         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
- 
+
 Many more value equalities may be introduced in a near future.
 
 #### Composite equalities
@@ -154,18 +154,18 @@ A composite equality is the a minimal definition for equality, as it is delegati
 - Another equality (of the same type) comparing extracted values.
 - A composition function for delegated equality results.
 
-It's easier to understand with an example. 
+It's easier to understand with an example.
 Let's get a look at the definition for the equality, as defined in, per example, URL (with a bit of refractor, for clarity):
 
 ```Java
 public class Date {
     //...
-    public boolean equals(Object obj) { 
+    public boolean equals(Object obj) {
         if (!obj instanceof Date) return false;     // Casting: Make sure classes are compatible
         Date other = ((Date) obj);                  // More casting...
         int thisTime = this.getTime();              // Extracting: Get attributes actually relevant to comparison
         int otherTime = other.getTime();            // More extracting...
-        boolean sameTime = (thisTime == otherTime); // Delegated comparison: Delegates to integer equality 
+        boolean sameTime = (thisTime == otherTime); // Delegated comparison: Delegates to integer equality
         return sameTime;                            // Composition: Only will return "true" if all delegated comparisons are "true"
     }
     //...
@@ -189,10 +189,10 @@ public class Node<K,V> implements Map.Entry<K,V> {
             return (key==null ? e.getKey()==null : key.equals(e.getKey())) &&
                (value==null ? e.getValue()==null : value.equals(e.getValue()));
         }
-        //...      
+        //...
 }
 ```
-Here, the extractors are `getKey` and `getValue` methods, delegated equalities are `Object`s `equals` methods, 
+Here, the extractors are `getKey` and `getValue` methods, delegated equalities are `Object`s `equals` methods,
 and composition (again) is `AND`.
 
 So, we can actually wrap all this to parameters for a class, something like the following:
@@ -202,15 +202,15 @@ So, we can actually wrap all this to parameters for a class, something like the 
         .addComponent(Node::getKey, JavaObject.EQUALITY)    //2
         .addComponent(Node::getValue, JavaObject.EQUALITY)  //3
         .build();                                           //1
-``` 
+```
 
-The extractors here are `Node::getKey` and `Node::getValue`. 
+The extractors here are `Node::getKey` and `Node::getValue`.
 The delegated equalities are both `JavaObject.EQUALITY`, that simply delegated to default equality.
 The equality result composition is defaulted in the equalizer class: true if all equalities actually return `true`
 
 Note that we are actually skipping the "class casting" section.
 The reason is that the design for equality:
-```java 
+```java
 public interface Equalizer<EQUALIZED> {
     //...
     default boolean areEquals(EQUALIZED equalized1, EQUALIZED equalized2) {
@@ -219,35 +219,35 @@ public interface Equalizer<EQUALIZED> {
     //...
 }
 ```
-While `Object`s `equals` method accepts an `Object` (making the cast required), the method `areEquals` actually require, 
+While `Object`s `equals` method accepts an `Object` (making the cast required), the method `areEquals` actually require,
 at compile time, that BOTH elements satisfy the EQUALIZED type. Hence, the cast is unnecessary.
- 
+
 Also worth commenting, that composite equalities DO NOT PERFORM ANY null-checks! It delegates responsibility to:
 - Extractors: Should be able to extract from `null`, or fail as required.
-- Delegated equality: Should be able to handle comparison against `null` values, or fail as required.  
+- Delegated equality: Should be able to handle comparison against `null` values, or fail as required.
 
 As already said, result composition is hardcoded into equality classes.
-Here a little summary of how composition is done. 
+Here a little summary of how composition is done.
 
 | Composite           | Composition result |
 | ------------------- | ------------------ |
 | CompositeEqualizer  | `true` iif all delegated equalities return `true`, else `false` |
 | CompositeHasher     |  Multiplies the delegated hash of each extracted value by 31, then recursively add the hash for the rest |
 | CompositeComparator |  Iterating extracted values, return the first delegated comparison not returning 0. Else returns 0  |
- 
+
 
 Finally, you may be asking: Why all this complication, if we can actually write the equalizer as we need?
  And you are right... if you actually can!
  Sometimes, the extractor methods or the delegated equalities are undefined at compile-time, and are only known at runtime.
  Think about an Excel-like table, where each row is an instance. You may choose to order the table given randomly chosen columns, and in a randomly chosen order.
  Having composite equalities, you can create the `CompositeComparator` on demand, and use standard sorting algorithms on the table.
- 
+
 #### Stream equalities
 Strangely, being able to define equality for streams was the initial motivation for Taijitu.
 Taijitu was initially conceived as a swiss-army-knife for comparing the results getting back from SQL queries.
 The initial problems actually faced (unknown columns or column type, relative similarity, etc..) drove to the design for composite equalities (and lately, for [Taijitu CLI](./cli/README.md).
 
-But there was still a problem: Given two streams of records, with an unknown at compile-time equality for rows, how we decide if streams are actually "equal"? 
+But there was still a problem: Given two streams of records, with an unknown at compile-time equality for rows, how we decide if streams are actually "equal"?
 How can I found (in the most general way) differences between them?
 
 A lot of analysis was required, but finally we found a way to classify streams, and then face the equality problem.
@@ -257,12 +257,12 @@ Streams were classified into three kinds:
 Streams where every single provided element have a distinct meaning, and they can not be skip.
 
 The simplest example is the stream view for an array. It is known that first element from the stream will be first element from array,
-second element for the stream came from second element from array, and so on... Stream can not skip any array element, nor provide more or 
-fewer elements than the size for the array.  
+second element for the stream came from second element from array, and so on... Stream can not skip any array element, nor provide more or
+fewer elements than the size for the array.
 
-So comparing positional streams is just as easy as comparing each and every generated element from both streams, 
+So comparing positional streams is just as easy as comparing each and every generated element from both streams,
 and generating the right `Difference` object when needed.
- 
+
 This is the approach taken for comparing many current classes in Java, like `String` or `AbstractList`.
 
 Class implementing this equality is `SimpleStreamEqualizer`.
@@ -272,16 +272,16 @@ Sorted streams (do not mix with streams with the `SORTED` characteristic), are s
 In other words, that, given a defined comparison, if element A is provided **before** element B, then `compare(A,B)<=0`.
 
 Despite this may seem banal, this fact provides a huge hint for comparing two streams. Given one element provided by each stream (A,B):
-- `compare(A,B)<0`, means that A is previous to B in the comparison order. Since B is the current element, 
+- `compare(A,B)<0`, means that A is previous to B in the comparison order. Since B is the current element,
 and there was none before, we can conclude there is a missing entry in B (or an extra element in A, equivalently).
-We can move forward with A's stream, looking for the element matching B, but we can't move B's stream forward.. 
+We can move forward with A's stream, looking for the element matching B, but we can't move B's stream forward..
 
-- `compare(A,B)>0` shows the opposite situation, where B have an element not present in A. 
+- `compare(A,B)>0` shows the opposite situation, where B have an element not present in A.
 
-- `compare(A,B)=0` indicates both elements are actually the same (as long as comparison equality contract is satisfied). 
-Nothing to report, and can move both streams forward.  
+- `compare(A,B)=0` indicates both elements are actually the same (as long as comparison equality contract is satisfied).
+Nothing to report, and can move both streams forward.
 
-As far as I know, there is no class implementing this behaviour in Java, but `ComparableStreamEqualizer` does it in Taijitu 
+As far as I know, there is no class implementing this behaviour in Java, but `ComparableStreamEqualizer` does it in Taijitu
 (despite the name, `Comparable` this class does not require stream elements to be comparable, but just require a `Comparator` for them).
 
 ##### Mapped streams
@@ -307,29 +307,29 @@ a `HashSet`).
 As you read, `HashingStreamEqualizer` maps all incoming elements, waiting for matching elements to be produced.
 If a matching element is found, the algorithm will do nothing (if elements are equals) of generate an `Unequals` instance.
 If there are no more elements in any of the streams, all unmatched elements will be reported as `Missing` instances.
-Despite generated results are built lazily, in case of an infinite input, process will not terminate, or consume 
+Despite generated results are built lazily, in case of an infinite input, process will not terminate, or consume
 an unbounded amount of memory until process crashes.
 
 So warning about infinite streams!
 
-### Integrations 
-Now we have the equality infrastructure, we can define equality for classes and for streams (collections). 
+### Integrations
+Now we have the equality infrastructure, we can define equality for classes and for streams (collections).
 But how can equality be used in current programs?
 
 Obviously, you can always invoke equality methods on the defined equality: `if (equality.areEquals(A,B))...`
 But this is just the tip of the iceberg.  There are many other places where equality (and equality-based contracts) are used, but
 out of reach for the developer.
 
-In order to be able to inject equality into those places, Taijitu offer three different approaches, each one with some benefits and caveats: 
+In order to be able to inject equality into those places, Taijitu offer three different approaches, each one with some benefits and caveats:
 
 ####  Equality wrappers
-Say you (as a developer) need to provide an instance (i.e. an `String`) to a third party library (via an API). 
+Say you (as a developer) need to provide an instance (i.e. an `String`) to a third party library (via an API).
 And let's say this library somehow relies on equality for the instance for doing its work.
 This dependence is reasonable (because Java force all instances to have some kind of equality).
 But, for business purposes, you need this library to ignore the case of the strings: should treat "Hi","HI" and "hi" as the same instance.
 Unluckily, the library relies on `Object.equals` methods, and can not be instructed to rely on `String.equalsCaseInsensitive`.
 
-Then, equality wrappers are the way to go. 
+Then, equality wrappers are the way to go.
 
 Equality wrapper are classes that:
 1. Accept and keep and instance for any class (V)
@@ -356,7 +356,7 @@ Having the instances wrapped, now all comparisons will go through external equal
         EqualizableWrapper<String> wrappedString = factory.wrap("Hola");
         EqualizableWrapper<String> anotherWrapped = factory.wrap("HOLA");
 
-        assertEquals(wrappedString,anotherWrapped);              
+        assertEquals(wrappedString,anotherWrapped);
         assertTrue(Collections.singletonList(wrappedString).contains(anotherWrapped));
 ```
 
@@ -377,7 +377,7 @@ without having to worry about the kind of equality actually being used.
 The main problem about using wrappers for 'internalize' equality is that the resulting instance does not satisfy original class anymore.
 Taijitu provides a second approach for avoiding this problem: using dynamic proxies.
 Dynamic proxies classes that:
-1. Are completely generated on run-time. 
+1. Are completely generated on run-time.
 2. Extend (or implement) the original class
 3. Can define behaviour for each method on the original class: delegate to original instance, delegate to another instance, or perform whatever the developer decides to.
 
@@ -392,8 +392,8 @@ Now, we can use the `proxy` like any other `Date` instance:
 ```java
     assertTrue(nowProxy instanceof Date);
     Date future = new Date(now.getTime() + 400); // In future, but below default threshold
-    assertEquals(nowProxy, future); 
-    
+    assertEquals(nowProxy, future);
+
     Collection<Date> dates = Arrays.asList(nowProxy);
     assertTrue(dates.contains(now));
     assertTrue(dates.contains(future));
@@ -424,7 +424,7 @@ Let's place a real world example.
 
 > Manager: Well, I said sort? In fact, I was thinking about sorting so we can easily remove duplicates... but maybe there is a better approach.
 
-> Developer: Grr... We can not use a `Set`, because it will only use the default string equality (that is case sensitive). 
+> Developer: Grr... We can not use a `Set`, because it will only use the default string equality (that is case sensitive).
 We can use the `CaseInsensitiveComparator` I just created to compare every pair of `String`s, but this will be really costly (O(n^2)).
 
 > Manager: And why don't you provide this "comparator" thing to the `Set`? It will take care of de-duplicating elements, isn't it?
@@ -437,16 +437,16 @@ With Taijitu, you have three ways to face this situation:
 1. Create a wrapper for the object to be "equalized" that actually uses the `Equalizer` as the natural equality.
 2. Create a proxy object (subclass for the "equalized" class) that delegates all methods to the original instance but equals/hashCode/compareTo, that will delegate to the right `Equalizer`
 3. Use an alternative collection class that allow using external equality, instead of default equality.
-   
+
 ### External Equality wrappers
 Taijitu offers a set of specialized wrapper for each kind of equalities.
 Those wrappers use provided external equality as default internal equality, so wrappers can be used in standard Java collections.
 
-Example: Wrapping String so we can use `StringCaseInsensitive` external equality. 
+Example: Wrapping String so we can use `StringCaseInsensitive` external equality.
 ```
     Set<HashableWrapper<String>> set = new HashSet<HashableWrapper<String>>>();
     StringCaseInsensitive equality = new StringCaseInsensitive(); // Default equality implementation
-    HashableWrapper.Factory<String> factory = new HashableWrapper.Factory<>(equality)); 
+    HashableWrapper.Factory<String> factory = new HashableWrapper.Factory<>(equality));
     set.add(factory.wrapp("hola"));
     set.add(factory.wrapp("Hola"));
     assertEquals(1,set.size());
@@ -456,12 +456,12 @@ Example: Wrapping String so we can use `StringCaseInsensitive` external equality
 
 This approach allows to use external equality (of all kinds) with any collection class, and that's good.
 
-But this does not came for free (unluckily). Objects used on the collection are not the same objects we had, but another object (wrappers). 
+But this does not came for free (unluckily). Objects used on the collection are not the same objects we had, but another object (wrappers).
 This implies some overhead when creating the collection (new instances created for each object) and when retrieving (objects should be unwrapped before being used).
 
 ### External Equality proxies
 There is a similar approach that faces some of the wrapper problems.
-Instead of creating a Wrapper object, why can't we extend the original class, 
+Instead of creating a Wrapper object, why can't we extend the original class,
 delegating all methods to the original instance, but delegating equality methods to the equalizer?
 
 In fact, we can. Those are the so-called *dynamic proxies*, and Taijitu relies on BiteBuddy library for creating them.
@@ -470,8 +470,8 @@ In fact, we can. Those are the so-called *dynamic proxies*, and Taijitu relies o
     Date date = new Date();
     Date otherDate = new Date(date.getTime() + 400); // Make sure dates have a small time difference...
     DateThreshold<Date> equalizer = new DateThreshold<>(1000); // ... but threshold will shallow it.
-    Date proxy = ProxyFactory.proxyEqualizer(date, equalizer, Date.class);    
-    assertEquals(proxy, otherDate); // proxy.equals(otherDate)==true \o/   
+    Date proxy = ProxyFactory.proxyEqualizer(date, equalizer, Date.class);
+    assertEquals(proxy, otherDate); // proxy.equals(otherDate)==true \o/
 ```
 
 This capability allows us to keep the object's class (`Date`, in the example), while "re-writing" the equality to our needs.
@@ -479,13 +479,13 @@ Now, we can use collections without fear!
 
 But again, that is not a perfect solution. Despite we re-wrote equality for one of the objects (`date`), the other object may stay intact.
 This means that, while `proxy.equals(otherDate)` will be *true*, `otherDate.equals(proxy)` will return *false*. This is a break for *transitive*
-and *symmetric* properties for `equals` contract. 
+and *symmetric* properties for `equals` contract.
 
 For collections, this will not be a big deal, as long as we can assure ALL objects send to the collection are actually proxies.
-But asserting so is depending on the situation.  
-  
+But asserting so is depending on the situation.
+
  > Note: Proxy capabilities are still experimental, and there are some cases proxies can not be easily created (i.e. for Streams). Use with caution.
- 
+
 ### External Equality collections
 There is a third alternative, that should not be impacted by caveats from wrappers or proxies: collections and methods based on equality that
 accept an external equality (the same way most of them already do with `Comparator` in Java).
@@ -507,8 +507,8 @@ If fair to say equality collections is neither a perfect solution. Take a look a
     assertTrue(hashSet.contains("HELLO")); // 1) This actually works as expected, returning true
     assertTrue(hashSet.iterator().next().equals("HELLO")); // 2) This assertion fails!
 ```
-At first sight, this 1) and 2) should return the same value! But checking in detail shows one detail that changes it all: in 1), the responsible for 
-performing comparisons on elements is the set (the `contains` methods, precisely); but in 2), we are **extracting** the element from the set, and then asking 
+At first sight, this 1) and 2) should return the same value! But checking in detail shows one detail that changes it all: in 1), the responsible for
+performing comparisons on elements is the set (the `contains` methods, precisely); but in 2), we are **extracting** the element from the set, and then asking
 this same element to compare itself to another value -hence the responsible for comparison is the element-.
 
 This tiny difference changes it all: it moves the comparison from the collection (the one we provided comparator to) to the elements (that we are willing to left
@@ -531,7 +531,7 @@ untouch).
 taijitu is based on the following concepts:
 - Comparing tables it complex enough to not fitting into a CLI interface. So everything should be provided prior usage into properties files.
 - Despite it is called `taijitu`, in fact it does compare the results from queries. So the whole power of _SQL_ can be used to obtain the data to be compared.
-- Inputs are named `source`and `target`, order being important to indentify the origin of the data. 
+- Inputs are named `source`and `target`, order being important to indentify the origin of the data.
 - Outputs are:
  - Entries appearing in `source` but not in `target`. Those are named `missing in target`
  - Entries appearing in `target` but not in `source`. Those are named `missing in source`
@@ -643,7 +643,7 @@ Each hook will perform different actions before and after each context is execut
  Also can dump context statistics in those same formats.
  - `org.someth2say.taijitu.ui.plugins.taijituSQLProvider`: Generate a SQL text file, with the needed SQL sentences for repairing found differences.
  Will generate INSERT statements for missing entries, and UPDATE statements for differences.
- 
+
 - `setup.threads = 2`: Number of concurrent comparisons that will run anytime.
 This is usefull for speeding up very big comparisons, at cost of 1) huge memory consumption and 2) interpolation for log entries.
 Use with caution.
