@@ -27,7 +27,7 @@ public class ComparableStreamEqualizerTest {
         Stream<TestComposite> stream2 = Stream.of(differentFrom2, equalsFrom2);
 
         ComparableStreamEqualizer<TestComposite> equality = new ComparableStreamEqualizer<>(testClassOneTwoEquality);
-        List<Difference> differences = equality.explain(stream1, stream2).collect(Collectors.toList());
+        List<Difference<TestComposite>> differences = equality.explain(stream1, stream2).collect(Collectors.toList());
 
         // Test results
         differences.forEach(System.out::println);

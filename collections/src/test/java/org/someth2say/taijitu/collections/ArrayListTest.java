@@ -45,7 +45,8 @@ public class ArrayListTest {
     @Test
     public void _remove() {
         ArrayList<String> insensitive = new ArrayList<>(StringCaseInsensitiveComparatorHasher.INSTANCE, Arrays.asList("Hola", "hola", "mundo"));
-        ArrayList clone = (ArrayList) insensitive.clone();
+        @SuppressWarnings("unchecked")
+        ArrayList<String> clone = (ArrayList<String>) insensitive.clone();
 
         assertTrue(insensitive.remove("HOLA"));
         clone.remove(0);

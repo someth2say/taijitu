@@ -1,13 +1,11 @@
 package org.someth2say.taijitu.stream;
 
-import org.someth2say.taijitu.equality.aspects.external.Hasher;
 import org.someth2say.taijitu.equality.impl.composite.CompositeComparator;
 import org.someth2say.taijitu.equality.impl.composite.CompositeComparatorHasher;
 import org.someth2say.taijitu.equality.impl.composite.CompositeHasher;
 import org.someth2say.taijitu.equality.impl.value.*;
 
 import java.util.Objects;
-import java.util.function.Function;
 
 public class TestComposite {
     private final String one;

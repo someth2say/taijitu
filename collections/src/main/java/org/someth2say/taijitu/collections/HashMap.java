@@ -537,7 +537,7 @@ public class HashMap<K, V>
                     (int) ft : Integer.MAX_VALUE);
         }
         threshold = newThr;
-        @SuppressWarnings({"rawtypes", "unchecked"})
+        @SuppressWarnings({ "unchecked"})
         Node<K, V>[] newTab = (Node<K, V>[]) new Node[newCap];
         table = newTab;
         if (oldTab != null) {
@@ -1249,7 +1249,6 @@ public class HashMap<K, V>
      *
      * @return a shallow copy of this map
      */
-    @SuppressWarnings("unchecked")
     @Override
     public Object clone() {
         return new HashMap<>(this, hasher, equalizer);
@@ -1321,7 +1320,7 @@ public class HashMap<K, V>
             // Check Map.Entry[].class since it's the nearest public type to
             // what we're actually creating.
             //SharedSecrets.getJavaOISAccess().checkArray(s, Map.Entry[].class, cap);
-            @SuppressWarnings({"rawtypes", "unchecked"})
+            @SuppressWarnings({ "unchecked"})
             Node<K, V>[] tab = (Node<K, V>[]) new Node[cap];
             table = tab;
 

@@ -28,7 +28,7 @@ public class HashingStreamEqualizerTest {
         Stream<TestComposite> stream2 = Stream.of(aFrom2, bFrom2);
 
         HashingStreamEqualizer<TestComposite> streamEqualizer = new HashingStreamEqualizer<>(TestComposite.testClassOneTwoEquality);
-        List<Difference> differences = streamEqualizer.explain(stream1, stream2).collect(Collectors.toList());
+        List<Difference<TestComposite>> differences = streamEqualizer.explain(stream1, stream2).collect(Collectors.toList());
 
         differences.forEach(System.out::println);
         // Test results
@@ -48,7 +48,7 @@ public class HashingStreamEqualizerTest {
         Stream<TestComposite> stream2 = Stream.empty();
 
         HashingStreamEqualizer<TestComposite> streamEqualizer = new HashingStreamEqualizer<>(TestComposite.testClassOneTwoEquality);
-        List<Difference> differences = streamEqualizer.explain(stream1, stream2).collect(Collectors.toList());
+        List<Difference<TestComposite>> differences = streamEqualizer.explain(stream1, stream2).collect(Collectors.toList());
 
         differences.forEach(System.out::println);
         // Test results

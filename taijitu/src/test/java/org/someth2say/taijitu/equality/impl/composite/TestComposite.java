@@ -64,6 +64,7 @@ public class TestComposite {
             .addComparator(TestComposite::getThree, new ComparableComparatorHasher<>())
             .build();
 
+            
     public static final CompositeHasher<TestComposite> testClassThreeHasher
             = new CompositeHasher.Builder<TestComposite>()
             .addHasher(TestComposite::getThree, ObjectHasher.INSTANCE)

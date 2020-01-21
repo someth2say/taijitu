@@ -68,7 +68,13 @@ public class HashMapTest {
 
     @Test
     public void putAll() {
-        Map<String, Float> otherMap = new java.util.HashMap<String, Float>() {{
+        Map<String, Float> otherMap = new java.util.HashMap<String, Float>() {
+            /**
+            *
+            */
+            private static final long serialVersionUID = 1L;
+
+            {
             put("HOLA", -4f);
             put("WORLD", -5f);
         }};
