@@ -44,17 +44,17 @@ public class CLITest_DB {
     @Test
     public void basicDBTest() throws TaijituCliException, SQLException {
         // Create the tables and test data
-        final Properties databaseProps = buildDbSampleData();
+        buildDbSampleData();
 
         final ITaijituCfg configuration = TaijituConfig.fromYamlFile("test_db.yaml");
 
-        final List<Stream<Difference>> comparisonResults = TaijituCli.compare(configuration);
+        final List<Stream<Difference<Object>>> comparisonResults = TaijituCli.compare(configuration);
 
         Assert.assertEquals(configuration.getComparisons().size(), comparisonResults.size());
-        final List<Difference> firstResult = comparisonResults.get(0).collect(Collectors.toList());
+        final List<Difference<Object>> firstResult = comparisonResults.get(0).collect(Collectors.toList());
         System.out.println(firstResult);
         Assert.assertEquals(0, firstResult.size());
-        final List<Difference> secondResult = comparisonResults.get(1).collect(Collectors.toList());
+        final List<Difference<Object>> secondResult = comparisonResults.get(1).collect(Collectors.toList());
         System.out.println(secondResult);
         Assert.assertEquals(1, secondResult.size());
     }

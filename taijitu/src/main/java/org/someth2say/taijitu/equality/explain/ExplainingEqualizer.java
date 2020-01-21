@@ -9,9 +9,10 @@ import java.util.stream.Stream;
  * This explanation is provided as an streams of {@link Difference} instances.
  *
  * @see Difference
- * @param <T>
+ * @param <TYPE> Type of objects to be compared
+ * @param <DIFF_TYPE> Boundary for type of differences generated. Usually `Object`
  */
-public interface ExplainingEqualizer<T> extends Equalizer<T> {
+public interface ExplainingEqualizer<TYPE,DIFF_TYPE> extends Equalizer<TYPE> {
     /**
      * Get the underlying differences that causes this equalizer to determine both elements are not equal.
      * The meaning for "underlying differences" depends on the kind of equalizer. I.E. composite equalizers delegate differences
@@ -28,7 +29,7 @@ public interface ExplainingEqualizer<T> extends Equalizer<T> {
      * @param t2
      * @return A stream of differences that explain the current difference
      */
-    default Stream<Difference> explain(T t1, T t2) {
+    default Stream<Difference<DIFF_TYPE>> explain(TYPE t1, TYPE t2) {
         return Stream.empty();
     }
 }

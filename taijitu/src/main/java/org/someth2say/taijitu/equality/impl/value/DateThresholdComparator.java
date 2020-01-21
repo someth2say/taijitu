@@ -19,13 +19,13 @@ import java.util.Date;
  * As the clocks of the sources may be slightly desynchronized, small time differences may occur, but should be acceptable.ç
  * This equalizer implements this behavior, assuming the risk of breaking absolute order in some cases.
  *
- * @param <T>
+ * @param <TYPE>
  */
-public class DateThresholdComparator<T extends Date> implements Comparator<T> {
+public class DateThresholdComparator<TYPE extends Date> implements Comparator<TYPE> {
 
     private static final int DEFAULT_THRESHOLD = 1000;
 
-    public static final DateThresholdComparator<Date> EQUALITY = new DateThresholdComparator<>();
+    public static final DateThresholdComparator<Date> INSTANCE = new DateThresholdComparator<>();
     private int threshold;
 
     public DateThresholdComparator() {
@@ -38,7 +38,7 @@ public class DateThresholdComparator<T extends Date> implements Comparator<T> {
     }
 
     @Override
-    public boolean areEquals(T object1, T object2) {
+    public boolean areEquals(TYPE object1, TYPE object2) {
         long threshold = getThreshold();
         long diff = object1.getTime() - object2.getTime();
         return (Math.abs(diff) < threshold);
@@ -49,7 +49,7 @@ public class DateThresholdComparator<T extends Date> implements Comparator<T> {
     }
 
     @Override
-    public int compare(T object1, T object2) {
+    public int compare(TYPE object1, TYPE object2) {
         long threshold = getThreshold();
         long diff = object1.getTime() - object2.getTime();
         return Math.abs(diff) < threshold ? 0 : diff < 0 ? -1 : 1;

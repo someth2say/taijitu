@@ -18,16 +18,16 @@ import java.util.stream.Stream;
  * <p>
  * This comparison scheme implies stream elements are ordered given the order defined by the comparator.
  */
-public class ComparableStreamEqualizer<T> implements StreamEqualizer<T> {
+public class ComparableStreamEqualizer<TYPE> implements StreamEqualizer<TYPE> {
 
-    private final Comparator<T> comparator;
+    private final Comparator<TYPE> comparator;
 
-    public ComparableStreamEqualizer(Comparator<T> comparator) {
+    public ComparableStreamEqualizer(Comparator<TYPE> comparator) {
         this.comparator = comparator;
     }
 
     @Override
-    public Stream<Difference> explain(Stream<T> source, Stream<T> target) {
+    public Stream<Difference<TYPE>> explain(Stream<TYPE> source, Stream<TYPE> target) {
         return compare(source, target, comparator);
     }
 
@@ -40,11 +40,11 @@ public class ComparableStreamEqualizer<T> implements StreamEqualizer<T> {
      * @param <ELEMENT>
      * @return
      */
-    public static <ELEMENT> Stream<Difference> compare(Stream<ELEMENT> source, Stream<ELEMENT> target, Comparator<ELEMENT> comparator) {
+    public static <ELEMENT> Stream<Difference<ELEMENT>> compare(Stream<ELEMENT> source, Stream<ELEMENT> target, Comparator<ELEMENT> comparator) {
         return StreamUtil.comparingBiMapTail(source, target,
                 comparator::compare,
-                (sourceElem, targetElem) ->  new Unequal<>(comparator, sourceElem, targetElem),
-                element -> new Missing(comparator, element),
+                (sourceElem, targetElem) ->  new Unequal<ELEMENT>(comparator, sourceElem, targetElem),
+                element -> new Missing<ELEMENT>(comparator, element),
                 comparator::areEquals);
     }
 

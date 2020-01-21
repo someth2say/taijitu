@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 /**
  * @author Jordi Sola
  */
-class TaijituCliRunner implements Callable<Stream<Difference>> {
+class TaijituCliRunner implements Callable<Stream<Difference<Object>>> {
 
     private static final Logger logger = LoggerFactory.getLogger(TaijituCliRunner.class);
 
@@ -48,11 +48,11 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
     }
 
     @Override
-    public Stream<Difference> call() {
+    public Stream<Difference<Object>> call() {
         return runComparison(comparisonCfg);
     }
 
-    public <MAPPED_TYPE> Stream<Difference> runComparison(IComparisonCfg iComparisonCfg) {
+    public <MAPPED_TYPE> Stream<Difference<MAPPED_TYPE>> runComparison(IComparisonCfg iComparisonCfg) {
 
         List<ISourceCfg> sourceConfigs = iComparisonCfg.getSourceConfigs();
         if (sourceConfigs.size() < 2) {
@@ -201,7 +201,7 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
         return source;
     }
 
-    private <MAPPED_TYPE> Stream<Difference> runStreamEquality(StreamEqualizer<MAPPED_TYPE> streamEquality,
+    private <MAPPED_TYPE> Stream<Difference<MAPPED_TYPE>> runStreamEquality(StreamEqualizer<MAPPED_TYPE> streamEquality,
                                                                   Duo<Source<MAPPED_TYPE>> mappedSources) {
         Source<MAPPED_TYPE> sourceSrc = mappedSources.getLeft();
         Source<MAPPED_TYPE> targetSrc = mappedSources.getRight();
@@ -214,7 +214,7 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
         IEqualityCfg iEqualityCfg = getEqualityConfigFor(fd, equalityConfigs);
         return iEqualityCfg!=null
                 ? EqualizerRegistry.getInstance(iEqualityCfg.getName())
-                : ObjectHasher.INSTANCE;
+                : (Equalizer<VALUE_TYPE>) ObjectHasher.INSTANCE;
     }
 
     private <VALUE_TYPE> Comparator<VALUE_TYPE> getComparableEquality(FieldDescription<VALUE_TYPE> fd, List<IEqualityCfg> equalityConfigs) {
@@ -224,15 +224,15 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
                 .map(cfg -> EqualizerRegistry.getInstance(cfg.getName()))
                 .filter(eq -> eq instanceof Comparator)
                 .map(eq -> (Comparator<VALUE_TYPE>) eq).findFirst();
+
         if (first.isPresent()) {
             return first.get();
         }
 
-        //throw new RuntimeException("Can't find any comparable equality for field " + fd);
         if (fd.getClazz().isAssignableFrom(Comparable.class))
-            return ComparableComparatorHasher.INSTANCE;
+            return (Comparator<VALUE_TYPE>) ComparableComparatorHasher.INSTANCE;
 
-        return ObjectToStringComparatorHasher.INSTANCE;
+        return (Comparator<VALUE_TYPE>) ObjectToStringComparatorHasher.INSTANCE;
     }
 
     private <VALUE_TYPE> Hasher<VALUE_TYPE> getHasherEquality(FieldDescription<VALUE_TYPE> fd, List<IEqualityCfg> equalityConfigs) {
@@ -247,8 +247,7 @@ class TaijituCliRunner implements Callable<Stream<Difference>> {
             return first.get();
         }
 
-        //throw new RuntimeException("Can't find any hasher equality for field " + fd);
-        return ObjectHasher.INSTANCE;
+        return (Hasher<VALUE_TYPE>) ObjectHasher.INSTANCE;
     }
 
     private <VALUE_TYPE> List<IEqualityCfg> getEqualityConfigsFor(FieldDescription<VALUE_TYPE> fd, final List<IEqualityCfg> equalityCfgs) {

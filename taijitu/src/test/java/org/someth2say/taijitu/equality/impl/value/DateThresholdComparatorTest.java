@@ -11,7 +11,7 @@ import static org.junit.Assert.assertTrue;
 
 public class DateThresholdComparatorTest {
 
-    final DateThresholdComparator<Date> instance = DateThresholdComparator.EQUALITY;
+    final DateThresholdComparator<Date> instance = DateThresholdComparator.INSTANCE;
     final ComparableWrapper.Factory<Date> factory = Wrappers.factory(instance);
 
     final Date now = new Date();

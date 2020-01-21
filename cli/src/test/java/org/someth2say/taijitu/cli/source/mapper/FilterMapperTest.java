@@ -28,8 +28,8 @@ public class FilterMapperTest {
         Comparator<Integer> comparator = new ComparableComparatorHasher<>();
 
         StreamEqualizer<Integer> sse = new ComparableStreamEqualizer<>(comparator);
-        Stream<Difference> diffs = sse.explain(filteredSource1.stream(), source2.stream());
-        List<Difference> collect = diffs.collect(Collectors.toList());
+        Stream<Difference<Integer>> diffs = sse.explain(filteredSource1.stream(), source2.stream());
+        List<Difference<Integer>> collect = diffs.collect(Collectors.toList());
         assertEquals(1, collect.size());
         assertEquals(new Missing<>(comparator, 3), collect.get(0));
 

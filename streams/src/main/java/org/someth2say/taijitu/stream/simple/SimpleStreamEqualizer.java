@@ -17,19 +17,19 @@ import java.util.stream.Stream;
  * Then, second element from both streams; then third element from both; and so on.
  * If one of the stream is exhausted, all elements remaining in the other stream will be reported as missing entries.
  */
-public class SimpleStreamEqualizer<ELEMENT> implements StreamEqualizer<ELEMENT> {
+public class SimpleStreamEqualizer<TYPE> implements StreamEqualizer<TYPE> {
 
-    private final Equalizer<ELEMENT> elementEqualizer;
+    private final Equalizer<TYPE> elementEqualizer;
 
-    public SimpleStreamEqualizer(Equalizer<ELEMENT> elementEqualizer) {
+    public SimpleStreamEqualizer(final Equalizer<TYPE> elementEqualizer) {
         this.elementEqualizer = elementEqualizer;
     }
 
     @Override
-    public Stream<Difference> explain(Stream<ELEMENT> source, Stream<ELEMENT> target) {
+    public Stream<Difference<TYPE>> explain(final Stream<TYPE> source, final Stream<TYPE> target) {
         return StreamUtil
                 .biMapTail(source, target,
-                        (sourceElem, targetElem) -> new Unequal<>(elementEqualizer, sourceElem, targetElem),
+                        (sourceElem, targetElem) -> new Unequal<TYPE>(elementEqualizer, sourceElem, targetElem),
                         element -> new Missing<>(elementEqualizer, element),
                         elementEqualizer::areEquals );
     }

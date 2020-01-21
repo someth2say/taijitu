@@ -1,4 +1,4 @@
-package test.java.org.someth2say.taijitu.util;
+package org.someth2say.taijitu.util;
 
 import org.junit.Test;
 import org.someth2say.taijitu.stream.StreamUtil;

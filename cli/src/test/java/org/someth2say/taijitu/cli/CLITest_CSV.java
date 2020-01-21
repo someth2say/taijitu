@@ -22,14 +22,14 @@ public class CLITest_CSV {
 
         final ITaijituCfg configuration = TaijituConfig.fromYamlFile("test_csv.yaml");
 
-        final List<Stream<Difference>> comparisonResults = TaijituCli.compare(configuration);
+        final List<Stream<Difference<Object>>> comparisonResults = TaijituCli.compare(configuration);
 
         Assert.assertEquals(1, comparisonResults.size());
-       Stream<Difference> differenceStream = comparisonResults.get(0);
-       final List<Difference> firstComparisonResult = differenceStream.collect(Collectors.toList());
+       Stream<Difference<Object>> differenceStream = comparisonResults.get(0);
+       final List<Difference<Object>> firstComparisonResult = differenceStream.collect(Collectors.toList());
        Assert.assertEquals(1, firstComparisonResult.size());
 
-       Difference difference = firstComparisonResult.get(0);
+       Difference<Object> difference = firstComparisonResult.get(0);
        String[] lhs = (String[]) difference.getEntries().get(0);
        String[] rhs = (String[]) difference.getEntries().get(1);
        System.out.println("From: "+ Arrays.toString(lhs));

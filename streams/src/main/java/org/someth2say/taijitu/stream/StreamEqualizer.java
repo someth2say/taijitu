@@ -15,7 +15,7 @@ import java.util.stream.Stream;
  * For the same reason, StreamComparer or StreamHasher are not implemented: no use on  compare streams or calculate hash, as they are consumed and became unusable.
  *
  */
-public interface StreamEqualizer<T> extends ExplainingEqualizer<Stream<T>> {
+public interface StreamEqualizer<TYPE> extends ExplainingEqualizer<Stream<TYPE>,TYPE> {
     /**
      * By default, all stream equalities will delegate on explain.
      * That means both streams will be consumed upon comparing them.
@@ -25,8 +25,8 @@ public interface StreamEqualizer<T> extends ExplainingEqualizer<Stream<T>> {
      * @return
      */
     @Override
-    default boolean areEquals(Stream<T> equalized1, Stream<T> equalized2) {
-        Stream<Difference> underlyingDiffs = explain(equalized1, equalized2);
+    default boolean areEquals(Stream<TYPE> equalized1, Stream<TYPE> equalized2) {
+        Stream<Difference<TYPE>> underlyingDiffs = explain(equalized1, equalized2);
         return !underlyingDiffs.findAny().isPresent();
     }
 }
