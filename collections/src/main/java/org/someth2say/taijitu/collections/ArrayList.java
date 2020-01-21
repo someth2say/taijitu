@@ -9,6 +9,10 @@ import java.util.Objects;
 
 public class ArrayList<E> extends java.util.ArrayList<E> {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = -5613438747359438122L;
     final Equalizer<E> equalizer;
 
     public ArrayList(int initialCapacity) {

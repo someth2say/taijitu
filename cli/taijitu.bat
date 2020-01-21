@@ -1,1 +1,0 @@
-java -cp bin\*;lib\* org.someth2say.taijitu.taijitu %1

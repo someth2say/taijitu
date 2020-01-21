@@ -1,1 +1,0 @@
-java -cp lib/h2-1.4.193.jar org.h2.tools.Server
