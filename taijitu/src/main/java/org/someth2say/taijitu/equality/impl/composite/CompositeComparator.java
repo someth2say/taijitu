@@ -49,7 +49,7 @@ public class CompositeComparator<T> extends CompositeEqualizer<T> implements ICo
             return this;
         }
 
-        public <R> Builder<T> addComparator(Function<T,R> extractor, Comparator<R> delegate) {
+        public <R> Builder<T> addComparator(Function<T,R> extractor, Comparator<? super R> delegate) {
             Comparator<T> delegatingComparator = new DelegatingComparator<>(extractor, delegate);
             return addComparator(delegatingComparator);
         }

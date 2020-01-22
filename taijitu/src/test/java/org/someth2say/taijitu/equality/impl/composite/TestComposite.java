@@ -59,12 +59,12 @@ public class TestComposite {
             .addComparatorHasher(TestComposite::getTwo, StringCaseInsensitiveComparatorHasher.INSTANCE)
             .build();
 
+    @SuppressWarnings({"unchecked"})
     public static final CompositeComparator<TestComposite> testClassThreeComparator
             = new CompositeComparator.Builder<TestComposite>()
-            .addComparator(TestComposite::getThree, new ComparableComparatorHasher<>())
+            .addComparator(TestComposite::getThree, (ComparableComparatorHasher<Integer>)ComparableComparatorHasher.INSTANCE)
             .build();
 
-            
     public static final CompositeHasher<TestComposite> testClassThreeHasher
             = new CompositeHasher.Builder<TestComposite>()
             .addHasher(TestComposite::getThree, ObjectHasher.INSTANCE)

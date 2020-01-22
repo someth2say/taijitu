@@ -40,7 +40,6 @@ public class HashSet<E>
      * @param hasher
      * @throws NullPointerException if the specified collection is null
      */
-    @SuppressWarnings("unchecked")
     public HashSet(Collection<? extends E> c, Hasher<E> hasher) {
         map = new HashMap<>(Math.max((int) (c.size() / .75f) + 1, 16), hasher, ObjectHasher.INSTANCE);
         this.hasher = hasher;

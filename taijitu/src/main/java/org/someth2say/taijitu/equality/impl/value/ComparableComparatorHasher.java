@@ -4,7 +4,8 @@ import org.someth2say.taijitu.equality.aspects.external.ComparatorHasher;
 
 public class ComparableComparatorHasher<TYPE extends Comparable<TYPE>> implements ComparatorHasher<TYPE> {
 
-    public static ComparableComparatorHasher INSTANCE = new ComparableComparatorHasher();
+    @SuppressWarnings({"rawtypes"})
+    public static ComparableComparatorHasher INSTANCE = new ComparableComparatorHasher<>();
 
     @Override
     public int compare(TYPE object1, TYPE other) {

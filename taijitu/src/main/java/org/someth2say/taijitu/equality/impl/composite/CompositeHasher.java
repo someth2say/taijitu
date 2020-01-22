@@ -42,7 +42,7 @@ public class CompositeHasher<T> extends CompositeEqualizer<T> implements ICompos
         }
 
 
-        public <R> Builder<T> addHasher(Function<T, R> extractor, Hasher<R> delegate) {
+        public <R> Builder<T> addHasher(Function<T, R> extractor, Hasher<? super R> delegate) {
             Hasher<T> delegatingHasher = new DelegatingHasher<>(extractor, delegate);
             return addHasher(delegatingHasher);
         }

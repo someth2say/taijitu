@@ -6,7 +6,7 @@ import java.util.function.Function;
 
 public class DelegatingEqualizer<T,R> extends Delegating<T, R> implements IDelegatingEqualizer<T,R> {
 
-    public DelegatingEqualizer(Function<T, R> extractor, Equalizer<R> delegate) {
+    public DelegatingEqualizer(Function<T, R> extractor, Equalizer<? super R> delegate) {
         super(extractor, delegate);
     }
 
