@@ -243,7 +243,7 @@ public class HashMap<K, V>
      * @throws IllegalArgumentException if the initial capacity is negative
      *                                  or the load factor is nonpositive
      */
-    public HashMap(int initialCapacity, float loadFactor, Hasher<K> hasher, Equalizer<V> equalizer) {
+    public HashMap(int initialCapacity, float loadFactor, Hasher<? super K> hasher, Equalizer<? super V> equalizer) {
         this.hasher = hasher;
         this.equalizer = equalizer;
         if (initialCapacity < 0)

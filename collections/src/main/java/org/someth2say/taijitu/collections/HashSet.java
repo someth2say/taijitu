@@ -27,7 +27,7 @@ public class HashSet<E>
      */
     public HashSet(Hasher<E> hasher) {
         this.hasher = hasher;
-        map = new HashMap<>(hasher, ObjectHasher.INSTANCE);
+        map = new HashMap<E,Object>(hasher, ObjectHasher.INSTANCE);
     }
 
     /**

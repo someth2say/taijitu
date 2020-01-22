@@ -2,22 +2,22 @@ package org.someth2say.taijitu.equality.impl.value;
 
 import org.someth2say.taijitu.equality.aspects.external.ComparatorHasher;
 
-public class ComparableComparatorHasher<T extends Comparable<T>> implements ComparatorHasher<T> {
+public class ComparableComparatorHasher<TYPE extends Comparable<TYPE>> implements ComparatorHasher<TYPE> {
 
     public static ComparableComparatorHasher INSTANCE = new ComparableComparatorHasher();
 
     @Override
-    public int compare(T object1, T other) {
+    public int compare(TYPE object1, TYPE other) {
         return object1.compareTo(other);
     }
 
     @Override
-    public int hash(T keyValue) {
+    public int hash(TYPE keyValue) {
         return keyValue.hashCode();
     }
 
     @Override
-    public boolean areEquals(T object1, T other) {
+    public boolean areEquals(TYPE object1, TYPE other) {
         return object1.equals(other);
     }
 
