@@ -9,7 +9,7 @@ os:
   - linux
 
 jdk:
-  - oraclejdk8
+  - openjdk11
 
 #env:
 #  global:
@@ -31,4 +31,5 @@ before_install:
 #  - echo $HOME
 
 script:
-- mvn clean package sonar:sonar -Dsonar.login=$SONAR_TOKEN
+#- mvn clean package sonar:sonar -Dsonar.login=$SONAR_TOKEN
+- mvn clean test
