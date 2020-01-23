@@ -10,7 +10,13 @@ import java.util.stream.Stream;
  *
  * @see Difference
  * @param <TYPE> Type of objects to be compared
- * @param <DIFF_TYPE> Boundary for type of differences generated. Usually `Object`
+ * @param <DIFF_TYPE> Boundary for the parameter type of differences generated. 
+ *      If TYPE is a simple type (i.e. Integer), DIFF_TYPE can be the same TYPE.
+ *      If TYPE is a composite type (i.e. Address), DIFF_TYPE may be set to the more specific common ancestor for all components (Object, in the broadest case)
+ *      If TYPE is an aggregator type (i.e. Stream<X> or Array<X>), DIFF_TYPE can be set to the aggregated type (X).
+ * @see Difference
+ * @see Missing
+ * @see Unequal
  */
 public interface ExplainingEqualizer<TYPE,DIFF_TYPE> extends Equalizer<TYPE> {
     /**

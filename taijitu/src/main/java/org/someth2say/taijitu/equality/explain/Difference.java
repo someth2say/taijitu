@@ -4,8 +4,8 @@ import org.apache.commons.lang.StringUtils;
 import org.someth2say.taijitu.equality.aspects.external.Equalizer;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -16,23 +16,22 @@ import java.util.Objects;
  * @see Missing
  * @see Unequal
  */
-public abstract class Difference<T> {
-    private final Equalizer<? super T> cause;
-    private final List<T> entries;
+public abstract class Difference<TYPE> {
+    private final Equalizer<? super TYPE> cause;
+    private final Collection<TYPE> entries;
 
-    public Difference(Equalizer<? super T> cause, List<T> entries) {
+    public Difference(Equalizer<? super TYPE> cause, Collection<TYPE> elements) {
         this.cause = cause;
-        this.entries = entries;
+        this.entries = elements;
     }
 
-    public Difference(Equalizer<? super T> cause, T composite) {
-        this(cause, Collections.singletonList(composite));
+    public Difference(Equalizer<? super TYPE> cause, TYPE element) {
+        this(cause, Collections.singletonList(element));
     }
 
-    public Difference(Equalizer<? super T> cause, T composite, T composite2) {
-        this(cause, Arrays.asList(composite, composite2));
+    public Difference(Equalizer<? super TYPE> cause, TYPE lhs, TYPE rhs) {
+        this(cause, Arrays.asList(lhs, rhs));
     }
-
 
     @Override
     public String toString() {
@@ -52,7 +51,7 @@ public abstract class Difference<T> {
     public int hashCode() {
         return Objects.hash(entries, cause);}
 
-    public List<T> getEntries() {
+    public Collection<TYPE> getEntries() {
         return entries;
     }
 
