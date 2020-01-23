@@ -2,6 +2,7 @@ package org.someth2say.taijitu.equality.impl.composite;
 
 import org.junit.Test;
 import org.someth2say.taijitu.equality.wrapper.HashableWrapper;
+import org.someth2say.taijitu.equality.wrapper.Wrappers;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -10,16 +11,18 @@ import static org.someth2say.taijitu.equality.impl.composite.TestComposite.testC
 public class CompositeHasherTest {
 
     @Test
-    public void testCompositeEquality() {
-        TestComposite differentFrom1 = new TestComposite("aaa", "aaa", 1);
-        TestComposite differentFrom2 = new TestComposite("bbb", "ccc", 1);
-        TestComposite differentFrom3 = new TestComposite("aaa", "AAA", 2);
+    public void testCompositeHasher() {
+        TestComposite tc_aa1 = new TestComposite("aaa", "aaa", 1);
+        TestComposite tc_bc1 = new TestComposite("bbb", "ccc", 1);
+        TestComposite tc_aa2 = new TestComposite("aaa", "AAA", 2);
 
-        assertTrue(testClassThreeHasher.hash(differentFrom1)== testClassThreeHasher.hash(differentFrom2));
-        assertFalse(testClassThreeHasher.hash(differentFrom1)==testClassThreeHasher.hash(differentFrom3));
-        assertTrue(new HashableWrapper<>(differentFrom1, testClassThreeHasher).hashCode() == new HashableWrapper<>(differentFrom2, testClassThreeHasher).hashCode());
-        assertFalse(new HashableWrapper<>(differentFrom1, testClassThreeHasher).hashCode()== new HashableWrapper<>(differentFrom3, testClassThreeHasher).hashCode());
-
+        assertTrue(testClassThreeHasher.hash(tc_aa1) == testClassThreeHasher.hash(tc_bc1));
+        assertFalse(testClassThreeHasher.hash(tc_aa1) == testClassThreeHasher.hash(tc_aa2));
+        
+        var factory = Wrappers.factory(testClassThreeHasher);
+        
+        assertTrue(factory.wrap(tc_aa1).hashCode() == factory.wrap(tc_bc1).hashCode());
+        assertFalse(factory.wrap(tc_aa1).hashCode() == factory.wrap(tc_aa2).hashCode());
 
     }
 }

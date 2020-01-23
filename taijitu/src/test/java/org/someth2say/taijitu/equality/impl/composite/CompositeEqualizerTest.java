@@ -9,12 +9,12 @@ import static org.someth2say.taijitu.equality.impl.composite.TestComposite.testC
 public class CompositeEqualizerTest {
     @Test
     public void testCompositeEquality() {
-        TestComposite as = new TestComposite("aaa", "aaa", 1);
-        TestComposite bs = new TestComposite("bbb", "ccc", 1);
-        TestComposite moreAs = new TestComposite("aaa", "AAA", 1);
+        TestComposite tc_aa1 = new TestComposite("aaa", "aaa", 1);
+        TestComposite tc_bc1 = new TestComposite("bbb", "ccc", 1);
+        TestComposite tc_aA1 = new TestComposite("aaa", "AAA", 1);
 
-        assertFalse(testClassOneTwoEquality.areEquals(as, bs));
-        assertTrue(testClassOneTwoEquality.areEquals(as, moreAs));
+        assertFalse(testClassOneTwoEquality.areEquals(tc_aa1, tc_bc1));
+        assertTrue(testClassOneTwoEquality.areEquals(tc_aa1, tc_aA1));
 
     }
 }
